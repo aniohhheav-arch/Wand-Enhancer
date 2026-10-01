@@ -31,7 +31,7 @@ public final class RvShaders {
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("wormhole"), DefaultVertexFormat.POSITION), s -> wormhole = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("screenfx"), DefaultVertexFormat.POSITION), s -> screenfx = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("cosmos"), DefaultVertexFormat.POSITION), s -> cosmos = s);
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("energy"), DefaultVertexFormat.POSITION_COLOR_TEX), s -> energy = s);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("energy"), DefaultVertexFormat.POSITION_TEX_COLOR), s -> energy = s);
         } catch (IOException e) {
             throw new RuntimeException("Riftverse failed to load its shaders", e);
         }

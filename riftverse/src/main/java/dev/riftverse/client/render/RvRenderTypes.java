@@ -13,7 +13,7 @@ public final class RvRenderTypes {
     public static final ResourceLocation GLOW = Riftverse.id("textures/misc/glow.png");
 
     /** Additive, animated energy ribbons (beams, rings, auras). UV: u along the beam, v across it. */
-    public static final RenderType ENERGY = RenderType.create("riftverse_energy", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS,
+    public static final RenderType ENERGY = RenderType.create("riftverse_energy", DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS,
             8192, false, true, RenderType.CompositeState.builder()
                     .setShaderState(new RenderStateShard.ShaderStateShard(() -> RvShaders.energy))
                     .setTransparencyState(RenderStateShard.LIGHTNING_TRANSPARENCY)
