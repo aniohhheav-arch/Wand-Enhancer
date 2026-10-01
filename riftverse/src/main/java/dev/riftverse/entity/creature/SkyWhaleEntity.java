@@ -52,10 +52,6 @@ public class SkyWhaleEntity extends PathfinderMob {
     protected void checkFallDamage(double y, boolean onGround, BlockState state, BlockPos pos) {
     }
 
-    @Override
-    public boolean isPushable() {
-        return false;
-    }
 
     @Override
     protected SoundEvent getAmbientSound() {

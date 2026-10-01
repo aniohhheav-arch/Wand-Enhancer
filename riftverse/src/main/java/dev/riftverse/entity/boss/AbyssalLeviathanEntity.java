@@ -204,10 +204,6 @@ public class AbyssalLeviathanEntity extends Monster {
     protected void checkFallDamage(double y, boolean onGround, BlockState state, BlockPos pos) {
     }
 
-    @Override
-    public boolean canBreatheUnderwater() {
-        return true;
-    }
 
     @Override
     public boolean isPushedByFluid() {
