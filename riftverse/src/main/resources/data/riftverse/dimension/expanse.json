@@ -1,0 +1,9 @@
+{
+  "type": "riftverse:expanse",
+  "generator": {
+    "type": "riftverse:universe",
+    "biome_source": {
+      "type": "riftverse:universe"
+    }
+  }
+}

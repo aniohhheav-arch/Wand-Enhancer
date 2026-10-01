@@ -1,0 +1,6 @@
+-proc:none
+-Xmaxerrs
+100000
+-d
+/tmp/claude-0/-home-user-Wand-Enhancer/747057f4-009a-5b1b-983b-1f89b6ba4185/scratchpad/javac-out
+@/tmp/claude-0/-home-user-Wand-Enhancer/747057f4-009a-5b1b-983b-1f89b6ba4185/scratchpad/sources.txt

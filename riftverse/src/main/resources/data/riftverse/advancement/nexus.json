@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:multiverse_console"
+    },
+    "title": {
+      "translate": "advancements.riftverse.nexus.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.nexus.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "riftverse:first_rift",
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

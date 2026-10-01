@@ -1,0 +1,54 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "1",
+    "dstrgb": "0"
+  },
+  "vertex": "riftverse:fullscreen",
+  "fragment": "riftverse:cosmos",
+  "attributes": [
+    "Position"
+  ],
+  "samplers": [],
+  "uniforms": [
+    {
+      "name": "RvTime",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "ColorA",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.5,
+        0.3,
+        1
+      ]
+    },
+    {
+      "name": "ColorB",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1,
+        0.3,
+        0.8
+      ]
+    },
+    {
+      "name": "CosmosParams",
+      "type": "float",
+      "count": 4,
+      "values": [
+        1.7,
+        0,
+        1,
+        1
+      ]
+    }
+  ]
+}

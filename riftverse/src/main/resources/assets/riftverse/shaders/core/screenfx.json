@@ -1,0 +1,100 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "1",
+    "dstrgb": "0"
+  },
+  "vertex": "riftverse:fullscreen",
+  "fragment": "riftverse:screenfx",
+  "attributes": [
+    "Position"
+  ],
+  "samplers": [
+    {
+      "name": "Sampler0"
+    }
+  ],
+  "uniforms": [
+    {
+      "name": "RvTime",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "FxA",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FxB",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FxC",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.5,
+        0.5,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "FxTint",
+      "type": "float",
+      "count": 4,
+      "values": [
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "FlashColor",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "VignetteColor",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "ScreenSize",
+      "type": "float",
+      "count": 2,
+      "values": [
+        1,
+        1
+      ]
+    }
+  ]
+}

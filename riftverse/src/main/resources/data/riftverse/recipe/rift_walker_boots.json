@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "X X",
+    "X X"
+  ],
+  "key": {
+    "X": {
+      "item": "riftverse:rift_shard"
+    }
+  },
+  "result": {
+    "id": "riftverse:rift_walker_boots",
+    "count": 1
+  }
+}

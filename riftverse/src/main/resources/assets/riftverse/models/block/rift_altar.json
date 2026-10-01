@@ -1,0 +1,260 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "riftverse:block/altar_side",
+    "side": "riftverse:block/altar_side",
+    "top": "riftverse:block/altar_top",
+    "bottom": "riftverse:block/altar_bottom",
+    "side_glow": "riftverse:block/altar_side_glow",
+    "top_glow": "riftverse:block/altar_top_glow"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        4,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#bottom",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#bottom"
+        },
+        "north": {
+          "texture": "#side",
+          "uv": [
+            0,
+            12,
+            16,
+            16
+          ],
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            0,
+            12,
+            16,
+            16
+          ],
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            0,
+            12,
+            16,
+            16
+          ],
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            0,
+            12,
+            16,
+            16
+          ],
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        4,
+        3
+      ],
+      "to": [
+        13,
+        12,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        4,
+        3
+      ],
+      "to": [
+        13,
+        12,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side_glow",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#side_glow",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        },
+        "west": {
+          "texture": "#side_glow",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        },
+        "east": {
+          "texture": "#side_glow",
+          "uv": [
+            3,
+            2,
+            13,
+            10
+          ]
+        }
+      },
+      "shade": false,
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15,
+        "ambient_occlusion": false
+      }
+    },
+    {
+      "from": [
+        1,
+        12,
+        1
+      ],
+      "to": [
+        15,
+        15,
+        15
+      ],
+      "faces": {
+        "down": {
+          "texture": "#bottom"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#side",
+          "uv": [
+            1,
+            0,
+            15,
+            3
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            1,
+            0,
+            15,
+            3
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            1,
+            0,
+            15,
+            3
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            1,
+            0,
+            15,
+            3
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        12,
+        1
+      ],
+      "to": [
+        15,
+        15,
+        15
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top_glow"
+        }
+      },
+      "shade": false,
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15,
+        "ambient_occlusion": false
+      }
+    }
+  ],
+  "render_type": "minecraft:cutout"
+}

@@ -1,0 +1,171 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "1",
+    "dstrgb": "0"
+  },
+  "vertex": "riftverse:fullscreen",
+  "fragment": "riftverse:sky",
+  "attributes": [
+    "Position"
+  ],
+  "samplers": [],
+  "uniforms": [
+    {
+      "name": "InvViewProj",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0
+      ]
+    },
+    {
+      "name": "RvTime",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "SkyTop",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SkyHorizon",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SkyGround",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "NebulaA",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "NebulaB",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SunColor",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SunDir",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "SkyP1",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SkyP2",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SkyP3",
+      "type": "float",
+      "count": 4,
+      "values": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SkyP4",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SkyP5",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

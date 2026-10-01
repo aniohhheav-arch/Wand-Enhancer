@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "riftverse:block/dream_cloud"
+  },
+  "render_type": "minecraft:translucent"
+}

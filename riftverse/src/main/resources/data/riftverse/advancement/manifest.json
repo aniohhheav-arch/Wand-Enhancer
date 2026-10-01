@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:dimensional_key"
+    },
+    "title": {
+      "translate": "advancements.riftverse.manifest.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.manifest.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "riftverse:nexus",
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

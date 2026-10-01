@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "OSO",
+    "SOS",
+    "OSO"
+  ],
+  "key": {
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "S": {
+      "item": "riftverse:rift_shard"
+    }
+  },
+  "result": {
+    "id": "riftverse:rift_frame",
+    "count": 4
+  }
+}

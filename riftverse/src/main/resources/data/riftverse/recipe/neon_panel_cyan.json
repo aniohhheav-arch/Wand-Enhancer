@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "riftverse:cyber_plating"
+    },
+    {
+      "item": "minecraft:glowstone_dust"
+    },
+    {
+      "item": "minecraft:cyan_dye"
+    }
+  ],
+  "result": {
+    "id": "riftverse:neon_panel_cyan",
+    "count": 2
+  }
+}

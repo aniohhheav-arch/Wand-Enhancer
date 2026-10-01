@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "minecraft:flint_and_steel"
+    },
+    {
+      "item": "riftverse:rift_shard"
+    }
+  ],
+  "result": {
+    "id": "riftverse:rift_igniter",
+    "count": 1
+  }
+}

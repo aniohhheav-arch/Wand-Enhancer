@@ -1,0 +1,270 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "riftverse:block/console_side",
+    "base": "riftverse:block/console_base",
+    "side": "riftverse:block/console_side",
+    "top": "riftverse:block/console_top",
+    "column": "riftverse:block/console_column",
+    "side_glow": "riftverse:block/console_side_glow",
+    "top_glow": "riftverse:block/console_top_glow",
+    "column_glow": "riftverse:block/console_column_glow"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        3,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#base",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#base"
+        },
+        "north": {
+          "texture": "#base"
+        },
+        "south": {
+          "texture": "#base"
+        },
+        "west": {
+          "texture": "#base"
+        },
+        "east": {
+          "texture": "#base"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        3,
+        5
+      ],
+      "to": [
+        11,
+        10,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#column",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#column",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        },
+        "west": {
+          "texture": "#column",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        },
+        "east": {
+          "texture": "#column",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        3,
+        5
+      ],
+      "to": [
+        11,
+        10,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#column_glow",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#column_glow",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        },
+        "west": {
+          "texture": "#column_glow",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        },
+        "east": {
+          "texture": "#column_glow",
+          "uv": [
+            5,
+            3,
+            11,
+            10
+          ]
+        }
+      },
+      "shade": false,
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15,
+        "ambient_occlusion": false
+      }
+    },
+    {
+      "from": [
+        1,
+        10,
+        1
+      ],
+      "to": [
+        15,
+        14,
+        15
+      ],
+      "faces": {
+        "down": {
+          "texture": "#base"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#side",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        10,
+        1
+      ],
+      "to": [
+        15,
+        14,
+        15
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top_glow"
+        },
+        "north": {
+          "texture": "#side_glow",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        },
+        "south": {
+          "texture": "#side_glow",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        },
+        "west": {
+          "texture": "#side_glow",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        },
+        "east": {
+          "texture": "#side_glow",
+          "uv": [
+            1,
+            4,
+            15,
+            12
+          ]
+        }
+      },
+      "shade": false,
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15,
+        "ambient_occlusion": false
+      }
+    }
+  ],
+  "render_type": "minecraft:cutout"
+}

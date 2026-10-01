@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SS",
+    "SS"
+  ],
+  "key": {
+    "S": {
+      "item": "riftverse:nexus_stone"
+    }
+  },
+  "result": {
+    "id": "riftverse:nexus_bricks",
+    "count": 4
+  }
+}

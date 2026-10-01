@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:singularity_core"
+    },
+    "title": {
+      "translate": "advancements.riftverse.event_horizon.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.event_horizon.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "riftverse:first_rift",
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

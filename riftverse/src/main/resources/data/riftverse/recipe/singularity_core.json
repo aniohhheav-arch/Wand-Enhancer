@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FXF",
+    "XNX",
+    "FXF"
+  ],
+  "key": {
+    "F": {
+      "item": "riftverse:singularity_fragment"
+    },
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    },
+    "N": {
+      "item": "minecraft:nether_star"
+    }
+  },
+  "result": {
+    "id": "riftverse:singularity_core",
+    "count": 1
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "1",
+    "dstrgb": "0"
+  },
+  "vertex": "riftverse:fullscreen",
+  "fragment": "riftverse:rift",
+  "attributes": [
+    "Position"
+  ],
+  "samplers": [
+    {
+      "name": "Sampler0"
+    },
+    {
+      "name": "Sampler1"
+    }
+  ],
+  "uniforms": [
+    {
+      "name": "InvViewProj",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0
+      ]
+    },
+    {
+      "name": "ViewProj",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0,
+        0,
+        0,
+        0,
+        0,
+        1.0
+      ]
+    },
+    {
+      "name": "RvTime",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "Center",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Normal",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "UpDir",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "HalfSize",
+      "type": "float",
+      "count": 2,
+      "values": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ColorA",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ColorB",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "RiftParams",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0,
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "DestSky",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "VFV",
+    "FCF",
+    "VFV"
+  ],
+  "key": {
+    "V": {
+      "item": "riftverse:void_essence"
+    },
+    "F": {
+      "item": "riftverse:singularity_fragment"
+    },
+    "C": {
+      "item": "riftverse:rift_crystal"
+    }
+  },
+  "result": {
+    "id": "riftverse:rift_sigil",
+    "count": 1
+  }
+}

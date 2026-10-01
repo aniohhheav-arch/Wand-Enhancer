@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:warden_core"
+    },
+    "title": {
+      "translate": "advancements.riftverse.warden_slayer.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.warden_slayer.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "riftverse:nexus",
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

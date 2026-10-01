@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "riftverse:alien_soil",
+    "riftverse:dead_regolith",
+    "riftverse:stardust_sand",
+    "riftverse:dream_turf"
+  ]
+}

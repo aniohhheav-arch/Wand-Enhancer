@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:leviathan_scale"
+    },
+    "title": {
+      "translate": "advancements.riftverse.leviathan_slayer.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.leviathan_slayer.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "riftverse:first_rift",
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

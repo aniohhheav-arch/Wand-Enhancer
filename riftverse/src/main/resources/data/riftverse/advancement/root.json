@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:rift_shard"
+    },
+    "title": {
+      "translate": "advancements.riftverse.root.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false,
+    "background": "riftverse:textures/block/cosmic_obsidian.png"
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}

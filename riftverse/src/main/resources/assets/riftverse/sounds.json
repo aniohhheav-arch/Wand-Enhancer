@@ -1,0 +1,346 @@
+{
+  "rift.ambient": {
+    "sounds": [
+      {
+        "name": "riftverse:rift/ambient"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.rift.ambient"
+  },
+  "rift.open": {
+    "sounds": [
+      {
+        "name": "riftverse:rift/open"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.rift.open"
+  },
+  "rift.enter": {
+    "sounds": [
+      {
+        "name": "riftverse:rift/enter"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.rift.enter"
+  },
+  "portal.open": {
+    "sounds": [
+      {
+        "name": "riftverse:portal/open"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.portal.open"
+  },
+  "portal.enter": {
+    "sounds": [
+      {
+        "name": "riftverse:portal/enter"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.portal.enter"
+  },
+  "portal_gun.fire": {
+    "sounds": [
+      {
+        "name": "riftverse:portal_gun/fire"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.portal_gun.fire"
+  },
+  "black_hole.ambient": {
+    "sounds": [
+      {
+        "name": "riftverse:black_hole/ambient"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.black_hole.ambient"
+  },
+  "black_hole.pull": {
+    "sounds": [
+      {
+        "name": "riftverse:black_hole/pull"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.black_hole.pull"
+  },
+  "black_hole.collapse": {
+    "sounds": [
+      {
+        "name": "riftverse:black_hole/collapse"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.black_hole.collapse"
+  },
+  "wormhole.travel": {
+    "sounds": [
+      {
+        "name": "riftverse:wormhole/travel",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.wormhole.travel"
+  },
+  "wormhole.emerge": {
+    "sounds": [
+      {
+        "name": "riftverse:wormhole/emerge"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.wormhole.emerge"
+  },
+  "universe.arrive": {
+    "sounds": [
+      {
+        "name": "riftverse:universe/arrive"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.universe.arrive"
+  },
+  "gravity.pulse": {
+    "sounds": [
+      {
+        "name": "riftverse:gravity/pulse"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.gravity.pulse"
+  },
+  "gravity.beam": {
+    "sounds": [
+      {
+        "name": "riftverse:gravity/beam"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.gravity.beam"
+  },
+  "singularity.implode": {
+    "sounds": [
+      {
+        "name": "riftverse:singularity/implode"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.singularity.implode"
+  },
+  "blade.slash": {
+    "sounds": [
+      {
+        "name": "riftverse:blade/slash"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.blade.slash"
+  },
+  "blade.dash": {
+    "sounds": [
+      {
+        "name": "riftverse:blade/dash"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.blade.dash"
+  },
+  "energy.fire": {
+    "sounds": [
+      {
+        "name": "riftverse:energy/fire"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.energy.fire"
+  },
+  "energy.hit": {
+    "sounds": [
+      {
+        "name": "riftverse:energy/hit"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.energy.hit"
+  },
+  "glitch.noise": {
+    "sounds": [
+      {
+        "name": "riftverse:glitch/noise"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.glitch.noise"
+  },
+  "jelly.chime": {
+    "sounds": [
+      {
+        "name": "riftverse:jelly/chime"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.jelly.chime"
+  },
+  "whale.call": {
+    "sounds": [
+      {
+        "name": "riftverse:whale/call"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.whale.call"
+  },
+  "drone.hum": {
+    "sounds": [
+      {
+        "name": "riftverse:drone/hum"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.drone.hum"
+  },
+  "stalker.hiss": {
+    "sounds": [
+      {
+        "name": "riftverse:stalker/hiss"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.stalker.hiss"
+  },
+  "wraith.scream": {
+    "sounds": [
+      {
+        "name": "riftverse:wraith/scream"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.wraith.scream"
+  },
+  "sentinel.step": {
+    "sounds": [
+      {
+        "name": "riftverse:sentinel/step"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.sentinel.step"
+  },
+  "warden.roar": {
+    "sounds": [
+      {
+        "name": "riftverse:warden/roar"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.warden.roar"
+  },
+  "warden.charge": {
+    "sounds": [
+      {
+        "name": "riftverse:warden/charge"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.warden.charge"
+  },
+  "leviathan.roar": {
+    "sounds": [
+      {
+        "name": "riftverse:leviathan/roar"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.leviathan.roar"
+  },
+  "creature.hurt": {
+    "sounds": [
+      {
+        "name": "riftverse:creature/hurt"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.creature.hurt"
+  },
+  "creature.death": {
+    "sounds": [
+      {
+        "name": "riftverse:creature/death"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.creature.death"
+  },
+  "armor.equip": {
+    "sounds": [
+      {
+        "name": "riftverse:armor/equip"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.armor.equip"
+  },
+  "ability.activate": {
+    "sounds": [
+      {
+        "name": "riftverse:ability/activate"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.ability.activate"
+  },
+  "ui.select": {
+    "sounds": [
+      {
+        "name": "riftverse:ui/select"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.ui.select"
+  },
+  "ui.manifest": {
+    "sounds": [
+      {
+        "name": "riftverse:ui/manifest"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.ui.manifest"
+  },
+  "music.cosmic": {
+    "sounds": [
+      {
+        "name": "riftverse:music/cosmic",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.music.cosmic"
+  },
+  "music.neon": {
+    "sounds": [
+      {
+        "name": "riftverse:music/neon",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.music.neon"
+  },
+  "music.dream": {
+    "sounds": [
+      {
+        "name": "riftverse:music/dream",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.music.dream"
+  },
+  "music.void": {
+    "sounds": [
+      {
+        "name": "riftverse:music/void",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.music.void"
+  },
+  "music.nexus": {
+    "sounds": [
+      {
+        "name": "riftverse:music/nexus",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.music.nexus"
+  },
+  "music.ocean": {
+    "sounds": [
+      {
+        "name": "riftverse:music/ocean",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.music.ocean"
+  },
+  "music.ancient": {
+    "sounds": [
+      {
+        "name": "riftverse:music/ancient",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.music.ancient"
+  }
+}

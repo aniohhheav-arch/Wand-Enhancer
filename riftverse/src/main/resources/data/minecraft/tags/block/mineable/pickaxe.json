@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "riftverse:rift_frame",
+    "riftverse:multiverse_console",
+    "riftverse:gravity_lift",
+    "riftverse:nexus_stone",
+    "riftverse:nexus_bricks",
+    "riftverse:nexus_glow",
+    "riftverse:void_stone",
+    "riftverse:void_crystal",
+    "riftverse:rift_crystal",
+    "riftverse:neon_panel_cyan",
+    "riftverse:neon_panel_magenta",
+    "riftverse:cyber_plating",
+    "riftverse:skystone",
+    "riftverse:ashen_rock",
+    "riftverse:cosmic_obsidian",
+    "riftverse:glitch_block",
+    "riftverse:ancient_bricks",
+    "riftverse:ancient_glyph",
+    "riftverse:ancient_gold",
+    "riftverse:abyssal_glow"
+  ]
+}

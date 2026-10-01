@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  C",
+    " X ",
+    "B  "
+  ],
+  "key": {
+    "C": {
+      "item": "riftverse:rift_crystal"
+    },
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    },
+    "B": {
+      "item": "minecraft:blaze_rod"
+    }
+  },
+  "result": {
+    "id": "riftverse:reality_shaper",
+    "count": 1
+  }
+}

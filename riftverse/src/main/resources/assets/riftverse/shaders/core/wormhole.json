@@ -1,0 +1,65 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
+  "vertex": "riftverse:fullscreen",
+  "fragment": "riftverse:wormhole",
+  "attributes": [
+    "Position"
+  ],
+  "samplers": [],
+  "uniforms": [
+    {
+      "name": "RvTime",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "ColorA",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ColorB",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "WormParams",
+      "type": "float",
+      "count": 4,
+      "values": [
+        1,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "WormExtra",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

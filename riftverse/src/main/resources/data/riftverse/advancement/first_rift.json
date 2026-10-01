@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:rift_igniter"
+    },
+    "title": {
+      "translate": "advancements.riftverse.first_rift.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.first_rift.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "riftverse:root",
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

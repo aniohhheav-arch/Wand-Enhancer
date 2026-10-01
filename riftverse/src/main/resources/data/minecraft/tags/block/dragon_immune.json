@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "riftverse:rift_altar",
+    "riftverse:rift",
+    "riftverse:portal_field"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "XXX",
+    "X X"
+  ],
+  "key": {
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    }
+  },
+  "result": {
+    "id": "riftverse:voyager_helmet",
+    "count": 1
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " XE",
+    "XRX",
+    "IX "
+  ],
+  "key": {
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "R": {
+      "item": "riftverse:rift_shard"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "id": "riftverse:portal_gun",
+    "count": 1
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RX",
+    "X "
+  ],
+  "key": {
+    "R": {
+      "item": "riftverse:rift_shard"
+    },
+    "X": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "id": "riftverse:dimensional_key",
+    "count": 1
+  }
+}

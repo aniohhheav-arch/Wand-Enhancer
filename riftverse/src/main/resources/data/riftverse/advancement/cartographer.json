@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "riftverse:universe_compass"
+    },
+    "title": {
+      "translate": "advancements.riftverse.cartographer.title"
+    },
+    "description": {
+      "translate": "advancements.riftverse.cartographer.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "riftverse:first_rift",
+  "criteria": {
+    "trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

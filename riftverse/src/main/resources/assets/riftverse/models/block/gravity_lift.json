@@ -1,0 +1,92 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "riftverse:block/gravity_lift_side",
+    "top": "riftverse:block/gravity_lift_top",
+    "side": "riftverse:block/gravity_lift_side",
+    "bottom": "riftverse:block/gravity_lift_bottom",
+    "top_glow": "riftverse:block/gravity_lift_top_glow",
+    "side_glow": "riftverse:block/gravity_lift_side_glow"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#bottom",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#top",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#side",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#side",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#side",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#side",
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top_glow",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#side_glow",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#side_glow",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#side_glow",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#side_glow",
+          "cullface": "east"
+        }
+      },
+      "shade": false,
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15,
+        "ambient_occlusion": false
+      }
+    }
+  ],
+  "render_type": "minecraft:cutout"
+}

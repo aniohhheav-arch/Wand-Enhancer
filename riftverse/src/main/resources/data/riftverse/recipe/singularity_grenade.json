@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "riftverse:singularity_fragment"
+    },
+    {
+      "item": "minecraft:tnt"
+    },
+    {
+      "item": "riftverse:void_essence"
+    }
+  ],
+  "result": {
+    "id": "riftverse:singularity_grenade",
+    "count": 2
+  }
+}

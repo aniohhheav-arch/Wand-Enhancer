@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " R ",
+    "RCR",
+    " R "
+  ],
+  "key": {
+    "R": {
+      "item": "riftverse:rift_shard"
+    },
+    "C": {
+      "item": "minecraft:compass"
+    }
+  },
+  "result": {
+    "id": "riftverse:universe_compass",
+    "count": 1
+  }
+}

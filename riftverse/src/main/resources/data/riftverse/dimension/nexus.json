@@ -1,0 +1,10 @@
+{
+  "type": "riftverse:nexus",
+  "generator": {
+    "type": "riftverse:nexus",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "riftverse:nexus"
+    }
+  }
+}

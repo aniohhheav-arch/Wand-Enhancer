@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "ISI",
+    "SRS",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "S": {
+      "item": "riftverse:stellar_dust"
+    },
+    "R": {
+      "item": "riftverse:rift_crystal"
+    }
+  },
+  "result": {
+    "id": "riftverse:gravity_lift",
+    "count": 2
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "riftverse:rift_shard"
+    },
+    {
+      "item": "minecraft:ender_pearl"
+    },
+    {
+      "item": "riftverse:stellar_dust"
+    }
+  ],
+  "result": {
+    "id": "riftverse:homeward_rift",
+    "count": 2
+  }
+}

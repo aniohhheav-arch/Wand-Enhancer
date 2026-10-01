@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "riftverse:block/lumen_log"
+    },
+    "axis=z": {
+      "model": "riftverse:block/lumen_log",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "riftverse:block/lumen_log",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "GEG",
+    "SDS",
+    "XXX"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "S": {
+      "item": "riftverse:rift_shard"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    }
+  },
+  "result": {
+    "id": "riftverse:multiverse_console",
+    "count": 1
+  }
+}

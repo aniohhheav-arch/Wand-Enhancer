@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "X X",
+    "XCX",
+    "XXX"
+  ],
+  "key": {
+    "X": {
+      "item": "riftverse:singularity_fragment"
+    },
+    "C": {
+      "item": "riftverse:warden_core"
+    }
+  },
+  "result": {
+    "id": "riftverse:event_horizon_chestplate",
+    "count": 1
+  }
+}

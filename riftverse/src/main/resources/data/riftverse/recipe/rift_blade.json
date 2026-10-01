@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "S",
+    "X",
+    "B"
+  ],
+  "key": {
+    "S": {
+      "item": "riftverse:singularity_fragment"
+    },
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    },
+    "B": {
+      "item": "minecraft:blaze_rod"
+    }
+  },
+  "result": {
+    "id": "riftverse:rift_blade",
+    "count": 1
+  }
+}
