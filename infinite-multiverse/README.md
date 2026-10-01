@@ -4,7 +4,7 @@ A modular NeoForge mod for **Minecraft 1.21.1** that aims to turn Minecraft into
 
 **Status: Phase 1 of 8 (Core Foundation).** This release ships the engine every later system plugs into, plus five fully working "Multiverse Core" abilities that exercise it end to end. Nothing in later phases is presented as done. See [ROADMAP.md](ROADMAP.md) for the full plan, feature checklist and known limitations.
 
-> The code targets the NeoForge 21.1 API but was written in an environment that could not download Minecraft or NeoForge, so it has **not been compiled yet**. Run `./gradlew build` first and expect to fix any small API mismatches it reports.
+> Verified: `./gradlew build` compiles with zero errors and warnings, and a dedicated server boots with the mod loaded and generates its config. In-game client testing (HUD, menu, abilities, VFX) is still pending.
 
 ## What Phase 1 contains
 
@@ -101,7 +101,7 @@ All abilities are unlocked by default. Creative-mode players can use every abili
 
 | File | Scope | Contents |
 |---|---|---|
-| `<world>/serverconfig/infinitemultiverse-server.toml` | Per world, synced to clients | Energy pool, per-system enable switches, terrain-modification switch, VFX broadcast range, per-ability cost/cooldown/parameters |
+| `config/infinitemultiverse-server.toml` (a copy in `<world>/serverconfig/` overrides it per world) | Server-wide, synced to clients | Energy pool, per-system enable switches, terrain-modification switch, VFX broadcast range, per-ability cost/cooldown/parameters |
 | `config/infinitemultiverse-client.toml` | Per player | HUD on/off, anchor corner and offsets, VFX quality (LOW/MEDIUM/HIGH), max effect distance, particle cap per effect |
 
 Both files can be edited in-game from *Mods → Infinite Multiverse → Config*.
