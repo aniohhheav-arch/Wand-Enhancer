@@ -16,13 +16,31 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class StandType {
     private final int color;
+    private final float scale;
+    private final boolean tracksRewind;
     private final List<Supplier<? extends Ability>> abilities;
     @Nullable
     private ResourceLocation id;
 
     public StandType(int color, List<Supplier<? extends Ability>> abilities) {
+        this(color, 1f, false, abilities);
+    }
+
+    public StandType(int color, float scale, boolean tracksRewind, List<Supplier<? extends Ability>> abilities) {
         this.color = color;
+        this.scale = scale;
+        this.tracksRewind = tracksRewind;
         this.abilities = abilities;
+    }
+
+    /** Render scale of the model (Tusk is small). */
+    public float scale() {
+        return scale;
+    }
+
+    /** Whether the user's recent positions are recorded for a rewind ability. */
+    public boolean tracksRewind() {
+        return tracksRewind;
     }
 
     public int color() {

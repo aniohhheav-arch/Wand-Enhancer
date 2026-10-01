@@ -8,16 +8,6 @@ import com.infinitemultiverse.stand.StandEntity;
 /** The Stand plants itself in front of you: catches incoming projectiles and blunts melee hits. */
 public final class GuardAbility extends StandAbility {
     @Override
-    public float energyCost() {
-        return MultiverseConfig.SERVER.standGuard.cost();
-    }
-
-    @Override
-    public int cooldownTicks() {
-        return MultiverseConfig.SERVER.standGuard.cooldown();
-    }
-
-    @Override
     protected boolean activateWithStand(AbilityContext ctx, StandEntity stand) {
         stand.startAction(StandAction.GUARD, MultiverseConfig.SERVER.guardDuration.get());
         return true;

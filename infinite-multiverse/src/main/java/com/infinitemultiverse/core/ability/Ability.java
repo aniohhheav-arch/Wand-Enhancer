@@ -5,6 +5,7 @@ import com.infinitemultiverse.core.registry.MultiverseRegistries;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -43,6 +44,11 @@ public abstract class Ability {
 
     /** Server side, every tick while a toggle ability is active. {@code activeTicks} starts at 1. */
     public void tickActive(AbilityContext ctx, int activeTicks) {
+    }
+
+    /** Cooldown applied when a toggle ends after {@code activeTicks}. Defaults to {@link #cooldownTicks()}. */
+    public int toggleCooldown(ServerPlayer player, int activeTicks) {
+        return cooldownTicks();
     }
 
     /** Server side, when a toggle ability ends for any reason. Must undo every lasting effect. */

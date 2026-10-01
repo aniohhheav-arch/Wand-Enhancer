@@ -45,7 +45,9 @@ The full design spec is far bigger than one release, so it ships in eight phases
 - [x] Stand framework: GeckoLib entity, summon/dismiss key, follow logic, actions, Stand registry, Awakening Arrowhead, commands
 - [x] Star Platinum: model, texture, glow mask, 5 animations, ORA barrage, Star Finger, Guard, The World time stop
 - [ ] Stand progression and evolution UI
-- [ ] Remaining Stands: The World, Killer Queen, Gold Experience, King Crimson, Made in Heaven, Tusk
+- [x] The World, Killer Queen, Gold Experience, King Crimson, Made in Heaven, Tusk (models, icons, 18 abilities)
+- [x] Time stop as a toggle with ability use inside it, creative-free and scaling survival cooldown
+- [x] Stands turn and look with their user
 - [ ] Cursed energy pool, reinforcement, Black Flash timing
 - [ ] Limitless, Shrine, Ten Shadows, Cursed Spirit Manipulation and other techniques
 - [ ] Domain Expansion engine with distinct interiors, rules and collapse sequences

@@ -261,6 +261,10 @@ public final class PlayerMultiverseData {
         return removed;
     }
 
+    public int activeTicks(ResourceLocation ability) {
+        return activeToggles.getOrDefault(ability, 0);
+    }
+
     public int incrementActiveTicks(ResourceLocation ability) {
         return activeToggles.merge(ability, 1, Integer::sum);
     }

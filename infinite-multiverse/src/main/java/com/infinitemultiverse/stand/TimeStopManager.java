@@ -83,11 +83,20 @@ public final class TimeStopManager {
         }
     }
 
+    public static boolean isActive(ServerPlayer owner) {
+        for (TimeStop stop : ACTIVE) {
+            if (stop.owner.equals(owner.getUUID())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean isFrozen(Entity entity) {
         return FROZEN_BY.containsKey(entity.getUUID());
     }
 
-    public static void start(ServerPlayer owner, double radius, int duration) {
+    public static void start(ServerPlayer owner, double radius, int duration, Component shout) {
         TimeStop stop = new TimeStop(owner, radius, duration);
         ACTIVE.add(stop);
         freezeNearby(stop, owner);
@@ -95,10 +104,7 @@ public final class TimeStopManager {
         MultiverseVfx.sound(stop.level, center, ModSounds.TIME_STOP, 1.4f, 1.0f);
         MultiverseVfx.broadcast(stop.level, VfxIds.TIME_STOP, center.add(0.0, 1.0, 0.0), Vec3.ZERO, (float) radius);
         broadcastState(stop, owner, true, duration);
-        StandType type = StandManager.standTypeOf(owner);
-        Component standName = type != null ? type.displayName() : Component.literal("?");
-        MultiverseVfx.shout(stop.level, center, Component.translatable("message.infinitemultiverse.shout.time_stop", standName)
-                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), radius * 2.0);
+        MultiverseVfx.shout(stop.level, center, shout, radius * 2.0);
     }
 
     public static void tick(MinecraftServer server) {

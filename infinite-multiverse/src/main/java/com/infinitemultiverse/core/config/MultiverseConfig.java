@@ -2,6 +2,8 @@ package com.infinitemultiverse.core.config;
 
 import com.infinitemultiverse.core.MultiverseSystem;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +28,40 @@ public final class MultiverseConfig {
     }
 
     private MultiverseConfig() {
+    }
+
+    /** Default energy cost and cooldown (ticks) of every Stand ability, keyed by ability id path. Lazily initialised holder. */
+    private static final class StandDefaults {
+        static final Map<String, double[]> MAP = new LinkedHashMap<>();
+
+        static void add(String id, double cost, int cooldown) {
+            MAP.put(id, new double[]{cost, cooldown});
+        }
+
+        static {
+            add("ora_barrage", 20, 100);
+            add("star_finger", 25, 80);
+            add("star_guard", 15, 160);
+            add("star_platinum_the_world", 60, 600);
+            add("muda_barrage", 20, 100);
+            add("knife_throw", 15, 60);
+            add("za_warudo", 75, 800);
+            add("first_bomb", 10, 40);
+            add("detonate", 20, 60);
+            add("bites_the_dust", 50, 900);
+            add("gold_experience_barrage", 20, 100);
+            add("life_giver", 25, 300);
+            add("healing_field", 30, 500);
+            add("epitaph", 20, 400);
+            add("time_erase", 45, 500);
+            add("king_crimson_chop", 30, 120);
+            add("heaven_acceleration", 15, 200);
+            add("time_acceleration", 40, 1200);
+            add("heaven_blink", 15, 40);
+            add("nail_shot", 8, 20);
+            add("golden_rotation", 30, 200);
+            add("infinite_rotation", 60, 900);
+        }
     }
 
     public static boolean isSystemEnabled(MultiverseSystem system) {
@@ -84,22 +120,27 @@ public final class MultiverseConfig {
         public final ModConfigSpec.DoubleValue standUpkeep;
         public final ModConfigSpec.DoubleValue standReach;
 
-        public final AbilityTuning barrage;
         public final ModConfigSpec.IntValue barrageDuration;
         public final ModConfigSpec.DoubleValue barrageDamage;
-
-        public final AbilityTuning precisionStrike;
         public final ModConfigSpec.DoubleValue precisionDamage;
         public final ModConfigSpec.DoubleValue precisionKnockback;
-
-        public final AbilityTuning standGuard;
         public final ModConfigSpec.IntValue guardDuration;
         public final ModConfigSpec.DoubleValue guardReduction;
-
-        public final AbilityTuning timeStop;
-        public final ModConfigSpec.IntValue timeStopDuration;
+        public final ModConfigSpec.IntValue timeStopMaxDuration;
+        public final ModConfigSpec.DoubleValue timeStopUpkeep;
+        public final ModConfigSpec.DoubleValue timeStopCooldownPerTick;
         public final ModConfigSpec.DoubleValue timeStopRadius;
         public final ModConfigSpec.BooleanValue timeStopFreezesPlayers;
+        private final Map<String, AbilityTuning> standAbilities = new HashMap<>();
+
+        /** Cost/cooldown of a Stand ability by its id path. */
+        public AbilityTuning standTuning(String abilityPath) {
+            AbilityTuning tuning = standAbilities.get(abilityPath);
+            if (tuning == null) {
+                throw new IllegalArgumentException("No config entry for stand ability " + abilityPath);
+            }
+            return tuning;
+        }
 
         Server(ModConfigSpec.Builder b) {
             b.comment("Shared multiverse energy pool used by every ability.").push("energy");
@@ -170,28 +211,34 @@ public final class MultiverseConfig {
             b.pop();
 
             b.push("barrage");
-            barrage = AbilityTuning.define(b, 20.0, 100);
             barrageDuration = b.comment("Barrage length in ticks.").defineInRange("durationTicks", 30, 5, 200);
             barrageDamage = b.comment("Damage per hit (a hit lands every 2 ticks).").defineInRange("damagePerHit", 1.2, 0.0, 50.0);
             b.pop();
 
-            b.push("precision_strike");
-            precisionStrike = AbilityTuning.define(b, 25.0, 80);
-            precisionDamage = b.comment("Damage of the strike.").defineInRange("damage", 9.0, 0.0, 200.0);
+            b.push("heavy_strike");
+            precisionDamage = b.comment("Base damage of single heavy strikes (Star Finger, King Crimson's chop scales it).").defineInRange("damage", 9.0, 0.0, 200.0);
             precisionKnockback = b.comment("Knockback strength.").defineInRange("knockback", 2.0, 0.0, 6.0);
             b.pop();
 
             b.push("guard");
-            standGuard = AbilityTuning.define(b, 15.0, 160);
             guardDuration = b.comment("Guard length in ticks.").defineInRange("durationTicks", 60, 10, 400);
             guardReduction = b.comment("Fraction of melee damage blocked while guarding.").defineInRange("damageReduction", 0.4, 0.0, 1.0);
             b.pop();
 
             b.push("time_stop");
-            timeStop = AbilityTuning.define(b, 60.0, 600);
-            timeStopDuration = b.comment("Frozen time in ticks.").defineInRange("durationTicks", 60, 10, 200);
+            timeStopMaxDuration = b.comment("Time stop is a toggle; this is the hard cap in ticks before time resumes on its own (The World holds it longer).").defineInRange("maxDurationTicks", 400, 20, 6000);
+            timeStopUpkeep = b.comment("Energy drained per second while time is stopped (survival).").defineInRange("upkeepPerSecond", 10.0, 0.0, 200.0);
+            timeStopCooldownPerTick = b.comment("Survival: extra cooldown ticks per tick time was held stopped, on top of the base cooldown. Creative has no cooldown.").defineInRange("cooldownPerStoppedTick", 4.0, 0.0, 100.0);
             timeStopRadius = b.comment("Radius of frozen time around the user, in blocks.").defineInRange("radius", 24.0, 4.0, 64.0);
             timeStopFreezesPlayers = b.comment("Also freeze other survival/adventure players.").define("freezePlayers", true);
+            b.pop();
+
+            b.comment("Energy cost and cooldown of every Stand ability.").push("abilities");
+            StandDefaults.MAP.forEach((id, defaults) -> {
+                b.push(id);
+                standAbilities.put(id, AbilityTuning.define(b, defaults[0], (int) defaults[1]));
+                b.pop();
+            });
             b.pop();
 
             b.pop();

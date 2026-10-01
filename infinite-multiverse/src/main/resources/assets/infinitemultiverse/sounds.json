@@ -265,5 +265,137 @@
         "pitch": 0.8
       }
     ]
+  },
+  "stand.knife": {
+    "sounds": [
+      {
+        "name": "minecraft:item.trident.throw",
+        "type": "event",
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:entity.arrow.shoot",
+        "type": "event",
+        "pitch": 1.8
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.knife"
+  },
+  "stand.bomb_mark": {
+    "sounds": [
+      {
+        "name": "minecraft:block.stone_button.click_on",
+        "type": "event",
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:block.note_block.chime",
+        "type": "event",
+        "pitch": 0.8
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.bomb_mark"
+  },
+  "stand.rewind": {
+    "sounds": [
+      {
+        "name": "minecraft:block.portal.trigger",
+        "type": "event",
+        "pitch": 2.0,
+        "volume": 0.6
+      },
+      {
+        "name": "minecraft:entity.illusioner.mirror_move",
+        "type": "event",
+        "pitch": 0.5
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.rewind"
+  },
+  "stand.life": {
+    "sounds": [
+      {
+        "name": "minecraft:block.flowering_azalea.place",
+        "type": "event",
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:entity.bee.loop_aggressive",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.6
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.life"
+  },
+  "stand.heal": {
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.6
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.heal"
+  },
+  "stand.epitaph": {
+    "sounds": [
+      {
+        "name": "minecraft:block.sculk_shrieker.shriek",
+        "type": "event",
+        "pitch": 1.8,
+        "volume": 0.4
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.epitaph"
+  },
+  "stand.time_erase": {
+    "sounds": [
+      {
+        "name": "minecraft:block.end_portal.spawn",
+        "type": "event",
+        "pitch": 2.0,
+        "volume": 0.5
+      },
+      {
+        "name": "minecraft:entity.warden.sonic_charge",
+        "type": "event",
+        "pitch": 1.6
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.time_erase"
+  },
+  "stand.accelerate": {
+    "sounds": [
+      {
+        "name": "minecraft:item.trident.riptide_3",
+        "type": "event",
+        "pitch": 1.4
+      },
+      {
+        "name": "minecraft:item.elytra.flying",
+        "type": "event",
+        "pitch": 2.0,
+        "volume": 0.4
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.accelerate"
+  },
+  "stand.nail": {
+    "sounds": [
+      {
+        "name": "minecraft:item.crossbow.shoot",
+        "type": "event",
+        "pitch": 1.4
+      },
+      {
+        "name": "minecraft:block.grindstone.use",
+        "type": "event",
+        "pitch": 2.0,
+        "volume": 0.5
+      }
+    ],
+    "subtitle": "subtitles.infinitemultiverse.stand.nail"
   }
 }

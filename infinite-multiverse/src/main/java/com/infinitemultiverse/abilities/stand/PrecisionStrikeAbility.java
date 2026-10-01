@@ -13,16 +13,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
-/** One wound-up, heavy blow on the creature you are looking at. Free if nothing is in reach. */
+/** One wound-up, heavy blow (scaled per Stand) on the creature you are looking at. Free if nothing is in reach. */
 public final class PrecisionStrikeAbility extends StandAbility {
-    @Override
-    public float energyCost() {
-        return MultiverseConfig.SERVER.precisionStrike.cost();
-    }
+    private final float damageMultiplier;
 
-    @Override
-    public int cooldownTicks() {
-        return MultiverseConfig.SERVER.precisionStrike.cooldown();
+    public PrecisionStrikeAbility(float damageMultiplier) {
+        this.damageMultiplier = damageMultiplier;
     }
 
     @Override
@@ -38,7 +34,7 @@ public final class PrecisionStrikeAbility extends StandAbility {
             AbilityManager.deny(player, Component.translatable("message.infinitemultiverse.no_target"));
             return false;
         }
-        stand.startHeavy(target);
+        stand.startHeavy(target, damageMultiplier);
         return true;
     }
 }

@@ -244,9 +244,9 @@ def temporal_drag():
     icon.save("temporal_drag")
 
 
-def fist(icon, cx, cy, scale, color_fn, alpha_glow=0.55):
+def fist(icon, cx, cy, scale, color_fn, alpha_glow=0.55, dark=0x3B2470, light=0x6A47C2):
     icon.fill(lambda px, py: d_round_rect(px, py, cx, cy, 6 * scale, 5 * scale, 2.2 * scale) < 0,
-              lambda px, py: mix(hex_rgb(0x3B2470), hex_rgb(0x6A47C2), (py - cy + 5 * scale) / (10 * scale)))
+              lambda px, py: mix(hex_rgb(dark), hex_rgb(light), (py - cy + 5 * scale) / (10 * scale)))
     icon.stroke(lambda px, py: abs(d_round_rect(px, py, cx, cy, 6 * scale, 5 * scale, 2.2 * scale)), 1.0, color_fn, glow=3, glow_strength=alpha_glow)
     for k in (-1, 1):
         icon.stroke(lambda px, py, k=k: d_segment(px, py, cx + k * 2 * scale, cy - 4.5 * scale, cx + k * 2 * scale, cy - 1.5 * scale),
@@ -317,10 +317,192 @@ def star_platinum_the_world():
     icon.save("star_platinum_the_world")
 
 
+def barrage(name, accent, dark, light, outline, spark):
+    icon = Icon(accent)
+    for i in range(7):
+        y = -20 + i * 6.5
+        icon.stroke(lambda px, py, y=y, i=i: d_segment(px, py, -26, y, -14 + (i % 2) * 4, y), 0.6, solid(accent), glow=2, glow_strength=0.25)
+    for cx, cy, s in ((-6, -12, 0.75), (2, 10, 0.75), (10, -2, 1.05)):
+        fist(icon, cx, cy, s, solid(outline), dark=dark, light=light)
+    for cx, cy in ((22, -2), (17, -14), (17, 12)):
+        icon.stroke(lambda px, py, cx=cx, cy=cy: d_star(px, py, cx, cy, 4.5, 1.5)[0], 0.5, solid(spark), glow=2, glow_strength=0.6)
+    icon.save(name)
+
+
+def knife_throw():
+    icon = Icon(0xFFD34D)
+    for angle in (-0.65, 0.0, 0.65):
+        ca, sa = math.cos(angle - math.pi / 2), math.sin(angle - math.pi / 2)
+        def rot(x, y, ca=ca, sa=sa):
+            return (x * ca - y * sa, x * sa + y * ca + 12)
+        blade = [rot(-12, -2.5), rot(16, 0), rot(-12, 2.5)]
+        icon.fill(lambda px, py, b=blade: inside_polygon(px, py, b), vertical(0xFFFFFF, 0xB8C4CC))
+        icon.stroke(lambda px, py, b=blade: d_polygon_outline(px, py, b), 0.5, solid(0xE6F0FF), glow=2, glow_strength=0.4)
+        h0, h1 = rot(-12, 0), rot(-22, 0)
+        icon.stroke(lambda px, py, h0=h0, h1=h1: d_segment(px, py, *h0, *h1), 2.0, solid(0xE8B020))
+    icon.save("knife_throw")
+
+
+def za_warudo():
+    icon = Icon(0xFFD34D)
+    for i in range(12):
+        a0 = 2 * math.pi * i / 12 + 0.06
+        icon.stroke(lambda px, py, a0=a0: d_arc(px, py, 0, 0, 23, a0, a0 + 0.36), 1.6, vertical(0xFFF1C2, 0xE8B020), glow=3)
+    icon.stroke(lambda px, py: d_segment(px, py, 0, 0, 0, -15), 1.4, solid(0xFFFFFF))
+    icon.stroke(lambda px, py: d_segment(px, py, 0, 0, 11, 3), 1.4, solid(0xFFFFFF))
+    heart = lambda px, py: (((px / 9) ** 2 + ((py + 2) / 9) ** 2 - 1) ** 3 - (px / 9) ** 2 * ((py + 2) / -9) ** 3) < 0
+    icon.fill(heart, vertical(0x5CBF5C, 0x2F4F2F))
+    icon.save("za_warudo")
+
+
+def first_bomb():
+    icon = Icon(0xFF8EC7)
+    icon.fill(lambda px, py: math.hypot(px + 2, py - 4) < 13, vertical(0x8C5A78, 0x4A2A40))
+    icon.stroke(lambda px, py: d_ring(px, py, -2, 4, 13), 1.2, solid(0xFF8EC7), glow=3)
+    fuse = [(6, -6), (12, -14), (18, -16)]
+    icon.stroke(lambda px, py: d_polyline(px, py, fuse), 1.0, solid(0xE6E1EA), glow=2, glow_strength=0.3)
+    icon.stroke(lambda px, py: d_star(px, py, 20, -18, 6, 2)[0], 0.6, solid(0xFFD86B), glow=3, glow_strength=0.8)
+    for dx, dy in ((-6, 2), (2, 2)):
+        icon.fill(lambda px, py, dx=dx, dy=dy: math.hypot(px - dx, py - dy) < 2.2, solid(0xF2F2F2))
+    icon.fill(lambda px, py: abs(px + 2) < 4 and abs(py - 9) < 1, solid(0xF2F2F2))
+    icon.save("first_bomb")
+
+
+def detonate():
+    icon = Icon(0xFF8EC7)
+    verts = d_star(0, 0, 0, 0, 24, 9, points=8)[1]
+    icon.fill(lambda px, py: inside_polygon(px, py, verts), lambda px, py: mix(hex_rgb(0xFFF1C2), hex_rgb(0xFF5E9A), min(1.0, math.hypot(px, py) / 22)))
+    icon.stroke(lambda px, py: d_star(px, py, 0, 0, 24, 9, points=8)[0], 0.8, solid(0xFF8EC7), glow=4)
+    icon.fill(lambda px, py: math.hypot(px, py) < 5, solid(0xFFFFFF))
+    icon.save("detonate")
+
+
+def bites_the_dust():
+    icon = Icon(0xFF8EC7)
+    icon.stroke(lambda px, py: d_arc(px, py, 0, 0, 19, math.pi * 0.25, math.pi * 1.95), 2.0, vertical(0xFFC8E4, 0xC0608E), glow=3)
+    tip = (19 * math.cos(math.pi * 0.25), 19 * math.sin(math.pi * 0.25))
+    head = [(tip[0] - 8, tip[1] - 2), tip, (tip[0] + 1, tip[1] - 8)]
+    icon.stroke(lambda px, py: d_polyline(px, py, head), 2.0, solid(0xFFE6F2))
+    icon.fill(lambda px, py: math.hypot(px, py + 1) < 8, vertical(0xF2F2F2, 0xBFB5C6))
+    for dx in (-3, 3):
+        icon.fill(lambda px, py, dx=dx: math.hypot(px - dx, py + 2) < 1.8, solid(0x3A2030))
+    icon.fill(lambda px, py: abs(px) < 3.5 and 4 < py < 7 and int(px + 10) % 2 == 0, solid(0xF2F2F2))
+    icon.save("bites_the_dust")
+
+
+def life_giver():
+    icon = Icon(0x8BE36A)
+    icon.stroke(lambda px, py: d_segment(px, py, 0, 24, 0, -2), 1.6, solid(0x3E9B4F), glow=2)
+    for k in (-1, 1):
+        leaf = [(0, -2), (k * 8, -10), (k * 16, -8), (k * 10, 2), (0, 2)]
+        icon.fill(lambda px, py, l=leaf: inside_polygon(px, py, l), vertical(0xB8FF8A, 0x3E9B4F))
+    for bx, by in ((-16, -18), (14, -22), (20, 4)):
+        icon.fill(lambda px, py, bx=bx, by=by: math.hypot((px - bx) / 1.3, py - by) < 3.2, solid(0xFFD24A))
+        icon.stroke(lambda px, py, bx=bx, by=by: d_segment(px, py, bx - 1, by - 3, bx - 1, by + 3), 0.5, solid(0x2A2010), glow=0.5, glow_strength=0.0)
+    icon.save("life_giver")
+
+
+def healing_field():
+    icon = Icon(0x8BE36A)
+    icon.stroke(lambda px, py: d_ring(px, py, 0, 0, 22), 1.2, solid(0x8BE36A), glow=4)
+    icon.stroke(lambda px, py: d_ring(px, py, 0, 0, 15), 0.6, solid(0x3E9B4F), glow=2, glow_strength=0.3)
+    plus = lambda px, py: (abs(px) < 3.5 and abs(py) < 11) or (abs(py) < 3.5 and abs(px) < 11)
+    icon.fill(plus, vertical(0xFFFFFF, 0x8BE36A))
+    icon.save("healing_field")
+
+
+def king_crimson_chop():
+    icon = Icon(0xE0284A)
+    icon.stroke(lambda px, py: d_segment(px, py, -22, 22, 22, -22), 2.2, vertical(0xFFFFFF, 0xE0284A), glow=4)
+    fist(icon, -4, 4, 1.2, solid(0xFFD0D6), 0.7, dark=0x5A0A16, light=0xC0283A)
+    icon.save("king_crimson_chop")
+
+
+def epitaph():
+    icon = Icon(0xE0284A)
+    eye = lambda px, py: (px / 22) ** 2 + (py / 11) ** 2 < 1 and abs(py) < 11 * math.cos(px / 22 * math.pi / 2)
+    icon.fill(eye, vertical(0xF2EEEE, 0xC8B8B8))
+    icon.stroke(lambda px, py: abs(math.hypot(px / 22, py / 11) - 1) * 10, 0.8, solid(0xE0284A), glow=3)
+    icon.fill(lambda px, py: math.hypot(px, py) < 7.5, vertical(0x5CFFB0, 0x1A7A4A))
+    icon.fill(lambda px, py: math.hypot(px, py) < 3, solid(0x101010))
+    icon.save("epitaph")
+
+
+def time_erase():
+    icon = Icon(0xE0284A)
+    icon.stroke(lambda px, py: d_arc(px, py, 0, 0, 20, math.pi * 0.15, math.pi * 1.35), 2.0, solid(0xF2EEEE), glow=3)
+    icon.stroke(lambda px, py: d_arc(px, py, 0, 0, 20, math.pi * 1.55, math.pi * 1.95), 2.0, solid(0xF2EEEE), glow=3)
+    icon.stroke(lambda px, py: d_segment(px, py, -24, 10, 24, -10), 2.4, solid(0xE0284A), glow=4, glow_strength=0.7)
+    icon.stroke(lambda px, py: d_segment(px, py, 0, 0, 0, -12), 1.2, solid(0xFFFFFF))
+    icon.save("time_erase")
+
+
+def heaven_acceleration():
+    icon = Icon(0xB8FFE0)
+    for i, x in enumerate((-16, -4, 8)):
+        pts = [(x - 6, -14), (x + 6, 0), (x - 6, 14)]
+        icon.stroke(lambda px, py, p=pts: d_polyline(px, py, p), 1.6 + i * 0.6, horizontal(0x4CC59B, 0xFFFFFF), glow=3)
+    icon.save("heaven_acceleration")
+
+
+def time_acceleration():
+    icon = Icon(0xFFF6C0)
+    icon.fill(lambda px, py: math.hypot(px - 8, py + 6) < 8, vertical(0xFFFFFF, 0xFFC94D))
+    for r in (14, 20, 26):
+        icon.stroke(lambda px, py, r=r: d_arc(px, py, 8, -6, r, math.pi * 0.55, math.pi * 1.05), 1.0, solid(0x4CC59B), glow=2, glow_strength=0.4)
+    icon.fill(lambda px, py: math.hypot(px + 14, py - 14) < 5 and math.hypot(px + 11, py - 16) > 4.5, solid(0xE6F0FF))
+    icon.save("time_acceleration")
+
+
+def heaven_blink():
+    icon = Icon(0xB8FFE0)
+    for i in range(5):
+        x = -22 + i * 6
+        icon.stroke(lambda px, py, x=x: d_segment(px, py, x, -10 + i * 0, x + 2, 10), 0.8, solid(0x4CC59B), glow=2, glow_strength=0.2 + i * 0.1)
+    icon.fill(lambda px, py: math.hypot((px - 12) / 0.8, py) < 10, vertical(0xFFFFFF, 0xB9C0CC))
+    icon.stroke(lambda px, py: d_ring(px, py, 12, 0, 10), 1.0, solid(0x5CFFB0), glow=3)
+    icon.save("heaven_blink")
+
+
+def nail_shot():
+    icon = Icon(0xFF9ED0)
+    spiral = [((2 + 1.4 * t) * math.cos(t * 1.4), (2 + 1.4 * t) * math.sin(t * 1.4)) for t in [i / 4 for i in range(56)]]
+    icon.stroke(lambda px, py: d_polyline(px, py, spiral), 0.9, solid(0xFF9ED0), glow=3, glow_strength=0.5)
+    icon.stroke(lambda px, py: d_segment(px, py, -20, 20, 14, -14), 1.8, vertical(0xFFFFFF, 0xF5D36B))
+    icon.save("nail_shot")
+
+
+def golden_rotation():
+    icon = Icon(0xF5D36B)
+    phi = (1 + 5 ** 0.5) / 2
+    spiral = [(0.9 * phi ** (t / (math.pi / 2)) * math.cos(t), 0.9 * phi ** (t / (math.pi / 2)) * math.sin(t)) for t in [i / 10 for i in range(0, 95)]]
+    icon.stroke(lambda px, py: d_polyline(px, py, spiral), 1.6, vertical(0xFFF1C2, 0xE8B020), glow=4)
+    icon.fill(lambda px, py: math.hypot(px, py) < 3, solid(0xFFFFFF))
+    icon.save("golden_rotation")
+
+
+def infinite_rotation():
+    icon = Icon(0xFF9ED0)
+    curve = []
+    for i in range(240):
+        t = 2 * math.pi * i / 240
+        d = 1 + math.sin(t) ** 2
+        curve.append((22 * math.cos(t) / d, 22 * math.sin(t) * math.cos(t) / d))
+    icon.stroke(lambda px, py: d_polyline(px, py, curve), 2.2, horizontal(0xFF9ED0, 0xF5D36B), glow=4)
+    for cx, cy in ((-14, -10), (14, 10)):
+        icon.stroke(lambda px, py, cx=cx, cy=cy: d_arc(px, py, cx, cy, 5, 0.3, 4.5), 0.8, solid(0xFFFFFF), glow=2)
+    icon.save("infinite_rotation")
+
+
 def main():
     for glyph in (phase_step, kinetic_leap, shockwave, aegis_field, temporal_drag,
-                  stand_manifest, ora_barrage, star_finger, star_guard, star_platinum_the_world):
+                  stand_manifest, ora_barrage, star_finger, star_guard, star_platinum_the_world,
+                  knife_throw, za_warudo, first_bomb, detonate, bites_the_dust, life_giver, healing_field,
+                  king_crimson_chop, epitaph, time_erase, heaven_acceleration, time_acceleration, heaven_blink,
+                  nail_shot, golden_rotation, infinite_rotation):
         glyph()
+    barrage("muda_barrage", 0xFFD34D, 0x7A5A10, 0xF1C232, 0xFFF1C2, 0x5CBF5C)
+    barrage("gold_experience_barrage", 0x8BE36A, 0x8A6A10, 0xF2C94C, 0xFFF6C0, 0xE0303A)
     print("Icons written to", os.path.normpath(ICONS))
 
 

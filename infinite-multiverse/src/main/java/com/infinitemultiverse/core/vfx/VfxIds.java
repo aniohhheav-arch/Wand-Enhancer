@@ -19,6 +19,12 @@ public final class VfxIds {
     public static final ResourceLocation STAND_HEAVY = InfiniteMultiverse.id("stand_heavy");
     public static final ResourceLocation TIME_STOP = InfiniteMultiverse.id("time_stop");
     public static final ResourceLocation TIME_RESUME = InfiniteMultiverse.id("time_resume");
+    public static final ResourceLocation KQ_MARK = InfiniteMultiverse.id("kq_mark");
+    public static final ResourceLocation REWIND = InfiniteMultiverse.id("rewind");
+    public static final ResourceLocation HEAL_PULSE = InfiniteMultiverse.id("heal_pulse");
+    public static final ResourceLocation EPITAPH = InfiniteMultiverse.id("epitaph");
+    public static final ResourceLocation TIME_ERASE = InfiniteMultiverse.id("time_erase");
+    public static final ResourceLocation AFTERIMAGE = InfiniteMultiverse.id("afterimage");
 
     private VfxIds() {
     }

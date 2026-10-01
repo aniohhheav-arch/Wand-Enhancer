@@ -30,6 +30,15 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> STAND_CATCH = register("stand.catch");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIME_STOP = register("stand.time_stop");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIME_RESUME = register("stand.time_resume");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_KNIFE = register("stand.knife");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_BOMB_MARK = register("stand.bomb_mark");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_REWIND = register("stand.rewind");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_LIFE = register("stand.life");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_HEAL = register("stand.heal");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_EPITAPH = register("stand.epitaph");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_TIME_ERASE = register("stand.time_erase");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_ACCELERATE = register("stand.accelerate");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_NAIL = register("stand.nail");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_DENIED = register("ui.denied");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_SELECT = register("ui.select");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_BIND = register("ui.bind");

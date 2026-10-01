@@ -30,7 +30,13 @@ public final class ClientVfx {
             Map.entry(VfxIds.STAND_PUNCH, StandEffects::punch),
             Map.entry(VfxIds.STAND_HEAVY, StandEffects::heavy),
             Map.entry(VfxIds.TIME_STOP, StandEffects::timeStop),
-            Map.entry(VfxIds.TIME_RESUME, StandEffects::timeResume));
+            Map.entry(VfxIds.TIME_RESUME, StandEffects::timeResume),
+            Map.entry(VfxIds.KQ_MARK, StandEffects::bombMark),
+            Map.entry(VfxIds.REWIND, StandEffects::rewind),
+            Map.entry(VfxIds.HEAL_PULSE, StandEffects::healPulse),
+            Map.entry(VfxIds.EPITAPH, StandEffects::epitaph),
+            Map.entry(VfxIds.TIME_ERASE, StandEffects::timeErase),
+            Map.entry(VfxIds.AFTERIMAGE, StandEffects::afterimage));
 
     private ClientVfx() {
     }

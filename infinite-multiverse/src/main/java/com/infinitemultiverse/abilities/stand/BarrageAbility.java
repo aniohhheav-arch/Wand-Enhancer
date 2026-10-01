@@ -3,28 +3,26 @@ package com.infinitemultiverse.abilities.stand;
 import com.infinitemultiverse.core.ability.AbilityContext;
 import com.infinitemultiverse.core.config.MultiverseConfig;
 import com.infinitemultiverse.core.vfx.MultiverseVfx;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import com.infinitemultiverse.stand.StandAction;
 import com.infinitemultiverse.stand.StandEntity;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 
-/** The Stand steps forward and unleashes a rapid punch barrage: a hit every 2 ticks on everything in front. */
+/** The Stand steps forward and unleashes a rush of punches: a hit every 2 ticks on everything in front, with its battle cry. */
 public final class BarrageAbility extends StandAbility {
-    @Override
-    public float energyCost() {
-        return MultiverseConfig.SERVER.barrage.cost();
-    }
+    private final String shoutKey;
+    private final ChatFormatting shoutColor;
 
-    @Override
-    public int cooldownTicks() {
-        return MultiverseConfig.SERVER.barrage.cooldown();
+    public BarrageAbility(String shoutKey, ChatFormatting shoutColor) {
+        this.shoutKey = shoutKey;
+        this.shoutColor = shoutColor;
     }
 
     @Override
     protected boolean activateWithStand(AbilityContext ctx, StandEntity stand) {
         stand.startAction(StandAction.BARRAGE, MultiverseConfig.SERVER.barrageDuration.get());
         MultiverseVfx.shout(ctx.level(), ctx.player().position(),
-                Component.translatable("message.infinitemultiverse.shout.ora").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD), 24.0);
+                Component.translatable(shoutKey).withStyle(shoutColor, ChatFormatting.BOLD), 24.0);
         return true;
     }
 }

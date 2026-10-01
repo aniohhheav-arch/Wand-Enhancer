@@ -150,12 +150,13 @@ public final class AbilityManager {
 
     public static void deactivate(ServerPlayer player, PlayerMultiverseData data, Ability ability, DeactivationReason reason) {
         ResourceLocation id = ability.id();
+        int activeTicks = data.activeTicks(id);
         if (!data.removeActive(id)) {
             return;
         }
         ability.onDeactivate(new AbilityContext(player, player.serverLevel(), data), reason);
         if (reason != DeactivationReason.ADMIN) {
-            data.startCooldown(id, ability.cooldownTicks());
+            data.startCooldown(id, ability.toggleCooldown(player, activeTicks));
         }
         if (reason == DeactivationReason.ENERGY_DEPLETED) {
             player.displayClientMessage(Component.translatable("message.infinitemultiverse.collapsed", ability.displayName()), true);

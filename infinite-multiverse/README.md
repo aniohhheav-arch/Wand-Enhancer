@@ -2,7 +2,7 @@
 
 A modular NeoForge mod for **Minecraft 1.21.1** that aims to turn Minecraft into a multiverse sandbox: Stands, cursed techniques, mutant powers, the Mystic Arts, an Infinity Gauntlet, space travel, time travel, portals, the Backrooms, reality-bending instruments, a large weapons arsenal, instant structures, combat arenas and a living city.
 
-**Status: Phase 2, slice 1 (Stands).** This release ships the core engine with five "Multiverse Core" abilities, plus the Stand system and its first Stand, **Star Platinum**. Nothing in later phases is presented as done. See [ROADMAP.md](ROADMAP.md) for the full plan, feature checklist and known limitations.
+**Status: Phase 2 in progress: all seven Stands are done.** This release ships the core engine with five "Multiverse Core" abilities, plus the Stand system with **Star Platinum, The World, Killer Queen, Gold Experience, King Crimson, Made in Heaven and Tusk**. Nothing in later phases is presented as done. See [ROADMAP.md](ROADMAP.md) for the full plan, feature checklist and known limitations.
 
 > Verified: `./gradlew build` compiles with zero errors and warnings, a dedicated server boots with the mod loaded, and a headless client test shows the HUD, the ability icons, and Star Platinum summoning, barraging and returning in game.
 
@@ -90,15 +90,19 @@ All abilities are unlocked by default. Creative-mode players can use every abili
 
 Craft an **Awakening Arrowhead** (amethyst shard on top, gold ingot / eye of ender / gold ingot in the middle row, stick below) and use it. It deals 2 damage and awakens a random Stand. Its abilities are unlocked and bound into your empty loadout slots. Press `H` (or the bound slot) to summon your Stand.
 
-**Star Platinum**: a close-range powerhouse. It rests over your right shoulder and steps in front of you to attack.
+Stands copy where you look: they turn with you and their head follows your pitch. Every ability's cost and cooldown is configurable under `stands.abilities.<id>`.
 
-| Ability | Energy | Cooldown | Effect |
-|---|---|---|---|
-| Manifest Stand | 10 + 1.5/s | 2 s | Summon/dismiss. Follows you across dimensions; the other Stand abilities need it out. |
-| ORA ORA Barrage | 20 | 5 s | 1.5 s rush: a 1.2-damage hit every 2 ticks on everything in front of you. |
-| Star Finger | 25 | 4 s | Wound-up blow on the creature you're looking at (5-block reach): 9 damage with heavy knockback. Free if nothing is in reach. |
-| Star Platinum Guard | 15 | 8 s | 3 s guard: catches incoming projectiles and blocks 40% of melee damage. |
-| Star Platinum: The World | 60 | 30 s | Stops time for 3 s within 24 blocks. Mobs, other players, projectiles and primed TNT freeze; damage you deal to frozen targets lands all at once when time resumes. Frozen players can look but not act. |
+| Stand | Abilities |
+|---|---|
+| **Star Platinum** | ORA ORA Barrage (rush in front), Star Finger (9-damage heavy blow), Guard (catches projectiles, blocks 40% melee), **Star Platinum: The World** (time stop toggle) |
+| **The World** | MUDA MUDA Barrage, Knife Throw (fan of 5 knives that hang in stopped time), Guard, **ZA WARUDO** (time stop toggle, 50% longer cap) |
+| **Killer Queen** | First Bomb (turn a creature or block into a bomb), Detonate (explode it; never breaks blocks unless terrain damage is enabled), Bites the Dust (return to where you were ~5 s ago, regaining that health) |
+| **Gold Experience** | MUDA Barrage, Life Giver (3 bees that attack the nearest hostile, never you, gone after 20 s), Healing Field (heals you and allies for 8 s) |
+| **King Crimson** | King Crimson Chop (60% stronger heavy blow), Epitaph (hostiles within 32 blocks glow through walls and show where they're heading), Time Erase (2.5 s untouchable and unseen, enemies lose you, then you appear behind the nearest one) |
+| **Made in Heaven** | Acceleration (toggle: speed climbs one tier every 3 s up to Speed V, with afterimages), Heaven's Speed (24-block blink), Time Acceleration (the sun and moon race across the sky for 10 s) |
+| **Tusk** | Nail Shot (straight, fast nail), Golden Rotation (heavy hit, strong knockback), Act 4: Infinite Rotation (withering plus unblockable damage for 10 s) |
+
+**Time stop** (Star Platinum and The World) is a toggle: press to stop time, press again to resume. Mobs, other players, projectiles and primed TNT freeze. You can keep moving and use every other ability; damage dealt to frozen targets is stored and lands when time resumes. In creative it's free with no cooldown. In survival it drains energy while held, and the cooldown grows with how long you held it. A configurable cap resumes time automatically.
 
 ## Commands
 

@@ -123,4 +123,84 @@ final class StandEffects {
             s.spark(center, s.randomUnit().scale(0.3), WHITE, GOLD, 0.3f, 10, 0.8f);
         }
     }
+
+    /** Pink ring that tightens around the bomb. */
+    static void bombMark(VfxSpawner s, Vec3 at, Vec3 unused, float scale) {
+        int color = colorOf(scale);
+        int count = s.count(30);
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 2.0 * i / count;
+            Vec3 dir = new Vec3(Math.cos(angle), 0.0, Math.sin(angle));
+            s.mote(at.add(dir.scale(1.2)), dir.scale(-0.07), WHITE, color, 0.12f, 14, 0.9f);
+        }
+        s.spark(at, Vec3.ZERO, WHITE, color, 0.5f, 10, 1f);
+    }
+
+    /** Spiral that winds backwards into the point, for rewinds. */
+    static void rewind(VfxSpawner s, Vec3 at, Vec3 unused, float scale) {
+        int color = colorOf(scale);
+        int count = s.count(60);
+        for (int i = 0; i < count; i++) {
+            double t = i / (double) count;
+            double angle = -t * Math.PI * 6.0;
+            double r = 1.4 * (1.0 - t) + 0.2;
+            Vec3 pos = at.add(Math.cos(angle) * r, (t - 0.5) * 2.0, Math.sin(angle) * r);
+            s.mote(pos, new Vec3(Math.sin(angle) * 0.05, 0.0, -Math.cos(angle) * 0.05), color, WHITE, 0.12f, 18, 0.9f);
+        }
+    }
+
+    /** Expanding green ring of life energy. scale = radius. */
+    static void healPulse(VfxSpawner s, Vec3 at, Vec3 unused, float radius) {
+        float friction = 0.88f;
+        int lifetime = 14;
+        double reach = (1.0 - Math.pow(friction, lifetime)) / (1.0 - friction);
+        int count = s.count(40);
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 2.0 * i / count;
+            Vec3 dir = new Vec3(Math.cos(angle), 0.0, Math.sin(angle));
+            s.mote(at, dir.scale(radius / reach).add(0.0, 0.02, 0.0), 0xC8FF9A, 0x3FA34D, 0.14f, lifetime, friction);
+        }
+        int rise = s.count(10);
+        for (int i = 0; i < rise; i++) {
+            s.spark(at.add(s.jitter(radius * 0.5).multiply(1, 0, 1)), new Vec3(0, 0.06, 0), WHITE, 0x8BE36A, 0.15f, 16, 0.95f);
+        }
+    }
+
+    /** A red ghost silhouette where a creature is about to be. vector points back to its present position, scale = height. */
+    static void epitaph(VfxSpawner s, Vec3 future, Vec3 toPresent, float height) {
+        int count = s.count(24);
+        for (int i = 0; i < count; i++) {
+            Vec3 pos = future.add(s.jitter(0.25).multiply(1, 0, 1)).add(0.0, s.rand() * Math.max(0.5f, height), 0.0);
+            s.mote(pos, new Vec3(0, 0.005, 0), 0xFF4D6A, 0x7C1222, 0.1f, 40, 0.98f);
+        }
+        int trail = s.count(10);
+        for (int i = 0; i < trail; i++) {
+            double t = i / (double) trail;
+            s.mote(future.add(toPresent.scale(t)).add(0, 0.2, 0), Vec3.ZERO, 0xE0284A, 0x400810, 0.06f, 30, 1f);
+        }
+    }
+
+    /** Red shell that collapses and shatters: time skipped. */
+    static void timeErase(VfxSpawner s, Vec3 at, Vec3 unused, float scale) {
+        int color = colorOf(scale);
+        int count = s.count(70);
+        for (int i = 0; i < count; i++) {
+            Vec3 dir = s.randomUnit();
+            s.mote(at.add(dir.scale(2.4)), dir.scale(-0.16), WHITE, color, 0.16f, 12, 0.85f);
+        }
+        int shards = s.count(20);
+        for (int i = 0; i < shards; i++) {
+            s.spark(at, s.randomUnit().scale(0.25), color, 0x400810, 0.22f, 10, 0.8f);
+        }
+    }
+
+    /** Fading afterimage trail. vector = movement, scale = colour. */
+    static void afterimage(VfxSpawner s, Vec3 feet, Vec3 movement, float scale) {
+        int color = colorOf(scale);
+        int count = s.count(14);
+        for (int i = 0; i < count; i++) {
+            Vec3 pos = feet.add(s.jitter(0.3).multiply(1, 0, 1)).add(0.0, s.rand() * 1.8, 0.0);
+            s.mote(pos, movement.scale(-0.15), WHITE, color, 0.14f, 10, 0.85f);
+        }
+    }
 }

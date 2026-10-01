@@ -14,6 +14,19 @@ import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import com.infinitemultiverse.abilities.stand.LifeGiverAbility;
+import com.infinitemultiverse.abilities.stand.NailShotAbility;
+import com.infinitemultiverse.abilities.stand.TimeEraseAbility;
+import com.infinitemultiverse.core.vfx.MultiverseVfx;
+import com.infinitemultiverse.core.vfx.VfxIds;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -30,12 +43,16 @@ public final class StandEvents {
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
         TimeStopManager.tick(event.getServer());
+        StandScheduler.tick();
+        RewindTracker.tick(event.getServer(), event.getServer().getTickCount());
     }
 
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         TimeStopManager.clear();
         StandManager.clear();
+        StandScheduler.clear();
+        RewindTracker.reset();
     }
 
     @SubscribeEvent
@@ -67,11 +84,53 @@ public final class StandEvents {
             event.setCanceled(true);
             return;
         }
+        if (target instanceof ServerPlayer erased && TimeEraseAbility.isErased(erased)) {
+            event.setCanceled(true);
+            return;
+        }
+        if (event.getSource().getEntity() != null
+                && event.getSource().getEntity().getPersistentData().hasUUID(LifeGiverAbility.CREATOR_TAG)
+                && target.getUUID().equals(event.getSource().getEntity().getPersistentData().getUUID(LifeGiverAbility.CREATOR_TAG))) {
+            event.setCanceled(true);
+            return;
+        }
         if (target instanceof ServerPlayer player && event.getSource().getDirectEntity() instanceof LivingEntity) {
             StandEntity stand = StandManager.get(player);
             if (stand != null && stand.isGuarding()) {
                 event.setAmount(event.getAmount() * (1f - MultiverseConfig.SERVER.guardReduction.get().floatValue()));
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onProjectileImpact(ProjectileImpactEvent event) {
+        Projectile projectile = event.getProjectile();
+        if (projectile.level().isClientSide || !projectile.getPersistentData().contains(NailShotAbility.VARIANT_TAG)) {
+            return;
+        }
+        if (!(event.getRayTraceResult() instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity target)) {
+            return;
+        }
+        ServerLevel level = (ServerLevel) projectile.level();
+        String variant = projectile.getPersistentData().getString(NailShotAbility.VARIANT_TAG);
+        Vec3 direction = projectile.getDeltaMovement().lengthSqr() > 1.0E-6 ? projectile.getDeltaMovement().normalize() : Vec3.ZERO;
+        MultiverseVfx.broadcast(level, VfxIds.STAND_PUNCH, target.getBoundingBox().getCenter(), direction, 1f);
+        if (NailShotAbility.Variant.GOLDEN.name().equals(variant)) {
+            target.knockback(1.5, -direction.x, -direction.z);
+            MultiverseVfx.broadcast(level, VfxIds.STAND_HEAVY, target.getBoundingBox().getCenter(), direction, 1f);
+        } else if (NailShotAbility.Variant.INFINITE.name().equals(variant)) {
+            // The rotation never stops: unblockable damage every half second for 10 seconds, plus withering.
+            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 1));
+            Entity owner = projectile.getOwner();
+            StandScheduler.repeat(10, 10, 20, index -> {
+                if (!target.isAlive()) {
+                    return false;
+                }
+                target.invulnerableTime = 0;
+                target.hurt(owner != null ? level.damageSources().indirectMagic(projectile, owner) : level.damageSources().magic(), 1.5f);
+                MultiverseVfx.broadcast(level, VfxIds.STAND_PUNCH, target.getBoundingBox().getCenter(), Vec3.ZERO, 0.6f);
+                return true;
+            });
         }
     }
 

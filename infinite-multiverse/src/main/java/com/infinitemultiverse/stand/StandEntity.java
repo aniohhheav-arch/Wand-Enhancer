@@ -43,6 +43,7 @@ public class StandEntity extends Entity implements GeoEntity {
 
     private static final EntityDataAccessor<String> DATA_STAND_TYPE = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> DATA_ACTION = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_OWNER_ENTITY = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
 
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.stand.idle");
     private static final RawAnimation BARRAGE = RawAnimation.begin().thenLoop("animation.stand.barrage");
@@ -61,8 +62,11 @@ public class StandEntity extends Entity implements GeoEntity {
     private int actionTicks;
     private int actionDuration;
     private int heavyTargetId = -1;
+    private float heavyMultiplier = 1f;
     private int dismissTicks;
     private int clientFadeTicks;
+    private float lookPitch;
+    private float lookPitchO;
 
     public StandEntity(EntityType<? extends StandEntity> type, Level level) {
         super(type, level);
@@ -74,12 +78,14 @@ public class StandEntity extends Entity implements GeoEntity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(DATA_STAND_TYPE, "");
         builder.define(DATA_ACTION, StandAction.IDLE.ordinal());
+        builder.define(DATA_OWNER_ENTITY, -1);
     }
 
     // ---- state ----
 
     public void setOwner(ServerPlayer owner) {
         this.ownerId = owner.getUUID();
+        entityData.set(DATA_OWNER_ENTITY, owner.getId());
     }
 
     @Nullable
@@ -113,8 +119,9 @@ public class StandEntity extends Entity implements GeoEntity {
         actionDuration = duration;
     }
 
-    public void startHeavy(LivingEntity target) {
+    public void startHeavy(LivingEntity target, float damageMultiplier) {
         heavyTargetId = target.getId();
+        heavyMultiplier = damageMultiplier;
         startAction(StandAction.HEAVY, HEAVY_LENGTH);
         triggerAnim(CONTROLLER, TRIGGER_HEAVY);
     }
@@ -143,6 +150,7 @@ public class StandEntity extends Entity implements GeoEntity {
         super.tick();
         if (level().isClientSide) {
             clientFadeTicks = action() == StandAction.DISMISSING ? clientFadeTicks + 1 : 0;
+            followOwnerLook();
             return;
         }
         ServerPlayer owner = owner();
@@ -202,8 +210,7 @@ public class StandEntity extends Entity implements GeoEntity {
         Vec3 next = position().lerp(anchor, tickCount <= 1 ? 1.0 : 0.45);
         setPos(next.x, next.y, next.z);
         setYRot(yaw);
-        setYHeadRot(yaw);
-        setXRot(0f);
+        setXRot(owner.getXRot());
     }
 
     private void tickBarrage(ServerPlayer owner) {
@@ -246,7 +253,7 @@ public class StandEntity extends Entity implements GeoEntity {
         }
         direction = direction.normalize();
         target.invulnerableTime = 0;
-        target.hurt(owner.damageSources().playerAttack(owner), MultiverseConfig.SERVER.precisionDamage.get().floatValue());
+        target.hurt(owner.damageSources().playerAttack(owner), MultiverseConfig.SERVER.precisionDamage.get().floatValue() * heavyMultiplier);
         target.knockback(MultiverseConfig.SERVER.precisionKnockback.get(), -direction.x, -direction.z);
         target.setDeltaMovement(target.getDeltaMovement().add(0.0, 0.4, 0.0));
         target.hurtMarked = true;
@@ -268,6 +275,30 @@ public class StandEntity extends Entity implements GeoEntity {
             MultiverseVfx.sound(level, at, ModSounds.STAND_CATCH, 0.9f, 1.0f);
             MultiverseVfx.broadcast(level, VfxIds.STAND_PUNCH, at, toOwner.normalize().scale(-1.0), 0.5f);
         }
+    }
+
+    /** Client side: mirror the owner's view every tick so the Stand turns and looks with its user. */
+    private void followOwnerLook() {
+        lookPitchO = lookPitch;
+        if (level().getEntity(entityData.get(DATA_OWNER_ENTITY)) instanceof Player owner) {
+            setYRot(owner.getYHeadRot());
+            lookPitch = Mth.clamp(owner.getXRot(), -70f, 70f);
+            if (tickCount <= 1) {
+                yRotO = getYRot();
+                lookPitchO = lookPitch;
+            }
+        }
+    }
+
+    /** Interpolated owner pitch in degrees, for the head bone. */
+    public float lookPitch(float partialTick) {
+        return Mth.lerp(partialTick, lookPitchO, lookPitch);
+    }
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+        // Rotation is driven locally from the owner; only take the server position.
+        setPos(x, y, z);
     }
 
     // ---- entity plumbing ----
