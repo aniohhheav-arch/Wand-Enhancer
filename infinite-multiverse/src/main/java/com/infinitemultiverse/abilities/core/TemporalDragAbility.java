@@ -14,7 +14,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -27,7 +26,7 @@ public final class TemporalDragAbility extends Ability {
     private static final double PROJECTILE_DAMPING = 0.15;
 
     public TemporalDragAbility() {
-        super(MultiverseSystem.CORE, ActivationType.INSTANT, Items.CLOCK, true);
+        super(MultiverseSystem.CORE, ActivationType.INSTANT, true);
     }
 
     @Override

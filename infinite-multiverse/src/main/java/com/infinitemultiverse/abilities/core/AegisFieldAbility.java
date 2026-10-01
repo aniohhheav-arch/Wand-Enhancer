@@ -13,7 +13,6 @@ import com.infinitemultiverse.core.vfx.MultiverseVfx;
 import com.infinitemultiverse.core.vfx.VfxIds;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
@@ -26,7 +25,7 @@ public final class AegisFieldAbility extends Ability implements OwnerDamageInter
     private static final float FIELD_RADIUS = 1.25f;
 
     public AegisFieldAbility() {
-        super(MultiverseSystem.CORE, ActivationType.TOGGLE, Items.SHIELD, true);
+        super(MultiverseSystem.CORE, ActivationType.TOGGLE, true);
     }
 
     @Override

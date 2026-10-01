@@ -2,6 +2,7 @@ package com.infinitemultiverse.client.hud;
 
 import com.infinitemultiverse.InfiniteMultiverse;
 import com.infinitemultiverse.client.ClientMultiverseState;
+import com.infinitemultiverse.client.AbilityIcons;
 import com.infinitemultiverse.client.MultiverseKeyMappings;
 import com.infinitemultiverse.core.ability.Ability;
 import com.infinitemultiverse.core.config.MultiverseConfig;
@@ -87,7 +88,7 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
 
         if (ability.isPresent()) {
             Ability a = ability.get();
-            graphics.renderItem(a.icon(), x + 2, y + 2);
+            AbilityIcons.draw(graphics, a, x + 2, y + 2, 16);
 
             graphics.pose().pushPose();
             graphics.pose().translate(0f, 0f, OVERLAY_Z);

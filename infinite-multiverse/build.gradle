@@ -23,6 +23,9 @@ neoForge {
     runs {
         client {
             client()
+            if (project.hasProperty('quickPlayWorld')) {
+                programArguments.addAll('--quickPlaySingleplayer', project.property('quickPlayWorld').toString())
+            }
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         server {
@@ -49,6 +52,7 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
             neo_version_range      : neo_version_range,
+            geckolib_version_range : geckolib_version_range,
             loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
@@ -68,6 +72,21 @@ neoForge.ideSyncTask generateModMetadata
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs << '-Xlint:deprecation'
+}
+
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content {
+            includeGroupByRegex('software\\.bernie.*')
+            includeGroup('com.eliotlash.mclib')
+        }
+    }
+}
+
+dependencies {
+    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
 }
 
 idea {

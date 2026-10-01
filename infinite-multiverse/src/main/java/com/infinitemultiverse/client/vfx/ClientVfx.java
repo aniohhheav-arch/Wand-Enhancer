@@ -16,14 +16,21 @@ public final class ClientVfx {
         void play(VfxSpawner spawner, Vec3 origin, Vec3 vector, float scale);
     }
 
-    private static final Map<ResourceLocation, Effect> EFFECTS = Map.of(
-            VfxIds.PHASE_STEP, CoreEffects::phaseStep,
-            VfxIds.KINETIC_LEAP, CoreEffects::kineticLeap,
-            VfxIds.SHOCKWAVE, CoreEffects::shockwave,
-            VfxIds.AEGIS_PULSE, CoreEffects::aegisPulse,
-            VfxIds.AEGIS_IMPACT, CoreEffects::aegisImpact,
-            VfxIds.AEGIS_COLLAPSE, CoreEffects::aegisCollapse,
-            VfxIds.TEMPORAL_DRAG, CoreEffects::temporalDrag);
+    private static final Map<ResourceLocation, Effect> EFFECTS = Map.ofEntries(
+            Map.entry(VfxIds.PHASE_STEP, CoreEffects::phaseStep),
+            Map.entry(VfxIds.KINETIC_LEAP, CoreEffects::kineticLeap),
+            Map.entry(VfxIds.SHOCKWAVE, CoreEffects::shockwave),
+            Map.entry(VfxIds.AEGIS_PULSE, CoreEffects::aegisPulse),
+            Map.entry(VfxIds.AEGIS_IMPACT, CoreEffects::aegisImpact),
+            Map.entry(VfxIds.AEGIS_COLLAPSE, CoreEffects::aegisCollapse),
+            Map.entry(VfxIds.TEMPORAL_DRAG, CoreEffects::temporalDrag),
+            Map.entry(VfxIds.STAND_SUMMON, StandEffects::summon),
+            Map.entry(VfxIds.STAND_DISMISS, StandEffects::dismiss),
+            Map.entry(VfxIds.STAND_AWAKEN, StandEffects::awaken),
+            Map.entry(VfxIds.STAND_PUNCH, StandEffects::punch),
+            Map.entry(VfxIds.STAND_HEAVY, StandEffects::heavy),
+            Map.entry(VfxIds.TIME_STOP, StandEffects::timeStop),
+            Map.entry(VfxIds.TIME_RESUME, StandEffects::timeResume));
 
     private ClientVfx() {
     }

@@ -21,6 +21,15 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> AEGIS_DEACTIVATE = register("ability.aegis_field.deactivate");
     public static final DeferredHolder<SoundEvent, SoundEvent> AEGIS_IMPACT = register("ability.aegis_field.impact");
     public static final DeferredHolder<SoundEvent, SoundEvent> TEMPORAL_DRAG = register("ability.temporal_drag");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_SUMMON = register("stand.summon");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_DISMISS = register("stand.dismiss");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_AWAKEN = register("stand.awaken");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_SWING = register("stand.swing");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_PUNCH = register("stand.punch");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_HEAVY = register("stand.heavy");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAND_CATCH = register("stand.catch");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIME_STOP = register("stand.time_stop");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIME_RESUME = register("stand.time_resume");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_DENIED = register("ui.denied");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_SELECT = register("ui.select");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_BIND = register("ui.bind");

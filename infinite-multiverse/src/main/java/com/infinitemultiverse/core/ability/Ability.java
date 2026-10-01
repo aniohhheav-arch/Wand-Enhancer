@@ -5,8 +5,6 @@ import com.infinitemultiverse.core.registry.MultiverseRegistries;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -19,17 +17,15 @@ import org.jetbrains.annotations.Nullable;
 public abstract class Ability {
     private final MultiverseSystem system;
     private final ActivationType activationType;
-    private final ItemLike iconItem;
     private final boolean unlockedByDefault;
     @Nullable
-    private ItemStack icon;
+    private ResourceLocation iconTexture;
     @Nullable
     private String descriptionId;
 
-    protected Ability(MultiverseSystem system, ActivationType activationType, ItemLike iconItem, boolean unlockedByDefault) {
+    protected Ability(MultiverseSystem system, ActivationType activationType, boolean unlockedByDefault) {
         this.system = system;
         this.activationType = activationType;
-        this.iconItem = iconItem;
         this.unlockedByDefault = unlockedByDefault;
     }
 
@@ -88,10 +84,12 @@ public abstract class Ability {
         return Component.translatable(descriptionId() + ".desc");
     }
 
-    public final ItemStack icon() {
-        if (icon == null) {
-            icon = new ItemStack(iconItem);
+    /** {@code <namespace>:textures/gui/ability/<path>.png}, a 64x64 icon. */
+    public final ResourceLocation iconTexture() {
+        if (iconTexture == null) {
+            ResourceLocation id = id();
+            iconTexture = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/gui/ability/" + id.getPath() + ".png");
         }
-        return icon;
+        return iconTexture;
     }
 }

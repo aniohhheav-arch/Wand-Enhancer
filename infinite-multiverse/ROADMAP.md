@@ -38,12 +38,14 @@ The full design spec is far bigger than one release, so it ships in eight phases
 - [x] `/multiverse` testing and admin commands
 - [x] Five working core abilities: Phase Step, Kinetic Leap, Shockwave, Aegis Field, Temporal Drag
 - [x] Compiles cleanly; dedicated server boots with the mod loaded
-- [ ] Client tested in game (HUD, menu, abilities, VFX)
+- [x] Client tested in game (HUD, icons, Stand rendering and abilities via headless screenshots)
+- [x] Original procedural ability icons
 
 ### Phase 2 — Supernatural
-- [ ] Stand entities: models, summon/dismiss, follow AI, independent targeting
+- [x] Stand framework: GeckoLib entity, summon/dismiss key, follow logic, actions, Stand registry, Awakening Arrowhead, commands
+- [x] Star Platinum: model, texture, glow mask, 5 animations, ORA barrage, Star Finger, Guard, The World time stop
 - [ ] Stand progression and evolution UI
-- [ ] Featured Stands (barrage, time stop, marking/detonation, life-giving, time-skip, acceleration, rotation tiers)
+- [ ] Remaining Stands: The World, Killer Queen, Gold Experience, King Crimson, Made in Heaven, Tusk
 - [ ] Cursed energy pool, reinforcement, Black Flash timing
 - [ ] Limitless, Shrine, Ten Shadows, Cursed Spirit Manipulation and other techniques
 - [ ] Domain Expansion engine with distinct interiors, rules and collapse sequences
@@ -105,4 +107,4 @@ The full design spec is far bigger than one release, so it ships in eight phases
 - **Protection mods.** Phase Step teleports with vanilla `teleportTo` and doesn't yet fire a teleport event that claim/protection mods could cancel.
 - **MIDI (Phase 7)** will use `javax.sound.midi`, which needs the `java.desktop` module. It is present in standard launcher runtimes, but some custom or server-only runtimes lack it, so MIDI will degrade to keyboard play.
 - **Time travel (Phase 4)** will use region snapshots loaded into isolated dimensions, not true whole-world rollback. A Minecraft world can't safely be rewound in place without risking corruption, so the original world is never overwritten.
-- **Content boundaries from the spec.** All Stands, techniques, heroes and instruments use original implementations and assets; no copyrighted models, textures or audio are redistributed. Substances are invented, with no real-world recipes. Social systems contain no sexual content, and violence stays non-graphic.
+- **Fan content.** Stands carry their canonical JoJo names (by request), but every model, texture and sound is original and generated in `tools/`; no official assets are redistributed. Public release under these names may be taken down. Substances are invented, with no real-world recipes. Social systems contain no sexual content, and violence stays non-graphic.

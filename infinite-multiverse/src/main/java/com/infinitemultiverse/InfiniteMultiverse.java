@@ -1,9 +1,12 @@
 package com.infinitemultiverse;
 
 import com.infinitemultiverse.abilities.core.ModAbilities;
+import com.infinitemultiverse.abilities.stand.StandAbilities;
 import com.infinitemultiverse.core.config.MultiverseConfig;
 import com.infinitemultiverse.core.network.MultiverseNetwork;
 import com.infinitemultiverse.core.registry.ModAttachments;
+import com.infinitemultiverse.core.registry.ModEntities;
+import com.infinitemultiverse.core.registry.ModItems;
 import com.infinitemultiverse.core.registry.ModParticles;
 import com.infinitemultiverse.core.registry.ModSounds;
 import com.infinitemultiverse.core.registry.MultiverseRegistries;
@@ -27,6 +30,11 @@ public final class InfiniteMultiverse {
         modBus.addListener(RegisterPayloadHandlersEvent.class, MultiverseNetwork::register);
 
         ModAbilities.ABILITIES.register(modBus);
+        StandAbilities.ABILITIES.register(modBus);
+        StandAbilities.STAND_TYPES.register(modBus);
+        ModEntities.ENTITY_TYPES.register(modBus);
+        ModItems.ITEMS.register(modBus);
+        ModItems.CREATIVE_TABS.register(modBus);
         ModAttachments.ATTACHMENT_TYPES.register(modBus);
         ModSounds.SOUNDS.register(modBus);
         ModParticles.PARTICLE_TYPES.register(modBus);

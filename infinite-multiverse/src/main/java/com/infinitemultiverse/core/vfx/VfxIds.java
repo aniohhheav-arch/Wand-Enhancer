@@ -12,6 +12,13 @@ public final class VfxIds {
     public static final ResourceLocation AEGIS_IMPACT = InfiniteMultiverse.id("aegis_impact");
     public static final ResourceLocation AEGIS_COLLAPSE = InfiniteMultiverse.id("aegis_collapse");
     public static final ResourceLocation TEMPORAL_DRAG = InfiniteMultiverse.id("temporal_drag");
+    public static final ResourceLocation STAND_SUMMON = InfiniteMultiverse.id("stand_summon");
+    public static final ResourceLocation STAND_DISMISS = InfiniteMultiverse.id("stand_dismiss");
+    public static final ResourceLocation STAND_AWAKEN = InfiniteMultiverse.id("stand_awaken");
+    public static final ResourceLocation STAND_PUNCH = InfiniteMultiverse.id("stand_punch");
+    public static final ResourceLocation STAND_HEAVY = InfiniteMultiverse.id("stand_heavy");
+    public static final ResourceLocation TIME_STOP = InfiniteMultiverse.id("time_stop");
+    public static final ResourceLocation TIME_RESUME = InfiniteMultiverse.id("time_resume");
 
     private VfxIds() {
     }

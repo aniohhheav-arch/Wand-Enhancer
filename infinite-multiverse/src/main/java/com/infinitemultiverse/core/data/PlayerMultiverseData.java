@@ -30,7 +30,8 @@ public final class PlayerMultiverseData {
             Codec.FLOAT.optionalFieldOf("energy", -1f).forGetter(data -> data.energy),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT).optionalFieldOf("cooldowns", Map.of()).forGetter(data -> data.cooldowns),
             Codec.STRING.listOf().optionalFieldOf("loadout", List.of()).forGetter(PlayerMultiverseData::encodeLoadout),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("unlocked", List.of()).forGetter(data -> List.copyOf(data.unlocked))
+            ResourceLocation.CODEC.listOf().optionalFieldOf("unlocked", List.of()).forGetter(data -> List.copyOf(data.unlocked)),
+            ResourceLocation.CODEC.optionalFieldOf("stand").forGetter(data -> Optional.ofNullable(data.standType))
     ).apply(instance, PlayerMultiverseData::new));
 
     /** Negative means "not initialised yet"; the first server tick fills it to the configured maximum. */
@@ -38,6 +39,8 @@ public final class PlayerMultiverseData {
     private final Map<ResourceLocation, Integer> cooldowns = new HashMap<>();
     private final ResourceLocation[] loadout = new ResourceLocation[LOADOUT_SIZE];
     private final Set<ResourceLocation> unlocked = new HashSet<>();
+    @Nullable
+    private ResourceLocation standType;
 
     private final Map<ResourceLocation, Integer> activeToggles = new LinkedHashMap<>();
     private int regenDelay;
@@ -49,13 +52,15 @@ public final class PlayerMultiverseData {
         this.energy = -1f;
     }
 
-    private PlayerMultiverseData(float energy, Map<ResourceLocation, Integer> cooldowns, List<String> loadout, List<ResourceLocation> unlocked) {
+    private PlayerMultiverseData(float energy, Map<ResourceLocation, Integer> cooldowns, List<String> loadout, List<ResourceLocation> unlocked,
+                                 Optional<ResourceLocation> standType) {
         this.energy = energy;
         this.cooldowns.putAll(cooldowns);
         for (int i = 0; i < Math.min(LOADOUT_SIZE, loadout.size()); i++) {
             this.loadout[i] = loadout.get(i).isEmpty() ? null : ResourceLocation.tryParse(loadout.get(i));
         }
         this.unlocked.addAll(unlocked);
+        this.standType = standType.orElse(null);
     }
 
     private List<String> encodeLoadout() {
@@ -218,6 +223,24 @@ public final class PlayerMultiverseData {
         }
         unlocked.removeIf(id -> !exists.test(id));
         cooldowns.keySet().removeIf(id -> !exists.test(id));
+        structuralDirty = true;
+    }
+
+    public void pruneStand(Predicate<ResourceLocation> exists) {
+        if (standType != null && !exists.test(standType)) {
+            standType = null;
+            structuralDirty = true;
+        }
+    }
+
+    // ---- stand ----
+
+    public Optional<ResourceLocation> standType() {
+        return Optional.ofNullable(standType);
+    }
+
+    public void setStandType(@Nullable ResourceLocation standType) {
+        this.standType = standType;
         structuralDirty = true;
     }
 

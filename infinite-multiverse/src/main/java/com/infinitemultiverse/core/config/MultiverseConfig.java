@@ -79,6 +79,28 @@ public final class MultiverseConfig {
         public final ModConfigSpec.DoubleValue temporalDragRadius;
         public final ModConfigSpec.IntValue temporalDragDuration;
 
+        public final ModConfigSpec.BooleanValue allowStandReroll;
+        public final AbilityTuning standManifest;
+        public final ModConfigSpec.DoubleValue standUpkeep;
+        public final ModConfigSpec.DoubleValue standReach;
+
+        public final AbilityTuning barrage;
+        public final ModConfigSpec.IntValue barrageDuration;
+        public final ModConfigSpec.DoubleValue barrageDamage;
+
+        public final AbilityTuning precisionStrike;
+        public final ModConfigSpec.DoubleValue precisionDamage;
+        public final ModConfigSpec.DoubleValue precisionKnockback;
+
+        public final AbilityTuning standGuard;
+        public final ModConfigSpec.IntValue guardDuration;
+        public final ModConfigSpec.DoubleValue guardReduction;
+
+        public final AbilityTuning timeStop;
+        public final ModConfigSpec.IntValue timeStopDuration;
+        public final ModConfigSpec.DoubleValue timeStopRadius;
+        public final ModConfigSpec.BooleanValue timeStopFreezesPlayers;
+
         Server(ModConfigSpec.Builder b) {
             b.comment("Shared multiverse energy pool used by every ability.").push("energy");
             maxEnergy = b.comment("Maximum energy a player can hold.").defineInRange("maxEnergy", 100.0, 1.0, 10_000.0);
@@ -134,6 +156,42 @@ public final class MultiverseConfig {
             temporalDrag = AbilityTuning.define(b, 25.0, 200);
             temporalDragRadius = b.comment("Radius in blocks.").defineInRange("radius", 7.0, 1.0, 24.0);
             temporalDragDuration = b.comment("Slow duration in ticks.").defineInRange("durationTicks", 100, 10, 1_200);
+            b.pop();
+
+            b.pop();
+
+            b.comment("Stand system (Phase 2).").push("stands");
+            allowStandReroll = b.comment("Allow an Awakening Arrowhead to replace an existing Stand.").define("allowReroll", false);
+            standReach = b.comment("How far in front of its user a Stand can strike, in blocks.").defineInRange("reach", 5.0, 2.0, 16.0);
+
+            b.push("manifest");
+            standManifest = AbilityTuning.define(b, 10.0, 40);
+            standUpkeep = b.comment("Energy drained per second while the Stand is manifested.").defineInRange("upkeepPerSecond", 1.5, 0.0, 100.0);
+            b.pop();
+
+            b.push("barrage");
+            barrage = AbilityTuning.define(b, 20.0, 100);
+            barrageDuration = b.comment("Barrage length in ticks.").defineInRange("durationTicks", 30, 5, 200);
+            barrageDamage = b.comment("Damage per hit (a hit lands every 2 ticks).").defineInRange("damagePerHit", 1.2, 0.0, 50.0);
+            b.pop();
+
+            b.push("precision_strike");
+            precisionStrike = AbilityTuning.define(b, 25.0, 80);
+            precisionDamage = b.comment("Damage of the strike.").defineInRange("damage", 9.0, 0.0, 200.0);
+            precisionKnockback = b.comment("Knockback strength.").defineInRange("knockback", 2.0, 0.0, 6.0);
+            b.pop();
+
+            b.push("guard");
+            standGuard = AbilityTuning.define(b, 15.0, 160);
+            guardDuration = b.comment("Guard length in ticks.").defineInRange("durationTicks", 60, 10, 400);
+            guardReduction = b.comment("Fraction of melee damage blocked while guarding.").defineInRange("damageReduction", 0.4, 0.0, 1.0);
+            b.pop();
+
+            b.push("time_stop");
+            timeStop = AbilityTuning.define(b, 60.0, 600);
+            timeStopDuration = b.comment("Frozen time in ticks.").defineInRange("durationTicks", 60, 10, 200);
+            timeStopRadius = b.comment("Radius of frozen time around the user, in blocks.").defineInRange("radius", 24.0, 4.0, 64.0);
+            timeStopFreezesPlayers = b.comment("Also freeze other survival/adventure players.").define("freezePlayers", true);
             b.pop();
 
             b.pop();

@@ -19,6 +19,9 @@ public final class MultiverseKeyMappings {
     public static final Lazy<KeyMapping> OPEN_MENU = Lazy.of(() -> new KeyMapping(
             "key.infinitemultiverse.open_menu", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, CATEGORY));
 
+    public static final Lazy<KeyMapping> TOGGLE_STAND = Lazy.of(() -> new KeyMapping(
+            "key.infinitemultiverse.toggle_stand", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY));
+
     public static final List<Lazy<KeyMapping>> ABILITY_SLOTS = IntStream.range(0, PlayerMultiverseData.LOADOUT_SIZE)
             .mapToObj(slot -> Lazy.of(() -> new KeyMapping(
                     "key.infinitemultiverse.ability_slot_" + (slot + 1), KeyConflictContext.IN_GAME,
@@ -30,6 +33,7 @@ public final class MultiverseKeyMappings {
 
     static void register(RegisterKeyMappingsEvent event) {
         event.register(OPEN_MENU.get());
+        event.register(TOGGLE_STAND.get());
         ABILITY_SLOTS.forEach(key -> event.register(key.get()));
     }
 }

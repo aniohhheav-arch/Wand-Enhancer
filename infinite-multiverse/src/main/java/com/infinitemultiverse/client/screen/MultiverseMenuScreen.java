@@ -1,6 +1,7 @@
 package com.infinitemultiverse.client.screen;
 
 import com.infinitemultiverse.client.ClientMultiverseState;
+import com.infinitemultiverse.client.AbilityIcons;
 import com.infinitemultiverse.client.MultiverseKeyMappings;
 import com.infinitemultiverse.client.hud.AbilityHudLayer;
 import com.infinitemultiverse.core.MultiverseSystem;
@@ -239,7 +240,7 @@ public final class MultiverseMenuScreen extends Screen {
             } else if (i % 2 == 0) {
                 graphics.fill(listX, y, listX + listWidth, y + ABILITY_ROW, 0x0CFFFFFF);
             }
-            graphics.renderItem(ability.icon(), listX + 2, y + 2);
+            AbilityIcons.draw(graphics, ability, listX + 2, y + 2, 16);
 
             boolean unlocked = isUnlocked(ability);
             String tag = tagFor(ability, unlocked);
@@ -292,7 +293,7 @@ public final class MultiverseMenuScreen extends Screen {
         }
         Ability ability = selectedAbility;
         int color = ability.system().color();
-        graphics.renderItem(ability.icon(), x, y);
+        AbilityIcons.draw(graphics, ability, x, y, 16);
         graphics.drawString(font, font.plainSubstrByWidth(ability.displayName().getString(), detailsWidth - 20), x + 20, y, color, false);
         graphics.drawString(font, font.plainSubstrByWidth(ability.system().displayName().getString(), detailsWidth - 20), x + 20, y + 9, COLOR_MUTED, false);
         y += 22;
@@ -353,7 +354,7 @@ public final class MultiverseMenuScreen extends Screen {
             boolean hovered = isInside(mouseX, mouseY, slotX, slotY, LOADOUT_SLOT, LOADOUT_SLOT);
             graphics.fill(slotX, slotY, slotX + LOADOUT_SLOT, slotY + LOADOUT_SLOT, hovered ? 0xE0182436 : 0xC0101826);
             graphics.renderOutline(slotX, slotY, LOADOUT_SLOT, LOADOUT_SLOT, 0xFF000000 | (hovered && selectedAbility != null ? 0xFFFFFF : accent));
-            ability.ifPresent(a -> graphics.renderItem(a.icon(), slotX + 3, slotY + 3));
+            ability.ifPresent(a -> AbilityIcons.draw(graphics, a, slotX + 3, slotY + 3, 16));
 
             String key = MultiverseKeyMappings.ABILITY_SLOTS.get(slot).get().getTranslatedKeyMessage().getString();
             graphics.pose().pushPose();

@@ -24,6 +24,7 @@ public final class ClientMultiverseState {
     private static final List<Optional<ResourceLocation>> LOADOUT = new ArrayList<>();
     private static Set<ResourceLocation> active = Set.of();
     private static Set<ResourceLocation> unlocked = Set.of();
+    private static Optional<ResourceLocation> standType = Optional.empty();
 
     static {
         reset();
@@ -47,6 +48,7 @@ public final class ClientMultiverseState {
         }
         active = Set.copyOf(payload.active());
         unlocked = Set.copyOf(payload.unlocked());
+        standType = payload.standType();
     }
 
     static void tick() {
@@ -76,6 +78,11 @@ public final class ClientMultiverseState {
         }
         active = Set.of();
         unlocked = Set.of();
+        standType = Optional.empty();
+    }
+
+    public static Optional<ResourceLocation> standType() {
+        return standType;
     }
 
     public static boolean isSynced() {

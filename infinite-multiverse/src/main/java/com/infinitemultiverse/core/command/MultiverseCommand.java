@@ -5,6 +5,8 @@ import com.infinitemultiverse.core.ability.AbilityManager;
 import com.infinitemultiverse.core.ability.DeactivationReason;
 import com.infinitemultiverse.core.data.PlayerMultiverseData;
 import com.infinitemultiverse.core.registry.MultiverseRegistries;
+import com.infinitemultiverse.stand.StandManager;
+import com.infinitemultiverse.stand.StandType;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -33,6 +35,10 @@ import net.minecraft.server.level.ServerPlayer;
 public final class MultiverseCommand {
     private static final DynamicCommandExceptionType UNKNOWN_ABILITY = new DynamicCommandExceptionType(
             id -> Component.translatable("command.infinitemultiverse.unknown_ability", String.valueOf(id)));
+    private static final DynamicCommandExceptionType UNKNOWN_STAND = new DynamicCommandExceptionType(
+            id -> Component.translatable("command.infinitemultiverse.stand.unknown", String.valueOf(id)));
+    private static final SuggestionProvider<CommandSourceStack> STAND_SUGGESTIONS =
+            (context, builder) -> SharedSuggestionProvider.suggestResource(MultiverseRegistries.STAND_TYPES.keySet(), builder);
     private static final SuggestionProvider<CommandSourceStack> ABILITY_SUGGESTIONS =
             (context, builder) -> SharedSuggestionProvider.suggestResource(MultiverseRegistries.ABILITIES.keySet(), builder);
 
@@ -88,6 +94,16 @@ public final class MultiverseCommand {
                         .then(Commands.argument("ability", ResourceLocationArgument.id())
                                 .suggests(ABILITY_SUGGESTIONS)
                                 .executes(MultiverseCommand::activate)))
+                .then(Commands.literal("stand")
+                        .requires(source -> source.hasPermission(2))
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .then(Commands.argument("stand", ResourceLocationArgument.id())
+                                                .suggests(STAND_SUGGESTIONS)
+                                                .executes(MultiverseCommand::setStand))))
+                        .then(Commands.literal("clear")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .executes(MultiverseCommand::clearStand))))
                 .then(Commands.literal("deactivate")
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("targets", EntityArgument.players())
@@ -215,6 +231,25 @@ public final class MultiverseCommand {
             AbilityManager.syncNow(player);
         }
         ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.deactivate", targets.size()), true);
+        return targets.size();
+    }
+
+    private static int setStand(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "stand");
+        StandType type = MultiverseRegistries.STAND_TYPES.get(id);
+        if (type == null) {
+            throw UNKNOWN_STAND.create(id);
+        }
+        Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
+        targets.forEach(player -> StandManager.awaken(player, type));
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.stand.set", type.displayName(), targets.size()), true);
+        return targets.size();
+    }
+
+    private static int clearStand(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
+        targets.forEach(StandManager::forget);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.stand.clear", targets.size()), true);
         return targets.size();
     }
 }

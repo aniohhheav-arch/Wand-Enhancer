@@ -2,13 +2,14 @@ package com.infinitemultiverse.core.network;
 
 import com.infinitemultiverse.client.ClientPayloadHandler;
 import com.infinitemultiverse.core.ability.AbilityManager;
+import com.infinitemultiverse.stand.StandEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class MultiverseNetwork {
     /** Bump when any payload layout changes so mismatched client/server versions refuse to connect. */
-    public static final String PROTOCOL_VERSION = "1";
+    public static final String PROTOCOL_VERSION = "2";
 
     private MultiverseNetwork() {
     }
@@ -30,11 +31,21 @@ public final class MultiverseNetwork {
                     }
                 }));
 
+        registrar.playToServer(ToggleStandPayload.TYPE, ToggleStandPayload.STREAM_CODEC, (payload, context) ->
+                context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        StandEvents.onToggleKey(player);
+                    }
+                }));
+
         // Lambda bodies are linked lazily, so ClientPayloadHandler is never loaded on a dedicated server.
         registrar.playToClient(SyncPlayerDataPayload.TYPE, SyncPlayerDataPayload.STREAM_CODEC, (payload, context) ->
                 context.enqueueWork(() -> ClientPayloadHandler.handleSync(payload)));
 
         registrar.playToClient(VfxPayload.TYPE, VfxPayload.STREAM_CODEC, (payload, context) ->
                 context.enqueueWork(() -> ClientPayloadHandler.handleVfx(payload)));
+
+        registrar.playToClient(TimeStopPayload.TYPE, TimeStopPayload.STREAM_CODEC, (payload, context) ->
+                context.enqueueWork(() -> ClientPayloadHandler.handleTimeStop(payload)));
     }
 }

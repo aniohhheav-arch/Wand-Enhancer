@@ -15,7 +15,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -26,7 +25,7 @@ public final class PhaseStepAbility extends Ability {
     private static final double MIN_DISTANCE_SQR = 1.5 * 1.5;
 
     public PhaseStepAbility() {
-        super(MultiverseSystem.CORE, ActivationType.INSTANT, Items.ENDER_PEARL, true);
+        super(MultiverseSystem.CORE, ActivationType.INSTANT, true);
     }
 
     @Override

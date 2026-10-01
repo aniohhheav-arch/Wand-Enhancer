@@ -21,7 +21,8 @@ public record SyncPlayerDataPayload(
         Map<ResourceLocation, Integer> cooldowns,
         List<Optional<ResourceLocation>> loadout,
         Set<ResourceLocation> active,
-        Set<ResourceLocation> unlocked
+        Set<ResourceLocation> unlocked,
+        Optional<ResourceLocation> standType
 ) implements CustomPacketPayload {
     public static final Type<SyncPlayerDataPayload> TYPE = new Type<>(InfiniteMultiverse.id("sync_player_data"));
     public static final StreamCodec<FriendlyByteBuf, SyncPlayerDataPayload> STREAM_CODEC =
@@ -34,7 +35,8 @@ public record SyncPlayerDataPayload(
                 Map.copyOf(data.cooldownsView()),
                 data.loadoutView(),
                 Set.copyOf(data.activeView()),
-                Set.copyOf(data.unlockedView()));
+                Set.copyOf(data.unlockedView()),
+                data.standType());
     }
 
     private void write(FriendlyByteBuf buf) {
@@ -52,6 +54,8 @@ public record SyncPlayerDataPayload(
         }
         writeIds(buf, active);
         writeIds(buf, unlocked);
+        buf.writeBoolean(standType.isPresent());
+        standType.ifPresent(buf::writeResourceLocation);
     }
 
     private static SyncPlayerDataPayload read(FriendlyByteBuf buf) {
@@ -67,7 +71,10 @@ public record SyncPlayerDataPayload(
         for (int i = 0; i < slotCount; i++) {
             loadout.add(buf.readBoolean() ? Optional.of(buf.readResourceLocation()) : Optional.empty());
         }
-        return new SyncPlayerDataPayload(energy, maxEnergy, cooldowns, loadout, readIds(buf), readIds(buf));
+        Set<ResourceLocation> active = readIds(buf);
+        Set<ResourceLocation> unlocked = readIds(buf);
+        Optional<ResourceLocation> standType = buf.readBoolean() ? Optional.of(buf.readResourceLocation()) : Optional.empty();
+        return new SyncPlayerDataPayload(energy, maxEnergy, cooldowns, loadout, active, unlocked, standType);
     }
 
     private static void writeIds(FriendlyByteBuf buf, Set<ResourceLocation> ids) {

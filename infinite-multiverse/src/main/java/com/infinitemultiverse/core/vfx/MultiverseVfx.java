@@ -3,6 +3,8 @@ package com.infinitemultiverse.core.vfx;
 import com.infinitemultiverse.core.config.MultiverseConfig;
 import com.infinitemultiverse.core.network.VfxPayload;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -29,5 +31,15 @@ public final class MultiverseVfx {
     public static void sound(ServerLevel level, Vec3 at, Holder<SoundEvent> sound, float volume, float pitch) {
         float spread = (level.random.nextFloat() - 0.5f) * 0.12f;
         level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, volume, pitch + spread);
+    }
+
+    /** Shows a battle cry on the action bar of every player within {@code radius}. */
+    public static void shout(ServerLevel level, Vec3 at, Component message, double radius) {
+        double radiusSqr = radius * radius;
+        for (ServerPlayer player : level.players()) {
+            if (player.position().distanceToSqr(at) <= radiusSqr) {
+                player.displayClientMessage(message, true);
+            }
+        }
     }
 }

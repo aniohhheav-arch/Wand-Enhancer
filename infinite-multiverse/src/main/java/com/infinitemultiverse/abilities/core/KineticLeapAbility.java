@@ -11,7 +11,6 @@ import com.infinitemultiverse.core.vfx.MultiverseVfx;
 import com.infinitemultiverse.core.vfx.VfxIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /** Launches the player along the look direction with guaranteed lift, and cancels the next fall's damage. */
@@ -20,7 +19,7 @@ public final class KineticLeapAbility extends Ability {
     private static final int FALL_PROTECTION_TICKS = 120;
 
     public KineticLeapAbility() {
-        super(MultiverseSystem.CORE, ActivationType.INSTANT, Items.RABBIT_FOOT, true);
+        super(MultiverseSystem.CORE, ActivationType.INSTANT, true);
     }
 
     @Override

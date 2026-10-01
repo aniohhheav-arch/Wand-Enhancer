@@ -11,7 +11,6 @@ import com.infinitemultiverse.core.vfx.MultiverseVfx;
 import com.infinitemultiverse.core.vfx.VfxIds;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 /** Radial blast: distance-scaled damage, outward knockback and lift. Never touches blocks. */
@@ -20,7 +19,7 @@ public final class ShockwaveAbility extends Ability {
     private static final double LIFT = 0.35;
 
     public ShockwaveAbility() {
-        super(MultiverseSystem.CORE, ActivationType.INSTANT, Items.HEAVY_CORE, true);
+        super(MultiverseSystem.CORE, ActivationType.INSTANT, true);
     }
 
     @Override
