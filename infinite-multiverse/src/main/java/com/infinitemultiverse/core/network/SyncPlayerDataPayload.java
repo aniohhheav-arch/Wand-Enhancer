@@ -1,0 +1,93 @@
+package com.infinitemultiverse.core.network;
+
+import com.infinitemultiverse.InfiniteMultiverse;
+import com.infinitemultiverse.core.data.PlayerMultiverseData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+
+/** Server → owning client: full snapshot of the player's multiverse state for the HUD and menu. */
+public record SyncPlayerDataPayload(
+        float energy,
+        float maxEnergy,
+        Map<ResourceLocation, Integer> cooldowns,
+        List<Optional<ResourceLocation>> loadout,
+        Set<ResourceLocation> active,
+        Set<ResourceLocation> unlocked
+) implements CustomPacketPayload {
+    public static final Type<SyncPlayerDataPayload> TYPE = new Type<>(InfiniteMultiverse.id("sync_player_data"));
+    public static final StreamCodec<FriendlyByteBuf, SyncPlayerDataPayload> STREAM_CODEC =
+            StreamCodec.ofMember(SyncPlayerDataPayload::write, SyncPlayerDataPayload::read);
+
+    public static SyncPlayerDataPayload of(PlayerMultiverseData data, float maxEnergy) {
+        return new SyncPlayerDataPayload(
+                Math.max(0f, data.energy()),
+                maxEnergy,
+                Map.copyOf(data.cooldownsView()),
+                data.loadoutView(),
+                Set.copyOf(data.activeView()),
+                Set.copyOf(data.unlockedView()));
+    }
+
+    private void write(FriendlyByteBuf buf) {
+        buf.writeFloat(energy);
+        buf.writeFloat(maxEnergy);
+        buf.writeVarInt(cooldowns.size());
+        cooldowns.forEach((id, ticks) -> {
+            buf.writeResourceLocation(id);
+            buf.writeVarInt(ticks);
+        });
+        buf.writeVarInt(loadout.size());
+        for (Optional<ResourceLocation> slot : loadout) {
+            buf.writeBoolean(slot.isPresent());
+            slot.ifPresent(buf::writeResourceLocation);
+        }
+        writeIds(buf, active);
+        writeIds(buf, unlocked);
+    }
+
+    private static SyncPlayerDataPayload read(FriendlyByteBuf buf) {
+        float energy = buf.readFloat();
+        float maxEnergy = buf.readFloat();
+        int cooldownCount = buf.readVarInt();
+        Map<ResourceLocation, Integer> cooldowns = new HashMap<>(cooldownCount);
+        for (int i = 0; i < cooldownCount; i++) {
+            cooldowns.put(buf.readResourceLocation(), buf.readVarInt());
+        }
+        int slotCount = buf.readVarInt();
+        List<Optional<ResourceLocation>> loadout = new ArrayList<>(slotCount);
+        for (int i = 0; i < slotCount; i++) {
+            loadout.add(buf.readBoolean() ? Optional.of(buf.readResourceLocation()) : Optional.empty());
+        }
+        return new SyncPlayerDataPayload(energy, maxEnergy, cooldowns, loadout, readIds(buf), readIds(buf));
+    }
+
+    private static void writeIds(FriendlyByteBuf buf, Set<ResourceLocation> ids) {
+        buf.writeVarInt(ids.size());
+        for (ResourceLocation id : ids) {
+            buf.writeResourceLocation(id);
+        }
+    }
+
+    private static Set<ResourceLocation> readIds(FriendlyByteBuf buf) {
+        int count = buf.readVarInt();
+        Set<ResourceLocation> ids = new HashSet<>(count);
+        for (int i = 0; i < count; i++) {
+            ids.add(buf.readResourceLocation());
+        }
+        return ids;
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+}
