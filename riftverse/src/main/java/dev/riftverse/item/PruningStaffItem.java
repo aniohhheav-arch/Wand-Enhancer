@@ -95,20 +95,59 @@ public class PruningStaffItem extends Item {
         }
     }
 
-    /** The pruned don't die, they simply stop having existed: an orange outline that collapses into embers. */
+    /**
+     * Disintegration: the target is held in place, lifted off the ground and comes apart from the top down, its edges
+     * flaking into orange embers while it shrinks to nothing over a second and a half.
+     */
     public static void pruneEntity(ServerLevel l, LivingEntity e) {
-        Vec3 c = e.position().add(0, e.getBbHeight() / 2, 0);
-        l.sendParticles(RvParticles.GLITCH.get().with(ORANGE, 1f, 20), c.x, c.y, c.z, 40, e.getBbWidth() / 2, e.getBbHeight() / 2, e.getBbWidth() / 2, 0.02);
-        l.sendParticles(RvParticles.RING.get().with(ORANGE, 1.5f + e.getBbWidth(), 14), c.x, c.y, c.z, 1, 0, 0, 0, 0);
         l.playSound(null, e.blockPosition(), RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 1f, 1.9f);
         if (e instanceof Player pl) {
             pl.hurt(l.damageSources().magic(), 12f);
             pl.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0));
-        } else if (e.getMaxHealth() > 150f) {
-            e.hurt(l.damageSources().magic(), e.getMaxHealth() * 0.15f);
-        } else {
-            e.discard();
+            burst(l, e, 30);
+            return;
         }
+        if (e.getMaxHealth() > 150f) {
+            e.hurt(l.damageSources().magic(), e.getMaxHealth() * 0.15f);
+            burst(l, e, 40);
+            return;
+        }
+        if (e.getTags().contains("riftverse_pruning")) return;
+        e.addTag("riftverse_pruning");
+        if (e instanceof Mob m) m.setNoAi(true);
+        e.setNoGravity(true);
+        e.setInvulnerable(true);
+        e.setGlowingTag(true);
+        var scale = e.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+        double base = scale != null ? scale.getBaseValue() : 1.0;
+        int steps = 30;
+        for (int i = 1; i <= steps; i++) {
+            int k = i;
+            dev.riftverse.multiverse.Scheduler.later(i, () -> {
+                if (e.isRemoved()) return;
+                float f = k / (float) steps;
+                e.setDeltaMovement(0, 0.02, 0);
+                e.hurtMarked = true;
+                if (scale != null) scale.setBaseValue(base * Math.max(0.05, 1.0 - f * f));
+                double top = e.getY() + e.getBbHeight() * (1.0 - f);
+                double w = e.getBbWidth() * 0.6;
+                // the dissolving "edge" sweeps from head to feet, shedding embers and glitch fragments
+                l.sendParticles(RvParticles.GLITCH.get().with(k % 3 == 0 ? 0xFFF0C0 : ORANGE, 0.7f, 18), e.getX(), top, e.getZ(), 6, w, 0.05, w, 0.01);
+                l.sendParticles(RvParticles.MOTE.get().with(ORANGE, 0.5f, 30), e.getX(), top, e.getZ(), 4, w, 0.1, w, 0.04);
+                l.sendParticles(net.minecraft.core.particles.ParticleTypes.ASH, e.getX(), top, e.getZ(), 3, w, 0.1, w, 0.02);
+                if (k == steps) {
+                    burst(l, e, 25);
+                    l.playSound(null, e.blockPosition(), RvSounds.BLACK_HOLE_PULL.get(), SoundSource.PLAYERS, 0.8f, 2f);
+                    e.discard();
+                }
+            });
+        }
+    }
+
+    private static void burst(ServerLevel l, LivingEntity e, int n) {
+        Vec3 c = e.position().add(0, e.getBbHeight() / 2, 0);
+        l.sendParticles(RvParticles.RING.get().with(ORANGE, 1.5f + e.getBbWidth(), 14), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+        l.sendParticles(RvParticles.STREAK.get().with(ORANGE, 0.8f, 16), c.x, c.y, c.z, n, e.getBbWidth() / 2, e.getBbHeight() / 2, e.getBbWidth() / 2, 0.15);
     }
 
     private void prune(ServerPlayer p) {

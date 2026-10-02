@@ -96,6 +96,57 @@ public final class TemporalManager {
 
     /** Sends a player to a year (and optionally another timeline), with the time-travel cinematic. */
     public static void travel(ServerPlayer p, int targetYear, Timeline line) {
+        travel(p, targetYear, line, null);
+    }
+
+    /** Which reality an era of time looks like. The same era always leads to the same world. */
+    public static dev.riftverse.universe.Archetype eraOf(int year) {
+        if (year < -10000) return dev.riftverse.universe.Archetype.PRIMEVAL;
+        if (year < 0) return dev.riftverse.universe.Archetype.SAVANNA;
+        if (year < 1500) return dev.riftverse.universe.Archetype.GOLDENTEMPLE;
+        if (year < PRESENT) return dev.riftverse.universe.Archetype.ELDER;
+        if (year < 2500) return dev.riftverse.universe.Archetype.NEON_SPRAWL;
+        if (year < 5000) return dev.riftverse.universe.Archetype.CHROME;
+        if (year < 20000) return dev.riftverse.universe.Archetype.LUNARCOLONY;
+        return dev.riftverse.universe.Archetype.WASTELAND;
+    }
+
+    /** Moves a traveller (and the machine they ride, if any) to the place that matches the destination era. */
+    private static void relocate(ServerPlayer p, int year, Timeline line, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity vehicle) {
+        CompoundTag d = data(p);
+        dev.riftverse.transit.UniverseTravel.Target t;
+        if (year == PRESENT && line == Timeline.PRIME) {
+            if (d.contains("anchorDim")) {
+                var key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
+                        net.minecraft.resources.ResourceLocation.parse(d.getString("anchorDim")));
+                t = dev.riftverse.transit.UniverseTravel.resolveFor(p.server, dev.riftverse.transit.Destination.location(key, BlockPos.of(d.getLong("anchorPos"))), p.getRandom());
+            } else {
+                t = dev.riftverse.transit.UniverseTravel.resolveFor(p.server, dev.riftverse.transit.Destination.home(), p.getRandom());
+            }
+        } else {
+            if (year(p) == PRESENT && timeline(p) == Timeline.PRIME) {
+                d.putString("anchorDim", p.level().dimension().location().toString());
+                d.putLong("anchorPos", p.blockPosition().asLong());
+            }
+            var dest = line == Timeline.ALTERNATE || line == Timeline.FRACTURED ? dev.riftverse.transit.Destination.random()
+                    : dev.riftverse.transit.Destination.archetype(eraOf(year));
+            t = dev.riftverse.transit.UniverseTravel.resolveFor(p.server, dest, p.getRandom());
+        }
+        if (t == null) return;
+        if (vehicle != null) p.stopRiding();
+        p.teleportTo(t.level(), t.pos().x, t.pos().y, t.pos().z, p.getYRot(), p.getXRot());
+        if (vehicle != null && !vehicle.isRemoved()) {
+            var moved = vehicle.level() == t.level() ? vehicle : vehicle.changeDimension(new net.minecraft.world.level.portal.DimensionTransition(t.level(), t.pos(), net.minecraft.world.phys.Vec3.ZERO,
+                    vehicle.getYRot(), 0, net.minecraft.world.level.portal.DimensionTransition.DO_NOTHING));
+            if (moved != null) {
+                moved.teleportTo(t.pos().x, t.pos().y, t.pos().z);
+                moved.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                p.startRiding(moved, true);
+            }
+        }
+    }
+
+    public static void travel(ServerPlayer p, int targetYear, Timeline line, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity vehicle) {
         int from = year(p);
         int jump = Math.abs(targetYear - from);
         Timeline target = line != null ? line : targetYear < PRESENT ? Timeline.PAST : targetYear > PRESENT ? Timeline.FUTURE : Timeline.PRIME;
@@ -108,13 +159,14 @@ public final class TemporalManager {
         }
         Scheduler.later(100, () -> {
             if (p.isRemoved()) return;
+            relocate(p, targetYear, target, vehicle);
             CompoundTag d = data(p);
             d.putInt("year", targetYear);
             d.putString("line", target.name());
             setParadox(p, paradox(p) + Math.min(40, 2 + jump / 50) + (target == Timeline.ALTERNATE || target == Timeline.FRACTURED ? 10 : 0));
             applyEra(p, targetYear);
             p.serverLevel().sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 1.2f, 20), p.getX(), p.getY() + 1, p.getZ(), 80, 1, 1.5, 1, 0.4);
-            RealityOps.cinematic(p, CinematicType.ANNOUNCE, 70, p.getEyePosition(), 0x7DF9FF, 0xFFFFFF, formatYear(targetYear), "Timeline " + target.name() + " • Paradox " + paradox(p) + "%");
+            RealityOps.cinematic(p, CinematicType.ANNOUNCE, 70, p.getEyePosition(), 0x7DF9FF, 0xFFFFFF, formatYear(targetYear), eraOf(targetYear).displayName + " • Timeline " + target.name() + " • Paradox " + paradox(p) + "%");
             if (paradox(p) >= 60) dispatch(p, "PARADOX THRESHOLD EXCEEDED");
         });
     }

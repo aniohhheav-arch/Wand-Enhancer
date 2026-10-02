@@ -194,6 +194,10 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
     private void drive() {
         LivingEntity d = getControllingPassenger();
         Vec3 v = getDeltaMovement();
+        if (jump() > 0) {
+            setDeltaMovement(0, v.y, 0);
+            return;
+        }
         double hs = v.horizontalDistance();
         float forward = d == null ? 0 : d.zza;
         float turn = d == null ? 0 : d.xxa;
@@ -248,7 +252,7 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
     private void timeJump(ServerPlayer driver) {
         ServerLevel level = (ServerLevel) level();
         entityData.set(ARMED, false);
-        entityData.set(JUMP, 40);
+        entityData.set(JUMP, 110);
         Vec3 back = new Vec3(Mth.sin(getYRot() * Mth.DEG_TO_RAD), 0, -Mth.cos(getYRot() * Mth.DEG_TO_RAD));
         Vec3 side = new Vec3(back.z, 0, -back.x).scale(0.8);
         for (int i = 0; i < 24; i++) {
@@ -261,15 +265,9 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
         level.sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 1.5f, 14), getX(), getY() + 1, getZ(), 60, 1.5, 0.8, 1.5, 0.5);
         level.playSound(null, blockPosition(), RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 3f, 1.8f);
         int year = targetYear();
-        TemporalManager.travel(driver, year, null);
-        // the car itself is out of time for a moment, then rematerialises under its driver
-        setInvisible(true);
-        Scheduler.later(100, () -> {
-            if (isRemoved()) return;
-            setInvisible(false);
-            level.sendParticles(RvParticles.RING.get().with(0x80D0FF, 5f, 14), getX(), getY() + 1, getZ(), 1, 0, 0, 0, 0);
-            level.playSound(null, blockPosition(), RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 2f, 2f);
-        });
+        // brake hard and hold the car still while the time field builds; driver and car cross together
+        setDeltaMovement(Vec3.ZERO);
+        TemporalManager.travel(driver, year, null, this);
     }
 
     @Override
