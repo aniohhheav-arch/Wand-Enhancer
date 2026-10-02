@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from assetgen import client_json, data_json, textures  # noqa: E402
+from assetgen import client_json, data_json, models3d, textures  # noqa: E402
 
 
 def main():
@@ -30,6 +30,7 @@ def main():
 
     print("client json...")
     client_json.generate(textures.GLOW_BLOCKS)
+    models3d.generate()
     print("data json...")
     data_json.generate()
 
