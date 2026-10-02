@@ -145,6 +145,7 @@ public final class CommonEvents {
         if (player.tickCount % 20 != 0) return;
         UniverseSync.check(player);
         RealityOps.playerSecond(player);
+        dev.riftverse.temporal.TemporalManager.playerSecond(player);
         applyGravity(player);
         UniverseEffects.playerSecond(player, specOf(player));
     }

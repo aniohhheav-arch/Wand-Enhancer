@@ -310,3 +310,10 @@ A secret artifact that can't be crafted, isn't in the creative tab and can't be 
   - **Sneak-use looking straight up — THE FINAL RUPTURE.**
 - **Config `[rupture]`:** `radius`; `ultimateMode` = `visual` | `area` (terrain comes back by itself after 60 s) | `universe` (normal erase with a backup).
 - **Commands:** `/multiverse weapon grant|revoke <player>`, `inspect`, `test`, `restore`, and `/multiverse reality rupture preview|activate [visual|area|universe]`.
+
+## Time travel and the TSA
+
+- `/multiverse time status|travel <year>|travel <prime|past|future|alternate|fractured> <year>|present|paradox <0-100>`: time travel with a cinematic. The era changes the sky's hour and the weather. Each jump builds paradox, which fades over time.
+- At 60%+ paradox, **TSA agents** (Time and Space Authority) are dispatched after you.
+- Flying above the temporal airspace ceiling (Y=300 by default) gets you warned and then arrested. The TSA halts you, pulls you to the ground and leaves agents to watch you.
+- `/multiverse tsa status|enable|disable|ceiling <y>|dispatch <p>|arrest <p>|pardon <p>|recall`.

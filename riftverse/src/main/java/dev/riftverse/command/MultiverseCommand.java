@@ -223,6 +223,8 @@ public final class MultiverseCommand {
                 })));
         root.then(entitiesTree());
         root.then(WeaponCommands.weapon());
+        root.then(TimeCommands.time());
+        root.then(TimeCommands.tsa());
         root.then(WeaponCommands.rupture());
         root.then(debugTree());
         d.register(root);

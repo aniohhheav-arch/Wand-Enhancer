@@ -298,6 +298,20 @@ public final class RealityCinematics {
                     if (p > 0.78f) wash(g, w, h, 0xFFFFFF, CameraRig.easeIn((p - 0.78f) / 0.1f) * k);
                 }
             }
+            case TIME_TRAVEL -> {
+                // the clock spins: era washes strobe past behind rewind streaks, ending in a white flash
+                int[] eras = {0xC27B4A, 0x7DF9FF, 0xFFC24D, 0x8F6BFF, 0x5CFF9D, 0xFF5A1F};
+                wash(g, w, h, eras[(int) (time / 4f) % eras.length], k * 0.25f);
+                rewindStreaks(g, w, h, time * 2.5f, k);
+                tunnelRings(g, w, h, time * 5f, colorA, k * 0.8f, 0.3f);
+                if (p > 0.85f) wash(g, w, h, 0xFFFFFF, CameraRig.easeIn((p - 0.85f) / 0.15f) * k);
+            }
+            case TSA_ARREST -> {
+                // red/blue enforcement strobe
+                wash(g, w, h, ((int) (time / 3f)) % 2 == 0 ? 0xFF2030 : 0x2050FF, k * 0.22f);
+                vignette(g, w, h, 0x000000, k * 0.6f);
+                scanLines(g, w, h, time * 3f, 0xFFFFFF, k * 0.5f, 2);
+            }
             case DISCOVERY -> {
                 // authority recognised: the screen darkens to a void and a turning sigil of fractures burns in
                 wash(g, w, h, 0x05000A, k * 0.7f);

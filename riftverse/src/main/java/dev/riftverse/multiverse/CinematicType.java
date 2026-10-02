@@ -30,7 +30,9 @@ public enum CinematicType {
     PROTOCOL_BLACK_HOLE("black_hole_infusion",  420, 24f, 10f, 0.30f, 0.55f, false, true),
     PROTOCOL_TIMELINE("timeline_erasure",       400, 14f, 12f, 0.40f, 0.20f, false, true),
     DISCOVERY("discovery",        150, 4f, 2f, 0.90f, 0.20f, true, true),
-    RUPTURE("final_rupture",      260, 22f, 18f, 0.40f, 0.70f, true, true);
+    RUPTURE("final_rupture",      260, 22f, 18f, 0.40f, 0.70f, true, true),
+    TIME_TRAVEL("time_travel",    120, 0f, 0f, 0.30f, 0.25f, false, true),
+    TSA_ARREST("tsa_arrest",       90, 0f, 0f, 0.25f, 0.30f, false, true);
 
     public final String id;
     public final int defaultTicks;
