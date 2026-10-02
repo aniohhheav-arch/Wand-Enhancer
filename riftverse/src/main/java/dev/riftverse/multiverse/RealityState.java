@@ -48,6 +48,7 @@ public final class RealityState extends SavedData {
     private final Map<String, Integer> cooldownOverride = new HashMap<>();
     private final Deque<String> history = new ArrayDeque<>();
     public long lastNaturalEvent = Long.MIN_VALUE / 2;
+    public boolean migrationEnabled = true;
 
     public static SavedData.Factory<RealityState> factory() {
         return new SavedData.Factory<>(RealityState::new, RealityState::load, null);
@@ -256,6 +257,7 @@ public final class RealityState extends SavedData {
         for (String s : history) hist.add(StringTag.valueOf(s));
         tag.put("history", hist);
         tag.putLong("lastNaturalEvent", lastNaturalEvent);
+        tag.putBoolean("migrationEnabled", migrationEnabled);
         ListTag sl = new ListTag();
         for (String d : sealed) sl.add(StringTag.valueOf(d));
         tag.put("sealedDimensions", sl);
@@ -284,6 +286,7 @@ public final class RealityState extends SavedData {
         ListTag hist = tag.getList("history", Tag.TAG_STRING);
         for (int i = 0; i < hist.size(); i++) s.history.addLast(hist.getString(i));
         if (tag.contains("lastNaturalEvent")) s.lastNaturalEvent = tag.getLong("lastNaturalEvent");
+        s.migrationEnabled = !tag.contains("migrationEnabled") || tag.getBoolean("migrationEnabled");
         ListTag sl = tag.getList("sealedDimensions", Tag.TAG_STRING);
         for (int i = 0; i < sl.size(); i++) s.sealed.add(sl.getString(i));
         return s;

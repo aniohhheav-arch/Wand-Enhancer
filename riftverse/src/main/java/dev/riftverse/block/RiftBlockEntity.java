@@ -151,6 +151,15 @@ public class RiftBlockEntity extends BlockEntity {
             collapse((ServerLevel) level, pos);
             return;
         }
+        if ((level.getGameTime() + pos.hashCode()) % 20 == 0 && be.type() != RiftType.RETURN && dev.riftverse.multiverse.MigrationManager.enabled((ServerLevel) level)) {
+            Vec3 cc = Vec3.atCenterOf(pos);
+            for (net.minecraft.world.entity.Mob mob : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+                    new AABB(cc, cc).inflate(TRIGGER_RADIUS + 0.4, TRIGGER_RADIUS + 1.0, TRIGGER_RADIUS + 0.4))) {
+                if (mob.getBoundingBox().inflate(0.3).contains(cc) || mob.position().add(0, mob.getBbHeight() / 2, 0).distanceTo(cc) < TRIGGER_RADIUS + 0.5) {
+                    dev.riftverse.multiverse.MigrationManager.migrate(mob, be.destination(), be.colorA());
+                }
+            }
+        }
         if ((level.getGameTime() + pos.hashCode()) % 2 != 0) return;
         Vec3 center = Vec3.atCenterOf(pos);
         AABB box = new AABB(center, center).inflate(TRIGGER_RADIUS + 0.6, TRIGGER_RADIUS + 1.2, TRIGGER_RADIUS + 0.6);

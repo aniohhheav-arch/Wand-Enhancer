@@ -100,6 +100,7 @@ public final class EventManager {
             case DIMENSIONAL_INVASION -> CinematicType.INVASION;
             case COSMIC_LEVIATHAN -> CinematicType.LEVIATHAN;
             case ANCIENT_GUARDIAN, VOID_WANDERER, COSMIC_DEITY -> CinematicType.GUARDIAN;
+            case DIMENSIONAL_MIGRATION -> CinematicType.INVASION;
             case DIMENSIONAL_ANOMALY -> CinematicType.ANOMALY;
             case UNIVERSE_BIRTH -> CinematicType.BIRTH;
             case BLACK_HOLE -> CinematicType.SINGULARITY;

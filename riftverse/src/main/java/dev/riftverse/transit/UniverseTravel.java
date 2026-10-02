@@ -71,6 +71,36 @@ public final class UniverseTravel {
         };
     }
 
+    /** Resolves a destination for something that is not a player (creatures migrating through rifts and black holes). */
+    @Nullable
+    public static Target resolveFor(MinecraftServer server, Destination dest, RandomSource random) {
+        UniverseRegistry reg = UniverseRegistry.get(server);
+        Random jr = new Random(random.nextLong());
+        return switch (dest.kind()) {
+            case UNIVERSE -> {
+                UniverseId uid = UniverseId.unpack(dest.universe());
+                yield RealityState.isAccessible(uid) ? toUniverse(server, UniverseRegistry.specFor(uid), random) : null;
+            }
+            case ARCHETYPE -> toUniverse(server, reg.primeSpec(Archetype.byId(dest.archetype())), random);
+            case RANDOM -> toUniverse(server, reg.randomUniverse(jr, null), random);
+            case FLAVOR -> toUniverse(server, reg.randomUniverse(jr, RiftType.byId(dest.flavor()).destinations()), random);
+            case NEXUS -> toNexus(server);
+            case LOCATION -> {
+                ResourceKey<Level> key = dest.dimensionKey();
+                ServerLevel level = key == null || RealityState.isSealed(key) ? null : server.getLevel(key);
+                if (level == null) yield null;
+                BlockPos p = safeAround(level, dest.pos(), 12);
+                yield new Target(level, Vec3.atBottomCenterOf(p), 0f, null, "", "", 0xFFFFFF, false);
+            }
+            case HOME -> {
+                ServerLevel level = server.overworld();
+                if (RealityState.isSealed(level.dimension())) yield toNexus(server);
+                BlockPos p = safeAround(level, level.getSharedSpawnPos(), 16);
+                yield new Target(level, Vec3.atBottomCenterOf(p), 0f, null, "", "", 0xFFFFFF, false);
+            }
+        };
+    }
+
     @Nullable
     private static Target toUniverse(MinecraftServer server, UniverseSpec spec, RandomSource random) {
         ServerLevel level = server.getLevel(RvWorldgen.EXPANSE);

@@ -57,6 +57,7 @@ public final class EventHandlers {
         m.put(EventType.RIFT_STORM, new RiftStorm());
         m.put(EventType.COSMIC_CONVERGENCE, new Convergence());
         m.put(EventType.COSMIC_DEITY, new Deity());
+        m.put(EventType.DIMENSIONAL_MIGRATION, new Migration());
         return m;
     }
 
@@ -228,6 +229,66 @@ public final class EventHandlers {
                 for (ServerPlayer p : EventKit.playersNear(e, 128)) p.displayClientMessage(Component.literal("The Leviathan dives back into the dark between worlds.").withColor(0x40FFE0), true);
             }
             EventKit.discardAll(e);
+        }
+    }
+
+    // ------------------------------------------------------------------ 12. dimensional migration
+
+    static final class Migration implements MultiverseEvent {
+        @Override
+        public String start(ActiveEvent e) {
+            RandomSource r = e.level.random;
+            UniverseSpec source = UniverseRegistry.get(e.level.getServer()).randomUniverse(new Random(r.nextLong()), null);
+            e.data.putLong("source", source.id.pack());
+            BlockPos in = EventKit.ringPos(e, 0, 12, 2);
+            BlockPos out = EventKit.ringPos(e, Math.PI, 12, 2);
+            boolean a = false;
+            boolean b = false;
+            for (int up = 0; up < 5 && !a; up++) a = EventKit.openRift(e, in.above(up), RiftType.PRIMAL, e.duration + 100, Destination.universe(source.id));
+            for (int up = 0; up < 5 && !b; up++) b = EventKit.openRift(e, out.above(up), RiftType.VERDANT, e.duration + 100, Destination.universe(source.id));
+            if (!a || !b) return "no room for the migration rifts";
+            e.focus = Vec3.atCenterOf(e.rifts.get(0));
+            for (ServerPlayer p : EventKit.playersNear(e, 96)) {
+                p.displayClientMessage(Component.literal("Creatures of " + source.name + " are migrating into this world.").withColor(0x5CFF9D), true);
+            }
+            return null;
+        }
+
+        @Override
+        public void tick(ActiveEvent e) {
+            EventKit.pruneRifts(e);
+            if (e.rifts.size() < 2) {
+                e.finished = true;
+                return;
+            }
+            UniverseSpec source = UniverseRegistry.specFor(dev.riftverse.universe.UniverseId.unpack(e.data.getLong("source")));
+            if (e.age % 30 == 10 && !source.creatures.isEmpty() && EventKit.alive(e) < 12) {
+                var kind = source.creatures.get(e.level.random.nextInt(source.creatures.size()));
+                Vec3 at = Vec3.atBottomCenterOf(e.rifts.get(0)).add(0, -1, 0);
+                Mob mob = EventKit.spawn(e, dev.riftverse.event.UniverseEffects.typeOf(kind), at);
+                if (mob != null) {
+                    mob.getPersistentData().putLong(dev.riftverse.multiverse.MigrationManager.COOLDOWN_TAG, e.level.getGameTime() + 2400);
+                    dev.riftverse.multiverse.MigrationManager.arriveFx(e.level, mob.position(), mob.getBbHeight(), 0x5CFF9D);
+                }
+            }
+            if (e.age % 40 == 25) {
+                // local life is drawn toward the outgoing rift and crosses over
+                Vec3 out = Vec3.atCenterOf(e.rifts.get(1));
+                for (Mob m : e.level.getEntitiesOfClass(Mob.class, new AABB(out, out).inflate(24), m -> !e.entities.contains(m.getUUID()))) {
+                    if (m.distanceToSqr(out) < 9) {
+                        dev.riftverse.multiverse.MigrationManager.migrate(m, Destination.universe(source.id), 0x3DFF6E);
+                        break;
+                    }
+                    m.getNavigation().moveTo(out.x, out.y - 1, out.z, 1.0);
+                }
+            }
+        }
+
+        @Override
+        public void end(ActiveEvent e, boolean forced) {
+            EventKit.closeRifts(e);
+            if (forced) EventKit.discardAll(e);
+            else e.entities.clear(); // the migrants stay: the local population has changed
         }
     }
 

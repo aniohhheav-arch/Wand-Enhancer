@@ -55,6 +55,8 @@ public final class RiftverseConfig {
     public static final ModConfigSpec.BooleanValue CINEMATIC_CAMERA;
     public static final ModConfigSpec.BooleanValue HEAVY_EFFECTS;
     public static final ModConfigSpec.IntValue GENESIS_SECONDS;
+    public static final ModConfigSpec.BooleanValue ENTITY_MIGRATION;
+    public static final ModConfigSpec.IntValue RIFT_SEEKING_CHANCE;
 
     static {
         BUILDER.push("events");
@@ -101,6 +103,13 @@ public final class RiftverseConfig {
                 .define("protectPrimeUniverses", false);
         ALLOW_ENDING_DIMENSIONS = BUILDER.comment("Whether the Reality Remote may permanently end whole dimensions (Overworld, Nether, End, modded worlds).")
                 .define("allowEndingVanillaDimensions", true);
+        BUILDER.pop();
+
+        BUILDER.push("migration");
+        ENTITY_MIGRATION = BUILDER.comment("Whether creatures can travel through rifts and be carried off by black holes into other universes.")
+                .define("entityMigration", true);
+        RIFT_SEEKING_CHANCE = BUILDER.comment("Per mille chance, every 10 seconds, that an idle mob near a rift goes to investigate it (0 disables wandering into rifts).")
+                .defineInRange("riftSeekingPerMille", 15, 0, 1000);
         BUILDER.pop();
 
         BUILDER.push("cinematics");

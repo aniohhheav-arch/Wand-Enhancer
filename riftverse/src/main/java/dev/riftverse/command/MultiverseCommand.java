@@ -221,6 +221,7 @@ public final class MultiverseCommand {
                     if (nexus == null) return reply(c.getSource(), Outcome.fail("The Nexus is not loaded."));
                     return reply(c.getSource(), Outcome.ok(NexusChunkGenerator.regenerateExpansion(nexus)));
                 })));
+        root.then(entitiesTree());
         root.then(debugTree());
         d.register(root);
     }
@@ -598,6 +599,58 @@ public final class MultiverseCommand {
                 " Cosmic rank: " + rank.title + " (" + d.research + " research" + (next != rank ? ", " + (next.points - d.research) + " to " + next.title : ", maximum") + ")",
                 " Universes discovered " + d.discoveredCount() + " • scanned " + d.scannedCount() + " • journeys " + d.journeys,
                 " Events witnessed " + d.eventsWitnessed + " • realities erased " + d.realitiesErased + " • rebuilt " + d.realitiesRebuilt));
+    }
+
+    // ------------------------------------------------------------------ entity migration
+
+    private static LiteralArgumentBuilder<CommandSourceStack> entitiesTree() {
+        return Commands.literal("entities").then(Commands.literal("migration")
+                .then(Commands.literal("status").executes(c -> {
+                    RealityState st = RealityState.get(c.getSource().getServer());
+                    int migrants = 0;
+                    for (ServerLevel l : c.getSource().getServer().getAllLevels()) {
+                        for (Entity e : l.getAllEntities()) {
+                            if (e.getPersistentData().contains(dev.riftverse.multiverse.MigrationManager.COOLDOWN_TAG)) migrants++;
+                        }
+                    }
+                    return reply(c.getSource(), Outcome.ok("Entity migration is " + (st.migrationEnabled ? "ENABLED" : "DISABLED")
+                            + " (config entityMigration=" + dev.riftverse.RiftverseConfig.get(dev.riftverse.RiftverseConfig.ENTITY_MIGRATION, true)
+                            + ", rift seeking " + dev.riftverse.RiftverseConfig.get(dev.riftverse.RiftverseConfig.RIFT_SEEKING_CHANCE, 15) + "‰). "
+                            + migrants + " loaded creatures have crossed between worlds."));
+                }))
+                .then(Commands.literal("enable").requires(s -> s.hasPermission(2)).executes(c -> {
+                    RealityState st = RealityState.get(c.getSource().getServer());
+                    st.migrationEnabled = true;
+                    st.touch();
+                    return reply(c.getSource(), Outcome.ok("Creatures may now travel through rifts and black holes."));
+                }))
+                .then(Commands.literal("disable").requires(s -> s.hasPermission(2)).executes(c -> {
+                    RealityState st = RealityState.get(c.getSource().getServer());
+                    st.migrationEnabled = false;
+                    st.touch();
+                    return reply(c.getSource(), Outcome.ok("Entity migration disabled: rifts and black holes no longer carry creatures."));
+                }))
+                .then(Commands.literal("test").requires(s -> s.hasPermission(2)).executes(c -> {
+                    ServerLevel level = c.getSource().getLevel();
+                    Vec3 at = c.getSource().getPosition();
+                    net.minecraft.world.entity.Mob mob = null;
+                    double bd = 32 * 32;
+                    for (net.minecraft.world.entity.Mob m : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(at, at).inflate(32))) {
+                        double d = m.distanceToSqr(at);
+                        if (d < bd) {
+                            bd = d;
+                            mob = m;
+                        }
+                    }
+                    if (mob == null) return reply(c.getSource(), Outcome.fail("No creature within 32 blocks to send."));
+                    mob.getPersistentData().remove(dev.riftverse.multiverse.MigrationManager.COOLDOWN_TAG);
+                    String name = mob.getName().getString();
+                    Entity arrived = dev.riftverse.multiverse.MigrationManager.migrate(mob, Destination.random(), 0x5CFF9D);
+                    if (arrived == null) return reply(c.getSource(), Outcome.fail(name + " could not be sent (no valid destination)."));
+                    var spec = arrived.level().dimension() == RvWorldgen.EXPANSE ? UniverseRegistry.specAt(arrived.getBlockX(), arrived.getBlockZ()) : null;
+                    return reply(c.getSource(), Outcome.ok(name + " crossed into " + (spec != null ? spec.name + " [" + spec.id.designation() + "]"
+                            : arrived.level().dimension().location().toString()) + " at " + arrived.blockPosition().toShortString() + "."));
+                })));
     }
 
     // ------------------------------------------------------------------ debug

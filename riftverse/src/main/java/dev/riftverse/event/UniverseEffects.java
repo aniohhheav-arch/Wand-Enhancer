@@ -94,7 +94,7 @@ public final class UniverseEffects {
         }
     }
 
-    private static EntityType<? extends Mob> typeOf(CreatureKind kind) {
+    public static EntityType<? extends Mob> typeOf(CreatureKind kind) {
         return switch (kind) {
             case ASTRAL_JELLY -> RvEntities.ASTRAL_JELLY.get();
             case SKY_WHALE -> RvEntities.SKY_WHALE.get();

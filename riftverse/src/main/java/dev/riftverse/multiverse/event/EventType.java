@@ -24,6 +24,8 @@ public enum EventType {
             "Unstable rifts flicker open everywhere, each leading somewhere different."),
     COSMIC_CONVERGENCE("cosmic_convergence", "COSMIC CONVERGENCE", "Every reality briefly touches this one", 0xFF7AF0, 2000, 240, 1600,
             "Rifts to many realities align and their creatures drift through. Witnesses gain deep research."),
+    DIMENSIONAL_MIGRATION("dimensional_migration", "DIMENSIONAL MIGRATION", "Another ecosystem is pouring through", 0x5CFF9D, 700, 60, 1400,
+            "Two rifts open into a living migration route: alien creatures arrive through one while local life is drawn into the other."),
     COSMIC_DEITY("cosmic_deity", "THE COSMIC DEITY", "A god made of night has come to feed", 0xC070FF, 2500, 240, 9000,
             "A titan wearing the night sky descends. Between star-bolts it inhales, dragging creatures and land into its mouth.");
 

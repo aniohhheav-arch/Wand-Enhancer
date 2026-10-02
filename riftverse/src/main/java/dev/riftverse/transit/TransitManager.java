@@ -151,6 +151,7 @@ public final class TransitManager {
         UniverseTravel.Target target = t.target;
         ServerLevel from = player.serverLevel();
         Vec3 p = target.pos();
+        Vec3 departedFrom = player.position();
         player.teleportTo(target.level(), p.x, p.y, p.z, target.yaw(), 0f);
         player.fallDistance = 0;
         player.setDeltaMovement(Vec3.ZERO);
@@ -177,9 +178,29 @@ public final class TransitManager {
 
         target.level().sendParticles(dev.riftverse.registry.RvParticles.RING.get().with(target.color(), 5f, 18), p.x, p.y + 1, p.z, 1, 0, 0, 0, 0);
         target.level().sendParticles(dev.riftverse.registry.RvParticles.SPARK.get().with(target.color(), 0.8f, 30), p.x, p.y + 1, p.z, 50, 0.4, 0.9, 0.4, 0.3);
+        companions(player, from, departedFrom, target);
         UniverseSync.send(player);
         PacketDistributor.sendToPlayer(player, new Payloads.Arrival(target.title(), target.subtitle(), target.color(), t.kind.ordinal()));
         target.level().playSound(null, p.x, p.y, p.z, RvSounds.UNIVERSE_ARRIVE.get(), SoundSource.PLAYERS, 1.0f, 1.0f);
+    }
+
+    /** Tamed companions follow their owner through the passage; hunters on the player's trail sometimes pursue. */
+    private static void companions(ServerPlayer player, ServerLevel from, Vec3 departedFrom, UniverseTravel.Target target) {
+        if (!dev.riftverse.multiverse.MigrationManager.enabled(from)) return;
+        Destination there = Destination.location(target.level().dimension(), BlockPos.containing(target.pos()));
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(departedFrom, departedFrom).inflate(16);
+        for (net.minecraft.world.entity.TamableAnimal pet : from.getEntitiesOfClass(net.minecraft.world.entity.TamableAnimal.class, box,
+                a -> player.getUUID().equals(a.getOwnerUUID()) && !a.isOrderedToSit())) {
+            dev.riftverse.multiverse.MigrationManager.migrate(pet, there, target.color());
+        }
+        for (net.minecraft.world.entity.Mob hunter : from.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, box, m -> m.getTarget() == player)) {
+            if (player.getRandom().nextFloat() > 0.5f) continue;
+            dev.riftverse.multiverse.Scheduler.later(40 + player.getRandom().nextInt(40), () -> {
+                if (!hunter.isAlive()) return;
+                var arrived = dev.riftverse.multiverse.MigrationManager.migrate(hunter, there, 0xFF2440);
+                if (arrived instanceof net.minecraft.world.entity.Mob m && player.isAlive() && m.level() == player.level()) m.setTarget(player);
+            });
+        }
     }
 
     private static void placeReturnRift(ServerPlayer player, UniverseTravel.Target target, Transit t) {

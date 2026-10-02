@@ -166,6 +166,10 @@ public final class CommonEvents {
 
     private static void onJoin(EntityJoinLevelEvent e) {
         if (e.getLevel().isClientSide()) return;
+        if (e.getEntity() instanceof net.minecraft.world.entity.PathfinderMob mob && !(mob instanceof dev.riftverse.entity.boss.CosmicDeityEntity)
+                && mob.getMaxHealth() <= 120f) {
+            mob.goalSelector.addGoal(8, new dev.riftverse.entity.ai.RiftSeekGoal(mob));
+        }
         if (e.getEntity() instanceof LivingEntity living && !(living instanceof Player) && e.getLevel().dimension() == RvWorldgen.EXPANSE) {
             applyGravity(living);
         }

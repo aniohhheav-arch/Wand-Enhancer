@@ -266,6 +266,10 @@ public class BlackHoleEntity extends Entity {
             level.addFreshEntity(frag);
             level.sendParticles(RvParticles.RING.get().with(0xB0A0FF, 2.0f, 14), frag.getX(), frag.getY(), frag.getZ(), 1, 0, 0, 0, 0);
         }
+        if (e instanceof LivingEntity living && !(living instanceof net.minecraft.world.entity.player.Player) && living.getMaxHealth() <= 120f
+                && dev.riftverse.multiverse.MigrationManager.swallow(living, 0xFF8A3A)) {
+            return;
+        }
         if (e instanceof LivingEntity living) {
             if (living.getMaxHealth() > 120f) {
                 if (tickCount % 10 == 0) living.hurt(damage(), 12f);
