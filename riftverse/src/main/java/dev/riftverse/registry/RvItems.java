@@ -99,6 +99,8 @@ public final class RvItems {
             () -> new dev.riftverse.item.VehicleItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1), () -> RvEntities.DELOREAN.get()));
     public static final DeferredItem<dev.riftverse.item.VehicleItem> TARDIS = add("tardis",
             () -> new dev.riftverse.item.VehicleItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1), () -> RvEntities.TARDIS.get()));
+    public static final DeferredItem<dev.riftverse.item.PruningStaffItem> PRUNING_STAFF = add("pruning_staff",
+            () -> new dev.riftverse.item.PruningStaffItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));
     public static final DeferredItem<DeferredSpawnEggItem> TSA_AGENT_EGG = egg("tsa_agent_spawn_egg", RvEntities.TSA_AGENT, 0x14161C, 0x60A0FF);
     public static final DeferredItem<DeferredSpawnEggItem> DENIZEN_EGG = egg("denizen_spawn_egg", RvEntities.DENIZEN, 0x3A2A5A, 0xFFC14D);
     public static final DeferredItem<DeferredSpawnEggItem> COSMIC_DEITY_EGG = egg("cosmic_deity_spawn_egg", RvEntities.COSMIC_DEITY, 0x05010F, 0xC070FF);

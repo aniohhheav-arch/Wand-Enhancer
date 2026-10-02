@@ -197,7 +197,7 @@ public final class TemporalManager {
             if (agent == null) continue;
             agent.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, (float) Math.toDegrees(-a), 0);
             agent.setRank(i == 0 && paradox(target) >= 80 ? 1 : 0);
-            agent.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(Items.BREEZE_ROD));
+            agent.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(dev.riftverse.registry.RvItems.PRUNING_STAFF.get()));
             agent.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0f);
             agent.setCustomName(Component.literal(agent.rank() > 0 ? "TSA Temporal Enforcer" : "TSA Agent").withColor(agent.rank() > 0 ? 0xFF4050 : 0x60A0FF));
             agent.addTag(AGENT_TAG);

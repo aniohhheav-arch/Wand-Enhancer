@@ -16,10 +16,10 @@ CUBES = {
     "ancient_glyph": "cutout", "ancient_gold": None, "abyssal_glow": "cutout", "rift_frame": "cutout",
     "starmetal_block": None, "aurora_glass": "translucent", "sculk_crystal": "cutout", "magma_crust": None, "chrome_plating": None, "honey_crystal": "cutout", "lunar_dust": None, "nebula_stone": None, "starwood_planks": None, "voidglass": "translucent", "rune_tile": None, "ember_bricks": None, "frost_crystal": "cutout", "coral_stone": None,
 }
-HANDHELD = {"portal_gun", "rift_blade", "reality_shaper", "reality_rupture"}
+HANDHELD = {"portal_gun", "rift_blade", "reality_shaper", "reality_rupture", "pruning_staff"}
 ITEMS = ["rift_shard", "void_essence", "stellar_dust", "singularity_fragment", "exotic_ingot", "warden_core", "leviathan_scale",
          "portal_gun", "rift_blade", "gravity_gauntlet", "singularity_grenade", "singularity_core", "reality_shaper", "dimensional_key",
-         "universe_compass", "homeward_rift", "rift_igniter", "rift_sigil", "reality_remote", "reality_rupture", "delorean", "tardis"]
+         "universe_compass", "homeward_rift", "rift_igniter", "rift_sigil", "reality_remote", "reality_rupture", "delorean", "tardis", "pruning_staff"]
 ARMOR = [f"{s}_{p}" for s in ["rift_walker", "voyager", "event_horizon", "astral"] for p in ["helmet", "chestplate", "leggings", "boots"]]
 CREATURES = ["astral_jelly", "sky_whale", "lumen_strider", "neon_drone", "glitchling", "void_stalker", "crystal_sentinel",
              "rift_wraith", "rift_warden", "abyssal_leviathan", "cosmic_deity", "void_cultist", "crystal_spider", "star_moth", "lunar_golem", "denizen", "tsa_agent"]

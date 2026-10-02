@@ -331,3 +331,17 @@ The ultimate artifact. Ops get it with `/multiverse weapon give [player]` (it's 
   - They blink through time toward their target, and their batons slow and weaken you.
   - At 80%+ paradox a red-trimmed **Temporal Enforcer** leads them.
   - They leave when their warrant expires.
+
+## TSA Temporal Pruning Staff
+
+All abilities depend on how you use it and where you look:
+
+| How you use it | Ability | What it does |
+|---|---|---|
+| Use | **Prune** | Erases the target from the timeline. Bosses lose 15% of their health instead. |
+| Sneak-use | **Temporal Snare** | Freezes everything within 12 blocks for 5 s. |
+| Use looking up | **Time Door** | Steps you through a door 14 blocks ahead. |
+| Use looking down | **Reset Charge** | Rewinds you to where you were 5 s ago. |
+| Sneak-use looking down | **FULL TIMELINE PRUNING** | Ultimate: an expanding wave prunes every hostile within 24 blocks. |
+
+TSA agents carry it as their baton (it doesn't drop).
