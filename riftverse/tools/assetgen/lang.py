@@ -10,6 +10,7 @@ BLOCKS = {
     "dream_cloud": "Dream Cloud", "dead_regolith": "Dead Regolith", "ashen_rock": "Ashen Rock", "cosmic_obsidian": "Cosmic Obsidian",
     "stardust_sand": "Stardust Sand", "glitch_block": "Glitched Block", "ancient_bricks": "Ancient Bricks",
     "ancient_glyph": "Ancient Glyph Stone", "ancient_gold": "Ancient Gold Plating", "abyssal_glow": "Abyssal Lantern",
+    "starmetal_block": "Starmetal Block", "aurora_glass": "Aurora Glass", "sculk_crystal": "Sculk Crystal", "magma_crust": "Magma Crust", "chrome_plating": "Chrome Plating", "honey_crystal": "Honey Crystal", "lunar_dust": "Lunar Dust", "nebula_stone": "Nebula Stone", "starwood_planks": "Petrified Starwood", "voidglass": "Voidglass", "rune_tile": "Rune Tile", "ember_bricks": "Ember Bricks", "frost_crystal": "Frost Crystal", "coral_stone": "Glowing Coral Stone",
 }
 
 ITEMS = {
@@ -43,7 +44,8 @@ ENTITIES = {
     "gravity_well": "Gravity Well", "energy_bolt": "Energy Bolt", "astral_jelly": "Astral Jelly", "sky_whale": "Sky Whale",
     "lumen_strider": "Lumen Strider", "neon_drone": "Neon Drone", "glitchling": "Glitchling", "void_stalker": "Void Stalker",
     "crystal_sentinel": "Crystal Sentinel", "rift_wraith": "Rift Wraith", "rift_warden": "The Rift Warden",
-    "abyssal_leviathan": "The Abyssal Leviathan",
+    "abyssal_leviathan": "The Abyssal Leviathan", "cosmic_deity": "The Cosmic Deity",
+    "void_cultist": "Void Cultist", "crystal_spider": "Crystal Spider", "star_moth": "Star Moth", "lunar_golem": "Lunar Golem",
 }
 
 TOOLTIPS = {
@@ -172,7 +174,7 @@ def english():
     for k, v in ENTITIES.items():
         out[f"entity.riftverse.{k}"] = v
         if k in ("astral_jelly", "sky_whale", "lumen_strider", "neon_drone", "glitchling", "void_stalker", "crystal_sentinel",
-                 "rift_wraith", "rift_warden", "abyssal_leviathan"):
+                 "rift_wraith", "rift_warden", "abyssal_leviathan", "cosmic_deity", "void_cultist", "crystal_spider", "star_moth", "lunar_golem"):
             out[f"item.riftverse.{k}_spawn_egg"] = f"{v.replace('The ', '')} Spawn Egg"
     out.update(TOOLTIPS)
     out.update(MESSAGES)

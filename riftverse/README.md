@@ -10,9 +10,11 @@ including universes you create just by describing them.
 ## Features
 
 ### Portals and rifts
-- **Natural rifts** tear open across the Overworld and inside other universes. There are twenty-four rift types (Azure,
+- **Natural rifts** tear open across the Overworld and inside other universes. There are twenty-nine rift types (Azure,
   Crimson, Verdant, Void, Prismatic, Nexus, Glitch, Stellar, Return, Solar, Abyssal, Fungal, Sanguine, Brass, Saccharine,
-  Tempest, Umbral, Patina, Auroral, Molten, Primal, Chrome, Sculk and Nebular), each with its own colours, shader animation and destination family. A rift lenses the world behind it, glows onto the ground and distorts your screen as you approach.
+  Tempest, Umbral, Patina, Auroral, Molten, Primal, Chrome, Sculk, Nebular, Forge, Frost, Weald, Celestial and Runic).
+  Every rift locks onto one concrete world when it opens, takes that world's colours and names it when you approach
+  ("Rift → <name>"), so a rift's colour always tells you where it goes, each with its own colours, shader animation and destination family. A rift lenses the world behind it, glows onto the ground and distorts your screen as you approach.
   Walk in to cross over, or **sneak-use** an open rift with an empty hand to harvest **Rift Shards**.
 - **Built portals:** ignite a rectangle of **Rift Frame** blocks with a **Rift Igniter** to open a stable gate to the Nexus.
   Hold an imprinted **Dimensional Key** in your off-hand to link the gate to that exact universe instead.
@@ -34,7 +36,7 @@ Black holes occur naturally in some universes and sit at the heart of the Nexus.
 **Singularity Core**, and the Event Horizon armour can collapse short-lived ones.
 
 ### The Multiverse Nexus and console
-The **Nexus** is a hub dimension floating around a captive singularity. It has 40 gates (one per prime reality),
+The **Nexus** is a hub dimension floating around a captive singularity. It has 62 gates (one per prime reality, in an outer and an inner ring),
 satellite platforms and the **Rift Altar**. At a **Multiverse Console** you can:
 - browse every prime, discovered and manifested reality,
 - **travel** to any of them, roll a **random** universe, or spin up a **new variant** of an archetype,
@@ -48,13 +50,16 @@ satellite platforms and the **Rift Altar**. At a **Multiverse Console** you can:
   moons, weather, time of day, scale, creatures, gravity, colours and music. It then tells you what it understood.
 
 ### Universes
-All universes are generated analytically. There are **40 prime archetypes**, each mutated into infinite variants:
+All universes are generated analytically. There are **62 prime archetypes**, each mutated into infinite variants:
 Neon Sprawl, Xenoflora Wilds, Skyshatter Isles, Thalassic Expanse, Prismatic Reach, Ashen Remnant, Astral Vastness,
 Corrupted Sector, Elder Dominion, Inverted Heights, The Hollow Dark, Somnium, Cinder Forge, Rime Eternal, Sunscar Dunes,
 Rust Mesa, Coral Shallows, Myco Hollows, Clockwork Reach, Sanguine Expanse, Confection, Tempest Reach, Fenrot Mire,
 Obsidian Spires, Verdigris Ruins, Radiant Expanse, Ferrous Wastes, Spectral Bloom, Aurora Tundra, Magma Throne,
 Primeval Jungle, Nebula Drift, Fallout Wastes, Amethyst Geode, Sculk Depths, Golden Savanna, Chrome Metropolis,
-Lunar Plains, Golden Hive and Mirror Realm.
+Lunar Plains, Golden Hive, Mirror Realm, Starforge Foundry, Frostglass Caverns, Echoing Abyss, Molten Sea,
+Cloud Kingdom, Drowned Ruins, Toxic Bog, Crimson Weald, Warped Weald, Golden Temple, Rainbow Reach, Voidglass Expanse,
+Runic Plateau, Ember Steppe, Pastel Dreamscape, Petrified Starwood, Crystal Ocean, Dusk Highlands, Neon Jungle,
+Celestial Court, Lunar Colony and Coral Kingdom.
 - 15 terrain modes, 13 kinds of megastructure (arcologies, rings, spires, colossal ruins and more), city street grids
   and treasure caches.
 - Each universe has its own shader skybox: nebulae, galaxies, auroras, ringed planets, multiple moons, suns and
@@ -85,6 +90,16 @@ Every set has its own visible aura: orbiting rift shards, a holographic visor, a
 stars.
 
 ### Creatures and bosses
+
+**The Cosmic Deity** (event `cosmic_deity`, spawn egg): a titan with a person's body whose skin is the night sky, a
+turning halo and burning eyes. Between volleys of star-bolts it inhales: its mouth tears open across its face, far
+wider than its head, streams of light spiral in, and creatures, items and loose terrain are dragged into it. Players
+nearby see the world warp (FOV surge, inward-rushing rings, violet bleed, shaking). It also plays the Celestial
+Devourer in the End Protocols. New creatures: Void Cultist (blinks to its prey), Crystal Spider (crystallising bite),
+Star Moth (glittering night flyer) and Lunar Golem (guardian of the moon worlds). 14 new building blocks: Starmetal,
+Aurora Glass, Sculk Crystal, Magma Crust, Chrome Plating, Honey Crystal, Lunar Dust, Nebula Stone, Petrified Starwood,
+Voidglass, Rune Tile, Ember Bricks, Frost Crystal and Glowing Coral Stone.
+
 - **Astral Jelly**, **Sky Whale** and **Lumen Strider**: peaceful drifters, sky leviathans and lantern-bearing grazers.
 - **Neon Drone**, **Glitchling**, **Void Stalker**, **Crystal Sentinel** and **Rift Wraith**: hostile and dimensional.
 - **The Rift Warden** is a three-phase boss summoned at the Rift Altar. It fires bolt barrages, makes aerial slams,

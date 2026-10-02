@@ -23,7 +23,9 @@ public enum EventType {
     RIFT_STORM("rift_storm", "RIFT STORM", "Reality is splitting at the seams", 0x8A3AFF, 450, 40, 1200,
             "Unstable rifts flicker open everywhere, each leading somewhere different."),
     COSMIC_CONVERGENCE("cosmic_convergence", "COSMIC CONVERGENCE", "Every reality briefly touches this one", 0xFF7AF0, 2000, 240, 1600,
-            "Rifts to many realities align and their creatures drift through. Witnesses gain deep research.");
+            "Rifts to many realities align and their creatures drift through. Witnesses gain deep research."),
+    COSMIC_DEITY("cosmic_deity", "THE COSMIC DEITY", "A god made of night has come to feed", 0xC070FF, 2500, 240, 9000,
+            "A titan wearing the night sky descends. Between star-bolts it inhales, dragging creatures and land into its mouth.");
 
     public final String id;
     public final String title;

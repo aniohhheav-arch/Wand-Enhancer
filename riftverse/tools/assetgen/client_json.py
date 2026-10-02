@@ -14,6 +14,7 @@ CUBES = {
     "skystone": None, "dream_turf": "cutout", "dream_cloud": "translucent", "dead_regolith": None, "ashen_rock": None,
     "cosmic_obsidian": "cutout", "stardust_sand": "cutout", "glitch_block": "cutout", "ancient_bricks": None,
     "ancient_glyph": "cutout", "ancient_gold": None, "abyssal_glow": "cutout", "rift_frame": "cutout",
+    "starmetal_block": None, "aurora_glass": "translucent", "sculk_crystal": "cutout", "magma_crust": None, "chrome_plating": None, "honey_crystal": "cutout", "lunar_dust": None, "nebula_stone": None, "starwood_planks": None, "voidglass": "translucent", "rune_tile": None, "ember_bricks": None, "frost_crystal": "cutout", "coral_stone": None,
 }
 HANDHELD = {"portal_gun", "rift_blade", "reality_shaper"}
 ITEMS = ["rift_shard", "void_essence", "stellar_dust", "singularity_fragment", "exotic_ingot", "warden_core", "leviathan_scale",
@@ -21,7 +22,7 @@ ITEMS = ["rift_shard", "void_essence", "stellar_dust", "singularity_fragment", "
          "universe_compass", "homeward_rift", "rift_igniter", "rift_sigil", "reality_remote"]
 ARMOR = [f"{s}_{p}" for s in ["rift_walker", "voyager", "event_horizon", "astral"] for p in ["helmet", "chestplate", "leggings", "boots"]]
 CREATURES = ["astral_jelly", "sky_whale", "lumen_strider", "neon_drone", "glitchling", "void_stalker", "crystal_sentinel",
-             "rift_wraith", "rift_warden", "abyssal_leviathan"]
+             "rift_wraith", "rift_warden", "abyssal_leviathan", "cosmic_deity", "void_cultist", "crystal_spider", "star_moth", "lunar_golem"]
 PARTICLES = ["spark", "mote", "streak", "ring", "glitch", "dust", "infall"]
 
 

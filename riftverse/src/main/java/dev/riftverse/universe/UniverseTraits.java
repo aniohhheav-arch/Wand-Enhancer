@@ -37,7 +37,8 @@ public final class UniverseTraits {
     }
 
     public enum CreatureKind {
-        ASTRAL_JELLY(false), SKY_WHALE(false), LUMEN_STRIDER(false), NEON_DRONE(true), GLITCHLING(true), VOID_STALKER(true), CRYSTAL_SENTINEL(true), RIFT_WRAITH(true), ABYSSAL_LEVIATHAN(true);
+        ASTRAL_JELLY(false), SKY_WHALE(false), LUMEN_STRIDER(false), NEON_DRONE(true), GLITCHLING(true), VOID_STALKER(true), CRYSTAL_SENTINEL(true), RIFT_WRAITH(true), ABYSSAL_LEVIATHAN(true),
+        VOID_CULTIST(true), CRYSTAL_SPIDER(true), STAR_MOTH(false), LUNAR_GOLEM(false);
 
         public final boolean hostile;
 

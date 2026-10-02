@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "riftverse:starwood_planks",
     "riftverse:lumen_log"
   ]
 }

@@ -179,6 +179,72 @@ public final class MaterialSet {
         m.put(Archetype.HIVE, new MaterialSet(Blocks.HONEYCOMB_BLOCK, Blocks.HONEY_BLOCK, Blocks.YELLOW_TERRACOTTA, Blocks.WATER,
                 Blocks.BEEHIVE, Blocks.OCHRE_FROGLIGHT, Blocks.HONEYCOMB_BLOCK, Blocks.YELLOW_CONCRETE,
                 Blocks.YELLOW_STAINED_GLASS, Blocks.SUNFLOWER, Blocks.OAK_LOG, persistent(Blocks.FLOWERING_AZALEA_LEAVES), false));
+        m.put(Archetype.STARFORGE, new MaterialSet(RvBlocks.STARMETAL_BLOCK.get(), Blocks.IRON_BLOCK, Blocks.DEEPSLATE, Blocks.LAVA,
+                RvBlocks.MAGMA_CRUST.get(), Blocks.SHROOMLIGHT, RvBlocks.STARMETAL_BLOCK.get(), RvBlocks.CHROME_PLATING.get(),
+                Blocks.TINTED_GLASS, Blocks.AIR, Blocks.IRON_BLOCK, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.FROSTGLASS, new MaterialSet(Blocks.SNOW_BLOCK, Blocks.PACKED_ICE, RvBlocks.FROST_CRYSTAL.get(), Blocks.WATER,
+                RvBlocks.FROST_CRYSTAL.get(), Blocks.SEA_LANTERN, Blocks.BLUE_ICE, Blocks.PACKED_ICE,
+                Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.AIR, Blocks.PACKED_ICE, Blocks.AIR.defaultBlockState(), true));
+        m.put(Archetype.ECHO, new MaterialSet(Blocks.SCULK, Blocks.DEEPSLATE, Blocks.DEEPSLATE, Blocks.AIR,
+                RvBlocks.SCULK_CRYSTAL.get(), Blocks.SOUL_LANTERN, Blocks.DEEPSLATE_TILES, Blocks.SCULK_CATALYST,
+                Blocks.TINTED_GLASS, Blocks.AIR, Blocks.DEEPSLATE_BRICKS, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.MOLTENSEA, new MaterialSet(Blocks.BASALT, Blocks.BLACKSTONE, RvBlocks.MAGMA_CRUST.get(), Blocks.LAVA,
+                Blocks.MAGMA_BLOCK, Blocks.SHROOMLIGHT, RvBlocks.EMBER_BRICKS.get(), Blocks.POLISHED_BLACKSTONE,
+                Blocks.ORANGE_STAINED_GLASS, Blocks.AIR, Blocks.CRIMSON_STEM, Blocks.NETHER_WART_BLOCK.defaultBlockState(), false));
+        m.put(Archetype.CLOUDKINGDOM, new MaterialSet(RvBlocks.DREAM_CLOUD.get(), RvBlocks.DREAM_CLOUD.get(), Blocks.CALCITE, Blocks.AIR,
+                Blocks.QUARTZ_BLOCK, Blocks.PEARLESCENT_FROGLIGHT, Blocks.QUARTZ_BRICKS, Blocks.SMOOTH_QUARTZ,
+                Blocks.WHITE_STAINED_GLASS, Blocks.AIR, Blocks.BIRCH_LOG, persistent(Blocks.BIRCH_LEAVES), false));
+        m.put(Archetype.DROWNED, new MaterialSet(Blocks.SAND, Blocks.GRAVEL, Blocks.PRISMARINE, Blocks.WATER,
+                Blocks.DARK_PRISMARINE, Blocks.SEA_LANTERN, RvBlocks.ANCIENT_BRICKS.get(), Blocks.PRISMARINE_BRICKS,
+                Blocks.GLASS, Blocks.AIR, Blocks.DARK_PRISMARINE, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.TOXIC, new MaterialSet(Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS, Blocks.PACKED_MUD, Blocks.WATER,
+                Blocks.SLIME_BLOCK, Blocks.VERDANT_FROGLIGHT, Blocks.MOSSY_COBBLESTONE, Blocks.GREEN_CONCRETE,
+                Blocks.LIME_STAINED_GLASS, Blocks.SHORT_GRASS, Blocks.MANGROVE_LOG, persistent(Blocks.MANGROVE_LEAVES), false));
+        m.put(Archetype.CRIMSONWEALD, new MaterialSet(Blocks.CRIMSON_NYLIUM, Blocks.NETHERRACK, Blocks.NETHERRACK, Blocks.LAVA,
+                Blocks.SHROOMLIGHT, Blocks.NETHER_WART_BLOCK, Blocks.CRIMSON_PLANKS, Blocks.RED_NETHER_BRICKS,
+                Blocks.RED_STAINED_GLASS, Blocks.CRIMSON_ROOTS, Blocks.CRIMSON_STEM, Blocks.NETHER_WART_BLOCK.defaultBlockState(), false));
+        m.put(Archetype.WARPEDWEALD, new MaterialSet(Blocks.WARPED_NYLIUM, Blocks.NETHERRACK, Blocks.NETHERRACK, Blocks.AIR,
+                Blocks.SHROOMLIGHT, Blocks.WARPED_WART_BLOCK, Blocks.WARPED_PLANKS, RvBlocks.SCULK_CRYSTAL.get(),
+                Blocks.CYAN_STAINED_GLASS, Blocks.WARPED_ROOTS, Blocks.WARPED_STEM, Blocks.WARPED_WART_BLOCK.defaultBlockState(), false));
+        m.put(Archetype.GOLDENTEMPLE, new MaterialSet(Blocks.SAND, Blocks.SANDSTONE, Blocks.SANDSTONE, Blocks.WATER,
+                RvBlocks.ANCIENT_GOLD.get(), RvBlocks.RUNE_TILE.get(), RvBlocks.ANCIENT_BRICKS.get(), RvBlocks.ANCIENT_GLYPH.get(),
+                Blocks.YELLOW_STAINED_GLASS, Blocks.DEAD_BUSH, Blocks.SMOOTH_SANDSTONE, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.RAINBOW, new MaterialSet(Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.WHITE_CONCRETE, Blocks.WATER,
+                Blocks.RED_STAINED_GLASS, Blocks.PEARLESCENT_FROGLIGHT, Blocks.LIME_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE,
+                Blocks.MAGENTA_STAINED_GLASS, Blocks.PINK_PETALS, Blocks.CHERRY_LOG, persistent(Blocks.CHERRY_LEAVES), false));
+        m.put(Archetype.VOIDGLASS, new MaterialSet(RvBlocks.VOIDGLASS.get(), RvBlocks.VOID_STONE.get(), RvBlocks.VOID_STONE.get(), Blocks.AIR,
+                RvBlocks.VOID_CRYSTAL.get(), RvBlocks.NEBULA_STONE.get(), RvBlocks.VOIDGLASS.get(), RvBlocks.COSMIC_OBSIDIAN.get(),
+                RvBlocks.VOIDGLASS.get(), Blocks.AIR, RvBlocks.VOID_STONE.get(), Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.RUNIC, new MaterialSet(Blocks.STONE, Blocks.ANDESITE, RvBlocks.RUNE_TILE.get(), Blocks.WATER,
+                RvBlocks.ANCIENT_GLYPH.get(), RvBlocks.RUNE_TILE.get(), RvBlocks.ANCIENT_BRICKS.get(), RvBlocks.RUNE_TILE.get(),
+                Blocks.PURPLE_STAINED_GLASS, Blocks.AIR, Blocks.DARK_OAK_LOG, persistent(Blocks.DARK_OAK_LEAVES), false));
+        m.put(Archetype.EMBERSTEPPE, new MaterialSet(Blocks.RED_SAND, Blocks.RED_SANDSTONE, RvBlocks.EMBER_BRICKS.get(), Blocks.LAVA,
+                RvBlocks.MAGMA_CRUST.get(), Blocks.SHROOMLIGHT, RvBlocks.EMBER_BRICKS.get(), Blocks.CRACKED_NETHER_BRICKS,
+                Blocks.ORANGE_STAINED_GLASS, Blocks.DEAD_BUSH, Blocks.CRIMSON_STEM, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.PASTEL, new MaterialSet(Blocks.PINK_WOOL, Blocks.WHITE_WOOL, Blocks.LIGHT_BLUE_CONCRETE, Blocks.WATER,
+                Blocks.YELLOW_WOOL, Blocks.PEARLESCENT_FROGLIGHT, Blocks.LIGHT_BLUE_WOOL, Blocks.LIME_WOOL,
+                Blocks.PINK_STAINED_GLASS, Blocks.PINK_PETALS, Blocks.CHERRY_LOG, persistent(Blocks.CHERRY_LEAVES), false));
+        m.put(Archetype.PETRIFIED, new MaterialSet(Blocks.MOSS_BLOCK, Blocks.DIRT, RvBlocks.STARWOOD_PLANKS.get(), Blocks.WATER,
+                Blocks.AMETHYST_BLOCK, RvBlocks.NEBULA_STONE.get(), RvBlocks.STARWOOD_PLANKS.get(), Blocks.CALCITE,
+                Blocks.PURPLE_STAINED_GLASS, Blocks.FERN, RvBlocks.STARWOOD_PLANKS.get(), persistent(Blocks.AZALEA_LEAVES), false));
+        m.put(Archetype.CRYSTALOCEAN, new MaterialSet(Blocks.SAND, RvBlocks.FROST_CRYSTAL.get(), Blocks.CALCITE, Blocks.WATER,
+                RvBlocks.FROST_CRYSTAL.get(), Blocks.SEA_LANTERN, Blocks.QUARTZ_BRICKS, RvBlocks.AURORA_GLASS.get(),
+                RvBlocks.AURORA_GLASS.get(), Blocks.AIR, Blocks.QUARTZ_PILLAR, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.DUSKHIGHLANDS, new MaterialSet(Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.STONE, Blocks.WATER,
+                Blocks.AMETHYST_BLOCK, Blocks.LANTERN, Blocks.STONE_BRICKS, Blocks.MOSSY_STONE_BRICKS,
+                Blocks.ORANGE_STAINED_GLASS, Blocks.SHORT_GRASS, Blocks.SPRUCE_LOG, persistent(Blocks.SPRUCE_LEAVES), false));
+        m.put(Archetype.NEONJUNGLE, new MaterialSet(RvBlocks.ALIEN_MOSS.get(), RvBlocks.ALIEN_SOIL.get(), Blocks.DEEPSLATE, Blocks.WATER,
+                RvBlocks.NEON_PANEL_CYAN.get(), RvBlocks.NEON_PANEL_MAGENTA.get(), RvBlocks.CYBER_PLATING.get(), RvBlocks.LUMEN_LOG.get(),
+                RvBlocks.CYBER_GLASS.get(), RvBlocks.GLOWCAP.get(), RvBlocks.LUMEN_LOG.get(), persistent(RvBlocks.LUMEN_LEAVES.get()), false));
+        m.put(Archetype.CELESTIAL, new MaterialSet(Blocks.CALCITE, Blocks.SMOOTH_QUARTZ, Blocks.QUARTZ_BLOCK, Blocks.AIR,
+                RvBlocks.ANCIENT_GOLD.get(), Blocks.PEARLESCENT_FROGLIGHT, Blocks.QUARTZ_BRICKS, RvBlocks.STARMETAL_BLOCK.get(),
+                Blocks.WHITE_STAINED_GLASS, Blocks.AIR, Blocks.QUARTZ_PILLAR, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.LUNARCOLONY, new MaterialSet(RvBlocks.LUNAR_DUST.get(), RvBlocks.LUNAR_DUST.get(), Blocks.STONE, Blocks.AIR,
+                RvBlocks.CHROME_PLATING.get(), Blocks.SEA_LANTERN, RvBlocks.CHROME_PLATING.get(), Blocks.WHITE_CONCRETE,
+                Blocks.GLASS, Blocks.AIR, Blocks.IRON_BLOCK, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.CORALKING, new MaterialSet(Blocks.SAND, Blocks.SAND, RvBlocks.CORAL_STONE.get(), Blocks.WATER,
+                Blocks.BRAIN_CORAL_BLOCK, RvBlocks.CORAL_STONE.get(), Blocks.PRISMARINE_BRICKS, Blocks.HORN_CORAL_BLOCK,
+                Blocks.PINK_STAINED_GLASS, Blocks.AIR, Blocks.MANGROVE_LOG, persistent(Blocks.MANGROVE_LEAVES), false));
         m.put(Archetype.MIRROR, new MaterialSet(Blocks.WHITE_CONCRETE, Blocks.QUARTZ_BLOCK, Blocks.CALCITE, Blocks.WATER,
                 Blocks.GLASS, Blocks.SEA_LANTERN, Blocks.SMOOTH_QUARTZ, Blocks.GLASS,
                 Blocks.GLASS, Blocks.AIR, Blocks.BIRCH_LOG, Blocks.AIR.defaultBlockState(), false));

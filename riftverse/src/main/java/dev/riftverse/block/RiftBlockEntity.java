@@ -35,6 +35,11 @@ public class RiftBlockEntity extends BlockEntity {
     public float openProgress;
     public float openProgressO;
     public long seed;
+    /** Colours and name of the concrete world this rift leads to (resolved server-side, synced to clients). */
+    public int tintA = -1;
+    public int tintB = -1;
+    public String destName = "";
+    private boolean resolved;
 
     public RiftBlockEntity(BlockPos pos, BlockState state) {
         super(RvBlockEntities.RIFT.get(), pos, state);
@@ -53,6 +58,7 @@ public class RiftBlockEntity extends BlockEntity {
         this.destination = destination;
         this.expireAt = expireAt;
         this.harvestable = harvestable;
+        this.resolved = false;
         setChanged();
         if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
@@ -76,7 +82,64 @@ public class RiftBlockEntity extends BlockEntity {
         level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
     }
 
+    /**
+     * Decides, once, exactly which world this rift opens onto, and takes on that world's colours, so a rift's colour
+     * always tells you where it goes. Family rifts pick a concrete universe of their family; the choice is saved.
+     */
+    private void resolve(ServerLevel level) {
+        resolved = true;
+        RiftType type = type();
+        var server = level.getServer();
+        Destination d = destination;
+        if (d == null && type != RiftType.NEXUS && type != RiftType.RETURN) d = Destination.flavor(type);
+        if (d == null || d.kind() == Destination.Kind.NEXUS) {
+            tintA = 0xFFC14D;
+            tintB = 0xFFFFFF;
+            destName = "The Multiverse Nexus";
+        } else if (d.kind() == Destination.Kind.FLAVOR || d.kind() == Destination.Kind.RANDOM || d.kind() == Destination.Kind.ARCHETYPE) {
+            var reg = dev.riftverse.universe.UniverseRegistry.get(server);
+            java.util.Random r = new java.util.Random(seed ^ level.getGameTime());
+            dev.riftverse.universe.UniverseSpec spec = d.kind() == Destination.Kind.ARCHETYPE
+                    ? reg.primeSpec(dev.riftverse.universe.Archetype.byId(d.archetype()))
+                    : reg.randomUniverse(r, d.kind() == Destination.Kind.FLAVOR ? RiftType.byId(d.flavor()).destinations() : null);
+            destination = Destination.universe(spec.id);
+            paint(spec);
+        } else if (d.kind() == Destination.Kind.UNIVERSE) {
+            paint(dev.riftverse.universe.UniverseRegistry.specFor(dev.riftverse.universe.UniverseId.unpack(d.universe())));
+        } else {
+            tintA = type.colorA;
+            tintB = type.colorB;
+            destName = d.kind() == Destination.Kind.HOME ? "Home" : "Return Passage";
+        }
+        setChanged();
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+    }
+
+    private void paint(dev.riftverse.universe.UniverseSpec spec) {
+        tintA = spec.accent;
+        tintB = spec.archetype.signatureColor;
+        destName = spec.name + " • " + spec.archetype.displayName;
+    }
+
+    public int colorA() {
+        return tintA >= 0 ? tintA : type().colorA;
+    }
+
+    public int colorB() {
+        return tintB >= 0 ? tintB : type().colorB;
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, RiftBlockEntity be) {
+        if (!be.resolved || (be.destination != null && be.destination.kind() == Destination.Kind.UNIVERSE
+                && !dev.riftverse.multiverse.RealityState.isAccessible(dev.riftverse.universe.UniverseId.unpack(be.destination.universe())))) {
+            if (be.resolved) be.destination = null;
+            be.resolve((ServerLevel) level);
+        }
+        if (level.getGameTime() % 20 == Math.floorMod(pos.hashCode(), 20) && !be.destName.isEmpty()) {
+            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(6))) {
+                p.displayClientMessage(net.minecraft.network.chat.Component.literal("Rift → " + be.destName).withColor(be.colorA()), true);
+            }
+        }
         if (be.expireAt > 0 && level.getGameTime() >= be.expireAt) {
             collapse((ServerLevel) level, pos);
             return;
@@ -89,7 +152,7 @@ public class RiftBlockEntity extends BlockEntity {
             Vec3 body = player.position().add(0, player.getBbHeight() * 0.5, 0);
             if (body.distanceTo(center) > TRIGGER_RADIUS + 0.9) continue;
             RiftType type = state.getValue(RiftBlock.TYPE);
-            TransitManager.begin(player, TransitKind.RIFT, be.destination(), center, type.colorA, type.colorB, type != RiftType.RETURN);
+            TransitManager.begin(player, TransitKind.RIFT, be.destination(), center, be.colorA(), be.colorB(), type != RiftType.RETURN);
         }
     }
 
@@ -105,6 +168,10 @@ public class RiftBlockEntity extends BlockEntity {
         tag.putInt("charges", charges);
         tag.putLong("expireAt", expireAt);
         tag.putBoolean("harvestable", harvestable);
+        tag.putBoolean("resolved", resolved);
+        tag.putInt("tintA", tintA);
+        tag.putInt("tintB", tintB);
+        tag.putString("destName", destName);
     }
 
     @Override
@@ -114,12 +181,19 @@ public class RiftBlockEntity extends BlockEntity {
         charges = tag.contains("charges") ? tag.getInt("charges") : 3;
         expireAt = tag.getLong("expireAt");
         harvestable = !tag.contains("harvestable") || tag.getBoolean("harvestable");
+        resolved = tag.getBoolean("resolved");
+        tintA = tag.contains("tintA") ? tag.getInt("tintA") : -1;
+        tintB = tag.contains("tintB") ? tag.getInt("tintB") : -1;
+        destName = tag.getString("destName");
     }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putLong("expireAt", expireAt);
+        tag.putInt("tintA", tintA);
+        tag.putInt("tintB", tintB);
+        tag.putString("destName", destName);
         return tag;
     }
 

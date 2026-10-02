@@ -202,7 +202,7 @@ public final class CinematicDirector {
             case EMERGE -> (kind == TransitKind.BLACK_HOLE ? 55f : 38f) * (1f - CameraRig.easeOut((t - emergeStart) / (EMERGE_TICKS * 0.8f)));
         };
         if (bossTick >= 0 && bossTick < 100) base -= 18f * (float) Math.sin(Math.min(1f, bossTick / 100f) * Math.PI);
-        if (phase == Phase.NONE) base += RealityCinematics.fovOffset(partial);
+        base += RealityCinematics.fovOffset(partial);
         return base;
     }
 

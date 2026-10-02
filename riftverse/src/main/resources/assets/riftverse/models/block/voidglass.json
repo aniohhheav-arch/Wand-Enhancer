@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "riftverse:block/voidglass"
+  },
+  "render_type": "minecraft:translucent"
+}

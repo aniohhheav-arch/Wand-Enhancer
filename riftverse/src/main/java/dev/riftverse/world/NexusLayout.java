@@ -33,21 +33,28 @@ public final class NexusLayout {
     private static Gate[] buildGates() {
         int n = Archetype.values().length;
         Gate[] g = new Gate[n];
+        // the outer ring holds 40 gates on the platform's edge; any further realities get an inner ring
+        int outer = Math.min(n, 40);
+        place(g, 0, outer, GATE_SIDE, 78);
+        if (n > outer) place(g, outer, n - outer, 30, 48);
+        return g;
+    }
+
+    private static void place(Gate[] g, int start, int n, int side, int span) {
         int perSide = (n + 3) / 4;
-        int span = 78;
-        for (int i = 0; i < n; i++) {
-            int side = i / perSide;
-            int k = i % perSide;
-            int count = Math.min(perSide, n - side * perSide);
+        for (int j = 0; j < n; j++) {
+            int i = start + j;
+            int s = j / perSide;
+            int k = j % perSide;
+            int count = Math.min(perSide, n - s * perSide);
             int off = count == 1 ? 0 : -span / 2 + Math.round(k * span / (float) (count - 1));
-            g[i] = switch (side) {
-                case 0 -> new Gate(i, off, -GATE_SIDE, Direction.Axis.X);
-                case 1 -> new Gate(i, GATE_SIDE, off, Direction.Axis.Z);
-                case 2 -> new Gate(i, -off, GATE_SIDE, Direction.Axis.X);
-                default -> new Gate(i, -GATE_SIDE, -off, Direction.Axis.Z);
+            g[i] = switch (s) {
+                case 0 -> new Gate(i, off, -side, Direction.Axis.X);
+                case 1 -> new Gate(i, side, off, Direction.Axis.Z);
+                case 2 -> new Gate(i, -off, side, Direction.Axis.X);
+                default -> new Gate(i, -side, -off, Direction.Axis.Z);
             };
         }
-        return g;
     }
 
     /**

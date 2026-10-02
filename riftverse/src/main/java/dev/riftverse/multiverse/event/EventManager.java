@@ -99,7 +99,7 @@ public final class EventManager {
             case REALITY_COLLAPSE -> CinematicType.COLLAPSE;
             case DIMENSIONAL_INVASION -> CinematicType.INVASION;
             case COSMIC_LEVIATHAN -> CinematicType.LEVIATHAN;
-            case ANCIENT_GUARDIAN, VOID_WANDERER -> CinematicType.GUARDIAN;
+            case ANCIENT_GUARDIAN, VOID_WANDERER, COSMIC_DEITY -> CinematicType.GUARDIAN;
             case DIMENSIONAL_ANOMALY -> CinematicType.ANOMALY;
             case UNIVERSE_BIRTH -> CinematicType.BIRTH;
             case BLACK_HOLE -> CinematicType.SINGULARITY;
@@ -112,7 +112,8 @@ public final class EventManager {
         EventKit.burst(e, e.focus, e.type.color, 1.2f);
         if (!e.focus.equals(e.center)) EventKit.burst(e, e.center, e.type.color, 0.7f);
         CinematicType cine = cinematicFor(e.type);
-        boolean bossTitle = e.type == EventType.COSMIC_LEVIATHAN || e.type == EventType.ANCIENT_GUARDIAN || e.type == EventType.VOID_WANDERER;
+        boolean bossTitle = e.type == EventType.COSMIC_LEVIATHAN || e.type == EventType.ANCIENT_GUARDIAN || e.type == EventType.VOID_WANDERER
+                || e.type == EventType.COSMIC_DEITY;
         for (ServerPlayer p : EventKit.playersNear(e, 160)) {
             if (TransitManager.inTransit(p)) continue;
             RealityOps.cinematic(p, cine, e.type == EventType.UNIVERSE_BIRTH ? 380 : 0, e.focus, e.type.color, 0xFFFFFF, bossTitle ? "" : e.type.title, bossTitle ? "" : e.type.subtitle);

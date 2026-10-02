@@ -1,6 +1,18 @@
 {
   "replace": false,
   "values": [
+    "riftverse:starmetal_block",
+    "riftverse:aurora_glass",
+    "riftverse:sculk_crystal",
+    "riftverse:magma_crust",
+    "riftverse:chrome_plating",
+    "riftverse:honey_crystal",
+    "riftverse:nebula_stone",
+    "riftverse:voidglass",
+    "riftverse:rune_tile",
+    "riftverse:ember_bricks",
+    "riftverse:frost_crystal",
+    "riftverse:coral_stone",
     "riftverse:rift_frame",
     "riftverse:multiverse_console",
     "riftverse:gravity_lift",

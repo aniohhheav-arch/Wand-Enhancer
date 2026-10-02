@@ -222,7 +222,7 @@ public final class EndProtocols {
         return switch (r.protocol) {
             case ORBITAL_ANNIHILATION -> around.add(0, 48, 0);
             case SINGULARITY_COLLAPSE -> around.add(0, 24, 0);
-            case CELESTIAL_DEVOURER -> around.add(0, 40, 0);
+            case CELESTIAL_DEVOURER -> around.add(14, 50, 14);
             case BLACK_HOLE_INFUSION -> around.add(18, 12, 0);
             default -> around.add(0, 1.5, 0);
         };
@@ -276,18 +276,14 @@ public final class EndProtocols {
                 case SINGULARITY_COLLAPSE -> spawnHole(r, a.add(0, 24, 0), 0.4f);
                 case BLACK_HOLE_INFUSION -> spawnHole(r, a.add(18, 12, 0), 1.0f);
                 case CELESTIAL_DEVOURER -> {
-                    Mob whale = RvEntities.SKY_WHALE.get().create(level);
-                    if (whale == null) break;
-                    whale.moveTo(a.x, a.y + 80, a.z, 0, 90);
-                    whale.setNoAi(true);
-                    whale.setNoGravity(true);
-                    whale.setInvulnerable(true);
-                    whale.setSilent(true);
-                    whale.setPersistenceRequired();
-                    AttributeInstance scale = whale.getAttribute(Attributes.SCALE);
-                    if (scale != null) scale.setBaseValue(14.0);
-                    level.addFreshEntity(whale);
-                    r.entities.add(whale.getUUID());
+                    var deity = RvEntities.COSMIC_DEITY.get().create(level);
+                    if (deity == null) break;
+                    deity.moveTo(a.x, a.y + 80, a.z, 0, 45);
+                    deity.makeDevourer(r.preview);
+                    AttributeInstance scale = deity.getAttribute(Attributes.SCALE);
+                    if (scale != null) scale.setBaseValue(16.0);
+                    level.addFreshEntity(deity);
+                    r.entities.add(deity.getUUID());
                 }
                 default -> {}
             }
@@ -449,12 +445,16 @@ public final class EndProtocols {
             case CELESTIAL_DEVOURER -> {
                 Entity whale = nearestOwned(r, a);
                 float descend = Math.min(1f, k / 0.4f);
-                Vec3 body = a.add(0, 80 - 42 * descend, 0);
-                if (whale != null) {
-                    whale.moveTo(body.x, body.y, body.z, whale.getYRot() + 0.6f, 90);
-                    whale.setDeltaMovement(Vec3.ZERO);
+                Vec3 body = a.add(14, 70 - 34 * descend, 14);
+                if (whale instanceof dev.riftverse.entity.boss.CosmicDeityEntity deity) {
+                    float yaw = (float) (Math.toDegrees(Math.atan2(a.z - body.z, a.x - body.x)) - 90);
+                    deity.moveTo(body.x, body.y, body.z, yaw, 45);
+                    deity.setYHeadRot(yaw);
+                    deity.yBodyRot = yaw;
+                    deity.setDeltaMovement(Vec3.ZERO);
+                    deity.setBreathing(k > 0.35f);
                 }
-                Vec3 mouth = body.add(0, -10, 0);
+                Vec3 mouth = whale instanceof dev.riftverse.entity.boss.CosmicDeityEntity deity ? deity.mouth() : body;
                 double spin = r.age * 0.12;
                 if (r.age % 2 == 0) {
                     for (int arm = 0; arm < (heavy ? 5 : 2); arm++) {
@@ -478,7 +478,7 @@ public final class EndProtocols {
                         lift(r, t, mouth.subtract(Vec3.atCenterOf(t)).normalize().scale(0.8 + k), true);
                     }
                 }
-                if (r.age % 60 == 0) sound(r, mouth, RvSounds.WHALE_CALL.get(), 6f, 0.35f);
+                if (r.age % 60 == 0) sound(r, mouth, RvSounds.WARDEN_ROAR.get(), 6f, 0.3f);
                 if (r.age % 30 == 0) shake(r, 0.25f + 0.4f * k, 24, 0f, pr.colorA);
             }
             case REALITY_DISASSEMBLY -> {

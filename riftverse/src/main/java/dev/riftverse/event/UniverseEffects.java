@@ -105,12 +105,16 @@ public final class UniverseEffects {
             case CRYSTAL_SENTINEL -> RvEntities.CRYSTAL_SENTINEL.get();
             case RIFT_WRAITH -> RvEntities.RIFT_WRAITH.get();
             case ABYSSAL_LEVIATHAN -> RvEntities.ABYSSAL_LEVIATHAN.get();
+            case VOID_CULTIST -> RvEntities.VOID_CULTIST.get();
+            case CRYSTAL_SPIDER -> RvEntities.CRYSTAL_SPIDER.get();
+            case STAR_MOTH -> RvEntities.STAR_MOTH.get();
+            case LUNAR_GOLEM -> RvEntities.LUNAR_GOLEM.get();
         };
     }
 
     private static boolean flies(CreatureKind kind) {
         return kind == CreatureKind.ASTRAL_JELLY || kind == CreatureKind.SKY_WHALE || kind == CreatureKind.NEON_DRONE
-                || kind == CreatureKind.RIFT_WRAITH || kind == CreatureKind.ABYSSAL_LEVIATHAN;
+                || kind == CreatureKind.RIFT_WRAITH || kind == CreatureKind.ABYSSAL_LEVIATHAN || kind == CreatureKind.STAR_MOTH;
     }
 
     private static void spawnAround(ServerLevel level, ServerPlayer player, UniverseSpec spec) {

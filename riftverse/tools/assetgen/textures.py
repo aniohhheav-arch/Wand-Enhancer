@@ -1263,8 +1263,204 @@ def animated_block(name, fn, frames, frametime, preview, interpolate=False):
         save_animated(pairs, f"block/{name}.png", frametime, preview, interpolate)
 
 
+def tex_cosmic_deity():
+    """64x64 player-layout skin: a body made of night sky — nebula skin, star points, gold sigil veins, burning eyes."""
+    size = 64
+    neb = fbm(size, 4, 4, 9001)
+    rgb = ramp(neb, [(0.0, 0x05010F), (0.35, 0x1A0A40), (0.6, 0x4A1A8A), (0.8, 0x2A60C0), (1.0, 0xC070FF)])
+    rng = np.random.default_rng(77)
+    stars = rng.random((size, size)) > 0.93
+    rgb[stars] = rgb[stars] * 0.3 + hexc(0xFFF4E0) * 0.7
+    veins = fbm(size, 6, 2, 31337)
+    vein = np.abs(veins - 0.5) < 0.035
+    rgb[vein] = hexc(0xFFC14D)
+    img = rgba(rgb, 1.0)
+    # second skin layer (rows/areas used by hat & jacket) left transparent
+    img[0:16, 32:64, 3] = 0.0
+    img[32:48, 0:56, 3] = 0.0
+    img[48:64, 0:16, 3] = 0.0
+    img[48:64, 48:64, 3] = 0.0
+    # face (front of head is x 8..15, y 8..15): darker brow, two burning eyes
+    img[8:16, 8:16, :3] *= 0.55
+    for x in (9, 10, 13, 14):
+        img[11, x, :3] = hexc(0xFFF0C0)
+    img[12, 9:11, :3] = hexc(0xFFC14D)
+    img[12, 13:15, :3] = hexc(0xFFC14D)
+    # a glowing core in the chest
+    img[22:26, 22:26, :3] = hexc(0xFFE0FF)
+    img[23:25, 23:25, :3] = hexc(0xFFFFFF)
+    return img
+
+
+def tex_x_starmetal_block():
+    f1, f2, idx = voronoi(N, 10, 3100)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3200) * 0.5
+    img = rgba(ramp(v, [(0, 0x2A3A5A), (0.6, 0x6A8AC0), (1, 0xD0E8FF)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    g = empty()
+    m = fbm(N, 6, 2, 3300) > 0.72
+    g[m, :3] = hexc(0xBFE8FF)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0xBFE8FF)
+    return img, g
+
+def tex_x_aurora_glass():
+    f1, f2, idx = voronoi(N, 11, 3101)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3201) * 0.5
+    img = rgba(ramp(v, [(0, 0x40FFB0), (0.5, 0x60C0FF), (1, 0xB060FF)]), 0.55)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    return img
+
+def tex_x_sculk_crystal():
+    f1, f2, idx = voronoi(N, 12, 3102)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3202) * 0.5
+    img = rgba(ramp(v, [(0, 0x021014), (0.6, 0x0A5A6A), (1, 0x30E0F0)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    img[(f2 - f1) < 0.35, 3] = 0.0
+    g = empty()
+    m = fbm(N, 6, 2, 3302) > 0.72
+    g[m, :3] = hexc(0x60F8FF)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0x60F8FF)
+    return img, g
+
+def tex_x_magma_crust():
+    f1, f2, idx = voronoi(N, 13, 3103)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3203) * 0.5
+    img = rgba(ramp(v, [(0, 0x1A0400), (0.5, 0x4A1000), (1, 0x8A2A00)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    g = empty()
+    m = fbm(N, 6, 2, 3303) > 0.72
+    g[m, :3] = hexc(0xFF7020)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0xFF7020)
+    return img, g
+
+def tex_x_chrome_plating():
+    f1, f2, idx = voronoi(N, 14, 3104)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3204) * 0.5
+    img = rgba(ramp(v, [(0, 0x8A9AAA), (0.6, 0xD8E4F0), (1, 0xFFFFFF)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    return img
+
+def tex_x_honey_crystal():
+    f1, f2, idx = voronoi(N, 15, 3105)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3205) * 0.5
+    img = rgba(ramp(v, [(0, 0x8A4A00), (0.5, 0xE0A020), (1, 0xFFE080)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    img[(f2 - f1) < 0.35, 3] = 0.0
+    g = empty()
+    m = fbm(N, 6, 2, 3305) > 0.72
+    g[m, :3] = hexc(0xFFF0A0)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0xFFF0A0)
+    return img, g
+
+def tex_x_lunar_dust():
+    f1, f2, idx = voronoi(N, 16, 3106)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3206) * 0.5
+    img = rgba(ramp(v, [(0, 0x8A8A92), (0.6, 0xB8B8C0), (1, 0xE0E0E8)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    return img
+
+def tex_x_nebula_stone():
+    f1, f2, idx = voronoi(N, 10, 3107)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3207) * 0.5
+    img = rgba(ramp(v, [(0, 0x10021A), (0.5, 0x4A1A7A), (1, 0xC050FF)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    g = empty()
+    m = fbm(N, 6, 2, 3307) > 0.72
+    g[m, :3] = hexc(0xFF80F0)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0xFF80F0)
+    return img, g
+
+def tex_x_starwood_planks():
+    f1, f2, idx = voronoi(N, 11, 3108)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3208) * 0.5
+    img = rgba(ramp(v, [(0, 0x2A1A3A), (0.6, 0x5A3A7A), (1, 0x9A7AC0)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    return img
+
+def tex_x_voidglass():
+    f1, f2, idx = voronoi(N, 12, 3109)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3209) * 0.5
+    img = rgba(ramp(v, [(0, 0x05010A), (0.6, 0x20103A), (1, 0x5A30A0)]), 0.55)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    return img
+
+def tex_x_rune_tile():
+    f1, f2, idx = voronoi(N, 13, 3110)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3210) * 0.5
+    img = rgba(ramp(v, [(0, 0x2A1A0A), (0.5, 0x5A4020), (1, 0x8A6A3A)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    g = empty()
+    m = fbm(N, 6, 2, 3310) > 0.72
+    g[m, :3] = hexc(0xFFC14D)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0xFFC14D)
+    return img, g
+
+def tex_x_ember_bricks():
+    f1, f2, idx = voronoi(N, 14, 3111)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3211) * 0.5
+    img = rgba(ramp(v, [(0, 0x2A0804), (0.6, 0x6A1A10), (1, 0xA03018)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    g = empty()
+    m = fbm(N, 6, 2, 3311) > 0.72
+    g[m, :3] = hexc(0xFF6020)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0xFF6020)
+    return img, g
+
+def tex_x_frost_crystal():
+    f1, f2, idx = voronoi(N, 15, 3112)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3212) * 0.5
+    img = rgba(ramp(v, [(0, 0x3A6A9A), (0.5, 0x80C0F0), (1, 0xF0FFFF)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    img[(f2 - f1) < 0.35, 3] = 0.0
+    g = empty()
+    m = fbm(N, 6, 2, 3312) > 0.72
+    g[m, :3] = hexc(0xE0FFFF)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0xE0FFFF)
+    return img, g
+
+def tex_x_coral_stone():
+    f1, f2, idx = voronoi(N, 16, 3113)
+    v = (idx * 0.37 % 1.0) * 0.5 + fbm(N, 4, 3, 3213) * 0.5
+    img = rgba(ramp(v, [(0, 0x5A1A3A), (0.5, 0xC04080), (1, 0xFF90C0)]), 1.0)
+    img[(f2 - f1) < 0.6, :3] *= 0.75
+    g = empty()
+    m = fbm(N, 6, 2, 3313) > 0.72
+    g[m, :3] = hexc(0x80FFE0)
+    g[m, 3] = 1.0
+    img[m, :3] = hexc(0x80FFE0)
+    return img, g
+
+
 def generate():
     preview = []
+    block("starmetal_block", tex_x_starmetal_block(), preview)
+    block("aurora_glass", tex_x_aurora_glass(), preview)
+    block("sculk_crystal", tex_x_sculk_crystal(), preview)
+    block("magma_crust", tex_x_magma_crust(), preview)
+    block("chrome_plating", tex_x_chrome_plating(), preview)
+    block("honey_crystal", tex_x_honey_crystal(), preview)
+    block("lunar_dust", tex_x_lunar_dust(), preview)
+    block("nebula_stone", tex_x_nebula_stone(), preview)
+    block("starwood_planks", tex_x_starwood_planks(), preview)
+    block("voidglass", tex_x_voidglass(), preview)
+    block("rune_tile", tex_x_rune_tile(), preview)
+    block("ember_bricks", tex_x_ember_bricks(), preview)
+    block("frost_crystal", tex_x_frost_crystal(), preview)
+    block("coral_stone", tex_x_coral_stone(), preview)
+    save(tex_cosmic_deity(), "entity/cosmic_deity.png", preview)
+    for name, stops, seed in [("void_cultist", [(0, 0x05010A), (0.6, 0x2A0A4A), (1, 0x9B30FF)], 501),
+                              ("crystal_spider", [(0, 0x1A0A2A), (0.5, 0x6A3AAA), (1, 0xE0B0FF)], 502),
+                              ("star_moth", [(0, 0x1A1030), (0.6, 0x8A70C0), (1, 0xFFE8A0)], 503),
+                              ("lunar_golem", [(0, 0x6A6A72), (0.6, 0xB8B8C0), (1, 0xEFEFF8)], 504)]:
+        save(rgba(ramp(fbm(64, 4, 4, seed), stops)), f"entity/{name}.png", preview)
     block("nexus_stone", tex_nexus_stone(), preview)
     block("nexus_bricks", tex_nexus_bricks(), preview)
     animated_block("nexus_glow", tex_nexus_glow, 16, 3, preview, interpolate=True)

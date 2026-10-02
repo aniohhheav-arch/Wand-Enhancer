@@ -46,15 +46,15 @@ public class RiftRenderer implements BlockEntityRenderer<RiftBlockEntity> {
         if (open <= 0.001f) return;
         float breathe = 1f + 0.04f * (float) Math.sin((mc.level.getGameTime() + partial) * 0.11 + be.seed % 100);
 
-        SpatialFx.rift(center, normal, new Vec3(0, 1, 0), HALF_W * breathe, HALF_H, type.colorA, type.colorB, type.shaderStyle(), open, SpatialFx.SHAPE_TEAR, 1f,
-                type.colorB, type == RiftType.RETURN ? 0.6f : 0.35f);
+        SpatialFx.rift(center, normal, new Vec3(0, 1, 0), HALF_W * breathe, HALF_H, be.colorA(), be.colorB(), type.shaderStyle(), open, SpatialFx.SHAPE_TEAR, 1f,
+                be.colorB(), type == RiftType.RETURN ? 0.6f : 0.35f);
         ClientEffects.reportRift(center, toCam.length());
 
         // light spilling onto the ground beneath the tear
         float t = mc.level.getGameTime() + partial;
         Vector3f ground = new Vector3f(0.5f, 0.03f, 0.5f);
-        FxDraw.ring(buffers.getBuffer(RvRenderTypes.ENERGY), ps.last(), ground, new Vector3f(0, 1, 0), 1.1f * open, 0.35f, type.colorA, 0.35f * open, 32);
-        FxDraw.ring(buffers.getBuffer(RvRenderTypes.ENERGY), ps.last(), ground, new Vector3f(0, 1, 0), (0.3f + (t * 0.02f) % 1f * 1.6f) * open, 0.08f, type.colorB,
+        FxDraw.ring(buffers.getBuffer(RvRenderTypes.ENERGY), ps.last(), ground, new Vector3f(0, 1, 0), 1.1f * open, 0.35f, be.colorA(), 0.35f * open, 32);
+        FxDraw.ring(buffers.getBuffer(RvRenderTypes.ENERGY), ps.last(), ground, new Vector3f(0, 1, 0), (0.3f + (t * 0.02f) % 1f * 1.6f) * open, 0.08f, be.colorB(),
                 0.5f * (1f - (t * 0.02f) % 1f) * open, 32);
     }
 

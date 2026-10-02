@@ -84,6 +84,11 @@ public final class RvItems {
     public static final DeferredItem<DeferredSpawnEggItem> CRYSTAL_SENTINEL_EGG = egg("crystal_sentinel_spawn_egg", RvEntities.CRYSTAL_SENTINEL, 0x6A3AAA, 0x7DF9FF);
     public static final DeferredItem<DeferredSpawnEggItem> RIFT_WRAITH_EGG = egg("rift_wraith_spawn_egg", RvEntities.RIFT_WRAITH, 0x120020, 0xFF2BD6);
     public static final DeferredItem<DeferredSpawnEggItem> RIFT_WARDEN_EGG = egg("rift_warden_spawn_egg", RvEntities.RIFT_WARDEN, 0x05010F, 0xFFC14D);
+    public static final DeferredItem<DeferredSpawnEggItem> VOID_CULTIST_EGG = egg("void_cultist_spawn_egg", RvEntities.VOID_CULTIST, 0x10051A, 0x9B30FF);
+    public static final DeferredItem<DeferredSpawnEggItem> CRYSTAL_SPIDER_EGG = egg("crystal_spider_spawn_egg", RvEntities.CRYSTAL_SPIDER, 0x2A1040, 0xC080FF);
+    public static final DeferredItem<DeferredSpawnEggItem> STAR_MOTH_EGG = egg("star_moth_spawn_egg", RvEntities.STAR_MOTH, 0x1A1030, 0xFFE8A0);
+    public static final DeferredItem<DeferredSpawnEggItem> LUNAR_GOLEM_EGG = egg("lunar_golem_spawn_egg", RvEntities.LUNAR_GOLEM, 0xB8B8C0, 0x7DF9FF);
+    public static final DeferredItem<DeferredSpawnEggItem> COSMIC_DEITY_EGG = egg("cosmic_deity_spawn_egg", RvEntities.COSMIC_DEITY, 0x05010F, 0xC070FF);
     public static final DeferredItem<DeferredSpawnEggItem> ABYSSAL_LEVIATHAN_EGG = egg("abyssal_leviathan_spawn_egg", RvEntities.ABYSSAL_LEVIATHAN, 0x0A1A3A, 0x40FFE0);
 
     static {

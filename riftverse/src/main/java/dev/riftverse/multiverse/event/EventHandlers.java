@@ -56,6 +56,7 @@ public final class EventHandlers {
         m.put(EventType.BLACK_HOLE, new Singularity());
         m.put(EventType.RIFT_STORM, new RiftStorm());
         m.put(EventType.COSMIC_CONVERGENCE, new Convergence());
+        m.put(EventType.COSMIC_DEITY, new Deity());
         return m;
     }
 
@@ -227,6 +228,37 @@ public final class EventHandlers {
                 for (ServerPlayer p : EventKit.playersNear(e, 128)) p.displayClientMessage(Component.literal("The Leviathan dives back into the dark between worlds.").withColor(0x40FFE0), true);
             }
             EventKit.discardAll(e);
+        }
+    }
+
+    // ------------------------------------------------------------------ 11. cosmic deity
+
+    static final class Deity implements MultiverseEvent {
+        @Override
+        public String start(ActiveEvent e) {
+            Mob god = EventKit.spawn(e, RvEntities.COSMIC_DEITY.get(), e.center.add(0, 40, 0));
+            if (god == null) return "the deity could not manifest";
+            e.focus = god.position().add(0, god.getBbHeight() * 0.8, 0);
+            e.level.playSound(null, god.getX(), god.getY(), god.getZ(), RvSounds.WARDEN_ROAR.get(), SoundSource.HOSTILE, 10f, 0.3f);
+            e.level.sendParticles(RvParticles.RING.get().with(0xC070FF, 40f, 40), god.getX(), god.getY() + 6, god.getZ(), 1, 0, 0, 0, 0);
+            bossIntro(e, god, "THE COSMIC DEITY", "A god made of night has come to feed", 0xC070FF);
+            return null;
+        }
+
+        @Override
+        public void tick(ActiveEvent e) {
+            if (EventKit.alive(e) == 0) {
+                reward(e, 128, 150, "a god has fallen");
+                e.finished = true;
+                return;
+            }
+            Entity god = EventKit.entity(e, e.entities.get(0));
+            if (god != null) e.center = god.position();
+        }
+
+        @Override
+        public void end(ActiveEvent e, boolean forced) {
+            if (forced || e.age >= e.duration) EventKit.discardAll(e);
         }
     }
 

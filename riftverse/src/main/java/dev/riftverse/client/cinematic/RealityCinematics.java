@@ -76,7 +76,32 @@ public final class RealityCinematics {
         return type == null ? 0f : Mth.clamp(t(partial) / duration, 0f, 1f);
     }
 
+    /** 0..1 how strongly a nearby inhaling Cosmic Deity is warping this player's view. */
+    private static float deityPull;
+    private static int deityTicks;
+
+    private static void sampleDeity() {
+        Minecraft mc = Minecraft.getInstance();
+        float best = 0f;
+        if (mc.level != null && mc.player != null) {
+            for (net.minecraft.world.entity.Entity e : mc.level.entitiesForRendering()) {
+                if (!(e instanceof dev.riftverse.entity.boss.CosmicDeityEntity deity)) continue;
+                double d = deity.mouth().distanceTo(mc.player.getEyePosition());
+                float k = deity.inhale() * (float) Math.max(0, 1 - d / 110);
+                best = Math.max(best, k);
+            }
+        }
+        deityPull = deityPull + (best - deityPull) * 0.2f;
+        if (deityPull > 0.05f) {
+            deityTicks++;
+            if (deityTicks % 6 == 0) CinematicDirector.shake(0.15f + 0.6f * deityPull, 8, 0f, 0xC070FF);
+        } else {
+            deityTicks = 0;
+        }
+    }
+
     public static void tick() {
+        sampleDeity();
         if (type == null) return;
         tick++;
         CinematicType t = type;
@@ -163,8 +188,9 @@ public final class RealityCinematics {
     }
 
     public static float fovOffset(float partial) {
+        float warp = deityPull > 0.01f ? deityPull * (24f + 10f * (float) Math.sin((deityTicks + partial) * 0.35)) : 0f;
         CinematicType t = type;
-        if (t == null) return 0f;
+        if (t == null) return warp;
         float k = envelope(partial);
         return switch (t) {
             case ERASURE -> 22f * k * progress(partial);
@@ -179,6 +205,16 @@ public final class RealityCinematics {
 
     /** Full-screen colour work drawn under the letterbox and titles. */
     public static void renderOverlay(GuiGraphics g, float partial) {
+        if (deityPull > 0.02f) {
+            // the world is being drawn into a mouth: the edges darken, rings rush inward, colour bleeds violet
+            int w = g.guiWidth();
+            int h = g.guiHeight();
+            float time = deityTicks + partial;
+            vignette(g, w, h, 0x0A0018, deityPull * 0.75f);
+            tunnelRings(g, w, h, time * 3f, 0xC070FF, deityPull, 0.4f);
+            wash(g, w, h, 0x6020A0, deityPull * 0.18f * (0.6f + 0.4f * (float) Math.sin(time * 0.4)));
+            if (RiftverseConfig.get(RiftverseConfig.HEAVY_EFFECTS, true)) staticNoise(g, w, h, time, deityPull * 0.5f, deityPull);
+        }
         CinematicType t = type;
         if (t == null) return;
         int w = g.guiWidth();

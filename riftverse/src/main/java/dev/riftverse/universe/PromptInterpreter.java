@@ -102,6 +102,28 @@ public final class PromptInterpreter {
         words(Archetype.CHROME, 3, "utopia", "chrome", "futuristic", "clean", "white", "metropolis", "solarpunk");
         words(Archetype.LUNAR, 3, "moon", "lunar", "astronaut", "apollo", "crater", "craters");
         words(Archetype.HIVE, 3, "bee", "bees", "honey", "hive", "honeycomb", "nectar");
+        words(Archetype.STARFORGE, 3, "forge", "foundry", "factory", "industrial", "smithy", "anvil", "metal");
+        words(Archetype.FROSTGLASS, 3, "frost", "frozen", "icy", "ice", "glacier", "crystal", "winter");
+        words(Archetype.ECHO, 3, "abyss", "silence", "silent", "whisper", "whispers", "haunted");
+        words(Archetype.MOLTENSEA, 3, "burning", "inferno", "firestorm");
+        words(Archetype.CLOUDKINGDOM, 3, "cloud", "clouds", "heaven", "heavenly", "kingdom", "castle", "sky");
+        words(Archetype.DROWNED, 3, "atlantis", "sunken", "drowned", "underwater", "shipwreck", "ruins");
+        words(Archetype.TOXIC, 3, "toxic", "poison", "poisonous", "acid", "sludge", "plague", "radiation");
+        words(Archetype.CRIMSONWEALD, 3, "crimson", "blood", "bloody", "scarlet");
+        words(Archetype.WARPEDWEALD, 3, "warped", "teal", "twisted", "weird");
+        words(Archetype.GOLDENTEMPLE, 3, "temple", "gold", "golden", "egypt", "pharaoh", "pyramid", "god", "gods");
+        words(Archetype.RAINBOW, 3, "rainbow", "rainbows", "colours", "colors", "unicorn", "happy");
+        words(Archetype.VOIDGLASS, 3, "void", "nothing", "nothingness", "empty");
+        words(Archetype.RUNIC, 3, "rune", "runes", "runic", "magic", "magical", "wizard", "spell", "spells");
+        words(Archetype.EMBERSTEPPE, 3, "ember", "embers", "smoulder", "steppe", "burnt", "scorched");
+        words(Archetype.PASTEL, 3, "pastel", "soft", "cute", "kawaii", "cozy", "cosy", "fluffy");
+        words(Archetype.PETRIFIED, 3, "petrified", "fossil", "fossils", "starwood");
+        words(Archetype.CRYSTALOCEAN, 3, "lagoon", "turquoise");
+        words(Archetype.DUSKHIGHLANDS, 3, "dusk", "twilight", "sunset", "highlands", "evening");
+        words(Archetype.NEONJUNGLE, 3, "glowing", "bioluminescent", "bioluminescence", "avatar", "pandora");
+        words(Archetype.CELESTIAL, 3, "celestial", "angel", "angels", "divine", "holy", "paradise", "olympus");
+        words(Archetype.LUNARCOLONY, 3, "moonbase", "colony", "sci-fi", "scifi", "outpost");
+        words(Archetype.CORALKING, 3, "mermaid", "mermaids", "pearl", "pearls", "shell", "shells");
         words(Archetype.MIRROR, 3, "mirror", "reflection", "reflective", "glass", "salt", "flats");
 
         color(0xFF2A2A, "red", "scarlet", "ruby");

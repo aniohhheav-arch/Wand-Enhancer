@@ -9,13 +9,13 @@ BLOCK_ITEMS = ["rift_frame", "multiverse_console", "rift_altar", "gravity_lift",
                "void_stone", "void_crystal", "rift_crystal", "neon_panel_cyan", "neon_panel_magenta", "cyber_plating", "cyber_glass",
                "alien_moss", "alien_soil", "glowcap", "lumen_log", "lumen_leaves", "skystone", "dream_turf", "dream_cloud",
                "dead_regolith", "ashen_rock", "cosmic_obsidian", "stardust_sand", "glitch_block", "ancient_bricks", "ancient_glyph",
-               "ancient_gold", "abyssal_glow"]
+               "ancient_gold", "abyssal_glow", "starmetal_block", "aurora_glass", "sculk_crystal", "magma_crust", "chrome_plating", "honey_crystal", "lunar_dust", "nebula_stone", "starwood_planks", "voidglass", "rune_tile", "ember_bricks", "frost_crystal", "coral_stone"]
 
-PICKAXE = ["rift_frame", "multiverse_console", "gravity_lift", "nexus_stone", "nexus_bricks", "nexus_glow", "void_stone", "void_crystal",
+PICKAXE = ["starmetal_block", "aurora_glass", "sculk_crystal", "magma_crust", "chrome_plating", "honey_crystal", "nebula_stone", "voidglass", "rune_tile", "ember_bricks", "frost_crystal", "coral_stone", "rift_frame", "multiverse_console", "gravity_lift", "nexus_stone", "nexus_bricks", "nexus_glow", "void_stone", "void_crystal",
            "rift_crystal", "neon_panel_cyan", "neon_panel_magenta", "cyber_plating", "skystone", "ashen_rock", "cosmic_obsidian",
            "glitch_block", "ancient_bricks", "ancient_glyph", "ancient_gold", "abyssal_glow"]
-SHOVEL = ["alien_soil", "dead_regolith", "stardust_sand", "dream_turf"]
-AXE = ["lumen_log"]
+SHOVEL = ["lunar_dust", "alien_soil", "dead_regolith", "stardust_sand", "dream_turf"]
+AXE = ["starwood_planks", "lumen_log"]
 HOE = ["alien_moss", "lumen_leaves", "dream_cloud"]
 NEEDS_IRON = ["gravity_lift", "cyber_plating", "ancient_gold"]
 NEEDS_DIAMOND = ["rift_frame", "multiverse_console", "cosmic_obsidian"]
@@ -137,6 +137,11 @@ def loot():
     entity_loot("crystal_sentinel", [("rift_shard", 1, 2), ("minecraft:amethyst_shard", 1, 3)])
     entity_loot("rift_wraith", [("void_essence", 0, 2), ("rift_shard", 0, 1), ("minecraft:phantom_membrane", 0, 1)])
     entity_loot("rift_warden", [("warden_core", 1, 1), ("singularity_fragment", 3, 5), ("exotic_ingot", 4, 8), ("rift_shard", 6, 10)])
+    entity_loot("void_cultist", [("void_essence", 0, 2), ("rift_shard", 0, 1)])
+    entity_loot("crystal_spider", [("minecraft:amethyst_shard", 1, 3), ("minecraft:string", 0, 2)])
+    entity_loot("star_moth", [("stellar_dust", 0, 1)])
+    entity_loot("lunar_golem", [("minecraft:iron_ingot", 2, 5), ("stellar_dust", 1, 3)])
+    entity_loot("cosmic_deity", [("singularity_core", 1, 1), ("singularity_fragment", 6, 10), ("warden_core", 1, 2), ("stellar_dust", 16, 32)])
     entity_loot("abyssal_leviathan", [("leviathan_scale", 4, 6), ("singularity_fragment", 1, 3), ("stellar_dust", 8, 12)])
 
     def e(name, weight, lo=1, hi=1):
@@ -257,6 +262,28 @@ BIOMES = {
     "lunar": (0.0, 0x0A0A12, 0x08080C, 0xD8D8E8, 0x101018, 0x808088, 0x707078),
     "hive": (0.9, 0xFFE070, 0xF0C040, 0xFFC020, 0x8A6A10, 0xE0C040, 0xD0B030),
     "mirror": (0.6, 0xFFFFFF, 0xE0F0FF, 0xB0E0FF, 0x80B0E0, 0xC0E0F0, 0xB0D0E8),
+    "starforge": (0.5, 0x3A2A5A, 0x2A2040, 0x9AC8FF, 0x1A1A3A, 0x6A6A8A, 0x5A5A7A),
+    "frostglass": (0.0, 0x6AA0D0, 0x80B0E0, 0xE0FFFF, 0x3A6A9A, 0xA0D0E0, 0x90C0D0),
+    "echo": (0.5, 0x02101A, 0x020A10, 0x30E0F0, 0x02101A, 0x205A5A, 0x1A4A4A),
+    "moltensea": (1.0, 0x8A2A00, 0x6A1A00, 0xFF6A10, 0x3A0800, 0x8A5020, 0x704010),
+    "cloudkingdom": (0.7, 0xE0F0FF, 0xF0F8FF, 0xFFFFFF, 0x80B0E0, 0xC0E0C0, 0xB0D0B0),
+    "drowned": (0.7, 0x2A6A9A, 0x1A4A6A, 0x2A8AC0, 0x0A2A4A, 0x4A9A9A, 0x3A8A8A),
+    "toxic": (0.9, 0x4A6A10, 0x3A5A10, 0x80FF20, 0x2A3A00, 0x6A8A20, 0x5A7A10),
+    "crimsonweald": (1.0, 0x7A1020, 0x5A0A18, 0xD02040, 0x3A0010, 0x8A2030, 0x7A1828),
+    "warpedweald": (0.5, 0x0A5A5A, 0x0A4040, 0x20D0B0, 0x002A2A, 0x20A080, 0x109070),
+    "goldentemple": (1.0, 0xFFE0A0, 0xE0C080, 0xFFC14D, 0x3A6A8A, 0xC0B040, 0xA8A030),
+    "rainbow": (0.8, 0xFFD0F0, 0xF0E0FF, 0xFF70C0, 0x6AB0FF, 0x80F080, 0x70E070),
+    "voidglass": (0.5, 0x0A0418, 0x05020C, 0x5A30A0, 0x05020C, 0x302050, 0x281840),
+    "runic": (0.5, 0x6A6AA0, 0x4A4A70, 0xFFC14D, 0x1A2A4A, 0x6A8A50, 0x5A7A40),
+    "embersteppe": (1.0, 0xA04010, 0x7A3010, 0xFF6020, 0x3A0800, 0x8A5020, 0x704010),
+    "pastel": (0.7, 0xFFE0F0, 0xFFF0F8, 0xFFC0E0, 0xC0E0FF, 0xF0C0E0, 0xE0B0D0),
+    "petrified": (0.5, 0x4A2A6A, 0x3A2050, 0x9A7AC0, 0x10061A, 0x6A5A8A, 0x5A4A7A),
+    "crystalocean": (0.8, 0xD0F8FF, 0xC0F0FF, 0xA0F0FF, 0x40B0E0, 0x80D0C0, 0x70C0B0),
+    "duskhighlands": (0.6, 0xFF9060, 0xC07080, 0xFF9060, 0x2A1A4A, 0x7A9A50, 0x6A8A40),
+    "neonjungle": (0.9, 0x0A1A3A, 0x08102A, 0x00F0FF, 0x02101A, 0x20C080, 0x10B070),
+    "celestial": (0.5, 0x6A5AC0, 0x4A3A90, 0xFFF0C8, 0x0A0A2A, 0xC0C0A0, 0xB0B090),
+    "lunarcolony": (0.0, 0x0A0A14, 0x08080C, 0xD0E8FF, 0x101018, 0x808088, 0x707078),
+    "coralking": (0.8, 0xB0F0FF, 0x90E0FF, 0xFF70A0, 0x2AA0C0, 0x60D0A0, 0x50C090),
     "nexus": (0.5, 0x05030A, 0x100A20, 0x7DF9FF, 0x0A2A30, 0x7DF9FF, 0x7DF9FF),
 }
 

@@ -92,6 +92,31 @@ public final class RvBlocks {
         return block;
     }
 
+    public static final DeferredBlock<Block> STARMETAL_BLOCK = simple("starmetal_block", MapColor.COLOR_LIGHT_BLUE, 5.0F, SoundType.NETHERITE_BLOCK, 6);
+    public static final DeferredBlock<Block> AURORA_GLASS = item("aurora_glass", () -> new net.minecraft.world.level.block.TransparentBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_LIGHT_GREEN).strength(0.6F, 1.7999999999999998F).sound(SoundType.GLASS).lightLevel(s -> 8).noOcclusion()
+            .isViewBlocking((s, l, p) -> false).isSuffocating((s, l, p) -> false)));
+    public static final DeferredBlock<Block> SCULK_CRYSTAL = item("sculk_crystal", () -> new net.minecraft.world.level.block.TransparentBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_CYAN).strength(2.5F, 7.5F).sound(SoundType.AMETHYST).lightLevel(s -> 10).noOcclusion()
+            .isViewBlocking((s, l, p) -> false).isSuffocating((s, l, p) -> false)));
+    public static final DeferredBlock<Block> MAGMA_CRUST = simple("magma_crust", MapColor.COLOR_ORANGE, 2.0F, SoundType.BASALT, 11);
+    public static final DeferredBlock<Block> CHROME_PLATING = simple("chrome_plating", MapColor.SNOW, 4.0F, SoundType.NETHERITE_BLOCK, 0);
+    public static final DeferredBlock<Block> HONEY_CRYSTAL = item("honey_crystal", () -> new net.minecraft.world.level.block.TransparentBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_YELLOW).strength(1.5F, 4.5F).sound(SoundType.AMETHYST).lightLevel(s -> 12).noOcclusion()
+            .isViewBlocking((s, l, p) -> false).isSuffocating((s, l, p) -> false)));
+    public static final DeferredBlock<Block> LUNAR_DUST = simple("lunar_dust", MapColor.COLOR_LIGHT_GRAY, 0.6F, SoundType.SAND, 0);
+    public static final DeferredBlock<Block> NEBULA_STONE = simple("nebula_stone", MapColor.COLOR_MAGENTA, 3.0F, SoundType.DEEPSLATE, 7);
+    public static final DeferredBlock<Block> STARWOOD_PLANKS = simple("starwood_planks", MapColor.COLOR_PURPLE, 2.0F, SoundType.WOOD, 0);
+    public static final DeferredBlock<Block> VOIDGLASS = item("voidglass", () -> new net.minecraft.world.level.block.TransparentBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_BLACK).strength(0.6F, 1.7999999999999998F).sound(SoundType.GLASS).lightLevel(s -> 0).noOcclusion()
+            .isViewBlocking((s, l, p) -> false).isSuffocating((s, l, p) -> false)));
+    public static final DeferredBlock<Block> RUNE_TILE = simple("rune_tile", MapColor.GOLD, 3.0F, SoundType.DEEPSLATE_TILES, 9);
+    public static final DeferredBlock<Block> EMBER_BRICKS = simple("ember_bricks", MapColor.NETHER, 3.0F, SoundType.NETHER_BRICKS, 5);
+    public static final DeferredBlock<Block> FROST_CRYSTAL = item("frost_crystal", () -> new net.minecraft.world.level.block.TransparentBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.ICE).strength(1.5F, 4.5F).sound(SoundType.GLASS).lightLevel(s -> 9).noOcclusion()
+            .isViewBlocking((s, l, p) -> false).isSuffocating((s, l, p) -> false)));
+    public static final DeferredBlock<Block> CORAL_STONE = simple("coral_stone", MapColor.COLOR_PINK, 2.0F, SoundType.CORAL_BLOCK, 8);
+
     private static DeferredBlock<Block> simple(String name, MapColor color, float strength, SoundType sound, int light) {
         return item(name, () -> {
             BlockBehaviour.Properties props = BlockBehaviour.Properties.of().mapColor(color).strength(strength, strength * 3f)

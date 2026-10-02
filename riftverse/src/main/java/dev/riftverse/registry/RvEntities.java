@@ -67,6 +67,19 @@ public final class RvEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<AbyssalLeviathanEntity>> ABYSSAL_LEVIATHAN = ENTITIES.register("abyssal_leviathan",
             () -> EntityType.Builder.<AbyssalLeviathanEntity>of(AbyssalLeviathanEntity::new, MobCategory.MONSTER).sized(4.0F, 3.5F).clientTrackingRange(20).fireImmune().build("abyssal_leviathan"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.boss.CosmicDeityEntity>> COSMIC_DEITY = ENTITIES.register("cosmic_deity",
+            () -> EntityType.Builder.<dev.riftverse.entity.boss.CosmicDeityEntity>of(dev.riftverse.entity.boss.CosmicDeityEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 1.8F).clientTrackingRange(32).fireImmune().build("cosmic_deity"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.creature.VoidCultistEntity>> VOID_CULTIST = ENTITIES.register("void_cultist",
+            () -> EntityType.Builder.<dev.riftverse.entity.creature.VoidCultistEntity>of(dev.riftverse.entity.creature.VoidCultistEntity::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(10).build("void_cultist"));
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.creature.CrystalSpiderEntity>> CRYSTAL_SPIDER = ENTITIES.register("crystal_spider",
+            () -> EntityType.Builder.<dev.riftverse.entity.creature.CrystalSpiderEntity>of(dev.riftverse.entity.creature.CrystalSpiderEntity::new, MobCategory.MONSTER).sized(1.4F, 0.9F).clientTrackingRange(10).build("crystal_spider"));
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.creature.StarMothEntity>> STAR_MOTH = ENTITIES.register("star_moth",
+            () -> EntityType.Builder.<dev.riftverse.entity.creature.StarMothEntity>of(dev.riftverse.entity.creature.StarMothEntity::new, MobCategory.AMBIENT).sized(0.5F, 0.9F).clientTrackingRange(10).build("star_moth"));
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.creature.LunarGolemEntity>> LUNAR_GOLEM = ENTITIES.register("lunar_golem",
+            () -> EntityType.Builder.<dev.riftverse.entity.creature.LunarGolemEntity>of(dev.riftverse.entity.creature.LunarGolemEntity::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10).build("lunar_golem"));
+
     private RvEntities() {}
 
     public static void registerAttributes(EntityAttributeCreationEvent event) {
@@ -80,5 +93,10 @@ public final class RvEntities {
         event.put(RIFT_WRAITH.get(), RiftWraithEntity.createAttributes().build());
         event.put(RIFT_WARDEN.get(), RiftWardenEntity.createAttributes().build());
         event.put(ABYSSAL_LEVIATHAN.get(), AbyssalLeviathanEntity.createAttributes().build());
+        event.put(VOID_CULTIST.get(), dev.riftverse.entity.creature.VoidCultistEntity.createAttributes().build());
+        event.put(CRYSTAL_SPIDER.get(), dev.riftverse.entity.creature.CrystalSpiderEntity.createAttributes().build());
+        event.put(STAR_MOTH.get(), dev.riftverse.entity.creature.StarMothEntity.createAttributes().build());
+        event.put(LUNAR_GOLEM.get(), dev.riftverse.entity.creature.LunarGolemEntity.createAttributes().build());
+        event.put(COSMIC_DEITY.get(), dev.riftverse.entity.boss.CosmicDeityEntity.createAttributes().build());
     }
 }

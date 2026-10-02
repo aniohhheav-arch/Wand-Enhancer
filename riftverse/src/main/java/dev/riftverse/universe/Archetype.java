@@ -46,7 +46,29 @@ public enum Archetype {
     CHROME("chrome", "Chrome Metropolis", 0xE0F0FF, new String[] {"Metropolis", "Chromeplex", "Spirecity", "Utopia", "Mirrorgrid"}),
     LUNAR("lunar", "Lunar Plains", 0xD8D8E8, new String[] {"Plains", "Mare", "Moonfield", "Selene", "Silence"}),
     HIVE("hive", "Golden Hive", 0xFFC020, new String[] {"Hive", "Honeycomb", "Combworld", "Nectar", "Swarm"}),
-    MIRROR("mirror", "Mirror Realm", 0xB0E0FF, new String[] {"Realm", "Reflection", "Stillwater", "Looking-Glass", "Glassworld"});
+    MIRROR("mirror", "Mirror Realm", 0xB0E0FF, new String[] {"Realm", "Reflection", "Stillwater", "Looking-Glass", "Glassworld"}),
+    STARFORGE("starforge", "Starforge Foundry", 0x9AC8FF, new String[] {"Foundry", "Anvilworld", "Forgeheart", "Smeltery", "Starworks"}),
+    FROSTGLASS("frostglass", "Frostglass Caverns", 0xE0FFFF, new String[] {"Caverns", "Icecathedral", "Shiverhall", "Glasswood", "Coldlight"}),
+    ECHO("echo", "Echoing Abyss", 0x30E0F0, new String[] {"Abyss", "Resonance", "Hollowsong", "Murmur", "Reverb"}),
+    MOLTENSEA("moltensea", "Molten Sea", 0xFF6A10, new String[] {"Sea", "Lavawaste", "Firetide", "Burning Deep", "Cinderocean"}),
+    CLOUDKINGDOM("cloudkingdom", "Cloud Kingdom", 0xF0F8FF, new String[] {"Kingdom", "Skyhold", "Nimbus", "Highcastle", "Cumulus"}),
+    DROWNED("drowned", "Drowned Ruins", 0x2A8AC0, new String[] {"Ruins", "Sunken Empire", "Tidetomb", "Atlantis", "Deepcrown"}),
+    TOXIC("toxic", "Toxic Bog", 0x80FF20, new String[] {"Bog", "Plaguefen", "Acidmire", "Blightmarsh", "Sludge"}),
+    CRIMSONWEALD("crimsonweald", "Crimson Weald", 0xD02040, new String[] {"Weald", "Bloodwood", "Scarletgrove", "Heartwood", "Redcanopy"}),
+    WARPEDWEALD("warpedweald", "Warped Weald", 0x20D0B0, new String[] {"Weald", "Twistwood", "Teal Tangle", "Warpgrove", "Wyrdwood"}),
+    GOLDENTEMPLE("goldentemple", "Golden Temple", 0xFFC14D, new String[] {"Temple", "Sunsanctum", "Aurum", "Godsreach", "Gildhall"}),
+    RAINBOW("rainbow", "Rainbow Reach", 0xFF70C0, new String[] {"Reach", "Spectrum", "Prismfall", "Chromaland", "Hues"}),
+    VOIDGLASS("voidglass", "Voidglass Expanse", 0x5A30A0, new String[] {"Expanse", "Glassnight", "Obscura", "Blackmirror", "Nullsea"}),
+    RUNIC("runic", "Runic Plateau", 0xFFC14D, new String[] {"Plateau", "Runeheight", "Scriptlands", "Glyphmesa", "Spellstone"}),
+    EMBERSTEPPE("embersteppe", "Ember Steppe", 0xFF6020, new String[] {"Steppe", "Cinderplain", "Ashveld", "Smoulder", "Brandland"}),
+    PASTEL("pastel", "Pastel Dreamscape", 0xFFC0E0, new String[] {"Dreamscape", "Softlands", "Cottonworld", "Lullaby", "Sherbet"}),
+    PETRIFIED("petrified", "Petrified Starwood", 0x9A7AC0, new String[] {"Starwood", "Stoneforest", "Fossilgrove", "Timberrock", "Agate"}),
+    CRYSTALOCEAN("crystalocean", "Crystal Ocean", 0xA0F0FF, new String[] {"Ocean", "Glasswater", "Shardsea", "Lucid Deep", "Clearwater"}),
+    DUSKHIGHLANDS("duskhighlands", "Dusk Highlands", 0xFF9060, new String[] {"Highlands", "Twilight Peaks", "Gloaming", "Vesper", "Duskcrown"}),
+    NEONJUNGLE("neonjungle", "Neon Jungle", 0x00F0FF, new String[] {"Jungle", "Glowwild", "Neonvine", "Lumina", "Biolume"}),
+    CELESTIAL("celestial", "Celestial Court", 0xFFF0C8, new String[] {"Court", "Throne of Stars", "Empyreal", "Seraphim", "Firmament"}),
+    LUNARCOLONY("lunarcolony", "Lunar Colony", 0xD0E8FF, new String[] {"Colony", "Outpost", "Moonbase", "Domeworld", "Selenopolis"}),
+    CORALKING("coralking", "Coral Kingdom", 0xFF70A0, new String[] {"Kingdom", "Reefcastle", "Shellthrone", "Pearlhold", "Tidecourt"});
 
     public final String id;
     public final String displayName;

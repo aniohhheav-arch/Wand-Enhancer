@@ -29,7 +29,12 @@ public enum RiftType implements StringRepresentable {
     PRIMAL("primal", 0x3ABF3A, 0xFFE060, 2, new Archetype[] {Archetype.PRIMEVAL, Archetype.SAVANNA, Archetype.HIVE}),
     CHROME("chrome", 0xE0F0FF, 0x80E0FF, 5, new Archetype[] {Archetype.CHROME, Archetype.MIRROR, Archetype.NEON_SPRAWL}),
     SCULK("sculk", 0x0A8A9A, 0x002030, 3, new Archetype[] {Archetype.DEEPDARK, Archetype.GEODE, Archetype.HOLLOW}),
-    NEBULAR("nebular", 0xC050FF, 0x40A0FF, 7, new Archetype[] {Archetype.NEBULA, Archetype.LUNAR, Archetype.ASTRAL});
+    NEBULAR("nebular", 0xC050FF, 0x40A0FF, 7, new Archetype[] {Archetype.NEBULA, Archetype.LUNAR, Archetype.ASTRAL}),
+    FORGE("forge", 0xFF8A3A, 0x9AC8FF, 1, new Archetype[] {Archetype.STARFORGE, Archetype.EMBERSTEPPE, Archetype.MOLTENSEA}),
+    FROST("frost", 0xE0FFFF, 0x80C0FF, 4, new Archetype[] {Archetype.FROSTGLASS, Archetype.CRYSTALOCEAN, Archetype.DUSKHIGHLANDS, Archetype.CORALKING}),
+    WEALD("weald", 0x20D0B0, 0xD02040, 2, new Archetype[] {Archetype.CRIMSONWEALD, Archetype.WARPEDWEALD, Archetype.PETRIFIED, Archetype.NEONJUNGLE}),
+    CELESTIAL("celestial", 0xFFF0C8, 0xFFC14D, 5, new Archetype[] {Archetype.CELESTIAL, Archetype.CLOUDKINGDOM, Archetype.GOLDENTEMPLE, Archetype.RAINBOW, Archetype.PASTEL, Archetype.LUNARCOLONY}),
+    RUNIC("runic", 0xFFC14D, 0x8F6BFF, 7, new Archetype[] {Archetype.RUNIC, Archetype.DROWNED, Archetype.ECHO, Archetype.VOIDGLASS, Archetype.TOXIC});
 
     private final String name;
     public final int colorA;

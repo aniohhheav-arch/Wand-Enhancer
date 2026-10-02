@@ -349,6 +349,11 @@ public final class Decorator {
             case CHROME -> RiftType.CHROME;
             case DEEPDARK, GEODE -> RiftType.SCULK;
             case NEBULA, LUNAR -> RiftType.NEBULAR;
+            case STARFORGE, MOLTENSEA, EMBERSTEPPE -> RiftType.FORGE;
+            case FROSTGLASS, CRYSTALOCEAN, DUSKHIGHLANDS, CORALKING -> RiftType.FROST;
+            case ECHO, DROWNED, TOXIC, VOIDGLASS, RUNIC -> RiftType.RUNIC;
+            case CLOUDKINGDOM, GOLDENTEMPLE, RAINBOW, PASTEL, CELESTIAL, LUNARCOLONY -> RiftType.CELESTIAL;
+            case CRIMSONWEALD, WARPEDWEALD, PETRIFIED, NEONJUNGLE -> RiftType.WEALD;
         };
     }
 
