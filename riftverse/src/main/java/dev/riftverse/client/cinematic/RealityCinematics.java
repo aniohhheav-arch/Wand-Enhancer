@@ -298,6 +298,22 @@ public final class RealityCinematics {
                     if (p > 0.78f) wash(g, w, h, 0xFFFFFF, CameraRig.easeIn((p - 0.78f) / 0.1f) * k);
                 }
             }
+            case WORMHOLE_EXIT -> {
+                // light rushes past in the destination's colour, streaks stretch, everything blooms white at the
+                // jump (40%), then the new world fades in through a shrinking colour iris
+                if (p < 0.4f) {
+                    float q = p / 0.4f;
+                    tunnelRings(g, w, h, time * (6f + 20f * q), colorA, k, 0.25f + 0.5f * q);
+                    rewindStreaks(g, w, h, time * (3f + 10f * q), k * q);
+                    wash(g, w, h, colorA, q * q * 0.5f);
+                    wash(g, w, h, 0xFFFFFF, CameraRig.easeIn(Math.max(0f, (q - 0.6f) / 0.4f)));
+                } else {
+                    float q = (p - 0.4f) / 0.6f;
+                    wash(g, w, h, 0xFFFFFF, (1f - q) * (1f - q));
+                    vignette(g, w, h, colorA, (1f - q) * 0.9f);
+                    tunnelRings(g, w, h, time * 4f, colorA, (1f - q) * 0.6f, 0.9f);
+                }
+            }
             case FLASH -> wash(g, w, h, 0xFFFFFF, (1f - p) * (1f - p));
             case TIME_TRAVEL -> {
                 // the clock spins: era washes strobe past behind rewind streaks, ending in a white flash

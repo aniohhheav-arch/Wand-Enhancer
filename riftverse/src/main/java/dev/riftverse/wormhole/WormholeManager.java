@@ -168,32 +168,15 @@ public final class WormholeManager {
             });
         }
         Scheduler.later(slices / 12 + 2, () -> {
-            placeExitRift(nexus, run, target);
             RUNS.add(run);
             BlockPos o = run.origin;
             for (ServerPlayer p : players) {
                 if (p.isRemoved()) continue;
-                p.teleportTo(nexus, o.getX() + 0.5, o.getY() + 1, o.getZ() + 1.5, 0f, 0f);
+                p.teleportTo(nexus, o.getX() + 0.5, o.getY() + 2, o.getZ() + 1.5, 0f, 0f);
                 run.bar.addPlayer(p);
                 p.displayClientMessage(Component.literal("Walk forward. Don't stop. The tunnel won't hold forever.").withColor(0xB070FF), true);
             }
         });
-    }
-
-    /** The far end of the tunnel is a living rift that already shows the colours of the reality beyond it. */
-    private static void placeExitRift(ServerLevel l, Run run, @Nullable Archetype target) {
-        BlockPos at = run.origin.offset(0, 2, LENGTH);
-        dev.riftverse.block.RiftType type = dev.riftverse.block.RiftType.STELLAR;
-        if (target != null) {
-            for (dev.riftverse.block.RiftType t : dev.riftverse.block.RiftType.values()) {
-                if (t.destinations() != null && java.util.Arrays.asList(t.destinations()).contains(target)) {
-                    type = t;
-                    break;
-                }
-            }
-        }
-        l.setBlockAndUpdate(at, dev.riftverse.registry.RvBlocks.RIFT.get().defaultBlockState().setValue(dev.riftverse.block.RiftBlock.TYPE, type));
-        if (l.getBlockEntity(at) instanceof dev.riftverse.block.RiftBlockEntity rift) rift.configure(run.destination, l.getGameTime() + 20 * 60 * 20, false);
     }
 
     private static int sectionOf(int z) {
@@ -296,11 +279,7 @@ public final class WormholeManager {
             if (run.age % 4 == 0) {
                 nexus.sendParticles(RvParticles.STREAK.get().with(SECTION_COLORS[sec], 0.9f, 20), p.getX(), p.getY() + 1, p.getZ() + 8, 6, 3, 3, 1, 0.05);
             }
-            if (dev.riftverse.transit.TransitManager.inTransit(p)) {
-                // stepped into the exit rift: the rift's own transit carries them across
-                run.travellers.remove(p.getUUID());
-                run.bar.removePlayer(p);
-            }
+            if (z >= LENGTH - 4) exit(server, run, p);
         }
         if (run.age % 160 == 80 && !inside.isEmpty()) phenomenon(nexus, run, inside.get(r.nextInt(inside.size())), r);
         if (run.stability <= 0) collapse(server, nexus, run, inside);
@@ -347,6 +326,34 @@ public final class WormholeManager {
                 p.displayClientMessage(Component.literal("THE TUNNEL SHUDDERS").withColor(0xFF4060), true);
             }
         }
+    }
+
+    /**
+     * Leaving the tunnel: light rushes past in the destination's colour, everything blooms to white, and the new
+     * reality fades in around you. The jump happens under cover of the bloom.
+     */
+    private static void exit(MinecraftServer server, Run run, ServerPlayer p) {
+        run.travellers.remove(p.getUUID());
+        run.bar.removePlayer(p);
+        UniverseTravel.Target t = UniverseTravel.resolveFor(server, run.destination, p.getRandom());
+        if (t == null) t = UniverseTravel.resolveFor(server, Destination.nexus(), p.getRandom());
+        if (t == null) return;
+        UniverseTravel.Target dest = t;
+        int color = dest.spec() != null ? dest.color() : 0xB070FF;
+        RealityOps.shield(p, 80);
+        p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 24, 6, false, false));
+        RealityOps.cinematic(p, CinematicType.WORMHOLE_EXIT, 0, p.getEyePosition(), color, 0xFFFFFF, "", "");
+        p.serverLevel().playSound(null, p.blockPosition(), RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 2f, 1.4f);
+        Scheduler.later(24, () -> {
+            if (p.isRemoved()) return;
+            p.teleportTo(dest.level(), dest.pos().x, dest.pos().y, dest.pos().z, dest.yaw(), 0f);
+            dest.level().sendParticles(RvParticles.RING.get().with(color, 5f, 20), p.getX(), p.getY() + 1, p.getZ(), 2, 0, 0, 0, 0);
+            dest.level().sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 1.2f, 18), p.getX(), p.getY() + 1, p.getZ(), 50, 1.5, 1.5, 1.5, 0.4);
+        });
+        Scheduler.later(50, () -> {
+            if (!p.isRemoved()) RealityOps.cinematic(p, CinematicType.ANNOUNCE, 80, p.getEyePosition(), color, 0xFFFFFF,
+                    dest.spec() != null ? dest.spec().name : dest.title(), "wormhole transit complete");
+        });
     }
 
     private static void collapse(MinecraftServer server, ServerLevel l, Run run, List<ServerPlayer> inside) {

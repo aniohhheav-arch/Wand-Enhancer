@@ -372,4 +372,4 @@ A boss bar shows the tunnel's **stability**. It drains steadily, and faster the 
 - **Stability surges** that restore stability and give you speed
 - **Shudders** that cost stability
 
-The tunnel walls are solid: you can't see outside. The far end is a living rift that already glows with the destination's colours; walk into it and the full rift transition carries you across. If stability hits zero, the tunnel collapses and throws you into a random universe. Tunnels clean themselves up afterwards.
+The tunnel walls are solid: you can't see outside. At the far end, light rushes past in the destination's colour, everything blooms white, and the new world fades in around you. If stability hits zero, the tunnel collapses and throws you into a random universe. Tunnels clean themselves up afterwards.
