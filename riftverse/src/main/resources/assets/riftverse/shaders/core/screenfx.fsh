@@ -15,6 +15,10 @@ uniform vec4 FxTint;
 uniform vec3 FlashColor;
 uniform vec3 VignetteColor;
 uniform vec2 ScreenSize;
+// x kaleidoscope, y recursion (droste), z gravitational lens + Einstein ring, w hue cycling
+uniform vec4 FxD;
+// x ghost echoes, y spaghettification stretch, z mirror fold, w inversion
+uniform vec4 FxE;
 
 in vec2 texCoord;
 out vec4 fragColor;
@@ -41,6 +45,31 @@ void main() {
         d *= 1.0 + FxA.y * dot(da, da);
     }
     uv = c + d;
+
+    // ---- mind-bending layer (black holes): lensing, stretch, folds, kaleidoscope
+    vec2 q = (uv - c) * vec2(aspect, 1.0);
+    float rq = length(q);
+    if (FxD.z > 0.0) {
+        float R = 0.16 + 0.04 * sin(t * 1.3);
+        q *= 1.0 + FxD.z * (R * R) / (rq * rq + 0.0025);
+    }
+    if (FxE.y > 0.0) {
+        float stretch = 1.0 + FxE.y * (rq - 0.25) * (1.6 + 0.6 * sin(t * 2.1));
+        q *= max(stretch, 0.15);
+    }
+    if (FxE.z > 0.0) {
+        vec2 f = vec2(abs(q.x), q.y * sign(sin(t * 0.9) + 0.0001));
+        q = mix(q, f, FxE.z);
+    }
+    if (FxD.x > 0.0) {
+        float seg = RV_TAU / 6.0;
+        float a = atan(q.y, q.x) + t * 0.35;
+        a = mod(a, seg);
+        a = abs(a - seg * 0.5);
+        vec2 kq = vec2(cos(a), sin(a)) * length(q);
+        q = mix(q, kq, FxD.x);
+    }
+    uv = c + q / vec2(aspect, 1.0);
 
     if (FxB.y > 0.0) {
         float g = FxB.y;
@@ -71,6 +100,37 @@ void main() {
         if (zoom <= 0.001) break;
     }
     col /= total;
+
+    vec2 cq = (uv - c) * vec2(aspect, 1.0);
+    float cr = length(cq);
+    if (FxE.x > 0.0) {
+        // time ghosts: the world smeared into rotated, scaled copies of itself
+        vec3 g1 = texture(Sampler0, clamp(c + rvRot(0.22 + 0.1 * sin(t)) * (uv - c) * 1.12, 0.001, 0.999)).rgb;
+        vec3 g2 = texture(Sampler0, clamp(c + rvRot(-0.3) * (uv - c) * 0.86, 0.001, 0.999)).rgb;
+        vec3 g3 = texture(Sampler0, clamp(c + rvRot(0.6 * sin(t * 0.7)) * (uv - c) * 1.35, 0.001, 0.999)).rgb;
+        col = mix(col, (col + g1 + g2 + g3) * 0.25 * vec3(1.05, 0.95, 1.1), FxE.x);
+    }
+    if (FxD.y > 0.0) {
+        // recursion: the whole picture repeats inside its own centre, spinning, forever
+        vec3 inner = vec3(0.0);
+        float wsum = 0.0;
+        for (int i = 1; i <= 3; i++) {
+            float sc = pow(3.2, float(i));
+            vec2 iu = c + rvRot(t * 0.4 * float(i)) * (uv - c) * sc;
+            float wgt = smoothstep(0.32 / pow(3.2, float(i - 1)), 0.02, cr);
+            inner += texture(Sampler0, fract(iu)).rgb * wgt;
+            wsum += wgt;
+        }
+        if (wsum > 0.0) col = mix(col, inner / wsum, FxD.y * clamp(wsum, 0.0, 1.0));
+    }
+    if (FxD.z > 0.0) {
+        float R = 0.16 + 0.04 * sin(t * 1.3);
+        float ring = exp(-pow((cr - R) * 55.0, 2.0));
+        col += vec3(1.0, 0.75, 0.45) * ring * FxD.z * 1.6;
+        col *= mix(1.0, smoothstep(R * 0.55, R * 0.9, cr), FxD.z);
+    }
+    if (FxD.w > 0.0) col = mix(col, rvHueShift(col, t * 0.45 + cr * 4.0), FxD.w);
+    if (FxE.w > 0.0) col = mix(col, vec3(1.0) - col, clamp(FxE.w, 0.0, 1.0));
 
     if (FxB.y > 0.0) {
         float scan = 0.92 + 0.08 * sin(texCoord.y * ScreenSize.y * 1.4);

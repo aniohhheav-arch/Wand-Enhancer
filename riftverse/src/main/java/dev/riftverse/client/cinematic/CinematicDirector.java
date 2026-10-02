@@ -51,6 +51,8 @@ public final class CinematicDirector {
     private static int titleTick = -1;
 
     private static int bossEntity = -1;
+    @Nullable
+    private static CameraRig.Pose frozenPose;
     private static int bossTick = -1;
 
     private CinematicDirector() {}
@@ -195,7 +197,9 @@ public final class CinematicDirector {
         float t = t(partial);
         float base = switch (phase) {
             case NONE -> 0f;
-            case PULL -> 45f * CameraRig.easeIn(t / PULL_TICKS) + 6f * (float) Math.sin(t * 0.3) * (t / PULL_TICKS);
+            case PULL -> 45f * CameraRig.easeIn(t / PULL_TICKS) + 6f * (float) Math.sin(t * 0.3) * (t / PULL_TICKS)
+                    // vertigo: the view breathes in and out ever harder as space stretches
+                    + (kind == TransitKind.BLACK_HOLE ? 22f * (t / PULL_TICKS) * (float) Math.sin(t * 0.45) : 0f);
             case CROSSING -> 45f + 40f * CameraRig.easeOut((t - PULL_TICKS) / CROSS_TICKS);
             case SURGE -> 34f * CameraRig.easeIn(t / surgeTicks());
             case TUNNEL -> (kind == TransitKind.BLACK_HOLE ? 55f : 38f) + 6f * (float) Math.sin(t * 0.15);
@@ -209,7 +213,9 @@ public final class CinematicDirector {
     public static float roll(float partial) {
         float t = t(partial);
         float r = switch (phase) {
-            case PULL -> 38f * CameraRig.easeIn(t / PULL_TICKS) * (float) Math.sin(t * 0.05 + 0.6);
+            case PULL -> kind == TransitKind.BLACK_HOLE
+                    ? 38f * (float) Math.sin(t * 0.05 + 0.6) * CameraRig.easeIn(t / PULL_TICKS) + 540f * (float) Math.pow(t / PULL_TICKS, 3)
+                    : 38f * CameraRig.easeIn(t / PULL_TICKS) * (float) Math.sin(t * 0.05 + 0.6);
             case CROSSING, TUNNEL -> (float) Math.sin(t * 0.04) * 12f;
             case SURGE -> 6f * CameraRig.easeIn(t / surgeTicks());
             case EMERGE -> (float) Math.sin(t * 0.04) * 12f * (1f - CameraRig.easeOut((t - emergeStart) / EMERGE_TICKS));
@@ -394,6 +400,11 @@ public final class CinematicDirector {
                 return;
             }
         }
+        if (phase == Phase.PULL && kind == TransitKind.BLACK_HOLE && pullProgress(partial) > 0.35f && tick % 19 < 2 && frozenPose != null) {
+            // time dilation: for a heartbeat the view freezes while the world keeps falling
+            CameraRig.set(frozenPose);
+            return;
+        }
         if (phase == Phase.PULL || phase == Phase.CROSSING) {
             float k = pullProgress(partial);
             float e = CameraRig.easeIn(k);
@@ -411,7 +422,8 @@ public final class CinematicDirector {
             float blend = CameraRig.easeInOut(k * 4f);
             yaw = CameraRig.lerpAngle(blend, player.getViewYRot(partial), yaw);
             pitch = Mth.lerp(blend, player.getViewXRot(partial), pitch);
-            CameraRig.set(new CameraRig.Pose(pos, yaw, pitch, roll(partial), e > 0.05f));
+            frozenPose = new CameraRig.Pose(pos, yaw, pitch, roll(partial), e > 0.05f);
+            CameraRig.set(frozenPose);
             return;
         }
         if (shotTick >= 0) {

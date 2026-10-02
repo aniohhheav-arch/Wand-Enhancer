@@ -138,6 +138,9 @@ public final class ClientEffects {
         }
         if (holeProximity > 0.01f) {
             float k = holeProximity;
+            ScreenFx.lens += k * k * 0.9f;
+            ScreenFx.echo += k * k * 0.35f;
+            ScreenFx.hue += k * k * k * 0.3f;
             ScreenFx.aberration += k * 0.9f;
             ScreenFx.vignette += k * 0.45f;
             ScreenFx.zoomBlur += k * k * 0.5f;
@@ -163,6 +166,7 @@ public final class ClientEffects {
             ScreenFx.vignette += 0.35f + 0.45f * k;
             ScreenFx.warp += 0.25f * k;
             ScreenFx.grain += 0.1f;
+            if (CinematicDirector.blackHoleMode()) mindBend(k, phase == CinematicDirector.Phase.CROSSING, partial);
             float[] p = screenPos(viewProj, CinematicDirector.focus(), camera);
             if (p != null) {
                 ScreenFx.centerX = p[0];
@@ -184,7 +188,39 @@ public final class ClientEffects {
             ScreenFx.aberration += (1f - k) * 1.4f;
             ScreenFx.warp -= (1f - k) * 0.2f;
         }
+        float protocol = RealityCinematicsBridge.blackHoleWarp(partial);
+        if (protocol > 0.01f) mindBend(protocol, false, partial);
         float shake = CinematicDirector.shakeAmount(partial) + ambientShake();
         ScreenFx.aberration += shake * 0.3f;
+    }
+
+    /**
+     * Falling into a black hole, escalating in stages: first the Einstein ring and ghost echoes of the world; then
+     * spaghettification, hue drift and flickering mirror folds; finally a spinning kaleidoscope and the picture
+     * repeating inside itself forever, with inversion flashes as each threshold is crossed.
+     */
+    private static void mindBend(float k, boolean crossing, float partial) {
+        float time = (Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime()) + partial;
+        ScreenFx.lens += 0.3f + 0.9f * smooth(k, 0f, 0.35f);
+        ScreenFx.echo += 0.6f * smooth(k, 0.1f, 0.5f);
+        ScreenFx.stretch += 1.1f * smooth(k, 0.3f, 0.7f);
+        ScreenFx.hue += 0.8f * smooth(k, 0.35f, 0.8f);
+        ScreenFx.fold += smooth(k, 0.4f, 0.7f) * (0.5f + 0.5f * (float) Math.sin(time * 0.31));
+        ScreenFx.kaleido += smooth(k, 0.6f, 0.95f);
+        ScreenFx.droste += smooth(k, 0.65f, 1f);
+        float pulse = 0f;
+        for (float edge : new float[] {0.35f, 0.6f, 0.85f}) pulse += (float) Math.exp(-Math.pow((k - edge) * 35f, 2));
+        if (crossing) {
+            ScreenFx.kaleido = 1f;
+            ScreenFx.droste = 1f;
+            pulse += 0.5f + 0.5f * (float) Math.sin(time * 1.7);
+        }
+        ScreenFx.invert += Math.min(1f, pulse) * 0.9f;
+        ScreenFx.glitch += 0.15f * k;
+    }
+
+    private static float smooth(float x, float a, float b) {
+        float t = Mth.clamp((x - a) / (b - a), 0f, 1f);
+        return t * t * (3 - 2 * t);
     }
 }

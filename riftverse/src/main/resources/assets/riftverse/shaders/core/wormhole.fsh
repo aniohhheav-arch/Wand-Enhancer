@@ -165,6 +165,14 @@ void main() {
         col = tunnel(uv, t, speed, ColorA, ColorB, 0.6);
         col += birth(uv, t, ColorA, ColorB, p) * smoothstep(0.6, 1.0, p) * 0.6;
     } else {
+        // reality comes apart before the stages even begin: shattered shards, radial spaghettification, mirror folds
+        float chaos = smoothstep(0.03, 0.3, p) * (1.0 - smoothstep(0.84, 0.95, p));
+        vec2 cell = floor(uv * 2.6 + vec2(sin(t * 0.31), cos(t * 0.27)) * 2.0);
+        float sh = rvHash12(cell);
+        uv = mix(uv, rvRot((sh - 0.5) * 1.6) * uv * (1.0 + (sh - 0.5) * 0.5), step(0.4, sh) * chaos * 0.8);
+        float rr0 = length(uv);
+        uv = uv / max(rr0, 1e-3) * pow(max(rr0, 1e-3), 1.0 + 0.55 * chaos * sin(t * 1.7));
+        uv = mix(uv, abs(uv), smoothstep(0.3, 0.5, p) * (1.0 - smoothstep(0.66, 0.74, p)) * (0.5 + 0.5 * sin(t * 2.3)));
         float w1 = 1.0 - smoothstep(0.12, 0.22, p);
         float w2 = smoothstep(0.12, 0.22, p) * (1.0 - smoothstep(0.4, 0.5, p));
         float w3 = smoothstep(0.4, 0.5, p) * (1.0 - smoothstep(0.66, 0.74, p));
@@ -175,6 +183,12 @@ void main() {
         if (w2 > 0.0) col += tunnel(uv, t, speed, mix(vec3(0.15, 0.25, 1.0), ColorA, 0.3), mix(vec3(0.7, 0.3, 1.0), ColorB, 0.3), 0.8) * w2;
         if (w3 > 0.0) col += dimensional(uv, t, ColorA, ColorB) * w3;
         if (w4 > 0.0) col += birth(uv, t, ColorA, ColorB, (p - 0.66) / 0.34) * w4;
+        // time echoes and an infinite tunnel nested in the centre of the picture
+        col += tunnel(rvRot(1.3) * uv * 1.15, t - 0.35, speed, ColorB, ColorA, -0.9) * 0.3 * chaos;
+        col += tunnel(rvRot(t * 0.6) * uv * 4.0, t * 1.7, speed * 2.0, vec3(1.0), ColorB, 1.5) * 0.35 * chaos * smoothstep(0.35, 0.0, length(uv));
+        col = mix(col, rvHueShift(col, t * 0.5 + length(uv) * 3.0), chaos * 0.65);
+        float inv = exp(-pow((p - 0.22) * 45.0, 2.0)) + exp(-pow((p - 0.5) * 45.0, 2.0)) + exp(-pow((p - 0.74) * 45.0, 2.0));
+        col = mix(col, vec3(1.2) - col, clamp(inv, 0.0, 1.0) * 0.85);
     }
     float whiteout = smoothstep(0.86, 1.0, p);
     col = mix(col, vec3(1.0, 0.98, 0.95), whiteout);

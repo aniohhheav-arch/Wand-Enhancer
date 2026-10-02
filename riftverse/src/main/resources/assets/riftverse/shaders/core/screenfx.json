@@ -95,6 +95,28 @@
         1,
         1
       ]
+    },
+    {
+      "name": "FxD",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FxE",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
     }
   ]
 }

@@ -187,6 +187,13 @@ public final class RealityCinematics {
         return t != null && t.letterbox ? envelope(partial) : 0f;
     }
 
+    /** 0..1 how far into a black-hole protocol (Black Hole Infusion, Singularity Collapse) the viewer is. */
+    public static float blackHoleWarp(float partial) {
+        CinematicType t = type;
+        if (t != CinematicType.PROTOCOL_BLACK_HOLE && t != CinematicType.PROTOCOL_SINGULARITY) return 0f;
+        return envelope(partial) * CameraRig.easeIn(Math.min(1f, progress(partial) / 0.85f));
+    }
+
     public static float fovOffset(float partial) {
         float warp = deityPull > 0.01f ? deityPull * (24f + 10f * (float) Math.sin((deityTicks + partial) * 0.35)) : 0f;
         CinematicType t = type;
