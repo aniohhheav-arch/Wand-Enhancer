@@ -40,6 +40,7 @@ public final class ClientEvents {
         public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
             event.registerAbove(VanillaGuiLayers.HOTBAR, AbilityHudLayer.ID, new AbilityHudLayer());
             event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, ClientTimeStop.LAYER_ID, ClientTimeStop::renderOverlay);
+            event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, ClientScreenTint.LAYER_ID, ClientScreenTint::render);
         }
 
         @SubscribeEvent
@@ -64,6 +65,7 @@ public final class ClientEvents {
             Minecraft minecraft = Minecraft.getInstance();
             ClientMultiverseState.tick();
             ClientTimeStop.tick();
+            ClientScreenTint.tick();
             if (minecraft.player == null) {
                 return;
             }
@@ -84,6 +86,7 @@ public final class ClientEvents {
         public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
             ClientMultiverseState.reset();
             ClientTimeStop.reset();
+            ClientScreenTint.reset();
         }
     }
 }

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "GNG",
+    "RBR",
+    "GNG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "N": {
+      "item": "minecraft:nether_wart"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "B": {
+      "item": "minecraft:glass_bottle"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:mutant_serum",
+    "count": 1
+  }
+}

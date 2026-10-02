@@ -23,6 +23,9 @@ public final class AbilityTargeting {
         if (entity instanceof Player other) {
             return !other.isCreative() && owner.canHarmPlayer(other);
         }
+        if (Summons.isAllyOf(entity, owner)) {
+            return false;
+        }
         if (entity instanceof OwnableEntity ownable && owner.getUUID().equals(ownable.getOwnerUUID())) {
             return false;
         }

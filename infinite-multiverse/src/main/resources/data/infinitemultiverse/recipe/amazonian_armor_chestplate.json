@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "XCX",
+    "XXX",
+    "XXX"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:gold_ingot"
+    },
+    "C": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:amazonian_armor_chestplate",
+    "count": 1
+  }
+}

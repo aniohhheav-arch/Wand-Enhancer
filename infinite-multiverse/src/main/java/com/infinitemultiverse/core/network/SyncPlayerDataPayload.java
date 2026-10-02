@@ -16,13 +16,14 @@ import net.minecraft.resources.ResourceLocation;
 
 /** Server → owning client: full snapshot of the player's multiverse state for the HUD and menu. */
 public record SyncPlayerDataPayload(
-        float energy,
+        float[] energies,
         float maxEnergy,
         Map<ResourceLocation, Integer> cooldowns,
         List<Optional<ResourceLocation>> loadout,
         Set<ResourceLocation> active,
         Set<ResourceLocation> unlocked,
-        Optional<ResourceLocation> standType
+        Optional<ResourceLocation> standType,
+        Map<String, ResourceLocation> powers
 ) implements CustomPacketPayload {
     public static final Type<SyncPlayerDataPayload> TYPE = new Type<>(InfiniteMultiverse.id("sync_player_data"));
     public static final StreamCodec<FriendlyByteBuf, SyncPlayerDataPayload> STREAM_CODEC =
@@ -30,17 +31,28 @@ public record SyncPlayerDataPayload(
 
     public static SyncPlayerDataPayload of(PlayerMultiverseData data, float maxEnergy) {
         return new SyncPlayerDataPayload(
-                Math.max(0f, data.energy()),
+                clampNonNegative(data.energiesView()),
                 maxEnergy,
                 Map.copyOf(data.cooldownsView()),
                 data.loadoutView(),
                 Set.copyOf(data.activeView()),
                 Set.copyOf(data.unlockedView()),
-                data.standType());
+                data.standType(),
+                Map.copyOf(data.powersView()));
+    }
+
+    private static float[] clampNonNegative(float[] values) {
+        for (int i = 0; i < values.length; i++) {
+            values[i] = Math.max(0f, values[i]);
+        }
+        return values;
     }
 
     private void write(FriendlyByteBuf buf) {
-        buf.writeFloat(energy);
+        buf.writeVarInt(energies.length);
+        for (float value : energies) {
+            buf.writeFloat(value);
+        }
         buf.writeFloat(maxEnergy);
         buf.writeVarInt(cooldowns.size());
         cooldowns.forEach((id, ticks) -> {
@@ -56,10 +68,18 @@ public record SyncPlayerDataPayload(
         writeIds(buf, unlocked);
         buf.writeBoolean(standType.isPresent());
         standType.ifPresent(buf::writeResourceLocation);
+        buf.writeVarInt(powers.size());
+        powers.forEach((system, set) -> {
+            buf.writeUtf(system);
+            buf.writeResourceLocation(set);
+        });
     }
 
     private static SyncPlayerDataPayload read(FriendlyByteBuf buf) {
-        float energy = buf.readFloat();
+        float[] energies = new float[buf.readVarInt()];
+        for (int i = 0; i < energies.length; i++) {
+            energies[i] = buf.readFloat();
+        }
         float maxEnergy = buf.readFloat();
         int cooldownCount = buf.readVarInt();
         Map<ResourceLocation, Integer> cooldowns = new HashMap<>(cooldownCount);
@@ -74,7 +94,12 @@ public record SyncPlayerDataPayload(
         Set<ResourceLocation> active = readIds(buf);
         Set<ResourceLocation> unlocked = readIds(buf);
         Optional<ResourceLocation> standType = buf.readBoolean() ? Optional.of(buf.readResourceLocation()) : Optional.empty();
-        return new SyncPlayerDataPayload(energy, maxEnergy, cooldowns, loadout, active, unlocked, standType);
+        int powerCount = buf.readVarInt();
+        Map<String, ResourceLocation> powers = new HashMap<>(powerCount);
+        for (int i = 0; i < powerCount; i++) {
+            powers.put(buf.readUtf(), buf.readResourceLocation());
+        }
+        return new SyncPlayerDataPayload(energies, maxEnergy, cooldowns, loadout, active, unlocked, standType, powers);
     }
 
     private static void writeIds(FriendlyByteBuf buf, Set<ResourceLocation> ids) {

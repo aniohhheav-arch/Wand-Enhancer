@@ -25,6 +25,19 @@ public final class VfxIds {
     public static final ResourceLocation EPITAPH = InfiniteMultiverse.id("epitaph");
     public static final ResourceLocation TIME_ERASE = InfiniteMultiverse.id("time_erase");
     public static final ResourceLocation AFTERIMAGE = InfiniteMultiverse.id("afterimage");
+    // Generic, colour-parametrised effects (colour travels in the payload's scale field).
+    public static final ResourceLocation BEAM = InfiniteMultiverse.id("beam");
+    public static final ResourceLocation BEAM_HEAVY = InfiniteMultiverse.id("beam_heavy");
+    public static final ResourceLocation SLASH = InfiniteMultiverse.id("slash");
+    public static final ResourceLocation ORB = InfiniteMultiverse.id("orb");
+    public static final ResourceLocation BURST = InfiniteMultiverse.id("burst");
+    public static final ResourceLocation BOLT = InfiniteMultiverse.id("bolt");
+    public static final ResourceLocation AURA = InfiniteMultiverse.id("aura");
+    public static final ResourceLocation MANDALA = InfiniteMultiverse.id("mandala");
+    public static final ResourceLocation PORTAL_RING = InfiniteMultiverse.id("portal_ring");
+    public static final ResourceLocation FROST = InfiniteMultiverse.id("frost");
+    public static final ResourceLocation DOMAIN_OPEN = InfiniteMultiverse.id("domain_open");
+    public static final ResourceLocation DOMAIN_CLOSE = InfiniteMultiverse.id("domain_close");
 
     private VfxIds() {
     }

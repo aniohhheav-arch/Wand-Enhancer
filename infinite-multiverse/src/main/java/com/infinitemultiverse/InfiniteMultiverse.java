@@ -32,7 +32,11 @@ public final class InfiniteMultiverse {
         ModAbilities.ABILITIES.register(modBus);
         StandAbilities.ABILITIES.register(modBus);
         StandAbilities.STAND_TYPES.register(modBus);
+        com.infinitemultiverse.power.PowerSets.ABILITIES.register(modBus);
+        com.infinitemultiverse.power.PowerSets.POWER_SETS.register(modBus);
         ModEntities.ENTITY_TYPES.register(modBus);
+        com.infinitemultiverse.power.gear.ModGear.MATERIALS.register(modBus);
+        com.infinitemultiverse.power.gear.ModGear.ALL.size();
         ModItems.ITEMS.register(modBus);
         ModItems.CREATIVE_TABS.register(modBus);
         ModAttachments.ATTACHMENT_TYPES.register(modBus);

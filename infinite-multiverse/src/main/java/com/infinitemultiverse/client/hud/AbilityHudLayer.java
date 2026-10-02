@@ -8,6 +8,9 @@ import com.infinitemultiverse.core.ability.Ability;
 import com.infinitemultiverse.core.config.MultiverseConfig;
 import com.infinitemultiverse.core.data.PlayerMultiverseData;
 import com.infinitemultiverse.core.registry.MultiverseRegistries;
+import com.infinitemultiverse.core.energy.EnergyPool;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import net.minecraft.client.DeltaTracker;
@@ -26,7 +29,8 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
     public static final int SLOT_GAP = 3;
     private static final int WIDTH = PlayerMultiverseData.LOADOUT_SIZE * SLOT_SIZE + (PlayerMultiverseData.LOADOUT_SIZE - 1) * SLOT_GAP;
     private static final int BAR_HEIGHT = 5;
-    private static final int HEIGHT = 9 + BAR_HEIGHT + 3 + SLOT_SIZE + 8;
+    private static final int POOL_ROW = 9 + BAR_HEIGHT + 3;
+    private static final int SLOTS_HEIGHT = SLOT_SIZE + 8;
     private static final float OVERLAY_Z = 200f;
 
     @Override
@@ -39,41 +43,56 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
         }
         int offsetX = MultiverseConfig.CLIENT.hudOffsetX.get();
         int offsetY = MultiverseConfig.CLIENT.hudOffsetY.get();
+        List<EnergyPool> pools = poolsInUse();
+        int height = pools.size() * POOL_ROW + SLOTS_HEIGHT;
         int x = switch (MultiverseConfig.CLIENT.hudAnchor.get()) {
             case TOP_LEFT, BOTTOM_LEFT -> offsetX;
             case TOP_RIGHT, BOTTOM_RIGHT -> graphics.guiWidth() - WIDTH - offsetX;
         };
         int y = switch (MultiverseConfig.CLIENT.hudAnchor.get()) {
             case TOP_LEFT, TOP_RIGHT -> offsetY;
-            case BOTTOM_LEFT, BOTTOM_RIGHT -> graphics.guiHeight() - HEIGHT - offsetY;
+            case BOTTOM_LEFT, BOTTOM_RIGHT -> graphics.guiHeight() - height - offsetY;
         };
         float time = (minecraft.player.tickCount + deltaTracker.getGameTimeDeltaPartialTick(false)) / 20f;
 
-        graphics.fill(x - 3, y - 3, x + WIDTH + 3, y + HEIGHT, 0x90080B14);
-        graphics.renderOutline(x - 3, y - 3, WIDTH + 6, HEIGHT + 3, 0x5038D4FF);
+        graphics.fill(x - 3, y - 3, x + WIDTH + 3, y + height, 0x90080B14);
+        graphics.renderOutline(x - 3, y - 3, WIDTH + 6, height + 3, 0x5038D4FF);
 
         Font font = minecraft.font;
-        int barY = y + 9;
-        drawEnergy(graphics, font, x, y, barY, WIDTH);
+        int rowY = y;
+        for (EnergyPool pool : pools) {
+            drawEnergy(graphics, font, pool, x, rowY, rowY + 9, WIDTH);
+            rowY += POOL_ROW;
+        }
 
-        int slotY = barY + BAR_HEIGHT + 3;
+        int slotY = rowY;
         for (int slot = 0; slot < PlayerMultiverseData.LOADOUT_SIZE; slot++) {
             int slotX = x + slot * (SLOT_SIZE + SLOT_GAP);
             drawSlot(graphics, font, slot, slotX, slotY, time);
         }
     }
 
-    public static void drawEnergy(GuiGraphics graphics, Font font, int x, int labelY, int barY, int width) {
+    /** MULTIVERSE always, plus any other pool used by a bound ability. */
+    public static List<EnergyPool> poolsInUse() {
+        EnumSet<EnergyPool> pools = EnumSet.of(EnergyPool.MULTIVERSE);
+        for (int slot = 0; slot < PlayerMultiverseData.LOADOUT_SIZE; slot++) {
+            ClientMultiverseState.loadoutSlot(slot).map(MultiverseRegistries.ABILITIES::get).ifPresent(a -> pools.add(a.energyPool()));
+        }
+        return List.copyOf(pools);
+    }
+
+    public static void drawEnergy(GuiGraphics graphics, Font font, EnergyPool pool, int x, int labelY, int barY, int width) {
         float max = ClientMultiverseState.maxEnergy();
-        float shown = Mth.clamp(ClientMultiverseState.displayedEnergy() / max, 0f, 1f);
-        graphics.drawString(font, "ENERGY", x, labelY, 0x7FD6FF, false);
-        String amount = String.format(Locale.ROOT, "%d/%d", Math.round(ClientMultiverseState.energy()), Math.round(max));
+        float shown = Mth.clamp(ClientMultiverseState.displayedEnergy(pool) / max, 0f, 1f);
+        String amount = String.format(Locale.ROOT, "%d/%d", Math.round(ClientMultiverseState.energy(pool)), Math.round(max));
+        String label = font.plainSubstrByWidth(pool.displayName().getString().toUpperCase(Locale.ROOT), width - font.width(amount) - 4);
+        graphics.drawString(font, label, x, labelY, pool.topColor(), false);
         graphics.drawString(font, amount, x + width - font.width(amount), labelY, 0xE6F7FF, false);
 
         graphics.fill(x, barY, x + width, barY + BAR_HEIGHT, 0xFF0D1626);
         int filled = Math.round(width * shown);
         if (filled > 0) {
-            graphics.fillGradient(x, barY, x + filled, barY + BAR_HEIGHT, 0xFF7FE9FF, 0xFF2F6BFF);
+            graphics.fillGradient(x, barY, x + filled, barY + BAR_HEIGHT, 0xFF000000 | pool.topColor(), 0xFF000000 | pool.bottomColor());
             graphics.fill(x, barY, x + filled, barY + 1, 0x80FFFFFF);
         }
         graphics.renderOutline(x - 1, barY - 1, width + 2, BAR_HEIGHT + 2, 0xFF1F3550);
@@ -104,7 +123,7 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
                 graphics.fill(x + 1, top, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0xB0000000);
                 String seconds = cooldown >= 200 ? Integer.toString(cooldown / 20) : String.format(Locale.ROOT, "%.1f", cooldown / 20f);
                 graphics.drawCenteredString(font, seconds, x + SLOT_SIZE / 2, y + 6, 0xFFFFFF);
-            } else if (!ClientMultiverseState.isActive(a.id()) && ClientMultiverseState.energy() < a.energyCost()
+            } else if (!ClientMultiverseState.isActive(a.id()) && ClientMultiverseState.energy(a.energyPool()) < a.energyCost()
                     && !Minecraft.getInstance().player.isCreative()) {
                 graphics.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, 0x60FF2020);
             }

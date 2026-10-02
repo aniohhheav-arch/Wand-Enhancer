@@ -299,7 +299,7 @@ public final class MultiverseMenuScreen extends Screen {
         y += 22;
 
         y = statRow(graphics, x, y, "screen.infinitemultiverse.stat.type", ability.activationType().displayName().getString());
-        String energy = Math.round(ability.energyCost()) + (ability.activationType() == ActivationType.TOGGLE
+        String energy = Math.round(ability.energyCost()) + " " + ability.energyPool().displayName().getString() + (ability.activationType() == ActivationType.TOGGLE
                 ? " + " + formatNumber(ability.upkeepPerSecond()) + "/s" : "");
         y = statRow(graphics, x, y, "screen.infinitemultiverse.stat.energy", energy);
         y = statRow(graphics, x, y, "screen.infinitemultiverse.stat.cooldown", formatNumber(ability.cooldownTicks() / 20f) + "s");
@@ -367,7 +367,9 @@ public final class MultiverseMenuScreen extends Screen {
         int energyX = loadoutSlotX(PlayerMultiverseData.LOADOUT_SIZE) + 8;
         int energyWidth = left + panelWidth - PAD - energyX;
         if (energyWidth >= 60) {
-            AbilityHudLayer.drawEnergy(graphics, font, energyX, footerTop + 4, footerTop + 15, energyWidth);
+            com.infinitemultiverse.core.energy.EnergyPool pool = selectedAbility != null ? selectedAbility.energyPool()
+                    : com.infinitemultiverse.core.energy.EnergyPool.MULTIVERSE;
+            AbilityHudLayer.drawEnergy(graphics, font, pool, energyX, footerTop + 4, footerTop + 15, energyWidth);
             List<FormattedCharSequence> hint = font.split(Component.translatable("screen.infinitemultiverse.loadout_hint"), energyWidth);
             int y = footerTop + 25;
             for (FormattedCharSequence line : hint) {

@@ -127,8 +127,9 @@ public final class AbilityManager {
         }
         boolean free = isEnergyFree(player);
         float cost = ability.energyCost();
-        if (!free && data.energy() < cost) {
-            deny(player, Component.translatable("message.infinitemultiverse.not_enough_energy", ability.displayName(), (int) Math.ceil(cost)));
+        if (!free && data.energy(ability.energyPool()) < cost) {
+            deny(player, Component.translatable("message.infinitemultiverse.not_enough_energy", ability.displayName(), (int) Math.ceil(cost),
+                    ability.energyPool().displayName()));
             return false;
         }
 
@@ -137,7 +138,7 @@ public final class AbilityManager {
         }
 
         if (!free) {
-            data.consume(cost, MultiverseConfig.SERVER.regenDelayTicks.get());
+            data.consume(ability.energyPool(), cost, MultiverseConfig.SERVER.regenDelayTicks.get());
         }
         if (ability.activationType() == ActivationType.TOGGLE) {
             data.setActive(id);
@@ -180,9 +181,7 @@ public final class AbilityManager {
     public static void tick(ServerPlayer player) {
         PlayerMultiverseData data = data(player);
         float max = maxEnergy();
-        if (!data.isEnergyInitialised() || data.energy() > max) {
-            data.setEnergy(max, max);
-        }
+        data.normalise(max);
 
         data.tickCooldowns();
         data.tickFallProtection();
@@ -209,7 +208,7 @@ public final class AbilityManager {
                 deactivate(player, data, ability, DeactivationReason.SYSTEM_DISABLED);
                 continue;
             }
-            if (!free && !data.drain(ability.upkeepPerSecond() / 20f)) {
+            if (!free && !data.drain(ability.energyPool(), ability.upkeepPerSecond() / 20f)) {
                 deactivate(player, data, ability, DeactivationReason.ENERGY_DEPLETED);
                 continue;
             }
@@ -234,9 +233,8 @@ public final class AbilityManager {
     public static void onLogin(ServerPlayer player) {
         PlayerMultiverseData data = data(player);
         data.prune(MultiverseRegistries.ABILITIES::containsKey);
-        if (!data.isEnergyInitialised()) {
-            data.setEnergy(maxEnergy(), maxEnergy());
-        }
+        data.prunePowers(MultiverseRegistries.POWER_SETS::containsKey);
+        data.normalise(maxEnergy());
         syncNow(player);
     }
 

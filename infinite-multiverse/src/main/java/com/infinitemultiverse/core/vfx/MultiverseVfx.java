@@ -42,4 +42,19 @@ public final class MultiverseVfx {
             }
         }
     }
+
+    /** Colour-parametrised effect: {@code color} travels in the scale field. */
+    public static void fx(ServerLevel level, ResourceLocation effect, Vec3 origin, Vec3 vector, int color) {
+        broadcast(level, effect, origin, vector, (float) (color & 0xFFFFFF));
+    }
+
+    /** Sends a screen tint to every player within {@code radius}. */
+    public static void tint(ServerLevel level, Vec3 at, double radius, int color, float strength, int ticks) {
+        double radiusSqr = radius * radius;
+        for (ServerPlayer player : level.players()) {
+            if (player.position().distanceToSqr(at) <= radiusSqr) {
+                PacketDistributor.sendToPlayer(player, new com.infinitemultiverse.core.network.ScreenTintPayload(color, strength, ticks));
+            }
+        }
+    }
 }

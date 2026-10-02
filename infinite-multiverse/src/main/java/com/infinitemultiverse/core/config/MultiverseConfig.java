@@ -64,6 +64,84 @@ public final class MultiverseConfig {
         }
     }
 
+    /** Default energy cost and cooldown of every Phase 2 power (cursed, mutant, suit, mystic) ability. */
+    private static final class PowerDefaults {
+        static final Map<String, double[]> MAP = new LinkedHashMap<>();
+
+        static void add(String id, double cost, int cooldown) {
+            MAP.put(id, new double[]{cost, cooldown});
+        }
+
+        static {
+            add("cursed_reinforcement", 10, 100);
+            add("black_flash", 15, 60);
+            add("reversed_cursed_technique", 20, 200);
+            add("infinity", 20, 200);
+            add("blue", 25, 120);
+            add("red", 30, 160);
+            add("hollow_purple", 80, 900);
+            add("domain_unlimited_void", 90, 2400);
+            add("dismantle", 15, 30);
+            add("cleave", 25, 120);
+            add("fuga", 45, 500);
+            add("domain_malevolent_shrine", 90, 2400);
+            add("divine_dogs", 30, 600);
+            add("nue", 25, 160);
+            add("shadow_storage", 5, 20);
+            add("domain_chimera_shadow_garden", 90, 2400);
+            add("absorb_spirit", 20, 60);
+            add("release_spirit", 15, 60);
+            add("maximum_uzumaki", 60, 1200);
+            add("piercing_blood", 20, 80);
+            add("supernova", 35, 240);
+            add("flowing_red_scale", 15, 200);
+            add("dont_move", 25, 240);
+            add("blast_away", 20, 120);
+            add("twist", 30, 200);
+            add("telekinetic_grip", 10, 40);
+            add("telekinetic_push", 15, 80);
+            add("kinetic_barrier", 15, 200);
+            add("mind_scan", 5, 20);
+            add("pacify", 25, 400);
+            add("psychic_blast", 20, 120);
+            add("chain_lightning", 20, 100);
+            add("thunder_strike", 30, 200);
+            add("static_field", 15, 200);
+            add("ice_shard", 8, 20);
+            add("flash_freeze", 25, 240);
+            add("ice_path", 10, 100);
+            add("fire_blast", 15, 60);
+            add("flame_wave", 25, 160);
+            add("heat_aura", 15, 200);
+            add("magnetic_pull", 15, 100);
+            add("magnetic_repulse", 20, 120);
+            add("magnetic_shield", 15, 200);
+            add("kryptonian_flight", 10, 40);
+            add("heat_vision", 20, 60);
+            add("super_strength", 15, 200);
+            add("super_speed", 10, 60);
+            add("speed_force_dash", 15, 60);
+            add("lightning_throw", 20, 100);
+            add("repulsor_blast", 10, 20);
+            add("unibeam", 50, 400);
+            add("thrusters", 5, 20);
+            add("grapple", 5, 20);
+            add("smoke_bomb", 20, 300);
+            add("glide", 5, 20);
+            add("lasso", 15, 120);
+            add("bracer_deflect", 10, 100);
+            add("divine_leap", 15, 60);
+            add("eldritch_whip", 12, 40);
+            add("seraphim_shield", 15, 100);
+            add("sling_ring_portal", 25, 200);
+            add("astral_projection", 20, 600);
+            add("time_reversal", 40, 900);
+            add("mirror_dimension", 30, 600);
+            add("cloak_levitation", 5, 20);
+            add("mystic_grip", 10, 40);
+        }
+    }
+
     public static boolean isSystemEnabled(MultiverseSystem system) {
         return !SERVER_SPEC.isLoaded() || SERVER.systemEnabled.get(system).get();
     }
@@ -132,6 +210,18 @@ public final class MultiverseConfig {
         public final ModConfigSpec.DoubleValue timeStopRadius;
         public final ModConfigSpec.BooleanValue timeStopFreezesPlayers;
         private final Map<String, AbilityTuning> standAbilities = new HashMap<>();
+        private final Map<String, AbilityTuning> powerAbilities = new HashMap<>();
+        public final ModConfigSpec.IntValue domainRadius;
+        public final ModConfigSpec.IntValue domainDuration;
+
+        /** Cost/cooldown of a cursed, mutant, suit or mystic ability by its id path. */
+        public AbilityTuning powerTuning(String abilityPath) {
+            AbilityTuning tuning = powerAbilities.get(abilityPath);
+            if (tuning == null) {
+                throw new IllegalArgumentException("No config entry for power ability " + abilityPath);
+            }
+            return tuning;
+        }
 
         /** Cost/cooldown of a Stand ability by its id path. */
         public AbilityTuning standTuning(String abilityPath) {
@@ -241,6 +331,18 @@ public final class MultiverseConfig {
             });
             b.pop();
 
+            b.pop();
+
+            b.comment("Cursed techniques, mutant powers, hero suits and the Mystic Arts (Phase 2).").push("powers");
+            domainRadius = b.comment("Domain Expansion radius in blocks.").defineInRange("domainRadius", 12, 6, 32);
+            domainDuration = b.comment("Domain Expansion duration in ticks.").defineInRange("domainDurationTicks", 240, 40, 2400);
+            b.comment("Energy cost and cooldown of every power ability.").push("abilities");
+            PowerDefaults.MAP.forEach((id, defaults) -> {
+                b.push(id);
+                powerAbilities.put(id, AbilityTuning.define(b, defaults[0], (int) defaults[1]));
+                b.pop();
+            });
+            b.pop();
             b.pop();
         }
     }

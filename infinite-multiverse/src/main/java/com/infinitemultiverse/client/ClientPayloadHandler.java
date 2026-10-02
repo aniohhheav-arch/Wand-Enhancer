@@ -1,6 +1,7 @@
 package com.infinitemultiverse.client;
 
 import com.infinitemultiverse.client.vfx.ClientVfx;
+import com.infinitemultiverse.core.network.ScreenTintPayload;
 import com.infinitemultiverse.core.network.SyncPlayerDataPayload;
 import com.infinitemultiverse.core.network.TimeStopPayload;
 import com.infinitemultiverse.core.network.VfxPayload;
@@ -20,5 +21,9 @@ public final class ClientPayloadHandler {
 
     public static void handleTimeStop(TimeStopPayload payload) {
         ClientTimeStop.apply(payload);
+    }
+
+    public static void handleTint(ScreenTintPayload payload) {
+        ClientScreenTint.apply(payload);
     }
 }

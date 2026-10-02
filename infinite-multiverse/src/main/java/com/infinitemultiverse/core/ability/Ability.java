@@ -32,6 +32,11 @@ public abstract class Ability {
 
     public abstract float energyCost();
 
+    /** Pool the cost and upkeep are paid from; defaults to the system's pool. */
+    public com.infinitemultiverse.core.energy.EnergyPool energyPool() {
+        return com.infinitemultiverse.core.energy.EnergyPool.forSystem(system);
+    }
+
     public abstract int cooldownTicks();
 
     /** Energy drained per second while a {@link ActivationType#TOGGLE} ability is active. */

@@ -77,7 +77,7 @@ public final class AegisFieldAbility extends Ability implements OwnerDamageInter
             return;
         }
         float cost = absorbed * MultiverseConfig.SERVER.aegisEnergyPerDamage.get().floatValue();
-        if (!AbilityManager.isEnergyFree(player) && !ctx.data().drain(cost)) {
+        if (!AbilityManager.isEnergyFree(player) && !ctx.data().drain(energyPool(), cost)) {
             AbilityManager.deactivate(player, ctx.data(), this, DeactivationReason.ENERGY_DEPLETED);
             return;
         }

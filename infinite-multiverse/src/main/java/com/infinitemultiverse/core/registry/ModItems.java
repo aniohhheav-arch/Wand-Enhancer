@@ -23,7 +23,10 @@ public final class ModItems {
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.infinitemultiverse"))
                     .icon(() -> new ItemStack(AWAKENING_ARROWHEAD.get()))
-                    .displayItems((parameters, output) -> output.accept(AWAKENING_ARROWHEAD.get()))
+                    .displayItems((parameters, output) -> {
+                        output.accept(AWAKENING_ARROWHEAD.get());
+                        com.infinitemultiverse.power.gear.ModGear.ALL.forEach(item -> output.accept(item.get()));
+                    })
                     .build());
 
     private ModItems() {

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "LAL",
+    "EBE",
+    "LAL"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:lapis_lazuli"
+    },
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:mystic_tome",
+    "count": 1
+  }
+}

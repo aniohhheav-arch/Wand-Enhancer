@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "XXX",
+    "XCX",
+    "X X"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:leather"
+    },
+    "C": {
+      "item": "minecraft:black_dye"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:vigilante_suit_leggings",
+    "count": 1
+  }
+}

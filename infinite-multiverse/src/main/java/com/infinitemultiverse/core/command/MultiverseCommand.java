@@ -39,6 +39,8 @@ public final class MultiverseCommand {
             id -> Component.translatable("command.infinitemultiverse.stand.unknown", String.valueOf(id)));
     private static final SuggestionProvider<CommandSourceStack> STAND_SUGGESTIONS =
             (context, builder) -> SharedSuggestionProvider.suggestResource(MultiverseRegistries.STAND_TYPES.keySet(), builder);
+    private static final SuggestionProvider<CommandSourceStack> POWER_SUGGESTIONS =
+            (context, builder) -> SharedSuggestionProvider.suggestResource(MultiverseRegistries.POWER_SETS.keySet(), builder);
     private static final SuggestionProvider<CommandSourceStack> ABILITY_SUGGESTIONS =
             (context, builder) -> SharedSuggestionProvider.suggestResource(MultiverseRegistries.ABILITIES.keySet(), builder);
 
@@ -104,6 +106,16 @@ public final class MultiverseCommand {
                         .then(Commands.literal("clear")
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .executes(MultiverseCommand::clearStand))))
+                .then(Commands.literal("power")
+                        .requires(source -> source.hasPermission(2))
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .then(Commands.argument("power", ResourceLocationArgument.id())
+                                                .suggests(POWER_SUGGESTIONS)
+                                                .executes(MultiverseCommand::setPower))))
+                        .then(Commands.literal("clear")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .executes(MultiverseCommand::clearPowers))))
                 .then(Commands.literal("deactivate")
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("targets", EntityArgument.players())
@@ -123,7 +135,7 @@ public final class MultiverseCommand {
         PlayerMultiverseData data = AbilityManager.data(player);
         source.sendSuccess(() -> Component.translatable("command.infinitemultiverse.info.header", player.getDisplayName()), false);
         source.sendSuccess(() -> Component.translatable("command.infinitemultiverse.info.energy",
-                String.format(Locale.ROOT, "%.1f", data.energy()), String.format(Locale.ROOT, "%.0f", AbilityManager.maxEnergy())), false);
+                java.util.Arrays.toString(data.energiesView()), String.format(Locale.ROOT, "%.0f", AbilityManager.maxEnergy())), false);
         for (int slot = 0; slot < PlayerMultiverseData.LOADOUT_SIZE; slot++) {
             int display = slot + 1;
             String bound = data.loadoutSlot(slot).map(ResourceLocation::toString).orElse("-");
@@ -154,7 +166,9 @@ public final class MultiverseCommand {
         Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
         float max = AbilityManager.maxEnergy();
         for (ServerPlayer player : targets) {
-            AbilityManager.data(player).setEnergy(Math.min(amount, max), max);
+            for (com.infinitemultiverse.core.energy.EnergyPool pool : com.infinitemultiverse.core.energy.EnergyPool.values()) {
+                AbilityManager.data(player).setEnergy(pool, Math.min(amount, max), max);
+            }
             AbilityManager.syncNow(player);
         }
         ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.energy.set", targets.size()), true);
@@ -250,6 +264,29 @@ public final class MultiverseCommand {
         Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
         targets.forEach(StandManager::forget);
         ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.stand.clear", targets.size()), true);
+        return targets.size();
+    }
+
+    private static int setPower(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "power");
+        com.infinitemultiverse.power.PowerSet set = MultiverseRegistries.POWER_SETS.get(id);
+        if (set == null) {
+            throw UNKNOWN_STAND.create(id);
+        }
+        Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
+        targets.forEach(player -> com.infinitemultiverse.power.PowerManager.grant(player, set));
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.power.set", set.displayName(), targets.size()), true);
+        return targets.size();
+    }
+
+    private static int clearPowers(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
+        for (ServerPlayer player : targets) {
+            for (com.infinitemultiverse.core.MultiverseSystem system : com.infinitemultiverse.core.MultiverseSystem.values()) {
+                com.infinitemultiverse.power.PowerManager.forget(player, system);
+            }
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.power.clear", targets.size()), true);
         return targets.size();
     }
 }

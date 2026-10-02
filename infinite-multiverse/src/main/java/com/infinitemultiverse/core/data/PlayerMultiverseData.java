@@ -1,5 +1,6 @@
 package com.infinitemultiverse.core.data;
 
+import com.infinitemultiverse.core.energy.EnergyPool;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -27,20 +28,22 @@ public final class PlayerMultiverseData {
     public static final int LOADOUT_SIZE = 5;
 
     public static final Codec<PlayerMultiverseData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.FLOAT.optionalFieldOf("energy", -1f).forGetter(data -> data.energy),
+            Codec.FLOAT.listOf().optionalFieldOf("energies", List.of()).forGetter(PlayerMultiverseData::encodeEnergies),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT).optionalFieldOf("cooldowns", Map.of()).forGetter(data -> data.cooldowns),
             Codec.STRING.listOf().optionalFieldOf("loadout", List.of()).forGetter(PlayerMultiverseData::encodeLoadout),
             ResourceLocation.CODEC.listOf().optionalFieldOf("unlocked", List.of()).forGetter(data -> List.copyOf(data.unlocked)),
-            ResourceLocation.CODEC.optionalFieldOf("stand").forGetter(data -> Optional.ofNullable(data.standType))
+            ResourceLocation.CODEC.optionalFieldOf("stand").forGetter(data -> Optional.ofNullable(data.standType)),
+            Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC).optionalFieldOf("powers", Map.of()).forGetter(data -> data.powers)
     ).apply(instance, PlayerMultiverseData::new));
 
-    /** Negative means "not initialised yet"; the first server tick fills it to the configured maximum. */
-    private float energy;
+    /** Per pool; negative means "not initialised yet" and the first server tick fills it to the configured maximum. */
+    private final float[] energies = new float[EnergyPool.values().length];
     private final Map<ResourceLocation, Integer> cooldowns = new HashMap<>();
     private final ResourceLocation[] loadout = new ResourceLocation[LOADOUT_SIZE];
     private final Set<ResourceLocation> unlocked = new HashSet<>();
     @Nullable
     private ResourceLocation standType;
+    private final Map<String, ResourceLocation> powers = new HashMap<>();
 
     private final Map<ResourceLocation, Integer> activeToggles = new LinkedHashMap<>();
     private int regenDelay;
@@ -49,18 +52,22 @@ public final class PlayerMultiverseData {
     private boolean energyDirty = true;
 
     public PlayerMultiverseData() {
-        this.energy = -1f;
+        java.util.Arrays.fill(energies, -1f);
     }
 
-    private PlayerMultiverseData(float energy, Map<ResourceLocation, Integer> cooldowns, List<String> loadout, List<ResourceLocation> unlocked,
-                                 Optional<ResourceLocation> standType) {
-        this.energy = energy;
+    private PlayerMultiverseData(List<Float> energies, Map<ResourceLocation, Integer> cooldowns, List<String> loadout, List<ResourceLocation> unlocked,
+                                 Optional<ResourceLocation> standType, Map<String, ResourceLocation> powers) {
+        java.util.Arrays.fill(this.energies, -1f);
+        for (int i = 0; i < Math.min(energies.size(), this.energies.length); i++) {
+            this.energies[i] = energies.get(i);
+        }
         this.cooldowns.putAll(cooldowns);
         for (int i = 0; i < Math.min(LOADOUT_SIZE, loadout.size()); i++) {
             this.loadout[i] = loadout.get(i).isEmpty() ? null : ResourceLocation.tryParse(loadout.get(i));
         }
         this.unlocked.addAll(unlocked);
         this.standType = standType.orElse(null);
+        this.powers.putAll(powers);
     }
 
     private List<String> encodeLoadout() {
@@ -73,43 +80,62 @@ public final class PlayerMultiverseData {
 
     // ---- energy ----
 
-    public float energy() {
-        return energy;
+    private List<Float> encodeEnergies() {
+        List<Float> out = new ArrayList<>(energies.length);
+        for (float value : energies) {
+            out.add(value);
+        }
+        return out;
     }
 
-    public boolean isEnergyInitialised() {
-        return energy >= 0f;
+    public float energy(EnergyPool pool) {
+        return energies[pool.ordinal()];
     }
 
-    public void setEnergy(float value, float max) {
+    public float[] energiesView() {
+        return energies.clone();
+    }
+
+    /** Fills uninitialised pools and clamps pools above {@code max}. */
+    public void normalise(float max) {
+        for (EnergyPool pool : EnergyPool.values()) {
+            float value = energies[pool.ordinal()];
+            if (value < 0f || value > max) {
+                setEnergy(pool, max, max);
+            }
+        }
+    }
+
+    public void setEnergy(EnergyPool pool, float value, float max) {
         float clamped = Math.max(0f, Math.min(value, max));
-        if (clamped != energy) {
-            energy = clamped;
+        if (clamped != energies[pool.ordinal()]) {
+            energies[pool.ordinal()] = clamped;
             energyDirty = true;
         }
     }
 
     /** Spends energy for an activation and pauses regeneration. */
-    public void consume(float amount, int regenDelayTicks) {
+    public void consume(EnergyPool pool, float amount, int regenDelayTicks) {
         if (amount <= 0f) {
             return;
         }
-        energy = Math.max(0f, energy - amount);
+        energies[pool.ordinal()] = Math.max(0f, energies[pool.ordinal()] - amount);
         regenDelay = Math.max(regenDelay, regenDelayTicks);
         energyDirty = true;
     }
 
     /** Continuous drain (upkeep, absorbed damage). Returns false and empties the pool if it cannot be paid. */
-    public boolean drain(float amount) {
+    public boolean drain(EnergyPool pool, float amount) {
         if (amount <= 0f) {
             return true;
         }
         energyDirty = true;
-        if (energy >= amount) {
-            energy -= amount;
+        int i = pool.ordinal();
+        if (energies[i] >= amount) {
+            energies[i] -= amount;
             return true;
         }
-        energy = 0f;
+        energies[i] = 0f;
         return false;
     }
 
@@ -118,8 +144,10 @@ public final class PlayerMultiverseData {
             regenDelay--;
             return;
         }
-        if (energy < max && perTick > 0f) {
-            setEnergy(energy + perTick, max);
+        for (EnergyPool pool : EnergyPool.values()) {
+            if (energies[pool.ordinal()] < max && perTick > 0f) {
+                setEnergy(pool, energies[pool.ordinal()] + perTick, max);
+            }
         }
     }
 
@@ -242,6 +270,29 @@ public final class PlayerMultiverseData {
     public void setStandType(@Nullable ResourceLocation standType) {
         this.standType = standType;
         structuralDirty = true;
+    }
+
+    // ---- power sets (one per system) ----
+
+    public Optional<ResourceLocation> power(String system) {
+        return Optional.ofNullable(powers.get(system));
+    }
+
+    public void setPower(String system, @Nullable ResourceLocation set) {
+        if (set == null) {
+            powers.remove(system);
+        } else {
+            powers.put(system, set);
+        }
+        structuralDirty = true;
+    }
+
+    public Map<String, ResourceLocation> powersView() {
+        return Collections.unmodifiableMap(powers);
+    }
+
+    public void prunePowers(Predicate<ResourceLocation> exists) {
+        structuralDirty |= powers.values().removeIf(id -> !exists.test(id));
     }
 
     // ---- toggles ----

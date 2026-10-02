@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "XXX",
+    "XCX",
+    "X X"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:gold_ingot"
+    },
+    "C": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:amazonian_armor_leggings",
+    "count": 1
+  }
+}

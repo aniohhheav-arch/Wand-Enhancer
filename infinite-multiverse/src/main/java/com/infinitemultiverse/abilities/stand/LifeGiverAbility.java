@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
  * They never turn on their creator and fade away after 20 seconds.
  */
 public final class LifeGiverAbility extends StandAbility {
-    public static final String CREATOR_TAG = "infinitemultiverse_life_creator";
+    public static final String CREATOR_TAG = com.infinitemultiverse.core.ability.Summons.CREATOR_TAG;
     private static final int LIFETIME = 400;
     private static final int COLOR = 0x8BE36A;
 

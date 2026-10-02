@@ -48,6 +48,13 @@ public final class StandEvents {
     }
 
     @SubscribeEvent
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            com.infinitemultiverse.core.world.TemporaryBlocks.tick(level);
+        }
+    }
+
+    @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         TimeStopManager.clear();
         StandManager.clear();
@@ -88,9 +95,7 @@ public final class StandEvents {
             event.setCanceled(true);
             return;
         }
-        if (event.getSource().getEntity() != null
-                && event.getSource().getEntity().getPersistentData().hasUUID(LifeGiverAbility.CREATOR_TAG)
-                && target.getUUID().equals(event.getSource().getEntity().getPersistentData().getUUID(LifeGiverAbility.CREATOR_TAG))) {
+        if (com.infinitemultiverse.core.ability.Summons.isCreatorOf(target, event.getSource().getEntity())) {
             event.setCanceled(true);
             return;
         }

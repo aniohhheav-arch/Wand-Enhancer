@@ -36,7 +36,19 @@ public final class ClientVfx {
             Map.entry(VfxIds.HEAL_PULSE, StandEffects::healPulse),
             Map.entry(VfxIds.EPITAPH, StandEffects::epitaph),
             Map.entry(VfxIds.TIME_ERASE, StandEffects::timeErase),
-            Map.entry(VfxIds.AFTERIMAGE, StandEffects::afterimage));
+            Map.entry(VfxIds.AFTERIMAGE, StandEffects::afterimage),
+            Map.entry(VfxIds.BEAM, PowerEffects::beam),
+            Map.entry(VfxIds.BEAM_HEAVY, PowerEffects::beamHeavy),
+            Map.entry(VfxIds.SLASH, PowerEffects::slash),
+            Map.entry(VfxIds.ORB, PowerEffects::orb),
+            Map.entry(VfxIds.BURST, PowerEffects::burst),
+            Map.entry(VfxIds.BOLT, PowerEffects::bolt),
+            Map.entry(VfxIds.AURA, PowerEffects::aura),
+            Map.entry(VfxIds.MANDALA, PowerEffects::mandala),
+            Map.entry(VfxIds.PORTAL_RING, PowerEffects::portalRing),
+            Map.entry(VfxIds.FROST, PowerEffects::frost),
+            Map.entry(VfxIds.DOMAIN_OPEN, PowerEffects::domainOpen),
+            Map.entry(VfxIds.DOMAIN_CLOSE, PowerEffects::domainClose));
 
     private ClientVfx() {
     }

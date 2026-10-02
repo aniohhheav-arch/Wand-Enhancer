@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "infinitemultiverse:item/cloak_of_levitation"
+  }
+}

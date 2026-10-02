@@ -1,6 +1,7 @@
 package com.infinitemultiverse.client;
 
 import com.infinitemultiverse.core.data.PlayerMultiverseData;
+import com.infinitemultiverse.core.energy.EnergyPool;
 import com.infinitemultiverse.core.network.SyncPlayerDataPayload;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,9 +18,9 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class ClientMultiverseState {
     private static boolean synced;
-    private static float energy;
+    private static final float[] ENERGY = new float[EnergyPool.values().length];
     private static float maxEnergy = 100f;
-    private static float displayedEnergy;
+    private static final float[] DISPLAYED = new float[EnergyPool.values().length];
     private static final Map<ResourceLocation, Integer> COOLDOWNS = new HashMap<>();
     private static final List<Optional<ResourceLocation>> LOADOUT = new ArrayList<>();
     private static Set<ResourceLocation> active = Set.of();
@@ -34,11 +35,13 @@ public final class ClientMultiverseState {
     }
 
     static void apply(SyncPlayerDataPayload payload) {
-        if (!synced) {
-            displayedEnergy = payload.energy();
+        for (int i = 0; i < Math.min(ENERGY.length, payload.energies().length); i++) {
+            ENERGY[i] = payload.energies()[i];
+            if (!synced) {
+                DISPLAYED[i] = ENERGY[i];
+            }
         }
         synced = true;
-        energy = payload.energy();
         maxEnergy = Math.max(1f, payload.maxEnergy());
         COOLDOWNS.clear();
         COOLDOWNS.putAll(payload.cooldowns());
@@ -63,13 +66,15 @@ public final class ClientMultiverseState {
                 }
             }
         }
-        displayedEnergy += (energy - displayedEnergy) * 0.35f;
+        for (int i = 0; i < ENERGY.length; i++) {
+            DISPLAYED[i] += (ENERGY[i] - DISPLAYED[i]) * 0.35f;
+        }
     }
 
     static void reset() {
         synced = false;
-        energy = 0f;
-        displayedEnergy = 0f;
+        java.util.Arrays.fill(ENERGY, 0f);
+        java.util.Arrays.fill(DISPLAYED, 0f);
         maxEnergy = 100f;
         COOLDOWNS.clear();
         LOADOUT.clear();
@@ -89,12 +94,12 @@ public final class ClientMultiverseState {
         return synced;
     }
 
-    public static float energy() {
-        return energy;
+    public static float energy(EnergyPool pool) {
+        return ENERGY[pool.ordinal()];
     }
 
-    public static float displayedEnergy() {
-        return displayedEnergy;
+    public static float displayedEnergy(EnergyPool pool) {
+        return DISPLAYED[pool.ordinal()];
     }
 
     public static float maxEnergy() {
