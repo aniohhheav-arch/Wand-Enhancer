@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "WWW",
+    "W W",
+    "W W"
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:white_wool"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:space_suit_leggings",
+    "count": 1
+  }
+}

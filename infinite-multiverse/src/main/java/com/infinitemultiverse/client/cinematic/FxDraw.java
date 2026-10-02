@@ -21,7 +21,7 @@ public final class FxDraw {
     private boolean drawing;
 
     /** Scenes are rendered twice, once per pass; primitives only emit in the pass matching the current mode. */
-    FxDraw(PoseStack pose, VertexConsumer out, boolean inkPass, Vec3 cam, Vec3 camLook) {
+    public FxDraw(PoseStack pose, VertexConsumer out, boolean inkPass, Vec3 cam, Vec3 camLook) {
         this.matrix = pose.last().pose();
         this.out = out;
         this.inkPass = inkPass;

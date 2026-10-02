@@ -28,6 +28,23 @@ public final class ModEntities {
                     .noSummon()
                     .build("physical_body"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<com.infinitemultiverse.cosmic.portal.PortalEntity>> PORTAL = ENTITY_TYPES.register("portal",
+            () -> EntityType.Builder.<com.infinitemultiverse.cosmic.portal.PortalEntity>of(com.infinitemultiverse.cosmic.portal.PortalEntity::new, MobCategory.MISC)
+                    .sized(1.0f, 2.0f)
+                    .clientTrackingRange(10)
+                    .updateInterval(20)
+                    .noSummon()
+                    .fireImmune()
+                    .build("portal"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.infinitemultiverse.cosmic.rift.RiftEntity>> RIFT = ENTITY_TYPES.register("rift",
+            () -> EntityType.Builder.<com.infinitemultiverse.cosmic.rift.RiftEntity>of(com.infinitemultiverse.cosmic.rift.RiftEntity::new, MobCategory.MISC)
+                    .sized(1.2f, 3.0f)
+                    .clientTrackingRange(10)
+                    .updateInterval(20)
+                    .fireImmune()
+                    .build("rift"));
+
     private ModEntities() {
     }
 }

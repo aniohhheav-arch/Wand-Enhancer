@@ -107,4 +107,30 @@ public final class SceneIds {
     public static final ResourceLocation MIRROR_EXIT = id("mirror_exit");
     public static final ResourceLocation MYSTIC_BANDS = id("mystic_bands");
     public static final ResourceLocation SPELL_CIRCLE = id("spell_circle");
+
+    // ---- Phase 3: Infinity Gauntlet ----
+    public static final ResourceLocation STONE_SET = id("stone_set");
+    public static final ResourceLocation STONE_CHARGE = id("stone_charge");
+    public static final ResourceLocation SPACE_WARP = id("space_warp");
+    public static final ResourceLocation TESSERACT = id("tesseract");
+    public static final ResourceLocation MIND_THRALL = id("mind_thrall");
+    public static final ResourceLocation PSIONIC_STORM = id("psionic_storm");
+    public static final ResourceLocation REALITY_WARP = id("reality_warp");
+    public static final ResourceLocation REALITY_SHATTER = id("reality_shatter");
+    public static final ResourceLocation TIME_REWIND = id("time_rewind");
+    public static final ResourceLocation TIME_FREEZE = id("time_freeze");
+    public static final ResourceLocation SOUL_DRAIN = id("soul_drain");
+    public static final ResourceLocation SOUL_HARVEST = id("soul_harvest");
+    public static final ResourceLocation SNAP = id("snap");
+    public static final ResourceLocation DUST = id("dust");
+
+    // ---- Phase 3: portals, rifts, space, chronokinesis ----
+    public static final ResourceLocation PORTAL_SHOT = id("portal_shot");
+    public static final ResourceLocation PORTAL_TRANSIT = id("portal_transit");
+    public static final ResourceLocation RIFT_OPEN = id("rift_open");
+    public static final ResourceLocation RIFT_TRANSIT = id("rift_transit");
+    public static final ResourceLocation LAUNCH = id("launch");
+    public static final ResourceLocation REENTRY = id("reentry");
+    public static final ResourceLocation TIME_FIELD = id("time_field");
+    public static final ResourceLocation STASIS = id("stasis");
 }

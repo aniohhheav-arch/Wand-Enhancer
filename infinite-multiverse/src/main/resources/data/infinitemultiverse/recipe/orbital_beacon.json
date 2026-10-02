@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "IGI",
+    "IFI",
+    "RBR"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "F": {
+      "item": "minecraft:firework_rocket"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    },
+    "B": {
+      "item": "minecraft:blaze_rod"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:orbital_beacon",
+    "count": 1
+  }
+}

@@ -37,6 +37,7 @@ public final class InfiniteMultiverse {
         ModEntities.ENTITY_TYPES.register(modBus);
         com.infinitemultiverse.power.gear.ModGear.MATERIALS.register(modBus);
         com.infinitemultiverse.power.gear.ModGear.ALL.size();
+        com.infinitemultiverse.cosmic.CosmicContent.init(modBus);
         ModItems.ITEMS.register(modBus);
         modBus.addListener((net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) ->
                 event.put(com.infinitemultiverse.core.registry.ModEntities.PHYSICAL_BODY.get(), com.infinitemultiverse.power.mystic.PhysicalBodyEntity.attributes().build()));

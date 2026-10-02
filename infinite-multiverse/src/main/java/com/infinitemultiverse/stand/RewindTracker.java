@@ -19,6 +19,9 @@ public final class RewindTracker {
     private static final int CAPACITY = 10;
     private static final Map<UUID, Deque<Snapshot>> HISTORY = new HashMap<>();
 
+    /** Other sources of rewinding (Time Stone, Chronokinesis) register here so their owners are tracked too. */
+    public static java.util.function.Predicate<ServerPlayer> extraTracking = player -> false;
+
     private RewindTracker() {
     }
 
@@ -28,7 +31,7 @@ public final class RewindTracker {
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             StandType type = StandManager.standTypeOf(player);
-            if (type == null || !type.tracksRewind()) {
+            if ((type == null || !type.tracksRewind()) && !extraTracking.test(player)) {
                 HISTORY.remove(player.getUUID());
                 continue;
             }

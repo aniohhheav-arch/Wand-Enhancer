@@ -120,6 +120,11 @@ public final class MultiverseCommand {
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .then(Commands.argument("level", IntegerArgumentType.integer(1, 5))
                                                 .executes(MultiverseCommand::setMastery)))))
+                .then(Commands.literal("gauntlet")
+                        .requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .then(Commands.argument("stones", IntegerArgumentType.integer(0, 63))
+                                        .executes(MultiverseCommand::giveGauntlet))))
                 .then(Commands.literal("deactivate")
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("targets", EntityArgument.players())
@@ -306,6 +311,21 @@ public final class MultiverseCommand {
             }
         }
         ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.power.mastery", com.infinitemultiverse.power.mastery.Mastery.roman(level), targets.size()), true);
+        return targets.size();
+    }
+
+    /** Gives a gauntlet with the stone bitmask set (63 = all six). */
+    private static int giveGauntlet(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        int mask = IntegerArgumentType.getInteger(ctx, "stones");
+        Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
+        for (ServerPlayer player : targets) {
+            net.minecraft.world.item.ItemStack gauntlet = new net.minecraft.world.item.ItemStack(com.infinitemultiverse.cosmic.CosmicContent.INFINITY_GAUNTLET.get());
+            com.infinitemultiverse.cosmic.gauntlet.Gauntlet.setStones(gauntlet, mask);
+            if (!player.getInventory().add(gauntlet)) {
+                player.drop(gauntlet, false);
+            }
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.gauntlet", Integer.bitCount(mask), targets.size()), true);
         return targets.size();
     }
 }

@@ -9,7 +9,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class MultiverseNetwork {
     /** Bump when any payload layout changes so mismatched client/server versions refuse to connect. */
-    public static final String PROTOCOL_VERSION = "4";
+    public static final String PROTOCOL_VERSION = "5";
 
     private MultiverseNetwork() {
     }
@@ -35,6 +35,16 @@ public final class MultiverseNetwork {
                 context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {
                         StandEvents.onToggleKey(player);
+                    }
+                }));
+
+        registrar.playToServer(GauntletScrollPayload.TYPE, GauntletScrollPayload.STREAM_CODEC, (payload, context) ->
+                context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        var gauntlet = com.infinitemultiverse.cosmic.gauntlet.Gauntlet.held(player);
+                        if (!gauntlet.isEmpty()) {
+                            com.infinitemultiverse.cosmic.gauntlet.Gauntlet.scroll(gauntlet, Integer.signum(payload.pageDelta()), Integer.signum(payload.slotDelta()));
+                        }
                     }
                 }));
 

@@ -140,6 +140,31 @@ public final class MultiverseConfig {
             add("mirror_dimension", 30, 600);
             add("cloak_levitation", 5, 20);
             add("mystic_grip", 10, 40);
+            add("space_warp", 15, 40);
+            add("space_pull", 15, 80);
+            add("tesseract_fold", 60, 900);
+            add("mind_control", 30, 400);
+            add("psionic_lance", 15, 60);
+            add("psionic_storm", 60, 900);
+            add("reality_warp", 25, 240);
+            add("reality_lance", 15, 60);
+            add("reality_shatter", 70, 1000);
+            add("power_punch", 15, 40);
+            add("power_blast", 25, 100);
+            add("power_nova", 70, 1000);
+            add("time_rewind", 25, 300);
+            add("time_age", 15, 120);
+            add("time_freeze", 70, 1200);
+            add("soul_siphon", 15, 80);
+            add("soul_guard", 10, 200);
+            add("soul_harvest", 70, 1200);
+            add("annihilation", 80, 1200);
+            add("chrono_jump", 30, 200);
+            add("snap", 100, 12000);
+            add("time_dilation", 10, 200);
+            add("overclock", 10, 200);
+            add("rewind_step", 15, 160);
+            add("stasis", 25, 300);
         }
     }
 
@@ -172,6 +197,9 @@ public final class MultiverseConfig {
         public final Map<MultiverseSystem, ModConfigSpec.BooleanValue> systemEnabled = new EnumMap<>(MultiverseSystem.class);
 
         public final ModConfigSpec.BooleanValue allowTerrainModification;
+        public final ModConfigSpec.EnumValue<SnapMode> snapMode;
+        public final ModConfigSpec.DoubleValue naturalRiftChance;
+        public final ModConfigSpec.DoubleValue orbitGravity;
         public final ModConfigSpec.IntValue vfxBroadcastRange;
 
         public final AbilityTuning phaseStep;
@@ -245,6 +273,14 @@ public final class MultiverseConfig {
             for (MultiverseSystem system : MultiverseSystem.values()) {
                 systemEnabled.put(system, b.define(system.id(), true));
             }
+            b.pop();
+
+            b.comment("Phase 3: cosmic content.").push("cosmic");
+            snapMode = b.comment("Infinity Gauntlet Snap: SAFE (half of nearby hostile mobs turn to dust, never players), VISUAL (cinematic only), OFF.")
+                    .defineEnum("snapMode", SnapMode.SAFE);
+            naturalRiftChance = b.comment("Chance per player every 5 minutes (at night) that a dimensional rift tears open nearby. 0 disables.")
+                    .defineInRange("naturalRiftChance", 0.08, 0.0, 1.0);
+            orbitGravity = b.comment("Gravity multiplier in the Orbit dimension (1 = normal).").defineInRange("orbitGravity", 0.17, 0.0, 1.0);
             b.pop();
 
             b.push("safety");
@@ -346,6 +382,16 @@ public final class MultiverseConfig {
             b.pop();
             b.pop();
         }
+    }
+
+    /** What the Infinity Gauntlet's Snap does. */
+    public enum SnapMode {
+        /** Half of nearby hostile, unnamed, non-boss, unowned creatures turn to dust. Players are never affected. */
+        SAFE,
+        /** Cutscene and effects only; nothing is removed. */
+        VISUAL,
+        /** The Snap cannot be used. */
+        OFF
     }
 
     public enum HudAnchor {

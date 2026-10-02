@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "DND",
+    "NCN",
+    "DND"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "N": {
+      "item": "minecraft:nether_star"
+    },
+    "C": {
+      "item": "minecraft:amethyst_block"
+    }
+  },
+  "result": {
+    "id": "infinitemultiverse:power_stone",
+    "count": 1
+  }
+}

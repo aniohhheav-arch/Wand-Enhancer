@@ -7,7 +7,8 @@ import net.minecraft.network.chat.Component;
 public enum EnergyPool {
     MULTIVERSE("energy", 0x7FE9FF, 0x2F6BFF),
     CURSED("cursed_energy", 0x6D8BFF, 0x1A1446),
-    MANA("mana", 0xFFC46A, 0xC4501C);
+    MANA("mana", 0xFFC46A, 0xC4501C),
+    COSMIC("cosmic_energy", 0xFFE27A, 0x9A3AFF);
 
     private final String id;
     private final int topColor;
@@ -39,6 +40,7 @@ public enum EnergyPool {
         return switch (system) {
             case CURSED_TECHNIQUES -> CURSED;
             case MYSTIC_ARTS -> MANA;
+            case INFINITY_GAUNTLET -> COSMIC;
             default -> MULTIVERSE;
         };
     }

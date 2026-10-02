@@ -48,6 +48,7 @@ public final class SceneManager {
         CursedScenes.register(FACTORIES);
         HeroScenes.register(FACTORIES);
         MysticScenes.register(FACTORIES);
+        CosmicScenes.register(FACTORIES);
     }
 
     private SceneManager() {
@@ -134,10 +135,14 @@ public final class SceneManager {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES || ACTIVE.isEmpty()) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
+        boolean orbit = mc.level != null && mc.level.dimension() == com.infinitemultiverse.cosmic.space.Space.ORBIT;
+        if (ACTIVE.isEmpty() && !orbit) {
+            return;
+        }
         float pt = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         Vec3 cam = event.getCamera().getPosition();
         Vec3 look = new Vec3(event.getCamera().getLookVector());
@@ -145,11 +150,17 @@ public final class SceneManager {
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
         // Darkness first so light composites over it.
         FxDraw ink = new FxDraw(pose, buffers.getBuffer(RenderType.debugQuads()), true, cam, look);
+        if (orbit) {
+            OrbitSky.render(ink.glow(), cam, mc.level.getGameTime() + pt);
+        }
         for (Scene scene : ACTIVE) {
             scene.render(ink.glow(), pt);
         }
         buffers.endBatch(RenderType.debugQuads());
         FxDraw glow = new FxDraw(pose, buffers.getBuffer(RenderType.lightning()), false, cam, look);
+        if (orbit) {
+            OrbitSky.render(glow.glow(), cam, mc.level.getGameTime() + pt);
+        }
         for (Scene scene : ACTIVE) {
             scene.render(glow.glow(), pt);
         }
