@@ -344,7 +344,7 @@ All abilities depend on how you use it and where you look:
 |---|---|---|
 | Use | **Prune** | Erases the target from the timeline. Bosses lose 15% of their health instead. |
 | Sneak-use | **Temporal Snare** | Freezes everything within 12 blocks for 5 s. |
-| Use looking up | **Time Door** | Steps you through a door 14 blocks ahead. |
+| Use looking up | **Time Door** | Opens a door in front of you; walk through it and you step out of a second door up to 14 blocks ahead. |
 | Use looking down | **Reset Charge** | Rewinds you to where you were 5 s ago. |
 | Sneak-use looking down | **FULL TIMELINE PRUNING** | Ultimate: an expanding wave prunes every hostile within 24 blocks. |
 
@@ -352,7 +352,7 @@ TSA agents carry it as their baton (it doesn't drop).
 
 ## Wormholes
 
-`/multiverse wormhole open [archetype]` tears open a swirling wormhole mouth in front of you. Walk into it to start the trip; anyone who walks in with you shares the journey. `/multiverse wormhole enter [archetype]` skips the mouth, and `status` shows how many tunnels are open.
+Wormholes also form naturally inside universes (every so often one appears on the ground within ~80 blocks of a wandering player and lasts 10 minutes). `/multiverse wormhole open [archetype]` tears open a swirling wormhole mouth in front of you. Walk into it to start the trip; anyone who walks in with you shares the journey. `/multiverse wormhole enter [archetype]` skips the mouth, and `status` shows how many tunnels are open.
 
 The trip is a real tunnel you walk through. It has four sections:
 
@@ -372,4 +372,4 @@ A boss bar shows the tunnel's **stability**. It drains steadily, and faster the 
 - **Stability surges** that restore stability and give you speed
 - **Shudders** that cost stability
 
-Reach the far end and you arrive at the destination. If stability hits zero, the tunnel collapses and throws you into a random universe. Tunnels clean themselves up afterwards.
+The tunnel walls are solid: you can't see outside. The far end is a living rift that already glows with the destination's colours; walk into it and the full rift transition carries you across. If stability hits zero, the tunnel collapses and throws you into a random universe. Tunnels clean themselves up afterwards.

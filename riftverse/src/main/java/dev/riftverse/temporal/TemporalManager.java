@@ -139,11 +139,36 @@ public final class TemporalManager {
             var moved = vehicle.level() == t.level() ? vehicle : vehicle.changeDimension(new net.minecraft.world.level.portal.DimensionTransition(t.level(), t.pos(), net.minecraft.world.phys.Vec3.ZERO,
                     vehicle.getYRot(), 0, net.minecraft.world.level.portal.DimensionTransition.DO_NOTHING));
             if (moved != null) {
-                moved.teleportTo(t.pos().x, t.pos().y, t.pos().z);
+                moved.teleportTo(t.pos().x, t.pos().y + 0.3, t.pos().z);
                 moved.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
-                p.startRiding(moved, true);
+                moved.setYRot(p.getYRot());
+                moved.yRotO = p.getYRot();
+                var car = moved;
+                Scheduler.later(3, () -> {
+                    if (!car.isRemoved() && !p.isRemoved() && p.level() == car.level()) {
+                        p.teleportTo(car.getX(), car.getY() + 0.5, car.getZ());
+                        p.startRiding(car, true);
+                    }
+                });
             }
         }
+    }
+
+    /** The DeLorean way: no sequence — a white flash and you are already there. */
+    public static void jumpNow(ServerPlayer p, int targetYear, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity vehicle) {
+        int from = year(p);
+        Timeline target = targetYear < PRESENT ? Timeline.PAST : targetYear > PRESENT ? Timeline.FUTURE : Timeline.PRIME;
+        relocate(p, targetYear, target, vehicle);
+        CompoundTag d = data(p);
+        d.putInt("year", targetYear);
+        d.putString("line", target.name());
+        setParadox(p, paradox(p) + Math.min(40, 2 + Math.abs(targetYear - from) / 50));
+        applyEra(p, targetYear);
+        RealityOps.cinematic(p, CinematicType.FLASH, 0, p.getEyePosition(), 0xFFFFFF, 0xFFFFFF, "", "");
+        Scheduler.later(10, () -> RealityOps.cinematic(p, CinematicType.ANNOUNCE, 70, p.getEyePosition(), 0x7DF9FF, 0xFFFFFF, formatYear(targetYear),
+                eraOf(targetYear).displayName + " • Paradox " + paradox(p) + "%"));
+        p.serverLevel().playSound(null, p.blockPosition(), RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 2f, 2f);
+        if (paradox(p) >= 60) Scheduler.later(60, () -> dispatch(p, "PARADOX THRESHOLD EXCEEDED"));
     }
 
     public static void travel(ServerPlayer p, int targetYear, Timeline line, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity vehicle) {

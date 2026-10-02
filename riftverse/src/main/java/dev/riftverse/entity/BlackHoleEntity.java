@@ -176,6 +176,10 @@ public class BlackHoleEntity extends Entity {
             }
         }
         ServerLevel level = (ServerLevel) level();
+        if (dev.riftverse.wormhole.WormholeManager.isMouth(this)) {
+            dev.riftverse.wormhole.WormholeManager.mouthTick(this);
+            return;
+        }
         if (harmless) return;
         float horizon = horizonRadius() * bloom(0);
         Vec3 c = center();

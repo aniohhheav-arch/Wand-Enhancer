@@ -246,32 +246,36 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
         Vec3 now = position();
         if (lastServerPos != null) {
             double d = now.subtract(lastServerPos).horizontalDistance();
+            if (d > 5) d = 0; // a teleport, not driving
             speedAvg = speedAvg * 0.7f + (float) Math.min(d, 3) * 0.3f;
             entityData.set(SPEED, speedAvg);
         }
         lastServerPos = now;
+        // burning tyre tracks once the car is armed and past 40 mph
+        if (armed() && speedAvg * MPH > 40f && onGround()) {
+            for (int k = -1; k <= 1; k += 2) dev.riftverse.temporal.FireTrails.add((ServerLevel) level(), wheelGround(k), 30);
+        }
         if (armed() && speedAvg * MPH >= 88f && getControllingPassenger() instanceof ServerPlayer driver) timeJump(driver);
+    }
+
+    private Vec3 wheelGround(int side) {
+        Vec3 back = new Vec3(Mth.sin(getYRot() * Mth.DEG_TO_RAD), 0, -Mth.cos(getYRot() * Mth.DEG_TO_RAD));
+        Vec3 lateral = new Vec3(back.z, 0, -back.x).scale(0.85 * side);
+        return position().add(back.scale(1.4)).add(lateral);
     }
 
     private void timeJump(ServerPlayer driver) {
         ServerLevel level = (ServerLevel) level();
         entityData.set(ARMED, false);
-        entityData.set(JUMP, 110);
+        // twin fire trails burn on along the track the car just left
         Vec3 back = new Vec3(Mth.sin(getYRot() * Mth.DEG_TO_RAD), 0, -Mth.cos(getYRot() * Mth.DEG_TO_RAD));
-        Vec3 side = new Vec3(back.z, 0, -back.x).scale(0.8);
-        for (int i = 0; i < 24; i++) {
-            for (int k = -1; k <= 1; k += 2) {
-                Vec3 p = position().add(back.scale(i * 0.8)).add(side.scale(k));
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, p.x, p.y + 0.1, p.z, 3, 0.05, 0.05, 0.05, 0.01);
-            }
+        for (int i = 0; i < 30; i++) {
+            for (int k = -1; k <= 1; k += 2) dev.riftverse.temporal.FireTrails.add(level, wheelGround(k).add(back.scale(i * 0.7)), 100 - i);
         }
         level.sendParticles(RvParticles.RING.get().with(0x80D0FF, 5f, 14), getX(), getY() + 1, getZ(), 2, 0, 0, 0, 0);
         level.sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 1.5f, 14), getX(), getY() + 1, getZ(), 60, 1.5, 0.8, 1.5, 0.5);
         level.playSound(null, blockPosition(), RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 3f, 1.8f);
-        int year = targetYear();
-        // brake hard and hold the car still while the time field builds; driver and car cross together
-        setDeltaMovement(Vec3.ZERO);
-        TemporalManager.travel(driver, year, null, this);
+        TemporalManager.jumpNow(driver, targetYear(), this);
     }
 
     @Override

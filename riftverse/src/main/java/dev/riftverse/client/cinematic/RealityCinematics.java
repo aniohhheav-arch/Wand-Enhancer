@@ -298,6 +298,7 @@ public final class RealityCinematics {
                     if (p > 0.78f) wash(g, w, h, 0xFFFFFF, CameraRig.easeIn((p - 0.78f) / 0.1f) * k);
                 }
             }
+            case FLASH -> wash(g, w, h, 0xFFFFFF, (1f - p) * (1f - p));
             case TIME_TRAVEL -> {
                 // the clock spins: era washes strobe past behind rewind streaks, ending in a white flash
                 int[] eras = {0xC27B4A, 0x7DF9FF, 0xFFC24D, 0x8F6BFF, 0x5CFF9D, 0xFF5A1F};

@@ -60,6 +60,7 @@ public final class CommonEvents {
             EndProtocols.clear();
             dev.riftverse.multiverse.GenesisManager.clear();
             dev.riftverse.wormhole.WormholeManager.clearAll();
+            dev.riftverse.temporal.FireTrails.clear();
             RealityOps.clear();
             TransitManager.clear();
             TerrainSampler.clearCache();
@@ -72,6 +73,7 @@ public final class CommonEvents {
             EndProtocols.tick(e.getServer());
             dev.riftverse.multiverse.GenesisManager.tick(e.getServer());
             dev.riftverse.wormhole.WormholeManager.tick(e.getServer());
+            dev.riftverse.temporal.FireTrails.tick();
         });
         bus.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer sp) UniverseSync.send(sp);
@@ -146,6 +148,7 @@ public final class CommonEvents {
         }
         if (player.tickCount % 20 != 0) return;
         UniverseSync.check(player);
+        if (player.level().dimension() == RvWorldgen.EXPANSE) dev.riftverse.wormhole.WormholeManager.naturalSecond(player);
         RealityOps.playerSecond(player);
         dev.riftverse.temporal.TemporalManager.playerSecond(player);
         applyGravity(player);
