@@ -22,7 +22,7 @@ ITEMS = ["rift_shard", "void_essence", "stellar_dust", "singularity_fragment", "
          "universe_compass", "homeward_rift", "rift_igniter", "rift_sigil", "reality_remote"]
 ARMOR = [f"{s}_{p}" for s in ["rift_walker", "voyager", "event_horizon", "astral"] for p in ["helmet", "chestplate", "leggings", "boots"]]
 CREATURES = ["astral_jelly", "sky_whale", "lumen_strider", "neon_drone", "glitchling", "void_stalker", "crystal_sentinel",
-             "rift_wraith", "rift_warden", "abyssal_leviathan", "cosmic_deity", "void_cultist", "crystal_spider", "star_moth", "lunar_golem"]
+             "rift_wraith", "rift_warden", "abyssal_leviathan", "cosmic_deity", "void_cultist", "crystal_spider", "star_moth", "lunar_golem", "denizen"]
 PARTICLES = ["spark", "mote", "streak", "ring", "glitch", "dust", "infall"]
 
 
@@ -157,6 +157,10 @@ def generate(glow_blocks):
     for it in ITEMS + ARMOR:
         parent = "minecraft:item/handheld" if it in HANDHELD else "minecraft:item/generated"
         write_json(ASSETS / "models" / "item" / f"{it}.json", {"parent": parent, "textures": {"layer0": rl(f"item/{it}")}})
+    # relics: a dark body (layer0) and an energy layer (layer1) tinted with the universe's colour at runtime
+    for it, parent in (("relic_blade", "minecraft:item/handheld"), ("relic_blaster", "minecraft:item/generated")):
+        write_json(ASSETS / "models" / "item" / f"{it}.json",
+                   {"parent": parent, "textures": {"layer0": rl(f"item/{it}"), "layer1": rl(f"item/{it}_energy")}})
     for c in CREATURES:
         write_json(ASSETS / "models" / "item" / f"{c}_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
 

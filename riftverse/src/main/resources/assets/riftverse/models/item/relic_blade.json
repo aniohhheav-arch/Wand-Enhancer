@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "riftverse:item/relic_blade",
+    "layer1": "riftverse:item/relic_blade_energy"
+  }
+}

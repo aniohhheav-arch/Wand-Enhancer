@@ -80,6 +80,10 @@ public final class RvEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.creature.LunarGolemEntity>> LUNAR_GOLEM = ENTITIES.register("lunar_golem",
             () -> EntityType.Builder.<dev.riftverse.entity.creature.LunarGolemEntity>of(dev.riftverse.entity.creature.LunarGolemEntity::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10).build("lunar_golem"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.creature.DenizenEntity>> DENIZEN = ENTITIES.register("denizen",
+            () -> EntityType.Builder.<dev.riftverse.entity.creature.DenizenEntity>of(dev.riftverse.entity.creature.DenizenEntity::new, MobCategory.CREATURE)
+                    .sized(0.6F, 1.95F).clientTrackingRange(10).build("denizen"));
+
     private RvEntities() {}
 
     public static void registerAttributes(EntityAttributeCreationEvent event) {
@@ -97,6 +101,7 @@ public final class RvEntities {
         event.put(CRYSTAL_SPIDER.get(), dev.riftverse.entity.creature.CrystalSpiderEntity.createAttributes().build());
         event.put(STAR_MOTH.get(), dev.riftverse.entity.creature.StarMothEntity.createAttributes().build());
         event.put(LUNAR_GOLEM.get(), dev.riftverse.entity.creature.LunarGolemEntity.createAttributes().build());
+        event.put(DENIZEN.get(), dev.riftverse.entity.creature.DenizenEntity.createAttributes().build());
         event.put(COSMIC_DEITY.get(), dev.riftverse.entity.boss.CosmicDeityEntity.createAttributes().build());
     }
 }

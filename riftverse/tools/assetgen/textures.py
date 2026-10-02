@@ -910,6 +910,78 @@ ITEM_ART = {
         "................",
         "................",
     ], {"o": 0x2A1408, "1": 0x020104, "r": 0xC0441A, "R": 0xFF8A3A, "w": 0xFFF0C0}),
+    "relic_blade": ([
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "....o...........",
+        ".....o.o........",
+        "......gg........",
+        ".....ogo........",
+        "....o2o.o.......",
+        "...o2o..........",
+        "...oo...........",
+    ], {"o": 0x1A1420, "2": 0x5A4A6A, "g": 0xC8A040}),
+    "relic_blade_energy": ([
+        "..............ww",
+        ".............wWw",
+        "............wWw.",
+        "...........wWw..",
+        "..........wWw...",
+        ".........wWw....",
+        "........wWw.....",
+        ".......wWw......",
+        "......wWw.......",
+        ".....wWw........",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+    ], {"w": 0xB0B0B0, "W": 0xFFFFFF}),
+    "relic_blaster": ([
+        "................",
+        "................",
+        "................",
+        "................",
+        "...oooooooooo...",
+        "..o22222222o....",
+        "..o2oooooooo....",
+        "..o2o...........",
+        "..ooo.og........",
+        "....o2og........",
+        "....o22o........",
+        "....o22o........",
+        ".....oo.........",
+        "................",
+        "................",
+        "................",
+    ], {"o": 0x1A1420, "2": 0x4A3E5A, "g": 0xC8A040}),
+    "relic_blaster_energy": ([
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "....wWWWWWWw.www",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+    ], {"w": 0xB0B0B0, "W": 0xFFFFFF}),
     "reality_remote": ([
         "................",
         ".....oooooo.....",
@@ -1263,6 +1335,24 @@ def animated_block(name, fn, frames, frametime, preview, interpolate=False):
         save_animated(pairs, f"block/{name}.png", frametime, preview, interpolate)
 
 
+def tex_denizen(robe, trim, skin, seed):
+    """64x64 player-layout skin: a robed native with trimmed hems, a face and a hood."""
+    img = rgba(ramp(fbm(64, 4, 3, seed), [(0, robe), (0.6, robe), (1, trim)]), 1.0)
+    img[32:48, 0:56, 3] = 0.0
+    img[48:64, 0:16, 3] = 0.0
+    img[48:64, 48:64, 3] = 0.0
+    img[0:16, 32:64, 3] = 0.0
+    img[8:16, 8:16, :3] = hexc(skin)
+    img[11, 9:11, :3] = hexc(0x101018)
+    img[11, 13:15, :3] = hexc(0x101018)
+    img[14, 10:14, :3] = hexc(skin) * 0.7
+    img[0:8, 8:16, :3] = hexc(robe) * 0.8
+    for y in (19, 31):
+        img[y, 16:40, :3] = hexc(trim)
+    img[30:32, 20:28, :3] = hexc(trim)
+    return img
+
+
 def tex_cosmic_deity():
     """64x64 player-layout skin: a body made of night sky — nebula skin, star points, gold sigil veins, burning eyes."""
     size = 64
@@ -1456,6 +1546,10 @@ def generate():
     block("frost_crystal", tex_x_frost_crystal(), preview)
     block("coral_stone", tex_x_coral_stone(), preview)
     save(tex_cosmic_deity(), "entity/cosmic_deity.png", preview)
+    for i, (robe, trim, skin) in enumerate([(0x2A3A8A, 0xFFC14D, 0xC08A6A), (0x1A6A3A, 0xE0FF80, 0x8A5A3A), (0x8A1A2A, 0xFFB040, 0xE0B090),
+                                            (0x101018, 0x00F0FF, 0xD0A080), (0xE0E0F0, 0x8F6BFF, 0xF0D0B0), (0x6A3A1A, 0x40E0C0, 0x6A4028),
+                                            (0x5A1A6A, 0xFF7AF0, 0xB08070), (0x3A3A3A, 0xFF4A10, 0x9A6A50)]):
+        save(tex_denizen(robe, trim, skin, 700 + i), f"entity/denizen_{i}.png", preview)
     for name, stops, seed in [("void_cultist", [(0, 0x05010A), (0.6, 0x2A0A4A), (1, 0x9B30FF)], 501),
                               ("crystal_spider", [(0, 0x1A0A2A), (0.5, 0x6A3AAA), (1, 0xE0B0FF)], 502),
                               ("star_moth", [(0, 0x1A1030), (0.6, 0x8A70C0), (1, 0xFFE8A0)], 503),

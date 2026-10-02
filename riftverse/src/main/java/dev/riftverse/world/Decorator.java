@@ -68,6 +68,11 @@ public final class Decorator {
             level.addFreshEntity(hole);
         }
 
+        if (random.nextInt(55) == 0 && spec.terrain != TerrainMode.OCEAN && spec.terrain != TerrainMode.FRAGMENTS
+                && spec.terrain != TerrainMode.INVERTED && spec.hostility < 1.7f) {
+            settlement(level, random, sampler, col, spec, m, minX, minZ);
+        }
+
         for (Megastructures.Placement p : Megastructures.touching(spec, sampler, minX, minZ, minX + 15, minZ + 15)) {
             int[] heart = p.heart();
             if (heart[0] < minX || heart[0] > minX + 15 || heart[2] < minZ || heart[2] > minZ + 15) continue;
@@ -82,6 +87,64 @@ public final class Decorator {
             } else if (p.kind == MegaKind.NEON_MEGATOWER) {
                 setChest(level, random, at);
             }
+        }
+    }
+
+    /**
+     * A small settlement of the universe's natives: three houses built from the local materials around a lit plaza, and
+     * a few denizens who live there. Skipped on terrain too steep or wet to build on.
+     */
+    private static void settlement(WorldGenLevel level, RandomSource r, TerrainSampler sampler, TerrainSampler.Column col, UniverseSpec spec, MaterialSet m,
+                                   int minX, int minZ) {
+        int[][] houses = {{1, 1}, {9, 1}, {5, 9}};
+        BlockPos plaza = surface(level, sampler, col, minX + 7, minZ + 7);
+        if (plaza == null || underwater(level, plaza) || underwater(level, plaza.below())) return;
+        for (int[] h : houses) {
+            BlockPos c = surface(level, sampler, col, minX + h[0] + 2, minZ + h[1] + 2);
+            if (c == null || Math.abs(c.getY() - plaza.getY()) > 4 || underwater(level, c)) return;
+        }
+        BlockState air = Blocks.AIR.defaultBlockState();
+        BlockState wall = m.structure.isAir() ? Blocks.STONE_BRICKS.defaultBlockState() : m.structure;
+        BlockState floor = m.structure2.isAir() ? Blocks.SMOOTH_STONE.defaultBlockState() : m.structure2;
+        BlockState window = m.glass.isAir() ? Blocks.GLASS.defaultBlockState() : m.glass;
+        BlockState light = Blocks.LANTERN.defaultBlockState();
+        int door = r.nextInt(4);
+        for (int[] h : houses) {
+            BlockPos c = surface(level, sampler, col, minX + h[0] + 2, minZ + h[1] + 2);
+            int y0 = c.getY();
+            for (int dx = 0; dx < 5; dx++) {
+                for (int dz = 0; dz < 5; dz++) {
+                    BlockPos base = new BlockPos(minX + h[0] + dx, y0 - 1, minZ + h[1] + dz);
+                    set(level, base, floor);
+                    for (int f = 2; f <= 4; f++) if (level.getBlockState(base.below(f - 1)).isAir()) set(level, base.below(f - 1), wall);
+                    boolean edge = dx == 0 || dx == 4 || dz == 0 || dz == 4;
+                    for (int dy = 1; dy <= 4; dy++) {
+                        BlockPos q = base.above(dy);
+                        if (!edge) {
+                            set(level, q, air);
+                            continue;
+                        }
+                        boolean corner = (dx == 0 || dx == 4) && (dz == 0 || dz == 4);
+                        boolean isDoor = !corner && dy <= 2 && ((door == 0 && dz == 0 && dx == 2) || (door == 1 && dz == 4 && dx == 2)
+                                || (door == 2 && dx == 0 && dz == 2) || (door == 3 && dx == 4 && dz == 2));
+                        boolean isWindow = !corner && dy == 2 && (dx == 2 || dz == 2);
+                        set(level, q, isDoor ? air : isWindow ? window : wall);
+                    }
+                    set(level, base.above(5), floor);
+                }
+            }
+            set(level, new BlockPos(minX + h[0] + 2, y0 + 5, minZ + h[1] + 2).above(), m.accent2.isAir() ? light : m.accent2);
+            set(level, new BlockPos(minX + h[0] + 2, y0 + 3, minZ + h[1] + 2), light);
+        }
+        set(level, plaza.below(), m.accent.isAir() ? floor : m.accent);
+        set(level, plaza, Blocks.LANTERN.defaultBlockState());
+        int people = 2 + r.nextInt(3);
+        for (int i = 0; i < people; i++) {
+            var d = dev.riftverse.registry.RvEntities.DENIZEN.get().create(level.getLevel());
+            if (d == null) continue;
+            d.moveTo(plaza.getX() + 0.5 + r.nextInt(5) - 2, plaza.getY(), plaza.getZ() + 0.5 + r.nextInt(5) - 2, r.nextFloat() * 360f, 0);
+            d.belongTo(spec);
+            level.addFreshEntity(d);
         }
     }
 

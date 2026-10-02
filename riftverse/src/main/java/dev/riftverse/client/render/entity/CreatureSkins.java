@@ -31,6 +31,24 @@ public final class CreatureSkins {
         }
     }
 
+    /** Natives wear one of eight cultural costumes chosen by their universe's archetype. */
+    public static final class Denizen extends HumanoidMobRenderer<dev.riftverse.entity.creature.DenizenEntity, PlayerModel<dev.riftverse.entity.creature.DenizenEntity>> {
+        private static final ResourceLocation[] TEX = new ResourceLocation[8];
+
+        static {
+            for (int i = 0; i < 8; i++) TEX[i] = Riftverse.id("textures/entity/denizen_" + i + ".png");
+        }
+
+        public Denizen(EntityRendererProvider.Context ctx) {
+            super(ctx, new PlayerModel<>(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f);
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(dev.riftverse.entity.creature.DenizenEntity entity) {
+            return TEX[Math.floorMod(entity.culture(), 8)];
+        }
+    }
+
     public static final class CrystalSpider extends SpiderRenderer<CrystalSpiderEntity> {
         private static final ResourceLocation TEX = Riftverse.id("textures/entity/crystal_spider.png");
 

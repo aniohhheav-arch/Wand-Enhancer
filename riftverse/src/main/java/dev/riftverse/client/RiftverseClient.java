@@ -73,6 +73,9 @@ public final class RiftverseClient {
         modBus.addListener(RiftverseClient::registerParticles);
         modBus.addListener(RiftverseClient::registerDimensionEffects);
         modBus.addListener(RiftverseClient::registerGuiLayers);
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Item e) -> e.register(
+                (stack, layer) -> layer == 1 ? (0xFF000000 | dev.riftverse.item.relic.Relics.color(stack)) : 0xFFFFFFFF,
+                dev.riftverse.registry.RvItems.RELIC_BLADE.get(), dev.riftverse.registry.RvItems.RELIC_BLASTER.get()));
         modBus.addListener(KeyBindings::register);
 
         IEventBus game = NeoForge.EVENT_BUS;
@@ -116,6 +119,7 @@ public final class RiftverseClient {
         e.registerEntityRenderer(RvEntities.CRYSTAL_SPIDER.get(), dev.riftverse.client.render.entity.CreatureSkins.CrystalSpider::new);
         e.registerEntityRenderer(RvEntities.STAR_MOTH.get(), dev.riftverse.client.render.entity.CreatureSkins.StarMoth::new);
         e.registerEntityRenderer(RvEntities.LUNAR_GOLEM.get(), dev.riftverse.client.render.entity.CreatureSkins.LunarGolem::new);
+        e.registerEntityRenderer(RvEntities.DENIZEN.get(), dev.riftverse.client.render.entity.CreatureSkins.Denizen::new);
         e.registerEntityRenderer(RvEntities.COSMIC_DEITY.get(), dev.riftverse.client.render.entity.CosmicDeityRenderer::new);
         e.registerBlockEntityRenderer(RvBlockEntities.RIFT.get(), RiftRenderer::new);
         e.registerBlockEntityRenderer(RvBlockEntities.PORTAL_FIELD.get(), PortalFieldRenderer::new);

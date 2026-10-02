@@ -25,6 +25,14 @@ public class EnergyBoltEntity extends ThrowableProjectile {
 
     private float damage = 4f;
     private int maxAge = 80;
+    private int element = -1;
+    private int tier = 1;
+
+    /** Relic bolts carry their universe's elemental nature into whatever they hit. */
+    public void setElement(int element, int tier) {
+        this.element = element;
+        this.tier = tier;
+    }
 
     public EnergyBoltEntity(EntityType<? extends EnergyBoltEntity> type, Level level) {
         super(type, level);
@@ -87,6 +95,9 @@ public class EnergyBoltEntity extends ThrowableProjectile {
         Entity target = hit.getEntity();
         Entity owner = getOwner();
         target.hurt(owner != null ? damageSources().indirectMagic(this, owner) : damageSources().magic(), damage);
+        if (element >= 0 && target instanceof net.minecraft.world.entity.LivingEntity living) {
+            dev.riftverse.item.relic.Relics.strike(dev.riftverse.item.relic.Relics.Element.byId(element), living, owner != null ? owner : this, tier);
+        }
         burst();
     }
 

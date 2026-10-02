@@ -89,6 +89,7 @@ public final class UniverseEffects {
         for (ServerPlayer player : level.players()) {
             if (player.isSpectator()) continue;
             UniverseSpec spec = UniverseRegistry.specAt(player.getBlockX(), player.getBlockZ());
+            if (level.random.nextInt(30) == 0) spawnNative(level, player, spec);
             if (spec.creatures.isEmpty()) continue;
             spawnAround(level, player, spec);
         }
@@ -115,6 +116,25 @@ public final class UniverseEffects {
     private static boolean flies(CreatureKind kind) {
         return kind == CreatureKind.ASTRAL_JELLY || kind == CreatureKind.SKY_WHALE || kind == CreatureKind.NEON_DRONE
                 || kind == CreatureKind.RIFT_WRAITH || kind == CreatureKind.ABYSSAL_LEVIATHAN || kind == CreatureKind.STAR_MOTH;
+    }
+
+    /** Every universe is inhabited: its natives roam the land in ones and twos. */
+    private static void spawnNative(ServerLevel level, ServerPlayer player, UniverseSpec spec) {
+        if (dev.riftverse.multiverse.InfiniteCorridor.isCorridor(spec.id)) return;
+        AABB area = player.getBoundingBox().inflate(64);
+        if (level.getEntitiesOfClass(dev.riftverse.entity.creature.DenizenEntity.class, area).size() >= 4) return;
+        RandomSource r = level.random;
+        double angle = r.nextDouble() * Math.PI * 2;
+        int x = (int) (player.getX() + Math.cos(angle) * (24 + r.nextInt(16)));
+        int z = (int) (player.getZ() + Math.sin(angle) * (24 + r.nextInt(16)));
+        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        if (y <= level.getMinBuildHeight() + 1 || !level.getFluidState(new BlockPos(x, y, z)).isEmpty()) return;
+        var d = RvEntities.DENIZEN.get().create(level);
+        if (d == null) return;
+        d.moveTo(x + 0.5, y, z + 0.5, r.nextFloat() * 360f, 0);
+        if (!level.noCollision(d)) return;
+        d.belongTo(spec);
+        level.addFreshEntity(d);
     }
 
     private static void spawnAround(ServerLevel level, ServerPlayer player, UniverseSpec spec) {

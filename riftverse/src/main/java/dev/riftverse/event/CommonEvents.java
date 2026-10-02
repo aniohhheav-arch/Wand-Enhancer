@@ -109,6 +109,17 @@ public final class CommonEvents {
         bus.addListener(CommonEvents::onFall);
         bus.addListener(CommonEvents::onBreathe);
         bus.addListener(CommonEvents::onJoin);
+        bus.addListener((net.neoforged.neoforge.event.entity.living.LivingDropsEvent e) -> {
+            LivingEntity dead = e.getEntity();
+            if (!(e.getSource().getEntity() instanceof Player) || !(dead.level() instanceof ServerLevel level)) return;
+            UniverseSpec spec = specOf(dead);
+            if (spec == null) return;
+            boolean boss = dead.getMaxHealth() > 120f;
+            float chance = boss ? 1f : (dead instanceof net.minecraft.world.entity.monster.Enemy ? 0.04f : 0.015f);
+            if (level.random.nextFloat() >= chance) return;
+            var stack = dev.riftverse.item.relic.Relics.forge(spec, level.random.nextBoolean(), level.random);
+            e.getDrops().add(new net.minecraft.world.entity.item.ItemEntity(level, dead.getX(), dead.getY() + 0.5, dead.getZ(), stack));
+        });
         bus.addListener(CommonEvents::onLevelTick);
     }
 
