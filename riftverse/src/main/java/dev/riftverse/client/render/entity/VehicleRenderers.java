@@ -32,6 +32,38 @@ public final class VehicleRenderers {
         }
 
         @Override
+        public void render(DeLoreanEntity e, float yaw, float partial, com.mojang.blaze3d.vertex.PoseStack pose, MultiBufferSource buf, int light) {
+            super.render(e, yaw, partial, pose, buf, light);
+            float k = e.jump() > 0 ? 1f - e.jump() / (float) DeLoreanEntity.CHARGE_TICKS * 0.6f : e.armed() && e.mph() > 60 ? (e.mph() - 60) / 60f : 0f;
+            if (k <= 0f || e.isInvisible()) return;
+            // the time field: forked blue arcs crawling over the bodywork, brighter and wilder as the jump nears
+            pose.pushPose();
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-Mth.rotLerp(partial, e.yRotO, e.getYRot())));
+            var p = pose.last();
+            net.minecraft.world.phys.Vec3 eye = dev.riftverse.client.render.FxDraw.eyeLocal(net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), e.position());
+            float t = dev.riftverse.client.render.RvShaders.time();
+            int arcs = 4 + (int) (k * 10);
+            for (int i = 0; i < arcs; i++) {
+                net.minecraft.util.RandomSource r = net.minecraft.util.RandomSource.create((long) (t * 20) * 31 + i);
+                net.minecraft.world.phys.Vec3 a = new net.minecraft.world.phys.Vec3((r.nextDouble() - 0.5) * 2.2, 0.3 + r.nextDouble() * 1.2, (r.nextDouble() - 0.5) * 4.4);
+                for (int seg = 0; seg < 4; seg++) {
+                    net.minecraft.world.phys.Vec3 b = a.add((r.nextDouble() - 0.5) * 0.9, (r.nextDouble() - 0.5) * 0.7, (r.nextDouble() - 0.5) * 0.9);
+                    dev.riftverse.client.render.FxDraw.beam(buf.getBuffer(dev.riftverse.client.render.RvRenderTypes.ENERGY), p, a, b, eye, 0.07f, i % 3 == 0 ? 0xFFFFFF : 0x60C0FF, Math.min(1f, 0.4f + k));
+                    a = b;
+                }
+            }
+            if (e.jump() > 0) {
+                // a glowing sphere of time-field rings closing in around the car
+                for (int ring = 0; ring < 3; ring++) {
+                    float rr = 3.2f - k * 1.2f + ring * 0.25f;
+                    dev.riftverse.client.render.FxDraw.ring(buf.getBuffer(dev.riftverse.client.render.RvRenderTypes.ENERGY), p, new org.joml.Vector3f(0, 0.8f, 0),
+                            new org.joml.Vector3f(Mth.sin(t * 2 + ring), 1, Mth.cos(t * 2 + ring)).normalize(), rr, 0.08f, 0x80D0FF, 0.5f * k, 48);
+                }
+            }
+            pose.popPose();
+        }
+
+        @Override
         public Color getRenderColor(DeLoreanEntity e, float partial, int light) {
             return e.isInvisible() ? Color.ofARGB(0, 255, 255, 255) : Color.WHITE;
         }

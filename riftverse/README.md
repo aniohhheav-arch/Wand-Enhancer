@@ -434,3 +434,7 @@ Every terrain change an event makes (craters, crystals, snow, overgrowth, colour
 - **Evolving audio:** each zone has its own ambient voice, and the farther you walk from the start, the lower and darker the score gets.
 
 Only newly generated corridor chunks get the zones. Already-explored stretches keep their old look.
+
+## Building an obfuscated release
+
+`./gradlew obfuscate` produces `build/libs/riftverse-<version>-obf.jar`, which is the jar to distribute. ProGuard renames every internal class, method and field into `dev.riftverse.z`. The things NeoForge, Mixin and the game look up by name are kept: the mod class, event subscribers, mixins, enum constants, records, and anything that overrides Minecraft or GeckoLib code. The rules are in `proguard.pro`.

@@ -127,7 +127,7 @@ public final class RiftverseConfig {
         HEAVY_EFFECTS = BUILDER.comment("Whether expensive particle effects are used by events and reality rewrites.")
                 .define("heavyEffects", true);
         GENESIS_SECONDS = BUILDER.comment("Length in seconds of the Genesis Protocol rebirth cinematic played after a universe is erased.")
-                .defineInRange("genesisSeconds", 48, 10, 180);
+                .defineInRange("genesisSeconds", 80, 10, 300);
         BUILDER.pop();
     }
 

@@ -63,7 +63,7 @@ public final class GenesisManager {
     }
 
     public static int durationTicks() {
-        return RiftverseConfig.get(RiftverseConfig.GENESIS_SECONDS, 48) * 20;
+        return RiftverseConfig.get(RiftverseConfig.GENESIS_SECONDS, 80) * 20;
     }
 
     /** Begins rebirth for everyone listed (all share one newborn universe). Returns the universe, or null if none was made. */

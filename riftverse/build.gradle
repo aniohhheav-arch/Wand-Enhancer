@@ -1,3 +1,8 @@
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'com.guardsquare:proguard-gradle:7.6.1' }
+}
+
 plugins {
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.148'
@@ -91,4 +96,18 @@ dependencies {
             prefer '4.9.3'
         }
     }
+}
+
+// ---------------------------------------------------------------- obfuscation
+// `./gradlew obfuscate` renames every internal class, method and field so the shipped jar is hard to read or copy.
+// Names the game, NeoForge or Mixin look up by name (the @Mod class, event subscribers, mixins, enum constants and
+// anything overriding Minecraft/GeckoLib code) are kept.
+tasks.register('obfuscate', proguard.gradle.ProGuardTask) {
+    dependsOn tasks.named('jar')
+    def input = tasks.named('jar').flatMap { it.archiveFile }
+    injars input
+    outjars layout.buildDirectory.file("libs/${mod_id}-${mod_version}-obf.jar")
+    libraryjars "${System.getProperty('java.home')}/jmods", jarfilter: '!**.jar', filter: '!module-info.class'
+    libraryjars sourceSets.main.compileClasspath
+    configuration file('proguard.pro')
 }

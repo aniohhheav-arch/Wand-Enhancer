@@ -77,7 +77,7 @@ public final class GenesisCinematic {
                 }
                 case 1 -> {
                     cue(RvSounds.GENESIS_BANG.get(), 1f, 1f);
-                    CinematicDirector.shake(1.2f, 40, 0f, 0xFFFFFF);
+                    CinematicDirector.shake(2.2f, 70, 1f, 0xFFFFFF);
                 }
                 case 2 -> cue(RvSounds.WORMHOLE_TRAVEL.get(), 0.6f, 0.5f);
                 case 3 -> cue(RvSounds.GENESIS_FORM.get(), 1f, 0.9f);
@@ -130,7 +130,7 @@ public final class GenesisCinematic {
             g.fill(0, 0, w, h, 0xFF000000);
         }
         // captions for each act
-        String caption = p < 0.07f ? "" : p < 0.17f ? "In the beginning, there was nothing." : p < 0.32f ? "Then, everything."
+        String caption = p < 0.07f ? "" : p < 0.13f ? "In the beginning, there was nothing." : p < 0.168f ? "Everything that will ever be, in a single point." : p < 0.21f ? "" : p < 0.32f ? "Then, everything."
                 : p < 0.54f ? "Space unfolds. Light gathers into galaxies." : p < 0.80f ? "A world takes shape." : p < 0.88f ? "Life stirs."
                 : "";
         float ca = captionAlpha(p);

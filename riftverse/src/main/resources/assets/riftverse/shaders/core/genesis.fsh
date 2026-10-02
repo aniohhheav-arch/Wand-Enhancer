@@ -168,6 +168,45 @@ void main() {
         col += vec3(1.0) * exp(-pow((p - 0.185) * 90.0, 2.0)) * 3.0; // the flash of creation
     }
 
+    // THE BIG BANG (0.13-0.27): the point implodes under its own weight, everything goes white, then a fireball of
+    // primordial plasma tears outward while inflation streaks race past the camera
+    float implode = smoothstep(0.13, 0.168, p) * (1.0 - step(0.168, p));
+    if (implode > 0.0) {
+        float ang = atan(uv.y, uv.x);
+        float infall = pow(abs(sin(ang * 23.0 + r0 * 30.0 + t * 12.0)), 30.0) * smoothstep(1.4, 0.05, r0) * implode;
+        col += vec3(0.85, 0.9, 1.0) * infall * 1.5;
+        col *= 1.0 - implode * smoothstep(0.05, 0.6, r0) * 0.9;
+        col += vec3(1.0) * exp(-r0 * mix(40.0, 400.0, implode)) * 6.0 * implode;
+    }
+    float bang = smoothstep(0.1675, 0.1700, p) * (1.0 - smoothstep(0.172, 0.205, p));
+    col = mix(col, vec3(1.6, 1.55, 1.45), bang);
+    float fireOn = band(p, 0.168, 0.27);
+    if (fireOn > 0.0) {
+        float f = smoothstep(0.168, 0.25, p);
+        float FR = 0.15 + f * 3.2;
+        float ang = atan(uv.y, uv.x);
+        float turb = rvFbm2(vec2(ang * 3.0, r0 * 4.0 - t * 2.5) + seed, 6);
+        float edge = FR * (0.85 + turb * 0.3);
+        float inside = smoothstep(edge, edge * 0.55, r0);
+        float heat = clamp(1.0 - r0 / max(edge, 0.001), 0.0, 1.0);
+        vec3 plasma = mix(vec3(0.6, 0.05, 0.02), vec3(1.0, 0.55, 0.1), smoothstep(0.0, 0.5, heat));
+        plasma = mix(plasma, vec3(1.2, 1.15, 1.0), smoothstep(0.55, 1.0, heat));
+        plasma = mix(plasma, mix(ColorA, ColorB, turb), f * 0.5);
+        col += plasma * inside * (0.8 + turb) * fireOn * 1.3;
+        // the shock front, split into colours like light through a prism
+        for (int k = 0; k < 3; k++) {
+            float sr = edge * (1.0 + float(k) * 0.015);
+            vec3 chan = k == 0 ? vec3(1.0, 0.2, 0.2) : k == 1 ? vec3(0.2, 1.0, 0.3) : vec3(0.3, 0.4, 1.0);
+            col += chan * exp(-pow((r0 - sr) * 45.0, 2.0)) * 1.6 * fireOn;
+        }
+        // inflation: streaks of matter flung outward faster than light
+        vec2 cell = vec2(floor(ang * 60.0), 0.0);
+        float lane = rvHash12(cell + seed);
+        float sp = fract(lane * 7.0 + f * (2.0 + lane * 3.0));
+        float streak = smoothstep(0.02, 0.0, abs(fract(ang * 60.0 / 6.2831853) - 0.5) - 0.45) * exp(-pow((r0 - sp * 3.0) * 6.0, 2.0)) * step(0.55, lane);
+        col += vec3(1.0, 0.9, 0.8) * streak * 2.0 * fireOn;
+    }
+
     // STAGE 3 (0.30-0.52) the birth of space: we fly through forming galaxies, stars and nebulae
     float spaceOn = band(p, 0.30, 0.56);
     if (spaceOn > 0.0) {

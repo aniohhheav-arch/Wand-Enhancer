@@ -52,7 +52,7 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
             st.getController().setAnimationSpeed(Math.min(6.0, mph / 15.0));
             return st.setAndContinue(drive);
         }));
-        controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "doors", 3, st -> st.setAndContinue(!isVehicle() && level().getNearestPlayer(this, 3.5) != null ? open : close)));
+        controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "doors", 3, st -> st.setAndContinue(!isVehicle() && level().getNearestPlayer(getX(), getY(), getZ(), 5.5, false) != null ? open : close)));
     }
 
     private static final EntityDataAccessor<Integer> TARGET = SynchedEntityData.defineId(DeLoreanEntity.class, EntityDataSerializers.INT);
@@ -61,6 +61,7 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
     private static final EntityDataAccessor<Integer> JUMP = SynchedEntityData.defineId(DeLoreanEntity.class, EntityDataSerializers.INT);
     /** Displayed mph per block/tick. 88 mph = 0.88 blocks per tick. */
     public static final float MPH = 100f;
+    public static final int CHARGE_TICKS = 50;
     private Vec3 lastServerPos;
     private float speedAvg;
     private int lerpSteps;
@@ -198,10 +199,7 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
     private void drive() {
         LivingEntity d = getControllingPassenger();
         Vec3 v = getDeltaMovement();
-        if (jump() > 0) {
-            setDeltaMovement(0, v.y, 0);
-            return;
-        }
+
         double hs = v.horizontalDistance();
         float forward = d == null ? 0 : d.zza;
         float turn = d == null ? 0 : d.xxa;
@@ -255,7 +253,23 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
         if (armed() && speedAvg * MPH > 40f && onGround()) {
             for (int k = -1; k <= 1; k += 2) dev.riftverse.temporal.FireTrails.add((ServerLevel) level(), wheelGround(k), 30);
         }
-        if (armed() && speedAvg * MPH >= 88f && getControllingPassenger() instanceof ServerPlayer driver) timeJump(driver);
+        if (!(getControllingPassenger() instanceof ServerPlayer driver)) {
+            if (jump() > 0) entityData.set(JUMP, 0);
+            return;
+        }
+        int charge = jump();
+        if (charge == 0 && armed() && speedAvg * MPH >= 88f) {
+            entityData.set(JUMP, CHARGE_TICKS);
+            driver.displayClientMessage(Component.literal("⚡ TEMPORAL DISPLACEMENT IMMINENT — HOLD 88 MPH ⚡").withColor(0x80D0FF), true);
+        } else if (charge > 0) {
+            if (speedAvg * MPH < 70f) {
+                entityData.set(JUMP, 0);
+                driver.displayClientMessage(Component.literal("Time field collapsed — not enough speed").withColor(0xFF6040), true);
+                return;
+            }
+            chargeFx((ServerLevel) level(), CHARGE_TICKS - charge);
+            if (charge == 1) timeJump(driver);
+        }
     }
 
     private Vec3 wheelGround(int side) {
@@ -264,9 +278,28 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
         return position().add(back.scale(1.4)).add(lateral);
     }
 
+    /** The build-up: arcs crawl over the body, the flux field hums louder, lightning snaps at the road. */
+    private void chargeFx(ServerLevel level, int t) {
+        Vec3 c = position().add(0, 0.8, 0);
+        level.sendParticles(RvParticles.STREAK.get().with(t % 3 == 0 ? 0xFFFFFF : 0x60C0FF, 0.9f, 6), c.x, c.y, c.z, 6 + t / 3, 1.2, 0.6, 2.0, 0.15);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, c.x, c.y, c.z, 10 + t / 2, 1.2, 0.6, 2.0, 0.4);
+        if (t % 10 == 0) level.playSound(null, blockPosition(), RvSounds.BLACK_HOLE_PULL.get(), SoundSource.PLAYERS, 1f + t / 25f, 1.2f + t / 50f);
+        if (t == 20 || t == 35 || t == 45) {
+            net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(level);
+            if (bolt != null) {
+                Vec3 at = position().add(random.nextGaussian() * 3, 0, random.nextGaussian() * 3);
+                bolt.moveTo(at);
+                bolt.setVisualOnly(true);
+                level.addFreshEntity(bolt);
+            }
+        }
+        if (t % 12 == 0) level.sendParticles(RvParticles.RING.get().with(0x80D0FF, 2.5f + t / 10f, 10), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+    }
+
     private void timeJump(ServerPlayer driver) {
         ServerLevel level = (ServerLevel) level();
         entityData.set(ARMED, false);
+        entityData.set(JUMP, 0);
         // twin fire trails burn on along the track the car just left
         Vec3 back = new Vec3(Mth.sin(getYRot() * Mth.DEG_TO_RAD), 0, -Mth.cos(getYRot() * Mth.DEG_TO_RAD));
         for (int i = 0; i < 30; i++) {
@@ -275,7 +308,39 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
         level.sendParticles(RvParticles.RING.get().with(0x80D0FF, 5f, 14), getX(), getY() + 1, getZ(), 2, 0, 0, 0, 0);
         level.sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 1.5f, 14), getX(), getY() + 1, getZ(), 60, 1.5, 0.8, 1.5, 0.5);
         level.playSound(null, blockPosition(), RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 3f, 1.8f);
-        TemporalManager.jumpNow(driver, targetYear(), this);
+        int year = targetYear();
+        for (int i = 0; i < 3; i++) Scheduler.later(i * 4, () -> dev.riftverse.multiverse.RealityOps.cinematic(driver, dev.riftverse.multiverse.CinematicType.FLASH, 10,
+                driver.getEyePosition(), 0xFFFFFF, 0xFFFFFF, "", ""));
+        level.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 3f, 0.6f);
+        level.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 3f, 1.4f);
+        Scheduler.later(12, () -> dev.riftverse.multiverse.RealityOps.cinematic(driver, dev.riftverse.multiverse.CinematicType.TIME_TRAVEL, 80, driver.getEyePosition(),
+                0x60C0FF, 0xFFC24D, "88 MPH", "→ " + TemporalManager.formatYear(year)));
+        DeLoreanEntity self = this;
+        Scheduler.later(52, () -> {
+            if (driver.isRemoved() || self.isRemoved()) return;
+            TemporalManager.jumpNow(driver, year, self);
+            Scheduler.later(5, () -> {
+                if (!(driver.getVehicle() instanceof DeLoreanEntity car)) return;
+                ServerLevel there = (ServerLevel) car.level();
+                // arrival: lightning snaps around the spot, a sphere of electricity, then the car steams with time-frost
+                for (int i = 0; i < 3; i++) {
+                    net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(there);
+                    if (bolt == null) continue;
+                    bolt.moveTo(car.position().add(car.random.nextGaussian() * 2.5, 0, car.random.nextGaussian() * 2.5));
+                    bolt.setVisualOnly(true);
+                    there.addFreshEntity(bolt);
+                }
+                there.sendParticles(RvParticles.RING.get().with(0x80D0FF, 6f, 18), car.getX(), car.getY() + 1, car.getZ(), 3, 0, 0, 0, 0);
+                there.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, car.getX(), car.getY() + 1, car.getZ(), 120, 2, 1, 3, 0.6);
+                for (int k = 0; k < 20; k++) {
+                    Scheduler.later(k * 5, () -> {
+                        if (car.isRemoved()) return;
+                        there.sendParticles(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE, car.getX(), car.getY() + 1.2, car.getZ(), 6, 1, 0.3, 2, 0.01);
+                        there.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, car.getX(), car.getY() + 1.4, car.getZ(), 2, 1, 0.2, 2, 0.01);
+                    });
+                }
+            });
+        });
     }
 
     @Override
