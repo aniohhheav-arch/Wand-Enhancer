@@ -153,6 +153,10 @@ public class DeLoreanEntity extends Entity implements software.bernie.geckolib.a
     protected void positionRider(Entity passenger, MoveFunction move) {
         super.positionRider(passenger, move);
         if (getControllingPassenger() == null) return;
+        // the driver's view turns with the car, like a boat
+        float delta = Mth.wrapDegrees(getYRot() - yRotO);
+        passenger.setYRot(passenger.getYRot() + delta);
+        passenger.setYHeadRot(passenger.getYHeadRot() + delta);
         passenger.setYBodyRot(getYRot());
     }
 

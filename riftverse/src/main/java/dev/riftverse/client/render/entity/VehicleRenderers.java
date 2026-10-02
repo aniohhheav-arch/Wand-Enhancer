@@ -26,6 +26,12 @@ public final class VehicleRenderers {
         }
 
         @Override
+        protected void applyRotations(DeLoreanEntity e, com.mojang.blaze3d.vertex.PoseStack pose, float age, float yaw, float partial, float scale) {
+            // GeckoLib only turns living entities; vehicles must follow their own (interpolated) yaw
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-Mth.rotLerp(partial, e.yRotO, e.getYRot())));
+        }
+
+        @Override
         public Color getRenderColor(DeLoreanEntity e, float partial, int light) {
             return e.isInvisible() ? Color.ofARGB(0, 255, 255, 255) : Color.WHITE;
         }
@@ -41,6 +47,12 @@ public final class VehicleRenderers {
             super(ctx, new DefaultedEntityGeoModel<>(Riftverse.id("tardis")));
             addRenderLayer(new AutoGlowingGeoLayer<>(this));
             shadowRadius = 0.8f;
+        }
+
+        @Override
+        protected void applyRotations(TardisEntity e, com.mojang.blaze3d.vertex.PoseStack pose, float age, float yaw, float partial, float scale) {
+            // GeckoLib only turns living entities; vehicles must follow their own (interpolated) yaw
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f - e.getYRot()));
         }
 
         @Override
@@ -85,6 +97,12 @@ public final class VehicleRenderers {
         public TimeDoor(EntityRendererProvider.Context ctx) {
             super(ctx, new DefaultedEntityGeoModel<>(Riftverse.id("time_door")));
             addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        }
+
+        @Override
+        protected void applyRotations(TimeDoorEntity e, com.mojang.blaze3d.vertex.PoseStack pose, float age, float yaw, float partial, float scale) {
+            // GeckoLib only turns living entities; vehicles must follow their own (interpolated) yaw
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-e.getYRot()));
         }
     }
 }
