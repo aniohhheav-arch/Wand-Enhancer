@@ -48,7 +48,7 @@ public class RealityTearRenderer extends EntityRenderer<RealityTearEntity> {
             float w = (0.15f + mid * 0.6f) * size * 0.35f * open;
             FxDraw.beam(buffers.getBuffer(RvRenderTypes.ENERGY), p, spine[i], spine[i + 1], eye, w * 2.6f, 0x8A30FF, 0.45f * flicker);
             FxDraw.beam(buffers.getBuffer(RvRenderTypes.ENERGY), p, spine[i], spine[i + 1], eye, w * 1.2f, 0xFFFFFF, 0.9f * flicker);
-            FxDraw.beam(buffers.getBuffer(RvRenderTypes.translucent()), p, spine[i], spine[i + 1], eye, w * 0.7f, 0x000000, 0.95f);
+            FxDraw.beam(buffers.getBuffer(RvRenderTypes.VOID_RIBBON), p, spine[i], spine[i + 1], eye, w * 0.7f, 0x000000, 0.95f);
         }
         for (int k = 0; k < 18; k++) {
             Vec3 from = spine[1 + r.nextInt(segs - 1)];

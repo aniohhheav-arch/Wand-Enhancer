@@ -22,6 +22,16 @@ public final class RvRenderTypes {
                     .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
                     .createCompositeState(false));
 
+    /** Same ribbons blended normally, so dark colours occlude (the black seam of a reality tear). */
+    public static final RenderType VOID_RIBBON = RenderType.create("riftverse_void_ribbon", DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS,
+            2048, false, true, RenderType.CompositeState.builder()
+                    .setShaderState(new RenderStateShard.ShaderStateShard(() -> RvShaders.energy))
+                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                    .setCullState(RenderStateShard.NO_CULL)
+                    .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                    .createCompositeState(false));
+
     private RvRenderTypes() {}
 
     /** Lit, opaque vertex-coloured geometry. */
