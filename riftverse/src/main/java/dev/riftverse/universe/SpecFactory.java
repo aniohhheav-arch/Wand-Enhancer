@@ -662,6 +662,336 @@ public final class SpecFactory {
                 s.hostility = 0.5f; s.music = MusicKind.OCEAN; s.gradeTint = 0xFF90C0; s.gradeStrength = 0.12f; s.saturation = 1.25f;
                 s.islandDensity = 0.45f;
             }
+            case SKETCHBOOK -> {
+                sky(s, 0xF0EAE0, 0xFFFFFF, 0xF4F0E8, 0x404040, 0x808080, 0xFFFFFF);
+                s.materials = Archetype.XENOFLORA;
+                s.artStyle = ArtStyle.SKETCH.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.CYCLE; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 68; s.amplitude = 22; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.GIANT_TREE; s.mega2 = MegaKind.ARCH; s.megaDensity = 0.5f; s.decorDensity = 1.3f;
+                creatures(s, CreatureKind.LUMEN_STRIDER, CreatureKind.STAR_MOTH);
+                s.hostility = 0.4f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                
+            }
+            case NOIR -> {
+                sky(s, 0x101010, 0x404040, 0x303030, 0xC0C0C0, 0x808080, 0xFFFFFF);
+                s.materials = Archetype.NEON_SPRAWL;
+                s.artStyle = ArtStyle.NOIR.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.RAIN; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.CITY; s.baseHeight = 66; s.amplitude = 4; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.MONOLITH; s.megaDensity = 0.6f; s.decorDensity = 0.5f;
+                creatures(s, CreatureKind.VOID_CULTIST, CreatureKind.NEON_DRONE);
+                s.hostility = 1.2f; s.music = MusicKind.VOID; s.gradeStrength = 0f;
+                
+            }
+            case PSYCHEDELIA -> {
+                sky(s, 0xFF00C0, 0x00FFC0, 0xC000FF, 0xFFFF00, 0x00C0FF, 0xFFFFFF);
+                s.materials = Archetype.BLOOM;
+                s.artStyle = ArtStyle.PSYCHEDELIC.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.PETALS; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SPIRES; s.baseHeight = 70; s.amplitude = 32; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.CRYSTAL_SPIRE; s.mega2 = MegaKind.GIANT_MUSHROOM; s.megaDensity = 0.8f; s.decorDensity = 1.6f;
+                creatures(s, CreatureKind.ASTRAL_JELLY, CreatureKind.GLITCHLING);
+                s.hostility = 0.6f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                s.auroraIntensity = 1f;
+            }
+            case COMICVERSE -> {
+                sky(s, 0x40A0FF, 0xFFF0A0, 0xFFE0C0, 0xFF3030, 0x3060FF, 0xFFFF60);
+                s.materials = Archetype.CHROME;
+                s.artStyle = ArtStyle.COMIC.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.CITY; s.baseHeight = 66; s.amplitude = 6; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.ARCH; s.megaDensity = 0.6f; s.decorDensity = 0.8f;
+                creatures(s, CreatureKind.NEON_DRONE, CreatureKind.VOID_CULTIST);
+                s.hostility = 1.0f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                
+            }
+            case PIXELWORLD -> {
+                sky(s, 0x5090FF, 0xA0D0FF, 0x90C0F0, 0x40E040, 0xFFE040, 0xFFFFA0);
+                s.materials = Archetype.PRIMEVAL;
+                s.artStyle = ArtStyle.PIXEL.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.CYCLE; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 68; s.amplitude = 18; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.ZIGGURAT; s.mega2 = MegaKind.GIANT_TREE; s.megaDensity = 0.4f; s.decorDensity = 1.2f;
+                creatures(s, CreatureKind.LUMEN_STRIDER, CreatureKind.GLITCHLING);
+                s.hostility = 0.8f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                
+            }
+            case CANVAS -> {
+                sky(s, 0x3060A0, 0xFFB060, 0xE09060, 0xFF8040, 0x6040A0, 0xFFE0A0);
+                s.materials = Archetype.DUSKHIGHLANDS;
+                s.artStyle = ArtStyle.PAINTED.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.MOUNTAINS; s.baseHeight = 72; s.amplitude = 40; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.GIANT_TREE; s.megaDensity = 0.4f; s.decorDensity = 1.2f;
+                creatures(s, CreatureKind.SKY_WHALE, CreatureKind.STAR_MOTH);
+                s.hostility = 0.4f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                s.moons = 1;
+            }
+            case PAPERCRAFT -> {
+                sky(s, 0xC0E0FF, 0xFFFFFF, 0xFFF8F0, 0xFFC0C0, 0xC0E0C0, 0xFFFFF0);
+                s.materials = Archetype.PASTEL;
+                s.artStyle = ArtStyle.PAPER.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 66; s.amplitude = 14; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.GIANT_MUSHROOM; s.megaDensity = 0.5f; s.decorDensity = 1.2f;
+                creatures(s, CreatureKind.STAR_MOTH, CreatureKind.ASTRAL_JELLY);
+                s.hostility = 0.2f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                
+            }
+            case NEONGRID -> {
+                sky(s, 0x000008, 0x10002A, 0x080018, 0x00F0FF, 0xFF00C8, 0xFFFFFF);
+                s.materials = Archetype.NEON_SPRAWL;
+                s.artStyle = ArtStyle.NEON.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.DATA_RAIN; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.FLOATING; s.baseHeight = 80; s.amplitude = 12; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.HALO_RING; s.megaDensity = 0.7f; s.decorDensity = 0.4f;
+                creatures(s, CreatureKind.NEON_DRONE, CreatureKind.GLITCHLING);
+                s.hostility = 1.1f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                s.islandDensity = 0.6f;
+            }
+            case REVERIE -> {
+                sky(s, 0x6050A0, 0xFFC0E0, 0xE0B0D0, 0xFFB0E0, 0x80C0FF, 0xFFFFFF);
+                s.materials = Archetype.CLOUDKINGDOM;
+                s.artStyle = ArtStyle.DREAM.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.PETALS; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.FLOATING; s.baseHeight = 86; s.amplitude = 22; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.HALO_RING; s.megaDensity = 0.5f; s.decorDensity = 1.0f;
+                creatures(s, CreatureKind.SKY_WHALE, CreatureKind.ASTRAL_JELLY, CreatureKind.STAR_MOTH);
+                s.hostility = 0.1f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                s.dreamlike = true; s.moons = 3; s.planetSize = 0.7f; s.islandDensity = 0.6f;
+            }
+            case CORRUPTDATA -> {
+                sky(s, 0x000000, 0x003000, 0x001800, 0x39FF14, 0xFF0055, 0xFFFFFF);
+                s.materials = Archetype.CORRUPTED;
+                s.artStyle = ArtStyle.GLITCH.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.DATA_RAIN; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SHATTERED; s.baseHeight = 62; s.amplitude = 30; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.GLITCH_CUBES; s.mega2 = MegaKind.MONOLITH; s.megaDensity = 0.8f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.GLITCHLING, CreatureKind.VOID_CULTIST);
+                s.hostility = 1.5f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                s.glitch = 0.6f;
+            }
+            case BLUEPRINT -> {
+                sky(s, 0x1A3A7A, 0x3060B0, 0x2050A0, 0xFFFFFF, 0x80B0FF, 0xFFFFFF);
+                s.materials = Archetype.CHROME;
+                s.artStyle = ArtStyle.BLUEPRINT.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.CITY; s.baseHeight = 66; s.amplitude = 4; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.COLOSSAL_PILLARS; s.megaDensity = 0.6f; s.decorDensity = 0.3f;
+                creatures(s, CreatureKind.LUNAR_GOLEM, CreatureKind.NEON_DRONE);
+                s.hostility = 0.6f; s.music = MusicKind.ANCIENT; s.gradeStrength = 0f;
+                
+            }
+            case CLAYMATION -> {
+                sky(s, 0x70B0FF, 0xFFE0B0, 0xF0D0A0, 0xFF8060, 0x60C060, 0xFFF0C0);
+                s.materials = Archetype.SAVANNA;
+                s.artStyle = ArtStyle.CLAY.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.CYCLE; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 66; s.amplitude = 20; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.GIANT_MUSHROOM; s.mega2 = MegaKind.ARCH; s.megaDensity = 0.6f; s.decorDensity = 1.4f;
+                creatures(s, CreatureKind.LUMEN_STRIDER, CreatureKind.CRYSTAL_SPIDER);
+                s.hostility = 0.5f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                
+            }
+            case WIREFRAME -> {
+                sky(s, 0x000000, 0x001010, 0x000808, 0x40FFE0, 0x0080FF, 0xFFFFFF);
+                s.materials = Archetype.LUNAR;
+                s.artStyle = ArtStyle.WIREFRAME.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.CRATERS; s.baseHeight = 64; s.amplitude = 18; s.hasSea = false; s.seaLevel = 30;
+                s.mega = MegaKind.MONOLITH; s.mega2 = MegaKind.HALO_RING; s.megaDensity = 0.5f; s.decorDensity = 0.3f;
+                creatures(s, CreatureKind.NEON_DRONE, CreatureKind.CRYSTAL_SENTINEL);
+                s.hostility = 0.9f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                
+            }
+            case INKWASH -> {
+                sky(s, 0xE0E0D8, 0xF8F4EC, 0xF0ECE0, 0x202020, 0x606060, 0xFFFFFF);
+                s.materials = Archetype.DUSKHIGHLANDS;
+                s.artStyle = ArtStyle.INK.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.CYCLE; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.MOUNTAINS; s.baseHeight = 74; s.amplitude = 52; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.MONOLITH; s.megaDensity = 0.3f; s.decorDensity = 0.8f;
+                creatures(s, CreatureKind.SKY_WHALE, CreatureKind.VOID_STALKER);
+                s.hostility = 0.8f; s.music = MusicKind.ANCIENT; s.gradeStrength = 0f;
+                
+            }
+            case GLASSWORLD -> {
+                sky(s, 0x80C0FF, 0xE0F8FF, 0xD0F0FF, 0xC0F0FF, 0xFFE0FF, 0xFFFFFF);
+                s.materials = Archetype.CRYSTALOCEAN;
+                s.artStyle = ArtStyle.GLASS.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SPIRES; s.baseHeight = 68; s.amplitude = 30; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.CRYSTAL_SPIRE; s.mega2 = MegaKind.ICE_SPIRE; s.megaDensity = 0.8f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.CRYSTAL_SENTINEL, CreatureKind.ASTRAL_JELLY);
+                s.hostility = 0.5f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                
+            }
+            case WATERCOLOR -> {
+                sky(s, 0x80C0E0, 0xFFE8D0, 0xF0E0D0, 0xFF90A0, 0x80D0A0, 0xFFF8E0);
+                s.materials = Archetype.PRIMEVAL;
+                s.artStyle = ArtStyle.WATERCOLOR.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.CYCLE; s.weather = WeatherKind.RAIN; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 68; s.amplitude = 18; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.GIANT_TREE; s.mega2 = MegaKind.ARCH; s.megaDensity = 0.4f; s.decorDensity = 1.6f;
+                creatures(s, CreatureKind.STAR_MOTH, CreatureKind.LUMEN_STRIDER);
+                s.hostility = 0.2f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                
+            }
+            case NEGATIVE -> {
+                sky(s, 0xFFFFFF, 0xC0C0C0, 0xE0E0E0, 0x000000, 0x404040, 0x000000);
+                s.materials = Archetype.ASHEN;
+                s.artStyle = ArtStyle.NEGATIVE.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.ASH; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.CRATERS; s.baseHeight = 64; s.amplitude = 20; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.MONOLITH; s.mega2 = MegaKind.RIBCAGE; s.megaDensity = 0.5f; s.decorDensity = 0.5f;
+                creatures(s, CreatureKind.VOID_STALKER, CreatureKind.VOID_CULTIST);
+                s.hostility = 1.3f; s.music = MusicKind.VOID; s.gradeStrength = 0f;
+                
+            }
+            case SILHOUETTE -> {
+                sky(s, 0x602060, 0xFF8040, 0xD06040, 0xFFB040, 0x800040, 0xFFE0A0);
+                s.materials = Archetype.SAVANNA;
+                s.artStyle = ArtStyle.SILHOUETTE.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 66; s.amplitude = 14; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.GIANT_TREE; s.megaDensity = 0.4f; s.decorDensity = 1.0f;
+                creatures(s, CreatureKind.LUMEN_STRIDER, CreatureKind.SKY_WHALE);
+                s.hostility = 0.4f; s.music = MusicKind.ANCIENT; s.gradeStrength = 0f;
+                
+            }
+            case VHSTAPE -> {
+                sky(s, 0x10081A, 0x302040, 0x201830, 0xC0A0FF, 0x40C0FF, 0xFFFFFF);
+                s.materials = Archetype.WASTELAND;
+                s.artStyle = ArtStyle.VHS.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.RAIN; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.CITY; s.baseHeight = 64; s.amplitude = 4; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.RIBCAGE; s.megaDensity = 0.5f; s.decorDensity = 0.4f;
+                creatures(s, CreatureKind.VOID_CULTIST, CreatureKind.GLITCHLING);
+                s.hostility = 1.4f; s.music = MusicKind.VOID; s.gradeStrength = 0f;
+                
+            }
+            case ASTRALPLANE -> {
+                sky(s, 0x02000A, 0x20104A, 0x100828, 0x8060FF, 0x40A0FF, 0xFFFFFF);
+                s.materials = Archetype.CELESTIAL;
+                s.artStyle = ArtStyle.ASTRAL.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.STARDUST; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.FLOATING; s.baseHeight = 90; s.amplitude = 24; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.HALO_RING; s.mega2 = MegaKind.CRYSTAL_SPIRE; s.megaDensity = 0.7f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.ASTRAL_JELLY, CreatureKind.SKY_WHALE);
+                s.hostility = 0.4f; s.music = MusicKind.COSMIC; s.gradeStrength = 0f;
+                s.galaxyIntensity = 1f; s.starDensity = 1f; s.islandDensity = 0.6f;
+            }
+            case ORIGAMI -> {
+                sky(s, 0xA0D0FF, 0xFFF0F0, 0xFFF8F8, 0xFF6060, 0x60A0FF, 0xFFFFFF);
+                s.materials = Archetype.PASTEL;
+                s.artStyle = ArtStyle.ORIGAMI.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.PETALS; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SPIRES; s.baseHeight = 68; s.amplitude = 26; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.CRYSTAL_SPIRE; s.megaDensity = 0.6f; s.decorDensity = 1.2f;
+                creatures(s, CreatureKind.STAR_MOTH, CreatureKind.ASTRAL_JELLY);
+                s.hostility = 0.2f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                
+            }
+            case XRAY -> {
+                sky(s, 0x000010, 0x001040, 0x000820, 0x4080FF, 0x80E0FF, 0xFFFFFF);
+                s.materials = Archetype.DEEPDARK;
+                s.artStyle = ArtStyle.XRAY.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SHATTERED; s.baseHeight = 60; s.amplitude = 30; s.hasSea = false; s.seaLevel = 30;
+                s.mega = MegaKind.RIBCAGE; s.mega2 = MegaKind.MONOLITH; s.megaDensity = 0.6f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.VOID_STALKER, CreatureKind.CRYSTAL_SPIDER);
+                s.hostility = 1.3f; s.music = MusicKind.VOID; s.gradeStrength = 0f;
+                
+            }
+            case FRACTAL -> {
+                sky(s, 0x200820, 0xFF9020, 0xA04080, 0xFF9020, 0x20C0FF, 0xFFFFFF);
+                s.materials = Archetype.GEODE;
+                s.artStyle = ArtStyle.FRACTAL.ordinal(); s.artStyle2 = ArtStyle.PSYCHEDELIC.ordinal();
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.STARDUST; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SPIRES; s.baseHeight = 68; s.amplitude = 36; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.CRYSTAL_SPIRE; s.mega2 = MegaKind.HALO_RING; s.megaDensity = 0.9f; s.decorDensity = 0.8f;
+                creatures(s, CreatureKind.CRYSTAL_SENTINEL, CreatureKind.ASTRAL_JELLY);
+                s.hostility = 0.7f; s.music = MusicKind.COSMIC; s.gradeStrength = 0f;
+                
+            }
+            case COMICPANELS -> {
+                sky(s, 0x40A0FF, 0xFFF0A0, 0xFFE0C0, 0xFF3030, 0xFFE020, 0xFFFFA0);
+                s.materials = Archetype.GOLDENTEMPLE;
+                s.artStyle = ArtStyle.COMIC_PANEL.ordinal(); s.artStyle2 = ArtStyle.NONE.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.DUNES; s.baseHeight = 66; s.amplitude = 16; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.ZIGGURAT; s.mega2 = MegaKind.ARCH; s.megaDensity = 0.6f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.CRYSTAL_SENTINEL, CreatureKind.LUNAR_GOLEM);
+                s.hostility = 0.9f; s.music = MusicKind.ANCIENT; s.gradeStrength = 0f;
+                
+            }
+            case GRAPHITE -> {
+                sky(s, 0xD0D0D0, 0xF0F0F0, 0xE0E0E0, 0x404040, 0x202020, 0xFFFFFF);
+                s.materials = Archetype.ASHEN;
+                s.artStyle = ArtStyle.SKETCH.ordinal(); s.artStyle2 = ArtStyle.NOIR.ordinal();
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.ASH; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 66; s.amplitude = 18; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.MONOLITH; s.mega2 = MegaKind.RIBCAGE; s.megaDensity = 0.4f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.VOID_STALKER, CreatureKind.VOID_CULTIST);
+                s.hostility = 1.0f; s.music = MusicKind.VOID; s.gradeStrength = 0f;
+                
+            }
+            case CYBERROT -> {
+                sky(s, 0x05000A, 0x200030, 0x100018, 0xFF0080, 0x00FFFF, 0xFFFFFF);
+                s.materials = Archetype.NEON_SPRAWL;
+                s.artStyle = ArtStyle.NEON.ordinal(); s.artStyle2 = ArtStyle.GLITCH.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.DATA_RAIN; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.CITY; s.baseHeight = 66; s.amplitude = 4; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.GLITCH_CUBES; s.megaDensity = 0.8f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.NEON_DRONE, CreatureKind.GLITCHLING, CreatureKind.VOID_CULTIST);
+                s.hostility = 1.6f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                s.glitch = 0.4f;
+            }
+            case DREAMWASH -> {
+                sky(s, 0x8070C0, 0xFFD0F0, 0xF0D0F0, 0xC0A0FF, 0xFFB0D0, 0xFFFFFF);
+                s.materials = Archetype.CLOUDKINGDOM;
+                s.artStyle = ArtStyle.WATERCOLOR.ordinal(); s.artStyle2 = ArtStyle.DREAM.ordinal();
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.PETALS; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.FLOATING; s.baseHeight = 84; s.amplitude = 22; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.HALO_RING; s.megaDensity = 0.5f; s.decorDensity = 1.2f;
+                creatures(s, CreatureKind.SKY_WHALE, CreatureKind.STAR_MOTH, CreatureKind.ASTRAL_JELLY);
+                s.hostility = 0.1f; s.music = MusicKind.DREAM; s.gradeStrength = 0f;
+                s.dreamlike = true; s.islandDensity = 0.6f; s.moons = 2;
+            }
+            case POPTRIP -> {
+                sky(s, 0xFF60FF, 0xFFFF60, 0xFFC0FF, 0x60FFFF, 0xFF6060, 0xFFFFFF);
+                s.materials = Archetype.CONFECTION;
+                s.artStyle = ArtStyle.COMIC.ordinal(); s.artStyle2 = ArtStyle.PSYCHEDELIC.ordinal();
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.PETALS; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 68; s.amplitude = 22; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.GIANT_MUSHROOM; s.mega2 = MegaKind.ARCH; s.megaDensity = 0.6f; s.decorDensity = 1.5f;
+                creatures(s, CreatureKind.ASTRAL_JELLY, CreatureKind.GLITCHLING);
+                s.hostility = 0.5f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                
+            }
+            case TAPEHORROR -> {
+                sky(s, 0x020202, 0x101810, 0x080C08, 0x608060, 0x203020, 0xC0C0C0);
+                s.materials = Archetype.HOLLOW;
+                s.artStyle = ArtStyle.VHS.ordinal(); s.artStyle2 = ArtStyle.NOIR.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.RAIN; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SHATTERED; s.baseHeight = 60; s.amplitude = 28; s.hasSea = false; s.seaLevel = 30;
+                s.mega = MegaKind.RIBCAGE; s.mega2 = MegaKind.MONOLITH; s.megaDensity = 0.5f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.VOID_CULTIST, CreatureKind.VOID_STALKER, CreatureKind.RIFT_WRAITH);
+                s.hostility = 2.0f; s.music = MusicKind.VOID; s.gradeStrength = 0f;
+                
+            }
+            case PRISMPIXEL -> {
+                sky(s, 0x08001A, 0x30106A, 0x180840, 0x40FFFF, 0xFF40FF, 0xFFFFFF);
+                s.materials = Archetype.PRISMATIC;
+                s.artStyle = ArtStyle.PIXEL.ordinal(); s.artStyle2 = ArtStyle.NEON.ordinal();
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.STARDUST; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.FLOATING; s.baseHeight = 80; s.amplitude = 16; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.CRYSTAL_SPIRE; s.mega2 = MegaKind.HALO_RING; s.megaDensity = 0.7f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.NEON_DRONE, CreatureKind.GLITCHLING);
+                s.hostility = 0.9f; s.music = MusicKind.NEON; s.gradeStrength = 0f;
+                s.islandDensity = 0.6f;
+            }
             case MIRROR -> {
                 sky(s, 0xA0D0FF, 0xFFFFFF, 0xE0F0FF, 0xB0E0FF, 0xFFE0FF, 0xFFFFFF);
                 s.starDensity = 0.3f; s.nebulaIntensity = 0.3f; s.moons = 2;

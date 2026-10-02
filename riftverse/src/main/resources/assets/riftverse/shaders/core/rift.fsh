@@ -109,6 +109,96 @@ vec3 interior(int style, vec2 uv, float d, vec3 rayDir, vec2 screenUv, vec2 cent
         col += mix(ColorA, ColorB, gal) * gal * 2.0 + mix(ColorB, ColorA, n1) * 0.25;
     } else if (style == STYLE_RETURN) {
         col = mix(vec3(0.75, 0.85, 1.0), ColorB, n1) * (0.4 + n2) + core * 1.2;
+    } else if (style == 11) {
+        // artisan: swirling brush strokes of wet paint
+        float stroke = rvFbm3(vec3(cos(swirl * 2.0) * 1.5, sin(swirl * 2.0) * 1.5, r * 3.0 + t * 0.3), 4);
+        float streak = smoothstep(0.02, 0.0, abs(fract(stroke * 6.0) - 0.5) - 0.42);
+        col = mix(rvHueShift(ColorA, stroke * 3.0), ColorB, smoothstep(0.4, 0.7, stroke)) * (0.7 + streak * 0.6) + core * 0.7;
+    } else if (style == 12) {
+        // anomalous: an impossible monochrome lattice that folds through itself
+        vec2 q = rvRot(t * 0.2 + r * 3.0) * uv * (3.0 + sin(t * 0.5));
+        float chk = mod(floor(q.x) + floor(q.y) + floor(t * 2.0 + r * 4.0), 2.0);
+        float tri = step(fract(q.x), fract(q.y));
+        col = vec3(mix(chk, 1.0 - chk, tri)) * (0.7 + 0.3 * sin(r * 20.0 - t * 4.0)) + core * 0.5;
+    } else if (style == 13) {
+        // solar: a corona of flares around a white-hot core
+        float flares = pow(abs(sin(a * 9.0 + n1 * 3.0 + t)), 6.0) * smoothstep(1.0, 0.3, r);
+        col = mix(ColorA * 0.6, ColorB * 1.4, smoothstep(0.8, 0.0, r)) + vec3(1.0, 0.9, 0.6) * flares * 1.2 + core * 1.6;
+    } else if (style == 14) {
+        // abyssal: deep-water caustics rippling across the opening
+        vec2 cp = uv * 4.0 + vec2(t * 0.3, t * 0.2);
+        float caus = pow(abs(sin(cp.x + sin(cp.y * 1.3 + t)) * sin(cp.y + sin(cp.x * 1.1 - t))), 0.35);
+        col = mix(ColorA * 0.25, ColorB, caus) * (0.6 + 0.4 * smoothstep(1.0, 0.0, r)) + core * 0.5;
+    } else if (style == 15) {
+        // fungal: glowing spores drifting outward from a living centre
+        vec2 g = uv * 8.0 + vec2(0.0, t * 0.6);
+        vec2 cell = floor(g);
+        float h = rvHash12(cell);
+        float spore = smoothstep(0.25, 0.0, length(fract(g) - 0.5 - (rvHash22(cell) - 0.5) * 0.4)) * step(0.6, h);
+        col = mix(ColorA * 0.3, ColorA, n1) + ColorB * spore * (0.7 + 0.3 * sin(t * 3.0 + h * 20.0)) * 1.5 + core * 0.6;
+    } else if (style == 16) {
+        // brass: interlocking gears turning
+        float gear = 0.0;
+        for (int i = 0; i < 3; i++) {
+            float rr = 0.25 + float(i) * 0.3;
+            float teeth = step(0.5, fract((a + (i == 1 ? -t : t) * (0.6 - float(i) * 0.15)) * (8.0 + float(i) * 6.0) / RV_TAU));
+            gear += smoothstep(0.04, 0.0, abs(r - rr) - 0.03 - teeth * 0.03);
+        }
+        col = mix(ColorA * 0.3, ColorB, gear) + core * vec3(1.0, 0.8, 0.5);
+    } else if (style == 17) {
+        // frost: a six-fold snowflake fractal growing in the ice
+        float sa = mod(a, RV_TAU / 6.0) - RV_TAU / 12.0;
+        vec2 k = vec2(cos(sa), abs(sin(sa))) * r;
+        float branch = smoothstep(0.02, 0.0, k.y - 0.015) + smoothstep(0.02, 0.0, abs(k.y - fract(k.x * 5.0) * 0.12) - 0.01) * step(k.x, 0.9);
+        col = mix(ColorA * 0.4, vec3(0.9, 0.97, 1.0), clamp(branch, 0.0, 1.0)) + ColorB * n2 * 0.3 + core * 0.8;
+    } else if (style == 18) {
+        // molten: cracked crust with lava burning through the seams
+        vec2 cp = uv * 5.0;
+        vec2 cell = floor(cp);
+        float f1 = 9.0, f2 = 9.0;
+        for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) {
+            vec2 g = vec2(float(i), float(j));
+            float dd = length(g + rvHash22(cell + g) - fract(cp));
+            if (dd < f1) { f2 = f1; f1 = dd; } else if (dd < f2) f2 = dd;
+        }
+        float seam = smoothstep(0.12, 0.0, f2 - f1);
+        col = mix(vec3(0.08, 0.03, 0.02), vec3(0.2, 0.08, 0.04), n1) + mix(ColorA, vec3(1.0, 0.9, 0.4), seam) * seam * (1.2 + 0.4 * sin(t * 3.0)) + core * 0.6;
+    } else if (style == 19) {
+        // veins: pulsing branching vessels
+        float vein = smoothstep(0.03, 0.0, abs(rvFbm3(vec3(uv * 3.0, t * 0.1), 4) - 0.5));
+        float pulse = 0.6 + 0.4 * sin(t * 4.0 - r * 10.0);
+        col = mix(vec3(0.03), ColorA * 0.4, n1) + ColorB * vein * pulse * 1.6 + core * ColorB;
+    } else if (style == 20) {
+        // auroral curtains rippling upward
+        float curtain = 0.0;
+        for (int i = 0; i < 3; i++) curtain += smoothstep(0.08, 0.0, abs(uv.x - sin(uv.y * 3.0 + t * (0.6 + float(i) * 0.2) + float(i)) * 0.4 - float(i - 1) * 0.3));
+        col = mix(vec3(0.0, 0.02, 0.05), mix(ColorA, ColorB, 0.5 + 0.5 * uv.y), clamp(curtain, 0.0, 1.0)) + core * 0.4;
+    } else if (style == 21) {
+        // runic: concentric circles of turning glyphs
+        float ring = floor(r * 6.0);
+        float spin = t * (mod(ring, 2.0) == 0.0 ? 0.4 : -0.3);
+        float glyph = step(0.55, rvHash12(vec2(floor((a + spin) * (6.0 + ring * 4.0) / RV_TAU), ring)));
+        float band = step(0.2, fract(r * 6.0)) * step(fract(r * 6.0), 0.65);
+        col = mix(ColorA * 0.2, ColorA, band * glyph) + ColorB * smoothstep(0.03, 0.0, abs(fract(r * 6.0) - 0.1)) + core * 1.1;
+    } else if (style == 22) {
+        // hex lattice of polished chrome cells
+        vec2 q = uv * 6.0;
+        vec2 hq = vec2(q.x * 1.1547, q.y + q.x * 0.57735);
+        vec2 f = fract(hq) - 0.5;
+        float edge = smoothstep(0.42, 0.48, max(abs(f.x), abs(f.y)));
+        float h = rvHash12(floor(hq) + floor(t));
+        col = mix(mix(ColorA, ColorB, h) * (0.5 + 0.5 * sin(t * 2.0 + h * 9.0)), vec3(1.0), edge * 0.8) + core * 0.6;
+    } else if (style == 23) {
+        // tempest: forked lightning crawling across a storm eye
+        float bolt = 0.0;
+        for (int i = 0; i < 4; i++) {
+            float ang = rvHash11(floor(t * 3.0) + float(i) * 7.0) * RV_TAU;
+            vec2 dir = vec2(cos(ang), sin(ang));
+            float along = dot(uv, dir);
+            float perp = dot(uv, vec2(-dir.y, dir.x)) + (rvNoise3(vec3(along * 8.0, float(i), floor(t * 3.0))) - 0.5) * 0.15;
+            bolt += smoothstep(0.02, 0.0, abs(perp)) * step(0.0, along);
+        }
+        col = mix(ColorA * 0.2, ColorB * 0.5, n1) + vec3(0.9, 0.95, 1.0) * clamp(bolt, 0.0, 1.0) * 1.5 + core * 0.6;
     } else if (style == STYLE_PORTAL) {
         float waves = 0.5 + 0.5 * sin(r * 25.0 - t * 4.0 + n1 * 4.0);
         col = mix(ColorA * 0.25, ColorA * 1.3, waves * smoothstep(1.0, 0.2, r)) + core * 0.7;

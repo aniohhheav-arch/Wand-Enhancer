@@ -35,6 +35,10 @@ public final class ScreenFx {
     public static float stretch;
     public static float fold;
     public static float invert;
+    public static float artA;
+    public static float artB;
+    public static float artMix;
+    public static float artTransform;
 
     private ScreenFx() {}
 
@@ -42,6 +46,7 @@ public final class ScreenFx {
         aberration = warp = zoomBlur = vignette = swirl = glitch = wave = grain = flash = 0f;
         tintStrength = 0f;
         kaleido = droste = lens = hue = echo = stretch = fold = invert = 0f;
+        artA = artB = artMix = artTransform = 0f;
         saturation = 1f;
         centerX = centerY = 0.5f;
         tint = 0xFFFFFF;
@@ -53,7 +58,7 @@ public final class ScreenFx {
         return aberration > 0.001f || Math.abs(warp) > 0.001f || zoomBlur > 0.001f || vignette > 0.001f || Math.abs(swirl) > 0.001f
                 || glitch > 0.001f || wave > 0.001f || grain > 0.001f || flash > 0.001f || tintStrength > 0.001f || Math.abs(saturation - 1f) > 0.01f
                 || kaleido > 0.001f || droste > 0.001f || lens > 0.001f || hue > 0.001f || echo > 0.001f || stretch > 0.001f || fold > 0.001f
-                || invert > 0.001f;
+                || invert > 0.001f || artMix > 0.001f;
     }
 
     public static void render() {
@@ -69,6 +74,7 @@ public final class ScreenFx {
         sh.safeGetUniform("VignetteColor").set(ColorUtil.r(vignetteColor), ColorUtil.g(vignetteColor), ColorUtil.b(vignetteColor));
         sh.safeGetUniform("FxD").set(Math.min(kaleido, 1f), Math.min(droste, 1f), Math.min(lens, 1.5f), Math.min(hue, 1f));
         sh.safeGetUniform("FxE").set(Math.min(echo, 1f), Math.min(stretch, 1.5f), Math.min(fold, 1f), Math.min(invert, 1f));
+        sh.safeGetUniform("FxArt").set(artA, artB, Math.min(artMix, 1f), Math.min(artTransform, 1f));
         sh.safeGetUniform("ScreenSize").set((float) SceneCapture.width(), (float) SceneCapture.height());
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);

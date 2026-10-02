@@ -70,6 +70,9 @@ public final class UniverseSpec {
     public int gradeTint = 0xFFFFFF;
     public float gradeStrength = 0f;
     public float saturation = 1f;
+    /** Visual medium of this reality (see {@link ArtStyle}); artStyle2 layers a second style over the first. */
+    public int artStyle;
+    public int artStyle2;
 
     public CompoundTag save() {
         CompoundTag t = new CompoundTag();
@@ -125,6 +128,8 @@ public final class UniverseSpec {
         t.putInt("gradeTint", gradeTint);
         t.putFloat("gradeStrength", gradeStrength);
         t.putFloat("saturation", saturation);
+        t.putInt("artStyle", artStyle);
+        t.putInt("artStyle2", artStyle2);
         return t;
     }
 
@@ -181,6 +186,8 @@ public final class UniverseSpec {
         s.gradeTint = t.getInt("gradeTint");
         s.gradeStrength = t.getFloat("gradeStrength");
         s.saturation = t.contains("saturation", Tag.TAG_FLOAT) ? t.getFloat("saturation") : 1f;
+        s.artStyle = t.getInt("artStyle");
+        s.artStyle2 = t.getInt("artStyle2");
         return s;
     }
 
@@ -212,6 +219,8 @@ public final class UniverseSpec {
         if (gravity > 1.3f) sb.append(" • crushing gravity");
         if (vacuum) sb.append(" • no atmosphere");
         if (glitch > 0.3f) sb.append(" • unstable reality");
+        if (artStyle != 0) sb.append(" • ").append(ArtStyle.byId(artStyle).displayName.toLowerCase())
+                .append(artStyle2 != 0 ? " + " + ArtStyle.byId(artStyle2).displayName.toLowerCase() : "").append(" reality");
         return sb.toString();
     }
 }

@@ -41,7 +41,7 @@ public class NaturalRiftFeature extends Feature<NoneFeatureConfiguration> {
         // expansion rifts: each leads to its own family of new realities
         RiftType[] extra = {RiftType.SOLAR, RiftType.ABYSSAL, RiftType.FUNGAL, RiftType.SANGUINE, RiftType.BRASS,
                 RiftType.SACCHARINE, RiftType.TEMPEST, RiftType.UMBRAL, RiftType.PATINA, RiftType.AURORAL, RiftType.MOLTEN, RiftType.PRIMAL,
-                RiftType.CHROME, RiftType.SCULK, RiftType.NEBULAR, RiftType.FORGE, RiftType.FROST, RiftType.WEALD, RiftType.CELESTIAL, RiftType.RUNIC};
+                RiftType.CHROME, RiftType.SCULK, RiftType.NEBULAR, RiftType.ARTISAN, RiftType.FORGE, RiftType.FROST, RiftType.WEALD, RiftType.CELESTIAL, RiftType.RUNIC};
         return extra[r.nextInt(extra.length)];
     }
 

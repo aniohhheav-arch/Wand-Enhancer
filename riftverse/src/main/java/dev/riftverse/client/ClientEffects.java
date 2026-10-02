@@ -97,7 +97,28 @@ public final class ClientEffects {
         }
     }
 
+    private static int artShownA;
+    private static int artShownB;
+    private static float artMix;
+
+    /** Blends between art styles: the current medium dissolves (and the picture glitches) before the next one draws itself in. */
+    private static void tickArt() {
+        UniverseSpec s = ClientUniverseState.spec();
+        int wantA = s == null ? 0 : s.artStyle;
+        int wantB = s == null ? 0 : s.artStyle2;
+        if (wantA == artShownA && wantB == artShownB) {
+            artMix = Math.min(1f, artMix + 0.025f);
+        } else {
+            artMix = Math.max(0f, artMix - 0.04f);
+            if (artMix <= 0f) {
+                artShownA = wantA;
+                artShownB = wantB;
+            }
+        }
+    }
+
     public static void tick() {
+        tickArt();
         holeProximity = Mth.lerp(0.3f, holeProximity, nextHole);
         holeCenter = nextHoleCenter;
         nextHole = 0f;
@@ -135,6 +156,14 @@ public final class ClientEffects {
             ScreenFx.grain = 0.04f;
             ScreenFx.vignette = 0.18f;
             if (s.archetype == dev.riftverse.universe.Archetype.HOLLOW) ScreenFx.vignette = 0.45f;
+        }
+        if (artShownA != 0 || artShownB != 0) {
+            ScreenFx.artA = artShownA;
+            ScreenFx.artB = artShownB;
+            ScreenFx.artMix = artMix;
+            ScreenFx.artTransform = artMix < 1f ? 4f * artMix * (1f - artMix) : 0f;
+            ScreenFx.glitch += ScreenFx.artTransform * 0.6f;
+            ScreenFx.aberration += ScreenFx.artTransform * 0.8f;
         }
         if (holeProximity > 0.01f) {
             float k = holeProximity;

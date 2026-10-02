@@ -31,7 +31,8 @@ public final class NexusLayout {
 
     /** Spreads one gate per archetype evenly around the four sides of the platform, however many realities exist. */
     private static Gate[] buildGates() {
-        int n = Archetype.values().length;
+        // up to 64 gates fit on the platform (40 outer, 24 inner); later realities are reached by rift, console and corridor
+        int n = Math.min(Archetype.values().length, 64);
         Gate[] g = new Gate[n];
         // the outer ring holds 40 gates on the platform's edge; any further realities get an inner ring
         int outer = Math.min(n, 40);
