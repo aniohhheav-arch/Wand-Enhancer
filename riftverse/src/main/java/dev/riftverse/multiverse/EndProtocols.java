@@ -572,6 +572,10 @@ public final class EndProtocols {
         MinecraftServer server = r.level.getServer();
         EndProtocol pr = r.protocol;
         shake(r, 1.2f, 30, 1f, 0xFFFFFF);
+        for (Vec3 a : anchors(r)) finale(r, a);
+        for (ServerPlayer p : viewers(r)) {
+            Scheduler.later(30, () -> RealityOps.cinematic(p, CinematicType.ANNOUNCE, 70, p.getEyePosition(), pr.colorA, 0xFFFFFF, "REALITY TERMINATED", pr.title));
+        }
         for (Vec3 a : anchors(r)) {
             r.level.sendParticles(RvParticles.RING.get().with(pr.colorB, 40f, 30), a.x, a.y + 2, a.z, 1, 0, 0, 0, 0);
             r.level.sendParticles(RvParticles.SPARK.get().with(pr.colorA, 1.4f, 50), a.x, a.y + 2, a.z, heavy() ? 300 : 80, 6, 6, 6, 1.4);
@@ -610,6 +614,102 @@ public final class EndProtocols {
         UniverseId id = r.universe;
         boolean reconstruct = r.reconstruct;
         RealityOps.eraseWave(server, id, 50, reconstruct ? () -> Scheduler.later(60, () -> RealityOps.restore(server, id, null)) : null);
+    }
+
+    /** Each protocol's signature last moment, layered on top of the shared climax. */
+    private static void finale(Run r, Vec3 a) {
+        ServerLevel l = r.level;
+        EndProtocol pr = r.protocol;
+        RandomSource rnd = l.random;
+        switch (pr) {
+            case ORBITAL_ANNIHILATION -> {
+                // the final lance: a world-wide pillar of fire, a molten ring tearing outward and the ground flung skyward
+                for (int t = 0; t < 30; t += 2) {
+                    int k = t;
+                    Scheduler.later(t, () -> {
+                        beam(l, a.add(0, 160, 0), a, k % 4 == 0 ? 0xFFFFFF : pr.colorA, 4f, 80);
+                        l.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, a.x, a.y + 1, a.z, 60, 3 + k, 0.5, 3 + k, 0.2);
+                        l.sendParticles(RvParticles.RING.get().with(0xFF6020, 8f + k * 4f, 20), a.x, a.y + 0.5, a.z, 1, 0, 0, 0, 0);
+                    });
+                }
+                for (int i = 0; i < 60; i++) {
+                    double ang = rnd.nextDouble() * Math.PI * 2, d = 6 + rnd.nextDouble() * 30;
+                    BlockPos top = r.level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                            BlockPos.containing(a.x + Math.cos(ang) * d, 0, a.z + Math.sin(ang) * d));
+                    Scheduler.later((int) d / 2, () -> lift(r, top, new Vec3(Math.cos(ang) * 0.6, 1.2 + rnd.nextDouble(), Math.sin(ang) * 0.6), false));
+                }
+            }
+            case SINGULARITY_COLLAPSE -> {
+                // everything falls inward: rings contract to a point, a breath of silence, then the bang
+                Vec3 c = a.add(0, 24, 0);
+                for (int i = 0; i < 12; i++) {
+                    int k = i;
+                    Scheduler.later(i * 2, () -> l.sendParticles(RvParticles.RING.get().with(k % 2 == 0 ? pr.colorA : 0xFFFFFF, 60f - k * 5f, 10), c.x, c.y, c.z, 1, 0, 0, 0, 0));
+                }
+                l.sendParticles(RvParticles.INFALL.get().with(pr.colorB, 1.6f, 30), c.x, c.y, c.z, 400, 30, 20, 30, 0.6);
+                Scheduler.later(34, () -> {
+                    l.sendParticles(RvParticles.RING.get().with(0xFFFFFF, 120f, 40), c.x, c.y, c.z, 3, 0, 0, 0, 0);
+                    l.sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 2.5f, 40), c.x, c.y, c.z, 500, 2, 2, 2, 2.5);
+                    shake(r, 1.6f, 40, 1f, 0xFFFFFF);
+                });
+            }
+            case CELESTIAL_DEVOURER -> {
+                // two jaws of light sweep in from the horizon and close over the world
+                for (int t = 0; t <= 24; t += 2) {
+                    float f = t / 24f;
+                    Scheduler.later(t, () -> {
+                        for (int s2 = -1; s2 <= 1; s2 += 2) {
+                            double z = a.z + s2 * 70 * (1 - f);
+                            for (int x = -60; x <= 60; x += 4) {
+                                double y = a.y + 30 + Math.sqrt(Math.max(0, 3600 - x * x)) * 0.5;
+                                l.sendParticles(RvParticles.STREAK.get().with(s2 < 0 ? pr.colorA : pr.colorB, 2f, 10), a.x + x, y, z, 2, 1, 1, 1, 0);
+                            }
+                        }
+                    });
+                }
+                Scheduler.later(26, () -> shake(r, 1.8f, 30, 1f, pr.colorA));
+            }
+            case REALITY_DISASSEMBLY -> {
+                // the world comes apart into cubes spiralling upward
+                for (int i = 0; i < 120; i++) {
+                    double ang = i * 0.5, d = 3 + i * 0.3;
+                    BlockPos top = r.level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                            BlockPos.containing(a.x + Math.cos(ang) * d, 0, a.z + Math.sin(ang) * d));
+                    Scheduler.later(i / 4, () -> lift(r, top, new Vec3(-Math.sin(ang) * 0.4, 0.5, Math.cos(ang) * 0.4), true));
+                }
+                for (int t = 0; t < 30; t += 3) Scheduler.later(t, () -> l.sendParticles(RvParticles.GLITCH.get().with(pr.colorA, 1.2f, 30), a.x, a.y + 10, a.z, 120, 30, 15, 30, 0.1));
+            }
+            case BLACK_HOLE_INFUSION -> {
+                // an accretion spiral tightens around the hole and is swallowed in one gulp
+                Vec3 c = a.add(18, 12, 0);
+                for (int t = 0; t < 30; t++) {
+                    int k = t;
+                    Scheduler.later(t, () -> {
+                        for (int arm = 0; arm < 4; arm++) {
+                            double ang = k * 0.4 + arm * Math.PI / 2, d = 40 * (1 - k / 30.0) + 2;
+                            l.sendParticles(RvParticles.STREAK.get().with(arm % 2 == 0 ? pr.colorA : 0xFFD080, 1.6f, 12), c.x + Math.cos(ang) * d, c.y, c.z + Math.sin(ang) * d, 4, 1, 0.3, 1, 0);
+                        }
+                    });
+                }
+                Scheduler.later(32, () -> l.sendParticles(RvParticles.RING.get().with(0x000000, 80f, 30), c.x, c.y, c.z, 2, 0, 0, 0, 0));
+            }
+            case TIMELINE_ERASURE -> {
+                // a clock face over the world; the hand sweeps backwards, faster and faster, and time stops
+                Vec3 c = a.add(0, 40, 0);
+                l.sendParticles(RvParticles.RING.get().with(pr.colorA, 50f, 60), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                for (int t = 0; t < 36; t++) {
+                    int k = t;
+                    Scheduler.later(t, () -> {
+                        double ang = -(k * k) * 0.02;
+                        beam(l, c, c.add(Math.cos(ang) * 22, Math.sin(ang) * 22, 0), 0xFFFFFF, 1.5f, 24);
+                        for (int h = 0; h < 12; h++) {
+                            double ha = h * Math.PI / 6;
+                            l.sendParticles(RvParticles.MOTE.get().with(pr.colorB, 1.4f, 8), c.x + Math.cos(ha) * 24, c.y + Math.sin(ha) * 24, c.z, 1, 0, 0, 0, 0);
+                        }
+                    });
+                }
+            }
+        }
     }
 
     private static void cleanup(Run r) {
