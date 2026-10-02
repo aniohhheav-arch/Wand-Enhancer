@@ -2,6 +2,8 @@ package dev.riftverse.world;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.riftverse.multiverse.InfiniteCorridor;
+import dev.riftverse.multiverse.RealityState;
 import dev.riftverse.universe.UniverseId;
 import dev.riftverse.universe.UniverseRegistry;
 import dev.riftverse.universe.UniverseSpec;
@@ -55,6 +57,12 @@ public class UniverseChunkGenerator extends ChunkGenerator {
     public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
         int minX = chunk.getPos().getMinBlockX();
         int minZ = chunk.getPos().getMinBlockZ();
+        UniverseId slot = UniverseId.ofBlock(minX + 8, minZ + 8);
+        if (RealityState.isErased(slot)) return CompletableFuture.completedFuture(chunk);
+        if (InfiniteCorridor.isCorridor(slot)) {
+            InfiniteCorridor.fill(chunk);
+            return CompletableFuture.completedFuture(chunk);
+        }
         UniverseSpec spec = UniverseRegistry.specAt(minX + 8, minZ + 8);
         TerrainSampler sampler = TerrainSampler.of(spec);
         MaterialSet m = MaterialSet.of(spec.materials);
@@ -107,6 +115,38 @@ public class UniverseChunkGenerator extends ChunkGenerator {
             for (LevelChunkSection section : acquired) section.release();
         }
         return CompletableFuture.completedFuture(chunk);
+    }
+
+    /**
+     * Recomputes the generated block column at (x, z) for a spec, exactly as fresh world generation would produce it.
+     * Used by reality reconstruction to rewrite already-generated terrain in place.
+     */
+    public static void column(UniverseSpec spec, List<Megastructures.Placement> megas, int x, int z, int minY, int maxY, BlockState[] out) {
+        TerrainSampler sampler = TerrainSampler.of(spec);
+        MaterialSet m = MaterialSet.of(spec.materials);
+        TerrainSampler.Column col = new TerrainSampler.Column();
+        sampler.sample(x, z, col);
+        boolean city = spec.terrain == TerrainMode.CITY && col.ground != TerrainSampler.NONE && !col.frayed;
+        int genMin = Math.max(minY, TerrainSampler.MIN_Y);
+        for (int y = minY; y <= maxY; y++) {
+            BlockState state = y < genMin || y > TerrainSampler.MAX_Y ? AIR : terrainAt(spec, sampler, m, col, x, y, z, genMin);
+            if (city && y >= col.ground) {
+                BlockState c = cityAt(spec, m, x, y, z, col.ground);
+                if (c != null) state = c;
+            }
+            for (Megastructures.Placement p : megas) {
+                if (y < p.minY() || y > p.maxY()) continue;
+                if (Math.abs(x - p.x) > p.radius() || Math.abs(z - p.z) > p.radius()) continue;
+                BlockState s = Megastructures.sample(p, m, x, y, z);
+                if (s != null) state = s;
+            }
+            out[y - minY] = state;
+        }
+    }
+
+    /** Landmarks touching a 16x16 chunk footprint, to pass to {@link #column}. */
+    public static List<Megastructures.Placement> landmarks(UniverseSpec spec, int minX, int minZ) {
+        return Megastructures.touching(spec, TerrainSampler.of(spec), minX, minZ, minX + 15, minZ + 15);
     }
 
     static BlockState terrainAt(UniverseSpec spec, TerrainSampler sampler, MaterialSet m, TerrainSampler.Column col, int x, int y, int z, int minY) {
@@ -217,6 +257,12 @@ public class UniverseChunkGenerator extends ChunkGenerator {
     public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
         int minX = chunk.getPos().getMinBlockX();
         int minZ = chunk.getPos().getMinBlockZ();
+        UniverseId slot = UniverseId.ofBlock(minX + 8, minZ + 8);
+        if (RealityState.isErased(slot)) return;
+        if (InfiniteCorridor.isCorridor(slot)) {
+            InfiniteCorridor.decorate(level, chunk);
+            return;
+        }
         UniverseSpec spec = UniverseRegistry.specAt(minX + 8, minZ + 8);
         Decorator.decorate(level, chunk, spec);
     }
@@ -251,6 +297,9 @@ public class UniverseChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor level, RandomState randomState) {
+        UniverseId slot = UniverseId.ofBlock(x, z);
+        if (RealityState.isErased(slot)) return level.getMinBuildHeight();
+        if (InfiniteCorridor.isCorridor(slot)) return InfiniteCorridor.baseHeight(x, z, level);
         UniverseSpec spec = UniverseRegistry.specAt(x, z);
         TerrainSampler.Column col = new TerrainSampler.Column();
         TerrainSampler.of(spec).sample(x, z, col);
@@ -264,6 +313,15 @@ public class UniverseChunkGenerator extends ChunkGenerator {
 
     @Override
     public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor level, RandomState randomState) {
+        UniverseId slot = UniverseId.ofBlock(x, z);
+        if (RealityState.isErased(slot) || InfiniteCorridor.isCorridor(slot)) {
+            BlockState[] states = new BlockState[level.getHeight()];
+            for (int i = 0; i < states.length; i++) {
+                int y = level.getMinBuildHeight() + i;
+                states[i] = RealityState.isErased(slot) ? AIR : InfiniteCorridor.stateAt(x, y, z);
+            }
+            return new NoiseColumn(level.getMinBuildHeight(), states);
+        }
         UniverseSpec spec = UniverseRegistry.specAt(x, z);
         TerrainSampler sampler = TerrainSampler.of(spec);
         MaterialSet m = MaterialSet.of(spec.materials);

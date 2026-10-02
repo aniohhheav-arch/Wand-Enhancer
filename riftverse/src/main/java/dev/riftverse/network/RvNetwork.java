@@ -18,6 +18,11 @@ public final class RvNetwork {
         r.playToClient(Payloads.OpenBrowser.TYPE, Payloads.OpenBrowser.CODEC, (p, ctx) -> ClientNetwork.onOpenBrowser(p));
         r.playToClient(Payloads.ManifestResult.TYPE, Payloads.ManifestResult.CODEC, (p, ctx) -> ClientNetwork.onManifestResult(p));
         r.playToClient(Payloads.BossIntro.TYPE, Payloads.BossIntro.CODEC, (p, ctx) -> ClientNetwork.onBossIntro(p));
+        r.playToClient(Payloads.RealityCinematic.TYPE, Payloads.RealityCinematic.CODEC, (p, ctx) -> ClientNetwork.onRealityCinematic(p));
+        r.playToClient(Payloads.OpenRemote.TYPE, Payloads.OpenRemote.CODEC, (p, ctx) -> ClientNetwork.onOpenRemote(p));
+        r.playToServer(Payloads.RemoteAction.TYPE, Payloads.RemoteAction.CODEC, (p, ctx) -> {
+            if (ctx.player() instanceof ServerPlayer sp) dev.riftverse.multiverse.RealityRemoteService.handle(sp, p);
+        });
         r.playToServer(Payloads.BrowserAction.TYPE, Payloads.BrowserAction.CODEC, MultiverseService::handle);
         r.playToServer(Payloads.Ability.TYPE, Payloads.Ability.CODEC, (p, ctx) -> {
             if (ctx.player() instanceof ServerPlayer sp) ArmorAbilities.activate(sp, p.ability());

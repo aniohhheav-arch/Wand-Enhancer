@@ -93,6 +93,80 @@ All creatures are built from procedural, animated geometry with emissive details
 
 ---
 
+### Ultimate Multiverse Expansion
+
+**Reality Remote** (endgame item: singularity fragments, a Warden Core, exotic ingots, a Singularity Core and a Leviathan
+Scale). Use it to open its console; sneak-use for a quick scan. The console lists every universe you have charted and
+offers: **Scan** (full research readout), **Stabilize** (stability back to 100%, glitching removed, events there ended),
+**Visit**, **Modify** (gravity, time, weather, storm, glitch, fog, hostility, saturation, creature scale, vacuum,
+dreamlike, name; changes sync live to everyone inside), **Archive** (seal a universe with its terrain intact),
+**Restore**, **Rebuild** (same definition, a brand-new reality, or a chosen archetype), **Architect** (create a universe
+from a description or from Universe DNA), **Events** (trigger any of the ten) and the **End Protocols**. Functions are
+gated by cosmic rank (creative players and operators are exempt; configurable). Everything is validated again on the
+server.
+
+**End Protocols**: six fully staged ways to unmake a universe. Each has its own camera work, particles, sounds,
+environmental reactions, screen effects and a configurable duration:
+1. *Orbital Annihilation*: an orbital platform is built in the sky. A targeting scan sweeps the land, then energy lances
+   hammer it (explosions, flying debris, lightning) under a targeting-reticle HUD.
+2. *Singularity Collapse*: a singularity grows overhead and drags terrain fragments into it. The picture caves in toward
+   one point before it compresses to nothing in a flash.
+3. *The Celestial Devourer*: a colossal sky leviathan descends with a spiralling galaxy maw and inhales light and land.
+4. *Reality Disassembly*: blocks detach and float apart as glowing wireframe cubes while the screen turns into a grid.
+5. *Black Hole Infusion*: an expanding black hole with accretion spirals swallows the land, then collapses.
+6. *Timeline Erasure*: eras rewind in flickering colour washes, the world becomes a glowing wireframe, then fades out.
+
+Every protocol (and plain erasure) first saves a definition backup and a block snapshot around each occupant. It marks
+the universe ERASED, so new chunks generate as void and travel is refused. Occupants get Slow Falling and Resistance V
+during the sequence. At the point of no return the erase wave unmakes the terrain and everyone inside is evacuated to
+the Nexus, so no one can be trapped (a watchdog also pulls anyone found in a sealed universe back to the Nexus). Before
+the point of no return, `protocol stop` / the Remote's **Abort** cancels it cleanly. *Reconstruct after* restores the
+universe automatically when the wave ends. **Preview** plays any protocol for you alone without touching the world.
+
+**Multiverse events** happen naturally (configurable rarity per event, per-event cooldown, global minimum gap, never in
+the Nexus or the Infinite Corridor) and can all be started by command or the Remote:
+reality collapse, dimensional invasion (wave defence with rewards), cosmic leviathan (boss), ancient guardian (Rift Warden
+boss), dimensional anomaly (gravity flips, levitation, blinking matter), void wanderer (giant void stalker that smothers
+light), universe birth (a new universe condenses and leaves a stable rift into it), black hole (grows over time), rift
+storm (unstable rifts everywhere) and cosmic convergence (rifts to many realities, wandering visitors). Witnessing events
+earns research.
+
+**Reality rewriting**: erase, rebuild and restore rewrite already-generated terrain in expanding waves, a budgeted
+number of block columns per tick. Rebuilt columns are regenerated exactly as world generation would make them, then
+re-decorated. Only chunks inside the target universe's slot are touched and everything goes through normal level APIs,
+so saves stay valid. **Snapshots** save and restore a block area with vanilla's structure format.
+
+**Cosmic progression**: research points from charting universes, scans, events and reality work raise your rank:
+Wanderer, Riftwalker, Voyager, Cartographer, Reality Architect, Multiversal Sovereign. Universe profiles track status,
+stability, visits, scans, events, erasures, rebuilds and who charted them first.
+
+**Universe DNA**: every universe has a shareable code (`/multiverse universe dna`). `/multiverse universe create
+dna:RV-...` grows a sibling of that reality.
+
+**The Infinite Corridor**: an endless lit hallway suspended in the void. A recessed doorway every 32 blocks holds a rift
+into a different family of realities, with the occasional rift back to the Nexus. It is reached from the new north gate
+of the Nexus or with `/multiverse universe visit corridor`.
+
+**Nexus expansion**: four new satellites on the cardinal axes: the Infinite Corridor gate (north), the Event Observatory
+spire (east), the Convergence Spire with a ring of rifts to eight realities (south) and the Reality Architect's dais
+(west). In worlds whose Nexus was generated before this update, build them with `/multiverse hub regenerate` (it only
+fills empty space).
+
+#### Known limitations (honest notes)
+- Erase/rebuild/restore rewrite terrain within `rewriteRadius` of the universe origin and of every player inside it.
+  Chunks of that universe generated elsewhere earlier stay on disk unchanged (they are unreachable while it is erased).
+  After a *mutated* rebuild, those distant old chunks keep their previous look, so seams can appear there.
+- Universe "time" is a sky/lighting mode per universe (cycle/day/dusk/night). Minecraft has a single clock per
+  dimension and every universe shares the Expanse dimension, so true per-universe time freezing is not possible.
+- Events and protocols in progress are ended cleanly when the server stops (their rifts and spawned creatures are
+  removed, and a protocol that has not reached its point of no return is aborted). They do not resume after a restart.
+- Restore uses the latest definition backup plus regeneration. Player builds inside an erased area come back only via
+  the automatic block snapshots (`/multiverse reality snapshot load auto_<gx>_<gz>_<n>`), which cover the configured
+  snapshot box around each occupant.
+- Cinematic camera work is client-side and can be disabled (`cinematicCamera`), as can expensive particles
+  (`heavyEffects`).
+- The Celestial Devourer is staged with a giant, AI-less sky leviathan model rather than a new bespoke entity model.
+
 ## Getting started (player guide)
 1. Find a **natural rift** in the Overworld; they glow and hum. Sneak-use it to harvest **Rift Shards**, or walk in.
 2. Craft a **Rift Igniter** (flint and steel + rift shard) and **Rift Frames** (obsidian + rift shards), build a ring and
@@ -112,9 +186,36 @@ All creatures are built from procedural, animated geometry with emissive details
 /riftverse info                     identify the universe you are standing in
 ```
 
+`/multiverse` (read-only parts open to all; anything that changes the world needs permission level 2; destructive
+operations require `/multiverse confirm` within 30 s). Universes can be named `here`, `corridor`, an archetype id,
+`u<number>` (designation number) or `gx.gz` (slot), all with tab completion.
+```
+/multiverse event list | history
+/multiverse event start <event> [targets] | summon <event> [targets]
+/multiverse event stop <event|#id|all> | info <event>
+/multiverse event cooldown <event> [reset|default|<minutes>] | rarity <event> [default|<value>]
+/multiverse cinematic list | play <name> [targets] | stop [targets]
+/multiverse reality scan | inspect [universe] | stabilize [universe] | modify <trait> <value>
+/multiverse reality erase [universe] | rebuild [universe] [new|<archetype>] | restore [universe]
+/multiverse reality snapshot save|load|delete <name> | snapshot list
+/multiverse reality protocols
+/multiverse reality protocol <protocol> [universe] [reconstruct]
+/multiverse reality protocol stop [universe] | protocol preview <protocol> [targets]
+/multiverse universe list [page] | info [universe] | dna [universe] | create <description | dna:CODE>
+/multiverse universe visit <universe> | archive <universe> | restore <universe>
+/multiverse profile [player] | hub regenerate | confirm | cancel
+/multiverse debug events | dimensions | portals | reality | performance
+```
+
 ## Configuration (`config/riftverse-common.toml`)
 `blackHolesBreakBlocks`, `blackHolesBreakBlocksInVanillaDimensions`, `naturalRiftRarity`,
 `maxPromptUniversesPerPlayer`, `universeCreatureSpawning`.
+
+`[events]`: `naturalEvents`, `checkIntervalSeconds`, `minMinutesBetweenEvents`, `eventsAlterTerrain`,
+`eventsInVanillaDimensions`, plus `rarity` and `cooldownMinutes` for each event (both can also be overridden in-game,
+saved with the world). `[reality]`: `rewriteRadius`, `rewriteColumnsPerTick`, `backupsPerUniverse`, `snapshotRadius`,
+`snapshotHeight`, `remoteRequiresRank`, `protectPrimeUniverses`, and `[reality.protocols]` with the length of each End
+Protocol. `[cinematics]`: `cinematicCamera`, `heavyEffects`.
 
 ---
 

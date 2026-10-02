@@ -19,6 +19,7 @@ ITEMS = {
     "gravity_gauntlet": "Gravity Gauntlet", "singularity_grenade": "Singularity Grenade", "singularity_core": "Singularity Core",
     "reality_shaper": "Reality Shaper", "dimensional_key": "Dimensional Key", "universe_compass": "Universe Compass",
     "homeward_rift": "Homeward Rift", "rift_igniter": "Rift Igniter", "rift_sigil": "Rift Sigil",
+    "reality_remote": "Reality Remote",
 }
 
 SETS = {
@@ -65,6 +66,8 @@ TOOLTIPS = {
     "item.riftverse.singularity_core.tip1": "Sneak + use on the ground: birth a permanent black hole high above",
     "item.riftverse.singularity_core.tip2": "Black holes are gateways to other universes - if you survive the fall",
     "item.riftverse.reality_shaper.tip": "Use in the air: switch mode",
+    "item.riftverse.reality_remote.tip": "Use: open the Remote console • Sneak-use: quick scan",
+    "item.riftverse.reality_remote.tip2": "Scan, stabilize, modify, archive, restore, rebuild, architect, events and the End Protocols",
     "item.riftverse.reality_shaper.mode0": "Mode: Transmute - rewrite matter into the substance of another universe",
     "item.riftverse.reality_shaper.mode1": "Mode: Stasis - freeze time around you",
     "item.riftverse.dimensional_key.blank": "Blank - imprint it at a Multiverse Console",

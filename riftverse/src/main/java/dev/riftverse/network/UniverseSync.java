@@ -24,7 +24,7 @@ public final class UniverseSync {
         Payloads.UniverseSync payload;
         if (player.level().dimension() == RvWorldgen.EXPANSE) {
             UniverseSpec spec = UniverseRegistry.specAt(player.getBlockX(), player.getBlockZ());
-            UniverseRegistry.get(player.server).remember(spec);
+            if (!dev.riftverse.multiverse.InfiniteCorridor.isCorridor(spec.id)) UniverseRegistry.get(player.server).remember(spec);
             key = spec.id.pack();
             payload = new Payloads.UniverseSync(1, spec.save());
         } else if (player.level().dimension() == RvWorldgen.NEXUS) {

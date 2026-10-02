@@ -224,6 +224,114 @@ public final class Payloads {
         }
     }
 
+    /**
+     * Server → client: play (or, with type {@link #STOP}, end) a reality cinematic: erasure, reconstruction, events and
+     * title-only announcements. The focus is the point the camera frames.
+     */
+    public record RealityCinematic(int type, int duration, double fx, double fy, double fz, int colorA, int colorB, String title, String subtitle)
+            implements CustomPacketPayload {
+        public static final int STOP = -1;
+        public static final Type<RealityCinematic> TYPE = payloadType("reality_cinematic");
+        public static final StreamCodec<FriendlyByteBuf, RealityCinematic> CODEC = CustomPacketPayload.<FriendlyByteBuf, RealityCinematic>codec(RealityCinematic::write, RealityCinematic::new);
+
+        RealityCinematic(FriendlyByteBuf buf) {
+            this(buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readInt(), buf.readInt(), buf.readUtf(128), buf.readUtf(256));
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(type);
+            buf.writeVarInt(duration);
+            buf.writeDouble(fx);
+            buf.writeDouble(fy);
+            buf.writeDouble(fz);
+            buf.writeInt(colorA);
+            buf.writeInt(colorB);
+            buf.writeUtf(title, 128);
+            buf.writeUtf(subtitle, 256);
+        }
+
+        @Override
+        public Type<RealityCinematic> type() {
+            return TYPE;
+        }
+    }
+
+    /** Server → client: open the Reality Remote with the holder's rank, current universe and reachable targets. */
+    public record OpenRemote(int rank, int research, long current, List<UniverseEntry> targets, List<Integer> statuses, List<Integer> stability)
+            implements CustomPacketPayload {
+        public static final long NONE = Long.MIN_VALUE;
+        public static final Type<OpenRemote> TYPE = payloadType("open_remote");
+        public static final StreamCodec<FriendlyByteBuf, OpenRemote> CODEC = CustomPacketPayload.<FriendlyByteBuf, OpenRemote>codec(OpenRemote::write, OpenRemote::new);
+
+        OpenRemote(FriendlyByteBuf buf) {
+            this(buf.readVarInt(), buf.readVarInt(), buf.readLong(), readEntries(buf), readInts(buf), readInts(buf));
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(rank);
+            buf.writeVarInt(research);
+            buf.writeLong(current);
+            buf.writeVarInt(targets.size());
+            for (UniverseEntry e : targets) e.write(buf);
+            writeInts(buf, statuses);
+            writeInts(buf, stability);
+        }
+
+        @Override
+        public Type<OpenRemote> type() {
+            return TYPE;
+        }
+    }
+
+    /** Client → server: a Reality Remote command. Validated server-side (held item, rank, target, permissions). */
+    public record RemoteAction(int action, long universe, int option, boolean flag, String text) implements CustomPacketPayload {
+        public static final int SCAN = 0;
+        public static final int STABILIZE = 1;
+        public static final int MODIFY = 2;
+        public static final int ARCHIVE = 3;
+        public static final int RESTORE = 4;
+        public static final int REBUILD = 5;
+        public static final int CREATE = 6;
+        public static final int EVENT = 7;
+        public static final int PROTOCOL = 8;
+        public static final int PREVIEW = 9;
+        public static final int STOP = 10;
+        public static final int VISIT = 11;
+        public static final int ERASE = 12;
+
+        public static final Type<RemoteAction> TYPE = payloadType("remote_action");
+        public static final StreamCodec<FriendlyByteBuf, RemoteAction> CODEC = CustomPacketPayload.<FriendlyByteBuf, RemoteAction>codec(RemoteAction::write, RemoteAction::new);
+
+        RemoteAction(FriendlyByteBuf buf) {
+            this(buf.readVarInt(), buf.readLong(), buf.readVarInt(), buf.readBoolean(), buf.readUtf(160));
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(action);
+            buf.writeLong(universe);
+            buf.writeVarInt(option);
+            buf.writeBoolean(flag);
+            buf.writeUtf(text, 160);
+        }
+
+        @Override
+        public Type<RemoteAction> type() {
+            return TYPE;
+        }
+    }
+
+    private static List<Integer> readInts(FriendlyByteBuf buf) {
+        int n = Math.min(buf.readVarInt(), 4096);
+        List<Integer> list = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) list.add(buf.readVarInt());
+        return list;
+    }
+
+    private static void writeInts(FriendlyByteBuf buf, List<Integer> list) {
+        buf.writeVarInt(list.size());
+        for (int i : list) buf.writeVarInt(i);
+    }
+
     private static CompoundTag readTag(FriendlyByteBuf buf) {
         CompoundTag t = buf.readNbt();
         return t == null ? new CompoundTag() : t;

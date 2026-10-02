@@ -48,6 +48,7 @@ public final class Riftverse {
 
         CommonEvents.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(RiftverseCommand::register);
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.RegisterCommandsEvent e) -> dev.riftverse.command.MultiverseCommand.register(e.getDispatcher()));
     }
 
     public static ResourceLocation id(String path) {

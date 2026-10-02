@@ -1,6 +1,12 @@
 package dev.riftverse.event;
 
 import dev.riftverse.Riftverse;
+import dev.riftverse.multiverse.EndProtocols;
+import dev.riftverse.multiverse.RealityOps;
+import dev.riftverse.multiverse.RealityRewriter;
+import dev.riftverse.multiverse.RealityState;
+import dev.riftverse.multiverse.Scheduler;
+import dev.riftverse.multiverse.event.EventManager;
 import dev.riftverse.network.UniverseSync;
 import dev.riftverse.player.ArmorAbilities;
 import dev.riftverse.registry.RvWorldgen;
@@ -25,6 +31,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -35,13 +42,32 @@ public final class CommonEvents {
     private CommonEvents() {}
 
     public static void register(IEventBus bus) {
-        bus.addListener((ServerStartedEvent e) -> UniverseRegistry.onServerStarted(e.getServer()));
+        bus.addListener((ServerStartedEvent e) -> {
+            UniverseRegistry.onServerStarted(e.getServer());
+            RealityState.onServerStarted(e.getServer());
+        });
+        bus.addListener((ServerStoppingEvent e) -> {
+            // end sequences while the levels still exist so no rift, boss or half-run protocol is orphaned
+            if (!EndProtocols.runs().isEmpty()) EndProtocols.stop(e.getServer(), null, null);
+            EventManager.shutdown();
+            RealityRewriter.cancelAll();
+        });
         bus.addListener((ServerStoppedEvent e) -> {
             UniverseRegistry.onServerStopped();
+            RealityState.onServerStopped();
+            Scheduler.clear();
+            EndProtocols.clear();
+            RealityOps.clear();
             TransitManager.clear();
             TerrainSampler.clearCache();
         });
-        bus.addListener((ServerTickEvent.Post e) -> TransitManager.tick(e.getServer()));
+        bus.addListener((ServerTickEvent.Post e) -> {
+            TransitManager.tick(e.getServer());
+            Scheduler.tick(e.getServer());
+            RealityRewriter.tick(e.getServer());
+            EventManager.tick(e.getServer());
+            EndProtocols.tick(e.getServer());
+        });
         bus.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer sp) UniverseSync.send(sp);
         });
@@ -76,6 +102,7 @@ public final class CommonEvents {
         ArmorAbilities.tick(player);
         if (player.tickCount % 20 != 0) return;
         UniverseSync.check(player);
+        RealityOps.playerSecond(player);
         applyGravity(player);
         UniverseEffects.playerSecond(player, specOf(player));
     }

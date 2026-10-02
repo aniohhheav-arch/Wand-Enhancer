@@ -50,8 +50,21 @@ public final class NexusLayout {
         return g;
     }
 
-    /** Satellite centres, in order: NE (random gate), NW (boss arena), SE (home gate), SW (archive). */
+    /**
+     * Satellite centres, in order: NE (random gate), NW (boss arena), SE (home gate), SW (archive), then the expansion
+     * ring on the cardinal axes: N (Infinite Corridor gate), E (event observatory), S (convergence spire), W (Reality
+     * Architect's dais).
+     */
     public static int[] satellite(int i) {
+        if (i >= 4) {
+            int d = SATELLITE_DIST;
+            return switch (i) {
+                case SAT_CORRIDOR -> new int[] {0, -d};
+                case SAT_OBSERVATORY -> new int[] {d, 0};
+                case SAT_CONVERGENCE -> new int[] {0, d};
+                default -> new int[] {-d, 0};
+            };
+        }
         int sx = (i == 0 || i == 2) ? 1 : -1;
         int sz = (i == 0 || i == 1) ? -1 : 1;
         int d = (int) Math.round(SATELLITE_DIST / Math.sqrt(2));
@@ -62,6 +75,11 @@ public final class NexusLayout {
     public static final int SAT_ARENA = 1;
     public static final int SAT_HOME = 2;
     public static final int SAT_ARCHIVE = 3;
+    public static final int SAT_CORRIDOR = 4;
+    public static final int SAT_OBSERVATORY = 5;
+    public static final int SAT_CONVERGENCE = 6;
+    public static final int SAT_ARCHITECT = 7;
+    public static final int SATELLITES = 8;
 
     private static BlockState stone() {
         return RvBlocks.NEXUS_STONE.get().defaultBlockState();
@@ -82,7 +100,7 @@ public final class NexusLayout {
         if (s != null) return s;
         s = gateFrame(x, y, z);
         if (s != null) return s;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < SATELLITES; i++) {
             s = bridge(x, y, z, i);
             if (s != null) return s;
             s = satellitePlatform(x, y, z, i);
@@ -180,6 +198,19 @@ public final class NexusLayout {
         if (y == TOP + 1 && r > rad - 1.5) {
             return ((int) Math.round(Math.atan2(dz, dx) * 6) & 3) == 0 ? glow() : bricks();
         }
+        if (i == SAT_OBSERVATORY && y > TOP) {
+            // a slender observatory spire with a glowing lens ring
+            if (r <= 2.2 && y <= TOP + 30) return y % 6 == 0 || y == TOP + 30 ? glow() : bricks();
+            if (y == TOP + 24 && Math.abs(r - 6) < 0.6) return glow();
+            if (y == TOP + 23 && r < 6.5 && r > 2.2 && ((int) Math.round(Math.atan2(dz, dx) * 4) & 1) == 0) return bricks();
+        }
+        if (i == SAT_CONVERGENCE && y > TOP && y <= TOP + 12) {
+            for (int k = 0; k < 8; k++) {
+                double a = k * Math.PI / 4;
+                if (Math.abs(dx - Math.cos(a) * 12) <= 0.5 && Math.abs(dz - Math.sin(a) * 12) <= 0.5) return y >= TOP + 11 ? glow() : bricks();
+            }
+        }
+        if (i == SAT_ARCHITECT && y > TOP && y <= TOP + 2 && r > 4.5 && r <= 5.5) return y == TOP + 2 ? glow() : bricks();
         if (i == SAT_ARCHIVE && y > TOP && y <= TOP + 7) {
             for (int k = 0; k < 6; k++) {
                 double a = k * Math.PI / 3;

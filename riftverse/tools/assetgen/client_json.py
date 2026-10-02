@@ -18,7 +18,7 @@ CUBES = {
 HANDHELD = {"portal_gun", "rift_blade", "reality_shaper"}
 ITEMS = ["rift_shard", "void_essence", "stellar_dust", "singularity_fragment", "exotic_ingot", "warden_core", "leviathan_scale",
          "portal_gun", "rift_blade", "gravity_gauntlet", "singularity_grenade", "singularity_core", "reality_shaper", "dimensional_key",
-         "universe_compass", "homeward_rift", "rift_igniter", "rift_sigil"]
+         "universe_compass", "homeward_rift", "rift_igniter", "rift_sigil", "reality_remote"]
 ARMOR = [f"{s}_{p}" for s in ["rift_walker", "voyager", "event_horizon", "astral"] for p in ["helmet", "chestplate", "leggings", "boots"]]
 CREATURES = ["astral_jelly", "sky_whale", "lumen_strider", "neon_drone", "glitchling", "void_stalker", "crystal_sentinel",
              "rift_wraith", "rift_warden", "abyssal_leviathan"]

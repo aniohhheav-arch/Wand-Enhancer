@@ -97,6 +97,13 @@ public class BlackHoleEntity extends Entity {
         entityData.set(CAPTURES, captures);
     }
 
+    /** Cosmetic black holes (End Protocol previews) pull, hurt and break nothing. Not saved: they never outlive their sequence. */
+    private boolean harmless;
+
+    public void setHarmless(boolean harmless) {
+        this.harmless = harmless;
+    }
+
     public boolean captures() {
         return entityData.get(CAPTURES);
     }
@@ -169,6 +176,7 @@ public class BlackHoleEntity extends Entity {
             }
         }
         ServerLevel level = (ServerLevel) level();
+        if (harmless) return;
         float horizon = horizonRadius() * bloom(0);
         Vec3 c = center();
         float influence = influenceRadius();

@@ -133,7 +133,8 @@ public final class TransitManager {
         data.journeys++;
         Advancements.award(player, "first_rift");
         if (target.spec() != null) {
-            data.discover(target.spec().id.pack());
+            boolean first = data.discover(target.spec().id.pack());
+            dev.riftverse.multiverse.RealityOps.onArrival(player, target.spec(), first);
             if (data.discoveredCount() >= 10) Advancements.award(player, "cartographer");
             if (target.spec().prompt != null && !target.spec().prompt.isEmpty()) Advancements.award(player, "dreamwalker");
         }

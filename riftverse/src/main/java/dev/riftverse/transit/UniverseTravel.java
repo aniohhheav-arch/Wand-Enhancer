@@ -1,6 +1,8 @@
 package dev.riftverse.transit;
 
 import dev.riftverse.block.RiftType;
+import dev.riftverse.multiverse.InfiniteCorridor;
+import dev.riftverse.multiverse.RealityState;
 import dev.riftverse.registry.RvAttachments;
 import dev.riftverse.registry.RvBlocks;
 import dev.riftverse.registry.RvWorldgen;
@@ -43,11 +45,16 @@ public final class UniverseTravel {
         Random jr = new Random(random.nextLong());
         return switch (dest.kind()) {
             case UNIVERSE -> {
-                UniverseSpec spec = UniverseRegistry.specFor(UniverseId.unpack(dest.universe()));
-                reg.remember(spec);
+                UniverseId uid = UniverseId.unpack(dest.universe());
+                if (!RealityState.isAccessible(uid)) yield null;
+                UniverseSpec spec = UniverseRegistry.specFor(uid);
+                if (!InfiniteCorridor.isCorridor(uid)) reg.remember(spec);
                 yield toUniverse(server, spec, random);
             }
-            case ARCHETYPE -> toUniverse(server, reg.primeSpec(Archetype.byId(dest.archetype())), random);
+            case ARCHETYPE -> {
+                Archetype a = Archetype.byId(dest.archetype());
+                yield RealityState.isAccessible(UniverseId.prime(a)) ? toUniverse(server, reg.primeSpec(a), random) : null;
+            }
             case RANDOM -> toUniverse(server, reg.randomUniverse(jr, null), random);
             case FLAVOR -> toUniverse(server, reg.randomUniverse(jr, RiftType.byId(dest.flavor()).destinations()), random);
             case NEXUS -> toNexus(server);
@@ -67,6 +74,11 @@ public final class UniverseTravel {
     private static Target toUniverse(MinecraftServer server, UniverseSpec spec, RandomSource random) {
         ServerLevel level = server.getLevel(RvWorldgen.EXPANSE);
         if (level == null) return null;
+        if (InfiniteCorridor.isCorridor(spec.id)) {
+            BlockPos p = InfiniteCorridor.arrival(random);
+            level.getChunk(p.getX() >> 4, p.getZ() >> 4);
+            return new Target(level, Vec3.atBottomCenterOf(p), -90f, spec, spec.name.toUpperCase(), "Every door leads somewhere else", spec.accent, false);
+        }
         TerrainSampler sampler = TerrainSampler.of(spec);
         int cx = spec.id.centerX() + random.nextInt(97) - 48;
         int cz = spec.id.centerZ() + random.nextInt(97) - 48;

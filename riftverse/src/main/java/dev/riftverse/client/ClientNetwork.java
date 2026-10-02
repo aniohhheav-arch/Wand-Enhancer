@@ -1,6 +1,7 @@
 package dev.riftverse.client;
 
 import dev.riftverse.client.cinematic.CinematicDirector;
+import dev.riftverse.client.cinematic.RealityCinematics;
 import dev.riftverse.client.screen.MultiverseScreen;
 import dev.riftverse.network.Payloads;
 import net.minecraft.client.Minecraft;
@@ -36,5 +37,14 @@ public final class ClientNetwork {
 
     public static void onBossIntro(Payloads.BossIntro p) {
         CinematicDirector.bossIntro(p.entityId(), p.name(), p.subtitle(), p.color());
+    }
+
+    public static void onRealityCinematic(Payloads.RealityCinematic p) {
+        if (p.type() == Payloads.RealityCinematic.STOP) RealityCinematics.stop();
+        else RealityCinematics.play(p.type(), p.duration(), new Vec3(p.fx(), p.fy(), p.fz()), p.colorA(), p.colorB(), p.title(), p.subtitle());
+    }
+
+    public static void onOpenRemote(Payloads.OpenRemote p) {
+        Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.RealityRemoteScreen(p));
     }
 }

@@ -54,6 +54,8 @@ public final class RvItems {
     public static final DeferredItem<UniverseCompassItem> UNIVERSE_COMPASS = add("universe_compass", () -> new UniverseCompassItem(new Item.Properties().rarity(Rarity.UNCOMMON).stacksTo(1)));
     public static final DeferredItem<HomewardRiftItem> HOMEWARD_RIFT = add("homeward_rift", () -> new HomewardRiftItem(new Item.Properties().rarity(Rarity.RARE).stacksTo(16)));
     public static final DeferredItem<RiftIgniterItem> RIFT_IGNITER = add("rift_igniter", () -> new RiftIgniterItem(new Item.Properties().rarity(Rarity.UNCOMMON).durability(64)));
+    public static final DeferredItem<dev.riftverse.item.RealityRemoteItem> REALITY_REMOTE = add("reality_remote",
+            () -> new dev.riftverse.item.RealityRemoteItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));
     public static final DeferredItem<RiftSigilItem> RIFT_SIGIL = add("rift_sigil", () -> new RiftSigilItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));
 
     public static final DeferredItem<RiftArmorItem> RIFT_WALKER_HELMET = armor("rift_walker_helmet", RvArmorMaterials.RIFT_WALKER, ArmorItem.Type.HELMET, 33);

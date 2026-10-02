@@ -22,6 +22,34 @@ public final class PlayerMultiverseData implements INBTSerializable<CompoundTag>
     public boolean hasHome;
     public long abilityReadyAt;
     public long dashReadyAt;
+    private final Set<Long> scanned = new LinkedHashSet<>();
+    public int research;
+    public int eventsWitnessed;
+    public int realitiesErased;
+    public int realitiesRebuilt;
+
+    /** Adds research points; returns true if this crossed into a new cosmic rank. */
+    public boolean addResearch(int points) {
+        dev.riftverse.multiverse.CosmicRank before = rank();
+        research = Math.max(0, research + points);
+        return rank() != before;
+    }
+
+    public dev.riftverse.multiverse.CosmicRank rank() {
+        return dev.riftverse.multiverse.CosmicRank.of(research);
+    }
+
+    /** Records a scan; returns true the first time a universe is scanned. */
+    public boolean scan(long universe) {
+        if (scanned.contains(universe)) return false;
+        scanned.add(universe);
+        while (scanned.size() > MAX_DISCOVERED * 2) scanned.remove(scanned.iterator().next());
+        return true;
+    }
+
+    public int scannedCount() {
+        return scanned.size();
+    }
 
     public boolean discover(long universe) {
         if (discovered.contains(universe)) return false;
@@ -59,6 +87,14 @@ public final class PlayerMultiverseData implements INBTSerializable<CompoundTag>
         t.putString("homeDimension", homeDimension);
         t.putLong("homePos", homePos);
         t.putBoolean("hasHome", hasHome);
+        long[] sc = new long[scanned.size()];
+        int j = 0;
+        for (long l : scanned) sc[j++] = l;
+        t.put("scanned", new LongArrayTag(sc));
+        t.putInt("research", research);
+        t.putInt("eventsWitnessed", eventsWitnessed);
+        t.putInt("realitiesErased", realitiesErased);
+        t.putInt("realitiesRebuilt", realitiesRebuilt);
         return t;
     }
 
@@ -71,5 +107,11 @@ public final class PlayerMultiverseData implements INBTSerializable<CompoundTag>
         homeDimension = t.getString("homeDimension");
         homePos = t.getLong("homePos");
         hasHome = t.getBoolean("hasHome");
+        scanned.clear();
+        for (long l : t.getLongArray("scanned")) scanned.add(l);
+        research = t.getInt("research");
+        eventsWitnessed = t.getInt("eventsWitnessed");
+        realitiesErased = t.getInt("realitiesErased");
+        realitiesRebuilt = t.getInt("realitiesRebuilt");
     }
 }

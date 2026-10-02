@@ -71,6 +71,8 @@ def recipes():
     shaped("singularity_core", ["FXF", "XNX", "FXF"], {"F": "singularity_fragment", "X": "exotic_ingot", "N": "minecraft:nether_star"})
     shaped("reality_shaper", ["  C", " X ", "B  "], {"C": "rift_crystal", "X": "exotic_ingot", "B": "minecraft:blaze_rod"},
            category="equipment")
+    shaped("reality_remote", ["FWF", "XCX", "FLF"], {"F": "singularity_fragment", "W": "warden_core", "X": "exotic_ingot",
+                                                    "C": "singularity_core", "L": "leviathan_scale"}, category="equipment")
     shaped("dimensional_key", ["RX", "X "], {"R": "rift_shard", "X": "minecraft:gold_ingot"})
     shaped("universe_compass", [" R ", "RCR", " R "], {"R": "rift_shard", "C": "minecraft:compass"}, category="equipment")
     shapeless("homeward_rift", ["rift_shard", "minecraft:ender_pearl", "stellar_dust"], count=2)

@@ -2,6 +2,7 @@ package dev.riftverse.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.riftverse.client.cinematic.CinematicDirector;
+import dev.riftverse.client.cinematic.RealityCinematics;
 import dev.riftverse.client.render.Fullscreen;
 import dev.riftverse.client.render.RvShaders;
 import dev.riftverse.util.ColorUtil;
@@ -41,6 +42,8 @@ public final class CinematicHud {
             RenderSystem.enableDepthTest();
             RenderSystem.defaultBlendFunc();
         }
+
+        RealityCinematics.renderOverlay(g, partial);
 
         float flash = CinematicDirector.flash();
         if (flash > 0.01f) {

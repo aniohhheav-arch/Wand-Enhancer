@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "FWF",
+    "XCX",
+    "FLF"
+  ],
+  "key": {
+    "F": {
+      "item": "riftverse:singularity_fragment"
+    },
+    "W": {
+      "item": "riftverse:warden_core"
+    },
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    },
+    "C": {
+      "item": "riftverse:singularity_core"
+    },
+    "L": {
+      "item": "riftverse:leviathan_scale"
+    }
+  },
+  "result": {
+    "id": "riftverse:reality_remote",
+    "count": 1
+  }
+}

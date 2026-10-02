@@ -68,6 +68,7 @@ public final class UniverseRegistry extends SavedData {
 
     /** Thread-safe lookup used by world generation workers. */
     public static UniverseSpec specFor(UniverseId id) {
+        if (dev.riftverse.multiverse.InfiniteCorridor.isCorridor(id)) return dev.riftverse.multiverse.InfiniteCorridor.spec();
         UniverseRegistry reg = active;
         if (reg != null) {
             UniverseSpec s = reg.stored.get(id.pack());
@@ -83,6 +84,13 @@ public final class UniverseRegistry extends SavedData {
     /** Persist a spec so that its identity survives generator changes and so it shows up in catalogues. */
     public void remember(UniverseSpec spec) {
         if (stored.putIfAbsent(spec.id.pack(), spec) == null) setDirty();
+    }
+
+    /** Replaces a universe's definition (reality rewrites). New chunks and synced clients follow the new spec at once. */
+    public void replace(UniverseSpec spec) {
+        stored.put(spec.id.pack(), spec);
+        DERIVED.remove(spec.id.pack());
+        setDirty();
     }
 
     public boolean isStored(UniverseId id) {
@@ -122,6 +130,7 @@ public final class UniverseRegistry extends SavedData {
             int gz = 1 + random.nextInt(UniverseId.MAX_SLOT);
             UniverseId id = new UniverseId(gx, gz);
             if (stored.containsKey(id.pack())) continue;
+            if (!dev.riftverse.multiverse.RealityState.isAccessible(id)) continue;
             UniverseSpec s = specFor(id);
             if (allowed != null && allowed.length > 0) {
                 boolean ok = false;
@@ -147,6 +156,21 @@ public final class UniverseRegistry extends SavedData {
         DERIVED.remove(id.pack());
         setDirty();
         return result;
+    }
+
+    /** Manifests a universe whose spec is built by the caller (Universe DNA, events) in the next free manifest slot. */
+    public UniverseSpec manifestCustom(java.util.function.Function<UniverseId, UniverseSpec> maker, @Nullable UUID author) {
+        int n = promptCounter++;
+        int gx = (n % (UniverseId.MAX_SLOT * 2)) - UniverseId.MAX_SLOT;
+        int gz = -1 - n / (UniverseId.MAX_SLOT * 2);
+        UniverseId id = new UniverseId(gx, gz);
+        UniverseSpec spec = maker.apply(id);
+        spec.id = id;
+        stored.put(id.pack(), spec);
+        if (author != null) manifestedBy.put(id.pack(), author);
+        DERIVED.remove(id.pack());
+        setDirty();
+        return spec;
     }
 
     public int manifestCount(UUID author) {

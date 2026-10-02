@@ -104,7 +104,16 @@ public final class CinematicDirector {
         shake(0.6f, 60, 0.3f, color);
     }
 
+    /** Shows a title card with letterbox and a soft shake, without moving the camera. */
+    public static void announce(String name, String sub, int color) {
+        title = name;
+        subtitle = sub;
+        titleColor = color;
+        titleTick = 0;
+    }
+
     public static void reset() {
+        RealityCinematics.stop();
         phase = Phase.NONE;
         tick = 0;
         shotTick = -1;
@@ -135,7 +144,7 @@ public final class CinematicDirector {
 
     public static boolean inputLocked() {
         if (bossTick >= 0 && bossTick < 90) return true;
-        if (phase == Phase.NONE) return false;
+        if (phase == Phase.NONE) return RealityCinematics.locksInput();
         if (phase == Phase.EMERGE) return tick - emergeStart < EMERGE_TICKS * 0.6f;
         return true;
     }
@@ -193,6 +202,7 @@ public final class CinematicDirector {
             case EMERGE -> (kind == TransitKind.BLACK_HOLE ? 55f : 38f) * (1f - CameraRig.easeOut((t - emergeStart) / (EMERGE_TICKS * 0.8f)));
         };
         if (bossTick >= 0 && bossTick < 100) base -= 18f * (float) Math.sin(Math.min(1f, bossTick / 100f) * Math.PI);
+        if (phase == Phase.NONE) base += RealityCinematics.fovOffset(partial);
         return base;
     }
 
@@ -244,6 +254,7 @@ public final class CinematicDirector {
             l = Math.max(l, titleTick < 0 ? 0f : 1f - CameraRig.easeInOut((tt - 100f) / 30f));
         }
         if (bossTick >= 0) l = Math.max(l, 1f - CameraRig.easeInOut((bossTick + partial - 110f) / 25f));
+        l = Math.max(l, RealityCinematics.letterbox(partial));
         return Mth.clamp(l, 0f, 1f);
     }
 
@@ -278,6 +289,7 @@ public final class CinematicDirector {
     public static void tick() {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
+        RealityCinematics.tick();
         if (shakeTicks > 0) shakeTicks--;
         else shake *= 0.85f;
         flash *= 0.88f;
@@ -364,6 +376,7 @@ public final class CinematicDirector {
             return;
         }
         Vec3 eye = player.getEyePosition(partial);
+        if (phase == Phase.NONE && bossTick < 0 && shotTick < 0 && RealityCinematics.updateRig(partial)) return;
         if (bossTick >= 0 && bossTick < 125 && mc.level != null) {
             Entity boss = mc.level.getEntity(bossEntity);
             if (boss != null) {

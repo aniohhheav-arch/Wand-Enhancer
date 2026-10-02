@@ -3,6 +3,8 @@ package dev.riftverse.world;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.riftverse.block.MultiverseConsoleBlock;
+import dev.riftverse.block.RiftBlock;
+import dev.riftverse.block.RiftType;
 import dev.riftverse.block.PortalFieldBlockEntity;
 import dev.riftverse.entity.BlackHoleEntity;
 import dev.riftverse.registry.RvBlocks;
@@ -122,33 +124,89 @@ public class NexusChunkGenerator extends ChunkGenerator {
             }
         }
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < NexusLayout.SATELLITES; i++) {
             int[] c = NexusLayout.satellite(i);
             if (!inChunk(minX, minZ, c[0], c[1])) continue;
-            BlockPos center = new BlockPos(c[0], top + 1, c[1]);
-            switch (i) {
-                case NexusLayout.SAT_RANDOM -> gate(level, center, Destination.random(), "Uncharted Reality", 0x7DF9FF);
-                case NexusLayout.SAT_HOME -> gate(level, center, Destination.home(), "Return Home", 0xFFFFFF);
-                case NexusLayout.SAT_ARENA -> {
-                    level.setBlock(center, RvBlocks.RIFT_ALTAR.get().defaultBlockState(), 2);
-                    for (int k = 0; k < 4; k++) {
-                        double a = k * Math.PI / 2 + Math.PI / 4;
-                        BlockPos p = center.offset((int) Math.round(Math.cos(a) * 6), 0, (int) Math.round(Math.sin(a) * 6));
-                        for (int y = 0; y < 5; y++) level.setBlock(p.above(y), y == 4 ? RvBlocks.NEXUS_GLOW.get().defaultBlockState() : RvBlocks.NEXUS_BRICKS.get().defaultBlockState(), 2);
-                    }
-                }
-                case NexusLayout.SAT_ARCHIVE -> {
-                    for (int k = 0; k < 3; k++) {
-                        double a = k * Math.PI * 2 / 3;
-                        BlockPos p = center.offset((int) Math.round(Math.cos(a) * 4), 0, (int) Math.round(Math.sin(a) * 4));
-                        level.setBlock(p, Blocks.CHEST.defaultBlockState(), 2);
-                        net.minecraft.world.RandomizableContainer.setBlockEntityLootTable(level, random, p, Decorator.RIFT_CACHE);
-                    }
-                    level.setBlock(center, RvBlocks.MULTIVERSE_CONSOLE.get().defaultBlockState(), 2);
-                }
-                default -> {}
-            }
+            decorateSatellite(level, i, new BlockPos(c[0], top + 1, c[1]), random);
         }
+    }
+
+    /** Places the block entities and features of one Nexus satellite (worldgen or /multiverse hub regenerate). */
+    public static void decorateSatellite(WorldGenLevel level, int i, BlockPos center, RandomSource random) {
+        switch (i) {
+            case NexusLayout.SAT_RANDOM -> gate(level, center, Destination.random(), "Uncharted Reality", 0x7DF9FF);
+            case NexusLayout.SAT_HOME -> gate(level, center, Destination.home(), "Return Home", 0xFFFFFF);
+            case NexusLayout.SAT_ARENA -> {
+                level.setBlock(center, RvBlocks.RIFT_ALTAR.get().defaultBlockState(), 2);
+                for (int k = 0; k < 4; k++) {
+                    double a = k * Math.PI / 2 + Math.PI / 4;
+                    BlockPos p = center.offset((int) Math.round(Math.cos(a) * 6), 0, (int) Math.round(Math.sin(a) * 6));
+                    for (int y = 0; y < 5; y++) level.setBlock(p.above(y), y == 4 ? RvBlocks.NEXUS_GLOW.get().defaultBlockState() : RvBlocks.NEXUS_BRICKS.get().defaultBlockState(), 2);
+                }
+            }
+            case NexusLayout.SAT_ARCHIVE -> {
+                for (int k = 0; k < 3; k++) {
+                    double a = k * Math.PI * 2 / 3;
+                    BlockPos p = center.offset((int) Math.round(Math.cos(a) * 4), 0, (int) Math.round(Math.sin(a) * 4));
+                    level.setBlock(p, Blocks.CHEST.defaultBlockState(), 2);
+                    net.minecraft.world.RandomizableContainer.setBlockEntityLootTable(level, random, p, Decorator.RIFT_CACHE);
+                }
+                level.setBlock(center, RvBlocks.MULTIVERSE_CONSOLE.get().defaultBlockState(), 2);
+            }
+            case NexusLayout.SAT_CORRIDOR -> gate(level, center, Destination.universe(dev.riftverse.multiverse.InfiniteCorridor.ID), "The Infinite Corridor", 0xB0A0FF);
+            case NexusLayout.SAT_OBSERVATORY -> level.setBlock(center.offset(0, 0, 4), RvBlocks.MULTIVERSE_CONSOLE.get().defaultBlockState()
+                    .setValue(MultiverseConsoleBlock.FACING, Direction.SOUTH), 2);
+            case NexusLayout.SAT_CONVERGENCE -> {
+                RiftType[] all = RiftType.values();
+                for (int k = 0; k < 8; k++) {
+                    double a = k * Math.PI / 4;
+                    BlockPos p = center.offset((int) Math.round(Math.cos(a) * 7), 2, (int) Math.round(Math.sin(a) * 7));
+                    RiftType t = all[(k * 2 + 9) % all.length];
+                    if (t == RiftType.RETURN || t == RiftType.NEXUS) t = RiftType.STELLAR;
+                    level.setBlock(p, RvBlocks.RIFT.get().defaultBlockState().setValue(RiftBlock.TYPE, t), 2);
+                }
+                level.setBlock(center, RvBlocks.NEXUS_GLOW.get().defaultBlockState(), 2);
+            }
+            case NexusLayout.SAT_ARCHITECT -> {
+                level.setBlock(center, RvBlocks.MULTIVERSE_CONSOLE.get().defaultBlockState(), 2);
+                level.setBlock(center.below(), RvBlocks.ANCIENT_GLYPH.get().defaultBlockState(), 2);
+            }
+            default -> {}
+        }
+    }
+
+    /**
+     * Builds the Nexus expansion ring (satellites 4-7 and their bridges) into an existing world, where those chunks were
+     * generated before the expansion existed. Only empty space is filled, so player builds are never overwritten.
+     */
+    public static String regenerateExpansion(net.minecraft.server.level.ServerLevel level) {
+        int placed = 0;
+        int top = NexusLayout.TOP;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int i = 4; i < NexusLayout.SATELLITES; i++) {
+            int[] c = NexusLayout.satellite(i);
+            int r = NexusLayout.SATELLITE_R + 2;
+            int x0 = Math.min(c[0], 0) - r;
+            int x1 = Math.max(c[0], 0) + r;
+            int z0 = Math.min(c[1], 0) - r;
+            int z1 = Math.max(c[1], 0) + r;
+            for (int x = x0; x <= x1; x++) {
+                for (int z = z0; z <= z1; z++) {
+                    if (Math.sqrt((double) x * x + (double) z * z) < NexusLayout.PLATFORM_R - 3) continue;
+                    for (int y = top - 31; y <= top + 31; y++) {
+                        BlockState s = NexusLayout.stateAt(x, y, z, LAYOUT_SEED);
+                        if (s == null || s.isAir()) continue;
+                        pos.set(x, y, z);
+                        if (!level.getBlockState(pos).isAir()) continue;
+                        level.setBlock(pos, s, 2);
+                        placed++;
+                    }
+                }
+            }
+            decorateSatellite(level, i, new BlockPos(c[0], top + 1, c[1]), level.random);
+        }
+        return "Nexus expansion ring regenerated (" + placed + " blocks placed): Infinite Corridor gate (north), Event Observatory (east), "
+                + "Convergence Spire (south) and the Reality Architect's dais (west).";
     }
 
     private static void gate(WorldGenLevel level, BlockPos center, Destination dest, String label, int color) {
