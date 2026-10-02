@@ -39,7 +39,26 @@ import net.minecraft.world.phys.Vec3;
  * the console inside dematerialises the box and lands it in another universe and another year. Two roles share one
  * entity type: the exterior shell and the interior console.
  */
-public class TardisEntity extends Entity {
+public class TardisEntity extends Entity implements software.bernie.geckolib.animatable.GeoEntity {
+    private final software.bernie.geckolib.animatable.instance.AnimatableInstanceCache geoCache = software.bernie.geckolib.util.GeckoLibUtil.createInstanceCache(this);
+
+    @Override
+    public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() {
+        return geoCache;
+    }
+
+    @Override
+    public void registerControllers(software.bernie.geckolib.animation.AnimatableManager.ControllerRegistrar controllers) {
+        software.bernie.geckolib.animation.RawAnimation open = software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold("animation.tardis.doors_open");
+        software.bernie.geckolib.animation.RawAnimation close = software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold("animation.tardis.doors_close");
+        controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "doors", 2, st -> {
+            if (console()) return software.bernie.geckolib.animation.PlayState.STOP;
+            boolean near = level().getNearestPlayer(this, 3.0) != null && fade() == 0;
+            return st.setAndContinue(near ? open : close);
+        }));
+        controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "lamp", 0, st -> console() ? software.bernie.geckolib.animation.PlayState.STOP : st.setAndContinue(software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("animation.tardis.lamp"))));
+    }
+
     private static final EntityDataAccessor<Boolean> CONSOLE = SynchedEntityData.defineId(TardisEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> FADE = SynchedEntityData.defineId(TardisEntity.class, EntityDataSerializers.INT);
     public static final int ROOM = 9;

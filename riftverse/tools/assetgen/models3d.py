@@ -9,20 +9,13 @@ PALETTE = [0x14101C, 0x6A2AC8, 0xB050FF, 0xFFFFFF, 0x000000, 0xE0C0FF,   # 0-5 r
 
 
 def palette_png():
-    from .textures import save
-    img = np.zeros((16, 16, 4))
-    for i, c in enumerate(PALETTE):
-        x, y = (i % 4) * 4, (i // 4) * 4
-        img[y:y + 4, x:x + 4, 0] = ((c >> 16) & 255) / 255
-        img[y:y + 4, x:x + 4, 1] = ((c >> 8) & 255) / 255
-        img[y:y + 4, x:x + 4, 2] = (c & 255) / 255
-        img[y:y + 4, x:x + 4, 3] = 1.0
-    save(img, "item/palette3d.png")
+    from .textures import save, shaded_cells
+    save(shaded_cells(PALETTE, seed=77), "item/palette3d.png")
 
 
 def el(frm, to, color, glow=False, rot=None):
-    x, y = (color % 4) * 4 + 1, (color // 4) * 4 + 1
-    face = {"uv": [x, y, x + 2, y + 2], "texture": "#p"}
+    x, y = (color % 8) * 2, (color // 8) * 2
+    face = {"uv": [x + 0.1, y + 0.1, x + 1.9, y + 1.9], "texture": "#p"}
     e = {"from": frm, "to": to, "faces": {d: dict(face) for d in ("north", "south", "east", "west", "up", "down")}}
     if glow:
         e["shade"] = False
@@ -32,13 +25,20 @@ def el(frm, to, color, glow=False, rot=None):
     return e
 
 
-HAND = {"thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]},
-        "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]},
-        "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
-        "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
-        "gui": {"rotation": [0, 90, -45], "scale": [0.6, 0.6, 0.6]},
-        "ground": {"translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
-        "fixed": {"rotation": [0, 90, -45], "scale": [0.6, 0.6, 0.6]}}
+HAND = {"thirdperson_righthand": {"rotation": [-10, 90, 0], "translation": [0, 5, 1], "scale": [0.8, 0.8, 0.8]},
+        "thirdperson_lefthand": {"rotation": [-10, -90, 0], "translation": [0, 5, 1], "scale": [0.8, 0.8, 0.8]},
+        "firstperson_righthand": {"rotation": [-5, 90, 20], "translation": [1, 5, 0], "scale": [0.6, 0.6, 0.6]},
+        "firstperson_lefthand": {"rotation": [-5, -90, -20], "translation": [1, 5, 0], "scale": [0.6, 0.6, 0.6]},
+        "gui": {"rotation": [0, 90, -40], "translation": [0, -1, 0], "scale": [0.55, 0.55, 0.55]},
+        "ground": {"translation": [0, 2, 0], "scale": [0.45, 0.45, 0.45]},
+        "fixed": {"rotation": [0, 90, -40], "scale": [0.55, 0.55, 0.55]}}
+STAFF = {"thirdperson_righthand": {"rotation": [-10, 90, 0], "translation": [0, 1, 1], "scale": [0.85, 0.85, 0.85]},
+         "thirdperson_lefthand": {"rotation": [-10, -90, 0], "translation": [0, 1, 1], "scale": [0.85, 0.85, 0.85]},
+         "firstperson_righthand": {"rotation": [-5, 90, 15], "translation": [1, 0, 0], "scale": [0.6, 0.6, 0.6]},
+         "firstperson_lefthand": {"rotation": [-5, -90, -15], "translation": [1, 0, 0], "scale": [0.6, 0.6, 0.6]},
+         "gui": {"rotation": [0, 90, -45], "translation": [-1, -2, 0], "scale": [0.38, 0.38, 0.38]},
+         "ground": {"translation": [0, 2, 0], "scale": [0.35, 0.35, 0.35]},
+         "fixed": {"rotation": [0, 90, -45], "scale": [0.4, 0.4, 0.4]}}
 OBJECT = {"gui": {"rotation": [30, 225, 0], "scale": [0.55, 0.55, 0.55]},
           "ground": {"translation": [0, 3, 0], "scale": [0.3, 0.3, 0.3]},
           "fixed": {"scale": [0.5, 0.5, 0.5]},
@@ -95,8 +95,60 @@ def box():
 
 
 def generate():
+    from .client_json import ITEMS, ARMOR, HANDHELD
+    voxelize([i for i in ITEMS + ARMOR if i not in ("reality_rupture", "pruning_staff", "delorean", "tardis")], HANDHELD)
     palette_png()
-    for name, elements, display in (("reality_rupture", rupture(), HAND), ("pruning_staff", staff(), HAND),
+    for name, elements, display in (("reality_rupture", rupture(), HAND), ("pruning_staff", staff(), STAFF),
                                     ("delorean", car(), OBJECT), ("tardis", box(), OBJECT)):
         write_json(ASSETS / "models" / "item" / f"{name}.json",
                    {"textures": {"p": rl("item/palette3d"), "particle": rl("item/palette3d")}, "elements": elements, "display": display})
+
+
+GENERATED = {"thirdperson_righthand": {"rotation": [0, 0, 0], "translation": [0, 3, 1], "scale": [0.55, 0.55, 0.55]},
+             "thirdperson_lefthand": {"rotation": [0, 0, 0], "translation": [0, 3, 1], "scale": [0.55, 0.55, 0.55]},
+             "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+             "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.13, 3.2, 1.13], "scale": [0.68, 0.68, 0.68]},
+             "ground": {"translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
+             "head": {"rotation": [0, 180, 0], "translation": [0, 13, 7]},
+             "fixed": {"rotation": [0, 180, 0]},
+             "gui": {"rotation": [15, -25, 0], "scale": [1, 1, 1]}}
+HANDHELD_D = dict(GENERATED, thirdperson_righthand={"rotation": [0, -90, 55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]},
+                  thirdperson_lefthand={"rotation": [0, 90, -55], "translation": [0, 4, 0.5], "scale": [0.85, 0.85, 0.85]})
+
+
+def voxel(texture_rel, depth=1.6):
+    """Extrudes a 16x16 sprite into chunky voxel rows: each run of opaque pixels becomes one cuboid that samples it."""
+    from PIL import Image
+    img = np.array(Image.open(ASSETS / "textures" / (texture_rel + ".png")).convert("RGBA"))
+    h, w = img.shape[:2]
+    if h != 16 or w != 16:
+        return None
+    z0, z1 = 8 - depth / 2, 8 + depth / 2
+    out = []
+    for row in range(16):
+        col = 0
+        while col < 16:
+            if img[row, col, 3] < 20:
+                col += 1
+                continue
+            start = col
+            while col < 16 and img[row, col, 3] >= 20:
+                col += 1
+            x0, x1 = start, col
+            y1 = 16 - row
+            uv = [x0, row, x1, row + 1]
+            faces = {"north": {"uv": [x1, row, x0, row + 1], "texture": "#t"}, "south": {"uv": uv, "texture": "#t"},
+                     "up": {"uv": uv, "texture": "#t"}, "down": {"uv": uv, "texture": "#t"},
+                     "west": {"uv": [x0, row, x0 + 1, row + 1], "texture": "#t"}, "east": {"uv": [x1 - 1, row, x1, row + 1], "texture": "#t"}}
+            out.append({"from": [x0, y1 - 1, z0], "to": [x1, y1, z1], "faces": faces})
+    return out
+
+
+def voxelize(names, handheld):
+    for name in names:
+        rel = f"item/{name}"
+        els = voxel(rel)
+        if not els:
+            continue
+        write_json(ASSETS / "models" / "item" / f"{name}.json",
+                   {"textures": {"t": rl(rel), "particle": rl(rel)}, "elements": els, "display": HANDHELD_D if name in handheld else GENERATED})

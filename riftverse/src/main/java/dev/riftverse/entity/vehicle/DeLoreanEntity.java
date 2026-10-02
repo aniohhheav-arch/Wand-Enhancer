@@ -33,7 +33,28 @@ import org.jetbrains.annotations.Nullable;
  * A drivable time machine. Ride it, sneak-use it to set the time circuits, arm them, and hit 88 mph: the car leaves
  * twin fire trails, vanishes in a flash and its driver arrives in the destination year.
  */
-public class DeLoreanEntity extends Entity {
+public class DeLoreanEntity extends Entity implements software.bernie.geckolib.animatable.GeoEntity {
+    private final software.bernie.geckolib.animatable.instance.AnimatableInstanceCache geoCache = software.bernie.geckolib.util.GeckoLibUtil.createInstanceCache(this);
+
+    @Override
+    public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() {
+        return geoCache;
+    }
+
+    @Override
+    public void registerControllers(software.bernie.geckolib.animation.AnimatableManager.ControllerRegistrar controllers) {
+        software.bernie.geckolib.animation.RawAnimation open = software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold("animation.delorean.doors_open");
+        software.bernie.geckolib.animation.RawAnimation close = software.bernie.geckolib.animation.RawAnimation.begin().thenPlayAndHold("animation.delorean.doors_close");
+        software.bernie.geckolib.animation.RawAnimation drive = software.bernie.geckolib.animation.RawAnimation.begin().thenLoop("animation.delorean.drive");
+        controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "wheels", 0, st -> {
+            float mph = Math.max(mph(), (float) getDeltaMovement().horizontalDistance() * MPH);
+            if (mph < 1f) return software.bernie.geckolib.animation.PlayState.STOP;
+            st.getController().setAnimationSpeed(Math.min(6.0, mph / 15.0));
+            return st.setAndContinue(drive);
+        }));
+        controllers.add(new software.bernie.geckolib.animation.AnimationController<>(this, "doors", 3, st -> st.setAndContinue(!isVehicle() && level().getNearestPlayer(this, 3.5) != null ? open : close)));
+    }
+
     private static final EntityDataAccessor<Integer> TARGET = SynchedEntityData.defineId(DeLoreanEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> ARMED = SynchedEntityData.defineId(DeLoreanEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Float> SPEED = SynchedEntityData.defineId(DeLoreanEntity.class, EntityDataSerializers.FLOAT);

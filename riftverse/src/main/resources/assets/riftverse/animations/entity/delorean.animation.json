@@ -1,0 +1,155 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.delorean.drive": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "wheel_fl": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.5": [
+              -180,
+              0,
+              0
+            ],
+            "1.0": [
+              -360,
+              0,
+              0
+            ]
+          }
+        },
+        "wheel_fr": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.5": [
+              -180,
+              0,
+              0
+            ],
+            "1.0": [
+              -360,
+              0,
+              0
+            ]
+          }
+        },
+        "wheel_bl": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.5": [
+              -180,
+              0,
+              0
+            ],
+            "1.0": [
+              -360,
+              0,
+              0
+            ]
+          }
+        },
+        "wheel_br": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.5": [
+              -180,
+              0,
+              0
+            ],
+            "1.0": [
+              -360,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.delorean.doors_open": {
+      "loop": "hold_on_last_frame",
+      "animation_length": 0.8,
+      "bones": {
+        "door_left": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.8": [
+              0,
+              0,
+              -95
+            ]
+          }
+        },
+        "door_right": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.8": [
+              0,
+              0,
+              95
+            ]
+          }
+        }
+      }
+    },
+    "animation.delorean.doors_close": {
+      "loop": "hold_on_last_frame",
+      "animation_length": 0.6,
+      "bones": {
+        "door_left": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              -95
+            ],
+            "0.6": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "door_right": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              95
+            ],
+            "0.6": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

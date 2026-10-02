@@ -1714,3 +1714,22 @@ def contact_sheet(preview, path, scale=4):
         sheet.alpha_composite(im, (x, y))
         draw.text((x, y + 16 * scale), rel.split("/")[-1][:12], fill=(220, 220, 230, 255))
     sheet.save(path)
+
+
+def shaded_cells(colors, size=64, cells=8, seed=5):
+    """Palette where every cell is a small material swatch: grain noise, a lit top-left bevel and a dark rim."""
+    rng = np.random.default_rng(seed)
+    cs = size // cells
+    img = np.zeros((size, size, 4))
+    yy, xx = np.mgrid[0:cs, 0:cs]
+    light = 1.0 + 0.10 * (1 - (xx + yy) / (2 * (cs - 1)))
+    rim = ((xx == 0) | (yy == 0) | (xx == cs - 1) | (yy == cs - 1))
+    for i, c in enumerate(colors):
+        x, y = (i % cells) * cs, (i // cells) * cs
+        base = np.array([((c >> 16) & 255) / 255, ((c >> 8) & 255) / 255, (c & 255) / 255])
+        grain = 1.0 + (rng.random((cs, cs)) - 0.5) * 0.12
+        shade = (light * grain)[..., None] * base
+        shade[rim] *= 0.72
+        img[y:y + cs, x:x + cs, :3] = np.clip(shade, 0, 1)
+        img[y:y + cs, x:x + cs, 3] = 1
+    return img

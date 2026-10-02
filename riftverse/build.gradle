@@ -74,3 +74,21 @@ idea {
         downloadJavadoc = true
     }
 }
+
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content { includeGroupByRegex('software\\.bernie.*') }
+    }
+}
+
+dependencies {
+    // bundled inside the Riftverse jar, so players don't need to install GeckoLib separately
+    jarJar(implementation("software.bernie.geckolib:geckolib-neoforge-1.21.1")) {
+        version {
+            strictly '[4.7,5.0)'
+            prefer '4.9.3'
+        }
+    }
+}

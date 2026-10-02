@@ -154,7 +154,21 @@ public class PruningStaffItem extends Item {
             }
             l.sendParticles(RvParticles.RING.get().with(ORANGE, 2f, 16), at.x, at.y + 1, at.z, 1, 0, 0, 0, 0);
         }
-        p.teleportTo(target.x, target.y, target.z);
+        float yaw = p.getYRot();
+        for (Vec3 at : new Vec3[] {p.position().add(look.scale(1.2)), target}) {
+            var door = dev.riftverse.registry.RvEntities.TIME_DOOR.get().create(l);
+            if (door != null) {
+                door.moveTo(at.x, at.y, at.z, yaw, 0);
+                l.addFreshEntity(door);
+            }
+        }
+        Vec3 dest = target;
+        dev.riftverse.multiverse.Scheduler.later(8, () -> {
+            if (p.isRemoved()) return;
+            p.teleportTo(dest.x, dest.y, dest.z);
+            p.fallDistance = 0;
+            l.playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.PLAYERS, 1f, 0.6f);
+        });
         p.fallDistance = 0;
         l.playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.WOODEN_DOOR_OPEN, SoundSource.PLAYERS, 1f, 0.6f);
     }

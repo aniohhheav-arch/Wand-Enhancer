@@ -97,6 +97,10 @@ public final class RvEntities {
             () -> EntityType.Builder.<dev.riftverse.entity.vehicle.TardisEntity>of(dev.riftverse.entity.vehicle.TardisEntity::new, MobCategory.MISC)
                     .sized(1.4F, 2.8F).clientTrackingRange(10).fireImmune().build("tardis"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.misc.TimeDoorEntity>> TIME_DOOR = ENTITIES.register("time_door",
+            () -> EntityType.Builder.<dev.riftverse.entity.misc.TimeDoorEntity>of(dev.riftverse.entity.misc.TimeDoorEntity::new, MobCategory.MISC)
+                    .sized(1.0F, 2.2F).clientTrackingRange(10).noSave().fireImmune().build("time_door"));
+
     private RvEntities() {}
 
     public static void registerAttributes(EntityAttributeCreationEvent event) {

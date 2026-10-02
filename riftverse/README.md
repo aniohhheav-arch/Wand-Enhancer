@@ -316,6 +316,10 @@ The ultimate artifact. Ops get it with `/multiverse weapon give [player]` (it's 
 - Flying above the temporal airspace ceiling (Y=300 by default) gets you warned and then arrested. The TSA halts you, pulls you to the ground and leaves agents to watch you.
 - `/multiverse tsa status|enable|disable|ceiling <y>|dispatch <p>|arrest <p>|pardon <p>|recall`.
 
+## Models
+
+GeckoLib is bundled inside the jar. The TARDIS (doors swing open when you walk up, the lamp pulses), the DeLorean (wheels spin with speed, gull-wing doors open when you're near and not driving) and the Pruning Staff's **Time Door** are animated GeckoLib models with glowing parts. Every item is a 3D model: the Rupture, staff, DeLorean and TARDIS are sculpted, and all other items are extruded from their pixels.
+
 ## Time machines
 
 - **DeLorean** (item, place on the ground):
