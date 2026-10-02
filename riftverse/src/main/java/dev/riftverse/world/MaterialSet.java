@@ -52,8 +52,20 @@ public final class MaterialSet {
                 m = sets;
             }
         }
-        return m.get(archetype);
+        final Map<Archetype, MaterialSet> all = m;
+        MaterialSet direct = all.get(archetype);
+        if (direct != null) return direct;
+        // art-style and other derived realities borrow the material set of the archetype they are built on
+        return BORROWED.computeIfAbsent(archetype, a -> {
+            dev.riftverse.universe.UniverseSpec t = new dev.riftverse.universe.UniverseSpec();
+            t.materials = Archetype.ASTRAL;
+            dev.riftverse.universe.SpecFactory.applyArchetype(t, a);
+            MaterialSet b = t.materials != a ? all.get(t.materials) : null;
+            return b != null ? b : all.get(Archetype.ASTRAL);
+        });
     }
+
+    private static final java.util.concurrent.ConcurrentHashMap<Archetype, MaterialSet> BORROWED = new java.util.concurrent.ConcurrentHashMap<>();
 
     private static BlockState persistent(Block leaves) {
         BlockState s = leaves.defaultBlockState();
