@@ -191,7 +191,12 @@ public class RealityRemoteScreen extends Screen {
                         b -> send(Payloads.RemoteAction.CREATE, 0, false, architectText));
             }
             case EVENTS -> {
-                EventType[] ev = EventType.values();
+                button(x0, y, panelW, Component.literal("▶ Open the Event Control Center (all 60 events)").withColor(0xFFD040),
+                        "Browse every event by category and control intensity, chains and natural events.", b -> {
+                            if (minecraft != null && minecraft.player != null) minecraft.player.connection.sendCommand("multiverse event center");
+                        });
+                y += BH + GAP;
+                EventType[] ev = java.util.Arrays.stream(EventType.values()).filter(EventType::classic).toArray(EventType[]::new);
                 for (int i = 0; i < ev.length; i++) {
                     final EventType t = ev[i];
                     int bx = i % 2 == 0 ? x0 : x1;

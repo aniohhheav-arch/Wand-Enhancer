@@ -72,6 +72,8 @@ public final class EventManager {
         if (problem != null) return RealityOps.Outcome.fail("Cannot start " + type.id + ": " + problem + ".");
         UniverseId universe = level.dimension() == RvWorldgen.EXPANSE ? UniverseId.ofBlock((int) center.x, (int) center.z) : null;
         ActiveEvent e = new ActiveEvent(nextId++, type, level, center, instigator == null ? null : instigator.getUUID(), natural, universe);
+        EventDirector.bind(level.getServer());
+        e.duration = EventDirector.durationFor(type);
         String fail = HANDLERS.get(type).start(e);
         if (fail != null) {
             EventKit.closeRifts(e);
@@ -106,6 +108,14 @@ public final class EventManager {
             case BLACK_HOLE -> CinematicType.SINGULARITY;
             case RIFT_STORM -> CinematicType.STORM;
             case COSMIC_CONVERGENCE -> CinematicType.CONVERGENCE;
+            default -> switch (t.category()) {
+                case 1 -> CinematicType.CONVERGENCE;
+                case 2 -> CinematicType.STORM;
+                case 3 -> CinematicType.TIME_TRAVEL;
+                case 4 -> CinematicType.STORM;
+                case 5 -> CinematicType.ANOMALY;
+                default -> CinematicType.ANOMALY;
+            };
         };
     }
 
@@ -143,6 +153,7 @@ public final class EventManager {
         for (ActiveEvent e : ended) {
             HANDLERS.get(e.type).end(e, false);
             EventKit.burst(e, e.center, e.type.color, 0.8f);
+            EventDirector.onEnded(e, false);
         }
         rollNatural(server);
     }
@@ -152,6 +163,8 @@ public final class EventManager {
         int interval = Math.max(5, RiftverseConfig.get(RiftverseConfig.EVENT_CHECK_SECONDS, 60)) * 20;
         if (time % interval != 0) return;
         if (!RiftverseConfig.get(RiftverseConfig.NATURAL_EVENTS, true)) return;
+        EventDirector.bind(server);
+        if (!EventDirector.naturalEnabled()) return;
         RealityState state = RealityState.get(server);
         long gap = RiftverseConfig.get(RiftverseConfig.EVENT_MIN_GAP_MINUTES, 20) * 1200L;
         if (time - state.lastNaturalEvent < gap) return;

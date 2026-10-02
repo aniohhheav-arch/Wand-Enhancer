@@ -58,6 +58,8 @@ public final class EventHandlers {
         m.put(EventType.COSMIC_CONVERGENCE, new Convergence());
         m.put(EventType.COSMIC_DEITY, new Deity());
         m.put(EventType.DIMENSIONAL_MIGRATION, new Migration());
+        Phenomena ph = new Phenomena();
+        for (EventType t : EventType.values()) if (!t.classic()) m.put(t, ph);
         return m;
     }
 

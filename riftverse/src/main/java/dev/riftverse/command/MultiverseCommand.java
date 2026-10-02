@@ -253,7 +253,79 @@ public final class MultiverseCommand {
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> eventTree() {
+        var intensity = Commands.literal("intensity").executes(c -> {
+            dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+            return reply(c.getSource(), Outcome.ok("Event intensity: " + dev.riftverse.multiverse.event.EventDirector.intensity().name()));
+        });
+        for (var lvl : dev.riftverse.multiverse.event.EventDirector.Intensity.values()) {
+            intensity.then(Commands.literal(lvl.name().toLowerCase()).requires(s -> s.hasPermission(2)).executes(c -> {
+                dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                dev.riftverse.multiverse.event.EventDirector.setIntensity(lvl);
+                return reply(c.getSource(), Outcome.ok("Event intensity set to " + lvl.name() + " (x" + lvl.scale + ")."));
+            }));
+        }
         return Commands.literal("event")
+                .then(intensity)
+                .then(Commands.literal("center").executes(c -> {
+                    var p = c.getSource().getPlayerOrException();
+                    dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new dev.riftverse.network.Payloads.Vehicle(
+                            dev.riftverse.multiverse.event.EventDirector.intensity().ordinal(), dev.riftverse.network.Payloads.Vehicle.OPEN_EVENTS,
+                            (dev.riftverse.multiverse.event.EventDirector.chains() ? 1 : 0) | (dev.riftverse.multiverse.event.EventDirector.naturalEnabled() ? 2 : 0)));
+                    return 1;
+                }))
+                .then(Commands.literal("duration").requires(s -> s.hasPermission(2)).then(Commands.argument("event", StringArgumentType.word()).suggests(EVENTS)
+                        .then(Commands.literal("default").executes(c -> {
+                            dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                            dev.riftverse.multiverse.event.EventDirector.setDuration(eventArg(c), -1);
+                            return reply(c.getSource(), Outcome.ok("Duration reset."));
+                        }))
+                        .then(Commands.argument("seconds", IntegerArgumentType.integer(5, 7200)).executes(c -> {
+                            dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                            dev.riftverse.multiverse.event.EventDirector.setDuration(eventArg(c), IntegerArgumentType.getInteger(c, "seconds"));
+                            return reply(c.getSource(), Outcome.ok("Duration of " + eventArg(c).id + " set to " + IntegerArgumentType.getInteger(c, "seconds") + "s."));
+                        }))))
+                .then(Commands.literal("chain").requires(s -> s.hasPermission(2))
+                        .then(Commands.literal("on").executes(c -> {
+                            dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                            dev.riftverse.multiverse.event.EventDirector.setChains(true);
+                            return reply(c.getSource(), Outcome.ok("Event chains enabled (max " + dev.riftverse.multiverse.event.EventDirector.MAX_CHAIN + " links, no repeats)."));
+                        }))
+                        .then(Commands.literal("off").executes(c -> {
+                            dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                            dev.riftverse.multiverse.event.EventDirector.setChains(false);
+                            return reply(c.getSource(), Outcome.ok("Event chains disabled."));
+                        })))
+                .then(Commands.literal("natural").requires(s -> s.hasPermission(2))
+                        .then(Commands.literal("enable").executes(c -> {
+                            dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                            dev.riftverse.multiverse.event.EventDirector.setNatural(true);
+                            return reply(c.getSource(), Outcome.ok("Natural events enabled."));
+                        }))
+                        .then(Commands.literal("disable").executes(c -> {
+                            dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                            dev.riftverse.multiverse.event.EventDirector.setNatural(false);
+                            return reply(c.getSource(), Outcome.ok("Natural events disabled."));
+                        })))
+                .then(Commands.literal("active").executes(c -> {
+                    List<String> out = new ArrayList<>();
+                    out.add("§6Active events:§r " + EventManager.active().size());
+                    for (ActiveEvent e : EventManager.active()) out.add(" " + e.describe());
+                    return lines(c.getSource(), out);
+                }))
+                .then(Commands.literal("preview").requires(s -> s.hasPermission(2)).then(Commands.argument("event", StringArgumentType.word()).suggests(EVENTS).executes(c -> {
+                    EventType t = eventArg(c);
+                    dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                    var out = startAt(c.getSource(), t, c.getSource().getLevel(), c.getSource().getPosition(), playerOrNull(c.getSource()));
+                    for (ActiveEvent e : EventManager.active()) if (e.type == t && e.age == 0) e.duration = Math.min(e.duration, 200);
+                    return out;
+                })))
+                .then(Commands.literal("reset").requires(s -> s.hasPermission(2)).executes(c -> {
+                    dev.riftverse.multiverse.event.EventDirector.bind(c.getSource().getServer());
+                    dev.riftverse.multiverse.event.EventDirector.reset();
+                    int n = EventManager.stopAll();
+                    return reply(c.getSource(), Outcome.ok("Event director reset to defaults; stopped " + n + " event(s)."));
+                }))
                 .then(Commands.literal("list").executes(c -> {
                     List<String> out = new ArrayList<>();
                     MinecraftServer server = c.getSource().getServer();

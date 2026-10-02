@@ -44,6 +44,8 @@ public final class RealityState extends SavedData {
     private final Set<String> sealed = new java.util.HashSet<>();
     private final Map<Long, List<Backup>> backups = new HashMap<>();
     private final Map<String, Long> eventReadyAt = new HashMap<>();
+    /** Event director settings (intensity, duration overrides, chains, natural toggle). */
+    public CompoundTag director = new CompoundTag();
     private final Map<String, Integer> rarityOverride = new HashMap<>();
     private final Map<String, Integer> cooldownOverride = new HashMap<>();
     private final Deque<String> history = new ArrayDeque<>();
@@ -250,6 +252,7 @@ public final class RealityState extends SavedData {
         CompoundTag rar = new CompoundTag();
         rarityOverride.forEach(rar::putInt);
         tag.put("rarityOverride", rar);
+        tag.put("director", director.copy());
         CompoundTag cd = new CompoundTag();
         cooldownOverride.forEach(cd::putInt);
         tag.put("cooldownOverride", cd);
@@ -279,6 +282,7 @@ public final class RealityState extends SavedData {
         }
         CompoundTag ready = tag.getCompound("eventReadyAt");
         for (String k : ready.getAllKeys()) s.eventReadyAt.put(k, ready.getLong(k));
+        s.director = tag.getCompound("director").copy();
         CompoundTag rar = tag.getCompound("rarityOverride");
         for (String k : rar.getAllKeys()) s.rarityOverride.put(k, rar.getInt(k));
         CompoundTag cd = tag.getCompound("cooldownOverride");

@@ -373,3 +373,34 @@ A boss bar shows the tunnel's **stability**. It drains steadily, and faster the 
 - **Shudders** that cost stability
 
 The tunnel walls are solid: you can't see outside. At the far end, light rushes past in the destination's colour, everything blooms white, and the new world fades in around you. If stability hits zero, the tunnel collapses and throws you into a random universe. Tunnels clean themselves up afterwards.
+
+## The Infinite Event System
+
+There are **60 events** in six categories, and each of the 48 new ones has its own behaviour:
+
+- **I Cosmic:** meteor shower, solar flare, eclipse, aurora storm, comet passage, starfall, gravity well, nebula drift.
+- **II Dimensional:** phase shift, mirror inversion, echo reality, dimensional bleed, portal surge, pocket collapse, void tide, boundary fracture.
+- **III Temporal:** time dilation, time freeze, temporal loop, chrono storm, future echo, past echo, age surge, paradox cascade.
+- **IV Elemental:** firestorm, blizzard, toxic fog, crystal bloom, magnetic storm, earthquake, acid rain, lightning storm.
+- **V Biological:** spore bloom, swarm, stampede, overgrowth, mutation wave, life surge, hive awakening, sky whale migration.
+- **VI Reality:** colour drain, glitch storm, silence, dream leak, geometry failure, null zone, reality rewrite, the Watcher.
+
+Every terrain change an event makes (craters, crystals, snow, overgrowth, colour drain…) is put back when it ends.
+
+**Director:** these settings are saved with the world.
+
+- **Intensity:** MINOR, MODERATE, MAJOR, SEVERE, CATASTROPHIC or MULTIVERSAL. It scales radius, spawn counts, damage and duration.
+- **Per-event duration overrides.**
+- **Event chains:** an event that ends naturally may trigger a related event from the same category. A chain never repeats a type and stops after 3 links.
+- **Natural-event switch.**
+
+**Commands:**
+
+- `/multiverse event center` opens the **Event Control Center**: category tabs, a start button for every event, and intensity, chains, natural and stop-all controls. The Remote's Events tab links to it.
+- `/multiverse event intensity [level]`
+- `duration <event> <seconds>|default`
+- `chain on|off`
+- `natural enable|disable`
+- `preview <event>` (a 10-second run)
+- `active`
+- `reset`

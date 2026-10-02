@@ -409,7 +409,7 @@ public final class Payloads {
 
     /** Vehicle controls, both ways: S→C opens the time circuits; C→S sets a year or toggles arming. */
     public record Vehicle(int entityId, int action, int value) implements CustomPacketPayload {
-        public static final int OPEN_CIRCUITS = 0, SET_YEAR = 1, ARM = 2;
+        public static final int OPEN_CIRCUITS = 0, SET_YEAR = 1, ARM = 2, OPEN_EVENTS = 3;
         public static final Type<Vehicle> TYPE = payloadType("vehicle");
         public static final StreamCodec<FriendlyByteBuf, Vehicle> CODEC = CustomPacketPayload.<FriendlyByteBuf, Vehicle>codec(Vehicle::write, Vehicle::new);
 
