@@ -29,15 +29,24 @@ public final class NexusLayout {
 
     private NexusLayout() {}
 
+    /** Spreads one gate per archetype evenly around the four sides of the platform, however many realities exist. */
     private static Gate[] buildGates() {
-        Gate[] g = new Gate[Archetype.values().length];
-        int[] four = {-18, -6, 6, 18};
-        int[] three = {-12, 0, 12};
-        int i = 0;
-        for (int x : four) g[i] = new Gate(i++, x, -GATE_SIDE, Direction.Axis.X);
-        for (int z : three) g[i] = new Gate(i++, GATE_SIDE, z, Direction.Axis.Z);
-        for (int x : four) g[i] = new Gate(i++, -x, GATE_SIDE, Direction.Axis.X);
-        for (int z : three) g[i] = new Gate(i++, -GATE_SIDE, -z, Direction.Axis.Z);
+        int n = Archetype.values().length;
+        Gate[] g = new Gate[n];
+        int perSide = (n + 3) / 4;
+        int span = 78;
+        for (int i = 0; i < n; i++) {
+            int side = i / perSide;
+            int k = i % perSide;
+            int count = Math.min(perSide, n - side * perSide);
+            int off = count == 1 ? 0 : -span / 2 + Math.round(k * span / (float) (count - 1));
+            g[i] = switch (side) {
+                case 0 -> new Gate(i, off, -GATE_SIDE, Direction.Axis.X);
+                case 1 -> new Gate(i, GATE_SIDE, off, Direction.Axis.Z);
+                case 2 -> new Gate(i, -off, GATE_SIDE, Direction.Axis.X);
+                default -> new Gate(i, -GATE_SIDE, -off, Direction.Axis.Z);
+            };
+        }
         return g;
     }
 

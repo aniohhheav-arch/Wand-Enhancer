@@ -10,9 +10,9 @@ including universes you create just by describing them.
 ## Features
 
 ### Portals and rifts
-- **Natural rifts** tear open across the Overworld and inside other universes. There are nine rift types (Azure, Crimson,
-  Verdant, Void, Prismatic, Nexus, Glitch, Stellar and Return), each with its own colour, shader animation, sound and
-  destination family. A rift lenses the world behind it, glows onto the ground and distorts your screen as you approach.
+- **Natural rifts** tear open across the Overworld and inside other universes. There are eighteen rift types (Azure,
+  Crimson, Verdant, Void, Prismatic, Nexus, Glitch, Stellar, Return, Solar, Abyssal, Fungal, Sanguine, Brass, Saccharine,
+  Tempest, Umbral and Patina), each with its own colours, shader animation and destination family. A rift lenses the world behind it, glows onto the ground and distorts your screen as you approach.
   Walk in to cross over, or **sneak-use** an open rift with an empty hand to harvest **Rift Shards**.
 - **Built portals:** ignite a rectangle of **Rift Frame** blocks with a **Rift Igniter** to open a stable gate to the Nexus.
   Hold an imprinted **Dimensional Key** in your off-hand to link the gate to that exact universe instead.
@@ -34,7 +34,7 @@ Black holes occur naturally in some universes and sit at the heart of the Nexus.
 **Singularity Core**, and the Event Horizon armour can collapse short-lived ones.
 
 ### The Multiverse Nexus and console
-The **Nexus** is a hub dimension floating around a captive singularity. It has 14 gates (one per prime reality),
+The **Nexus** is a hub dimension floating around a captive singularity. It has 28 gates (one per prime reality),
 satellite platforms and the **Rift Altar**. At a **Multiverse Console** you can:
 - browse every prime, discovered and manifested reality,
 - **travel** to any of them, roll a **random** universe, or spin up a **new variant** of an archetype,
@@ -48,9 +48,11 @@ satellite platforms and the **Rift Altar**. At a **Multiverse Console** you can:
   moons, weather, time of day, scale, creatures, gravity, colours and music. It then tells you what it understood.
 
 ### Universes
-All universes are generated analytically. There are **14 prime archetypes**, each mutated into infinite variants:
+All universes are generated analytically. There are **28 prime archetypes**, each mutated into infinite variants:
 Neon Sprawl, Xenoflora Wilds, Skyshatter Isles, Thalassic Expanse, Prismatic Reach, Ashen Remnant, Astral Vastness,
-Corrupted Sector, Elder Dominion, Inverted Heights, The Hollow Dark, Somnium, Cinder Forge and Rime Eternal.
+Corrupted Sector, Elder Dominion, Inverted Heights, The Hollow Dark, Somnium, Cinder Forge, Rime Eternal, Sunscar Dunes,
+Rust Mesa, Coral Shallows, Myco Hollows, Clockwork Reach, Sanguine Expanse, Confection, Tempest Reach, Fenrot Mire,
+Obsidian Spires, Verdigris Ruins, Radiant Expanse, Ferrous Wastes and Spectral Bloom.
 - 15 terrain modes, 13 kinds of megastructure (arcologies, rings, spires, colossal ruins and more), city street grids
   and treasure caches.
 - Each universe has its own shader skybox: nebulae, galaxies, auroras, ringed planets, multiple moons, suns and

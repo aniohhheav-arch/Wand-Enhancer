@@ -46,7 +46,7 @@ public class RiftRenderer implements BlockEntityRenderer<RiftBlockEntity> {
         if (open <= 0.001f) return;
         float breathe = 1f + 0.04f * (float) Math.sin((mc.level.getGameTime() + partial) * 0.11 + be.seed % 100);
 
-        SpatialFx.rift(center, normal, new Vec3(0, 1, 0), HALF_W * breathe, HALF_H, type.colorA, type.colorB, type.ordinal(), open, SpatialFx.SHAPE_TEAR, 1f,
+        SpatialFx.rift(center, normal, new Vec3(0, 1, 0), HALF_W * breathe, HALF_H, type.colorA, type.colorB, type.shaderStyle(), open, SpatialFx.SHAPE_TEAR, 1f,
                 type.colorB, type == RiftType.RETURN ? 0.6f : 0.35f);
         ClientEffects.reportRift(center, toCam.length());
 

@@ -20,7 +20,21 @@ public enum Archetype {
     HOLLOW("hollow", "The Hollow Dark", 0x6A3AAA, new String[] {"Hollow", "Umbra", "Nightfold", "Silence", "Void"}),
     SOMNIUM("somnium", "Somnium", 0xFFB3E6, new String[] {"Somnium", "Reverie", "Daydream", "Lullaby", "Mirage"}),
     CINDER("cinder", "Cinder Forge", 0xFF5A1F, new String[] {"Forge", "Inferno", "Caldera", "Pyre", "Furnace"}),
-    RIME("rime", "Rime Eternal", 0xA8E8FF, new String[] {"Eternal", "Glacier", "Frostfall", "Whiteout", "Permafrost"});
+    RIME("rime", "Rime Eternal", 0xA8E8FF, new String[] {"Eternal", "Glacier", "Frostfall", "Whiteout", "Permafrost"}),
+    SUNSCAR("sunscar", "Sunscar Dunes", 0xFFC24D, new String[] {"Dunes", "Sandsea", "Scorch", "Mirage", "Sirocco"}),
+    MESA("mesa", "Rust Mesa", 0xC85A2A, new String[] {"Mesa", "Badlands", "Gorge", "Rustlands", "Hoodoo"}),
+    CORAL("coral", "Coral Shallows", 0xFF6FA5, new String[] {"Shallows", "Atoll", "Reefscape", "Lagoon", "Cay"}),
+    MYCELIA("mycelia", "Myco Hollows", 0xBB7AF0, new String[] {"Hollows", "Sporefields", "Underbloom", "Fungarium", "Capworld"}),
+    CLOCKWORK("clockwork", "Clockwork Reach", 0xCB9A3C, new String[] {"Reach", "Mechanism", "Gearworks", "Cogwheel", "Orrery"}),
+    SANGUINE("sanguine", "Sanguine Expanse", 0xC01030, new String[] {"Expanse", "Carnage", "Scarlet", "Veinworld", "Pulse"}),
+    CONFECTION("confection", "Confection", 0xFF8FD0, new String[] {"Confection", "Sugarfall", "Candyland", "Sweetscape", "Frosting"}),
+    TEMPEST("tempest", "Tempest Reach", 0x6FA8FF, new String[] {"Reach", "Stormfront", "Galeworld", "Thunderhead", "Squall"}),
+    MIRE("mire", "Fenrot Mire", 0x7AA83C, new String[] {"Mire", "Fen", "Swampdeep", "Bog", "Marshland"}),
+    OBSIDIAN("obsidian", "Obsidian Spires", 0x4A2A6A, new String[] {"Spires", "Glasswaste", "Shardfall", "Blacklands", "Cinderglass"}),
+    VERDIGRIS("verdigris", "Verdigris Ruins", 0x4AC8A8, new String[] {"Ruins", "Patina", "Overgrowth", "Greenbronze", "Mossworks"}),
+    RADIANCE("radiance", "Radiant Expanse", 0xFFF0C8, new String[] {"Expanse", "Empyrean", "Aureole", "Dawnlands", "Halo"}),
+    FERROUS("ferrous", "Ferrous Wastes", 0x9AA2AC, new String[] {"Wastes", "Slagworld", "Ironfall", "Scrapheap", "Oxide"}),
+    BLOOM("bloom", "Spectral Bloom", 0xFF5AD0, new String[] {"Bloom", "Petalfall", "Floradream", "Blossomreach", "Pollen"});
 
     public final String id;
     public final String displayName;

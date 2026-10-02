@@ -334,6 +334,15 @@ public final class Decorator {
             case ASTRAL, INVERTED -> RiftType.STELLAR;
             case HOLLOW -> RiftType.VOID;
             case ELDER -> r.nextBoolean() ? RiftType.PRISMATIC : RiftType.VERDANT;
+            case SUNSCAR, RADIANCE -> RiftType.SOLAR;
+            case CORAL, MIRE -> RiftType.ABYSSAL;
+            case MYCELIA, BLOOM -> RiftType.FUNGAL;
+            case SANGUINE -> RiftType.SANGUINE;
+            case CLOCKWORK, FERROUS -> RiftType.BRASS;
+            case CONFECTION -> RiftType.SACCHARINE;
+            case TEMPEST -> RiftType.TEMPEST;
+            case OBSIDIAN -> RiftType.UMBRAL;
+            case VERDIGRIS, MESA -> RiftType.PATINA;
         };
     }
 

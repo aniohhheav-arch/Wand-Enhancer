@@ -30,14 +30,18 @@ public class NaturalRiftFeature extends Feature<NoneFeatureConfiguration> {
 
     public static RiftType overworldType(RandomSource r) {
         int roll = r.nextInt(100);
-        if (roll < 34) return RiftType.AZURE;
-        if (roll < 49) return RiftType.VERDANT;
-        if (roll < 61) return RiftType.CRIMSON;
-        if (roll < 71) return RiftType.PRISMATIC;
-        if (roll < 80) return RiftType.VOID;
-        if (roll < 88) return RiftType.STELLAR;
-        if (roll < 94) return RiftType.GLITCH;
-        return RiftType.NEXUS;
+        if (roll < 22) return RiftType.AZURE;
+        if (roll < 31) return RiftType.VERDANT;
+        if (roll < 38) return RiftType.CRIMSON;
+        if (roll < 44) return RiftType.PRISMATIC;
+        if (roll < 49) return RiftType.VOID;
+        if (roll < 54) return RiftType.STELLAR;
+        if (roll < 58) return RiftType.GLITCH;
+        if (roll < 62) return RiftType.NEXUS;
+        // expansion rifts: each leads to its own family of new realities
+        RiftType[] extra = {RiftType.SOLAR, RiftType.ABYSSAL, RiftType.FUNGAL, RiftType.SANGUINE, RiftType.BRASS,
+                RiftType.SACCHARINE, RiftType.TEMPEST, RiftType.UMBRAL, RiftType.PATINA};
+        return extra[r.nextInt(extra.length)];
     }
 
     @Override
