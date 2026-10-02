@@ -297,3 +297,16 @@ tools/        asset generator and resource checker
 ```
 
 Licensed under MIT.
+
+## The Reality Rupture (creator weapon)
+
+A secret artifact that can't be crafted, isn't in the creative tab and can't be duplicated: every copy carries a registered serial, and in unauthorised hands it crumbles.
+
+- **Setup:** a level-4 operator runs `/multiverse weapon authorize`. The first time, this opens a masked interface where you seal a secret of 8 or more characters. The secret is stored as a salted PBKDF2 hash in `<world>/serverconfig/riftverse_creator.json`. Commands never take it as an argument. To change it later, use `/multiverse weapon authorize credential`.
+- **Unlock:** run `/multiverse weapon authorize` and enter the secret. This opens the creator console: Materialize (discovery sequence), Toggle Aura ("✦ Reality Architect"), Announce, Preview, Seal Session. Three failed attempts trigger a lockout.
+- **Abilities:**
+  - **Use — Reality Tear:** opens a tear that pulls creatures in and migrates them.
+  - **Sneak-use — Existence Disassembly:** removes a creature, or a region of terrain that can be restored.
+  - **Sneak-use looking straight up — THE FINAL RUPTURE.**
+- **Config `[rupture]`:** `radius`; `ultimateMode` = `visual` | `area` (terrain comes back by itself after 60 s) | `universe` (normal erase with a backup).
+- **Commands:** `/multiverse weapon grant|revoke <player>`, `inspect`, `test`, `restore`, and `/multiverse reality rupture preview|activate [visual|area|universe]`.

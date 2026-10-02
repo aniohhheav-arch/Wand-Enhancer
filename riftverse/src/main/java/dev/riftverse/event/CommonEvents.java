@@ -45,6 +45,7 @@ public final class CommonEvents {
         bus.addListener((ServerStartedEvent e) -> {
             UniverseRegistry.onServerStarted(e.getServer());
             RealityState.onServerStarted(e.getServer());
+            dev.riftverse.creator.CreatorAuthority.load(e.getServer());
         });
         bus.addListener((ServerStoppingEvent e) -> {
             // end sequences while the levels still exist so no rift, boss or half-run protocol is orphaned
@@ -76,6 +77,7 @@ public final class CommonEvents {
         bus.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
             TransitManager.onLogout(e.getEntity());
             UniverseSync.forget(e.getEntity().getUUID());
+            dev.riftverse.creator.CreatorAuthority.endSession(e.getEntity().getUUID());
         });
         bus.addListener((PlayerEvent.PlayerChangedDimensionEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer sp) {
@@ -121,6 +123,11 @@ public final class CommonEvents {
             e.getDrops().add(new net.minecraft.world.entity.item.ItemEntity(level, dead.getX(), dead.getY() + 0.5, dead.getZ(), stack));
         });
         bus.addListener(CommonEvents::onLevelTick);
+        bus.addListener((PlayerEvent.NameFormat e) -> {
+            if (e.getEntity() instanceof ServerPlayer sp && dev.riftverse.creator.CreatorAuthority.aura(sp.getUUID())) {
+                e.setDisplayname(net.minecraft.network.chat.Component.literal("✦ Reality Architect ").withColor(0xC080FF).append(e.getDisplayname()));
+            }
+        });
     }
 
     public static UniverseSpec specOf(LivingEntity entity) {
@@ -131,6 +138,10 @@ public final class CommonEvents {
     private static void onPlayerTick(PlayerTickEvent.Post e) {
         if (!(e.getEntity() instanceof ServerPlayer player)) return;
         ArmorAbilities.tick(player);
+        if (player.tickCount % 4 == 0 && dev.riftverse.creator.CreatorAuthority.aura(player.getUUID())) {
+            player.serverLevel().sendParticles(dev.riftverse.registry.RvParticles.STREAK.get().with(player.tickCount % 8 == 0 ? 0xFFFFFF : 0xA040FF, 0.7f, 18),
+                    player.getX(), player.getY() + 1, player.getZ(), 2, 0.4, 0.8, 0.4, 0.02);
+        }
         if (player.tickCount % 20 != 0) return;
         UniverseSync.check(player);
         RealityOps.playerSecond(player);

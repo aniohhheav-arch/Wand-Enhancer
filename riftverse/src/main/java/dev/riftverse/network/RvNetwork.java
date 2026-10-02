@@ -28,6 +28,10 @@ public final class RvNetwork {
             if (ctx.player() instanceof ServerPlayer sp) dev.riftverse.multiverse.GenesisManager.skip(sp);
             else ClientNetwork.onGenesisEnd();
         });
+        r.playToClient(Payloads.CreatorScreen.TYPE, Payloads.CreatorScreen.CODEC, (p, ctx) -> ClientNetwork.onCreatorScreen(p));
+        r.playToServer(Payloads.CreatorSubmit.TYPE, Payloads.CreatorSubmit.CODEC, (p, ctx) -> {
+            if (ctx.player() instanceof ServerPlayer sp) dev.riftverse.creator.RuptureService.submit(sp, p);
+        });
         r.playToServer(Payloads.BrowserAction.TYPE, Payloads.BrowserAction.CODEC, MultiverseService::handle);
         r.playToServer(Payloads.Ability.TYPE, Payloads.Ability.CODEC, (p, ctx) -> {
             if (ctx.player() instanceof ServerPlayer sp) ArmorAbilities.activate(sp, p.ability());

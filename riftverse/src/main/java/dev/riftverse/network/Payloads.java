@@ -366,6 +366,47 @@ public final class Payloads {
         }
     }
 
+    /** Server → client: open a creator screen (0 password prompt, 1 credential setup/change, 2 creator console). */
+    public record CreatorScreen(int mode, boolean credentialSet) implements CustomPacketPayload {
+        public static final Type<CreatorScreen> TYPE = payloadType("creator_screen");
+        public static final StreamCodec<FriendlyByteBuf, CreatorScreen> CODEC = CustomPacketPayload.<FriendlyByteBuf, CreatorScreen>codec(CreatorScreen::write, CreatorScreen::new);
+
+        CreatorScreen(FriendlyByteBuf buf) {
+            this(buf.readVarInt(), buf.readBoolean());
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(mode);
+            buf.writeBoolean(credentialSet);
+        }
+
+        @Override
+        public Type<CreatorScreen> type() {
+            return TYPE;
+        }
+    }
+
+    /** Client → server: a creator screen submission (secrets travel only in this packet, never in chat). */
+    public record CreatorSubmit(int mode, String first, String second) implements CustomPacketPayload {
+        public static final Type<CreatorSubmit> TYPE = payloadType("creator_submit");
+        public static final StreamCodec<FriendlyByteBuf, CreatorSubmit> CODEC = CustomPacketPayload.<FriendlyByteBuf, CreatorSubmit>codec(CreatorSubmit::write, CreatorSubmit::new);
+
+        CreatorSubmit(FriendlyByteBuf buf) {
+            this(buf.readVarInt(), buf.readUtf(128), buf.readUtf(128));
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(mode);
+            buf.writeUtf(first, 128);
+            buf.writeUtf(second, 128);
+        }
+
+        @Override
+        public Type<CreatorSubmit> type() {
+            return TYPE;
+        }
+    }
+
     private static List<Integer> readInts(FriendlyByteBuf buf) {
         int n = Math.min(buf.readVarInt(), 4096);
         List<Integer> list = new ArrayList<>(n);

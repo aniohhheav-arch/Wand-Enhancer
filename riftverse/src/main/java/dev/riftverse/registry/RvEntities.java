@@ -30,6 +30,9 @@ public final class RvEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<BlackHoleEntity>> BLACK_HOLE = ENTITIES.register("black_hole",
             () -> EntityType.Builder.<BlackHoleEntity>of(BlackHoleEntity::new, MobCategory.MISC).sized(1.0F, 1.0F)
                     .clientTrackingRange(32).updateInterval(2).fireImmune().build("black_hole"));
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.RealityTearEntity>> REALITY_TEAR = ENTITIES.register("reality_tear",
+            () -> EntityType.Builder.<dev.riftverse.entity.RealityTearEntity>of(dev.riftverse.entity.RealityTearEntity::new, MobCategory.MISC).sized(1.0F, 3.0F)
+                    .clientTrackingRange(16).updateInterval(2).fireImmune().noSave().build("reality_tear"));
     public static final DeferredHolder<EntityType<?>, EntityType<PortalEntity>> PORTAL = ENTITIES.register("portal",
             () -> EntityType.Builder.<PortalEntity>of(PortalEntity::new, MobCategory.MISC).sized(0.5F, 0.5F)
                     .clientTrackingRange(10).updateInterval(20).fireImmune().build("portal"));

@@ -20,7 +20,7 @@ ITEMS = {
     "gravity_gauntlet": "Gravity Gauntlet", "singularity_grenade": "Singularity Grenade", "singularity_core": "Singularity Core",
     "reality_shaper": "Reality Shaper", "dimensional_key": "Dimensional Key", "universe_compass": "Universe Compass",
     "homeward_rift": "Homeward Rift", "rift_igniter": "Rift Igniter", "rift_sigil": "Rift Sigil",
-    "reality_remote": "Reality Remote", "relic_blade": "Relic Blade", "relic_blaster": "Relic Blaster",
+    "reality_remote": "Reality Remote", "reality_rupture": "The Reality Rupture", "relic_blade": "Relic Blade", "relic_blaster": "Relic Blaster",
 }
 
 SETS = {
@@ -40,7 +40,7 @@ SETS = {
 PIECES = {"helmet": "Helm", "chestplate": "Chestplate", "leggings": "Leggings", "boots": "Boots"}
 
 ENTITIES = {
-    "black_hole": "Black Hole", "portal": "Portal", "portal_bolt": "Portal Bolt", "singularity_grenade": "Singularity Grenade",
+    "black_hole": "Black Hole", "reality_tear": "Reality Tear", "portal": "Portal", "portal_bolt": "Portal Bolt", "singularity_grenade": "Singularity Grenade",
     "gravity_well": "Gravity Well", "energy_bolt": "Energy Bolt", "astral_jelly": "Astral Jelly", "sky_whale": "Sky Whale",
     "lumen_strider": "Lumen Strider", "neon_drone": "Neon Drone", "glitchling": "Glitchling", "void_stalker": "Void Stalker",
     "crystal_sentinel": "Crystal Sentinel", "rift_wraith": "Rift Wraith", "rift_warden": "The Rift Warden",

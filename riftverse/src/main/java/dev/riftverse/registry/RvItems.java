@@ -58,6 +58,9 @@ public final class RvItems {
             () -> new dev.riftverse.item.relic.RelicBladeItem(new Item.Properties().rarity(Rarity.RARE).fireResistant()));
     public static final DeferredItem<dev.riftverse.item.relic.RelicBlasterItem> RELIC_BLASTER = add("relic_blaster",
             () -> new dev.riftverse.item.relic.RelicBlasterItem(new Item.Properties().rarity(Rarity.RARE).durability(900).fireResistant()));
+    /** Deliberately not in the creative tab and without a recipe: only the creator interface can forge one. */
+    public static final DeferredItem<dev.riftverse.item.RealityRuptureItem> REALITY_RUPTURE = ITEMS.register("reality_rupture",
+            () -> new dev.riftverse.item.RealityRuptureItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));
     public static final DeferredItem<dev.riftverse.item.RealityRemoteItem> REALITY_REMOTE = add("reality_remote",
             () -> new dev.riftverse.item.RealityRemoteItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));
     public static final DeferredItem<RiftSigilItem> RIFT_SIGIL = add("rift_sigil", () -> new RiftSigilItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));

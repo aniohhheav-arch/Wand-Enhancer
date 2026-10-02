@@ -222,6 +222,8 @@ public final class MultiverseCommand {
                     return reply(c.getSource(), Outcome.ok(NexusChunkGenerator.regenerateExpansion(nexus)));
                 })));
         root.then(entitiesTree());
+        root.then(WeaponCommands.weapon());
+        root.then(WeaponCommands.rupture());
         root.then(debugTree());
         d.register(root);
     }

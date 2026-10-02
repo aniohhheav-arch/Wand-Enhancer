@@ -298,9 +298,71 @@ public final class RealityCinematics {
                     if (p > 0.78f) wash(g, w, h, 0xFFFFFF, CameraRig.easeIn((p - 0.78f) / 0.1f) * k);
                 }
             }
+            case DISCOVERY -> {
+                // authority recognised: the screen darkens to a void and a turning sigil of fractures burns in
+                wash(g, w, h, 0x05000A, k * 0.7f);
+                sigil(g, w, h, time, k);
+                if (heavy) staticNoise(g, w, h, time, k * 0.15f, k);
+                if (p > 0.45f && p < 0.5f) wash(g, w, h, 0xFFFFFF, k * (1f - Math.abs(p - 0.475f) / 0.025f));
+            }
+            case RUPTURE -> {
+                // charge -> sky distortion -> cracks -> fracture -> consume -> silence -> scar
+                vignette(g, w, h, 0x0A0014, k * Math.min(1f, p * 3f));
+                if (p < 0.3f) tunnelRings(g, w, h, time * 4f, 0xC070FF, k * p / 0.3f, 0.4f);
+                if (p > 0.15f) cracks(g, w, h, time, k * Math.min(1f, (p - 0.15f) / 0.2f), p);
+                if (p > 0.45f && p < 0.62f) wash(g, w, h, 0x000000, k * Math.min(1f, (p - 0.45f) / 0.05f) * 0.85f);
+                if (p > 0.62f && p < 0.66f) wash(g, w, h, 0xFFFFFF, k * (1f - (p - 0.62f) / 0.04f));
+                if (p > 0.66f) wash(g, w, h, 0x2A0040, k * 0.25f);
+                if (heavy && p > 0.3f && p < 0.62f) staticNoise(g, w, h, time, k * 0.3f, k);
+            }
             default -> {
                 wash(g, w, h, colorA, t.wash * k);
                 vignette(g, w, h, 0x000000, k * 0.45f);
+            }
+        }
+    }
+
+    /** Rotating fracture sigil: concentric shards around the centre. */
+    private static void sigil(GuiGraphics g, int w, int h, float time, float k) {
+        int cx = w / 2, cy = h / 2;
+        float rad = Math.min(w, h) * 0.32f * Math.min(1f, time / 40f);
+        for (int ring = 0; ring < 3; ring++) {
+            int n = 6 + ring * 6;
+            float rr = rad * (0.45f + ring * 0.28f);
+            float rot = time * (ring % 2 == 0 ? 0.02f : -0.03f);
+            for (int i = 0; i < n; i++) {
+                float a = rot + i * Mth.TWO_PI / n;
+                int x = cx + (int) (Mth.cos(a) * rr);
+                int y = cy + (int) (Mth.sin(a) * rr);
+                int col = ring == 1 ? 0xFFFFFF : 0xB050FF;
+                int al = (int) (k * (0.5f + 0.5f * Mth.sin(time * 0.2f + i)) * 255);
+                g.fill(x - 1, y - 1 - ring, x + 2, y + 2 + ring, (Mth.clamp(al, 0, 255) << 24) | col);
+            }
+        }
+        int al = (int) (k * 200);
+        g.fill(cx - 1, cy - (int) rad, cx + 1, cy + (int) rad, (al << 24) | 0xC080FF);
+    }
+
+    /** Jagged lightning-like cracks spreading from the top of the screen down through the view. */
+    private static void cracks(GuiGraphics g, int w, int h, float time, float k, float p) {
+        if (k <= 0.01f) return;
+        java.util.Random r = new java.util.Random(77);
+        int count = 9;
+        float reach = Math.min(1f, p * 2.2f);
+        for (int c = 0; c < count; c++) {
+            float x = w * (0.1f + 0.8f * r.nextFloat());
+            float y = 0;
+            int steps = 22;
+            for (int s = 0; s < steps * reach; s++) {
+                float nx = x + (r.nextFloat() - 0.5f) * w * 0.06f;
+                float ny = y + h * 0.7f / steps;
+                int thick = 1 + (int) (3 * (1f - s / (float) steps));
+                int a = (int) (k * 255 * (0.7f + 0.3f * Mth.sin(time * 0.9f + c + s)));
+                int col = s % 3 == 0 ? 0xFFFFFF : 0xC070FF;
+                int x0 = (int) Math.min(x, nx), x1 = (int) Math.max(x, nx) + thick;
+                g.fill(x0, (int) y, x1, (int) ny + 1, (Mth.clamp(a, 0, 255) << 24) | col);
+                x = nx;
+                y = ny;
             }
         }
     }

@@ -55,4 +55,8 @@ public final class ClientNetwork {
     public static void onGenesisEnd() {
         dev.riftverse.client.cinematic.GenesisCinematic.finish();
     }
+
+    public static void onCreatorScreen(Payloads.CreatorScreen p) {
+        Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.CreatorScreen(p.mode(), p.credentialSet()));
+    }
 }

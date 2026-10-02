@@ -100,6 +100,7 @@ public final class RiftverseClient {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers e) {
         e.registerEntityRenderer(RvEntities.BLACK_HOLE.get(), BlackHoleRenderer::new);
+        e.registerEntityRenderer(RvEntities.REALITY_TEAR.get(), dev.riftverse.client.render.entity.RealityTearRenderer::new);
         e.registerEntityRenderer(RvEntities.PORTAL.get(), PortalRenderer::new);
         e.registerEntityRenderer(RvEntities.PORTAL_BOLT.get(), BoltRenderer.PortalBolt::new);
         e.registerEntityRenderer(RvEntities.ENERGY_BOLT.get(), BoltRenderer.Energy::new);

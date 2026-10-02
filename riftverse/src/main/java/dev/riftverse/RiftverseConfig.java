@@ -55,6 +55,8 @@ public final class RiftverseConfig {
     public static final ModConfigSpec.BooleanValue CINEMATIC_CAMERA;
     public static final ModConfigSpec.BooleanValue HEAVY_EFFECTS;
     public static final ModConfigSpec.IntValue GENESIS_SECONDS;
+    public static final ModConfigSpec.IntValue RUPTURE_RADIUS;
+    public static final ModConfigSpec.ConfigValue<String> RUPTURE_MODE;
     public static final ModConfigSpec.BooleanValue ENTITY_MIGRATION;
     public static final ModConfigSpec.IntValue RIFT_SEEKING_CHANCE;
 
@@ -110,6 +112,13 @@ public final class RiftverseConfig {
                 .define("entityMigration", true);
         RIFT_SEEKING_CHANCE = BUILDER.comment("Per mille chance, every 10 seconds, that an idle mob near a rift goes to investigate it (0 disables wandering into rifts).")
                 .defineInRange("riftSeekingPerMille", 15, 0, 1000);
+        BUILDER.pop();
+
+        BUILDER.push("rupture");
+        RUPTURE_RADIUS = BUILDER.comment("Radius of Existence Disassembly and of the Final Rupture's area mode. Disassembled terrain is snapshotted and restorable.")
+                .defineInRange("radius", 10, 2, 32);
+        RUPTURE_MODE = BUILDER.comment("What THE FINAL RUPTURE does: visual (spectacle only), area (temporary disassembly, auto-restored) or universe (erases the current universe through the normal backed-up erase).")
+                .define("ultimateMode", "area");
         BUILDER.pop();
 
         BUILDER.push("cinematics");
