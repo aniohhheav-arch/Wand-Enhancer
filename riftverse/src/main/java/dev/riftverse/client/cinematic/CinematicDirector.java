@@ -146,6 +146,7 @@ public final class CinematicDirector {
 
     public static boolean inputLocked() {
         if (bossTick >= 0 && bossTick < 90) return true;
+        if (GenesisCinematic.locksInput()) return true;
         if (phase == Phase.NONE) return RealityCinematics.locksInput();
         if (phase == Phase.EMERGE) return tick - emergeStart < EMERGE_TICKS * 0.6f;
         return true;
@@ -296,6 +297,7 @@ public final class CinematicDirector {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         RealityCinematics.tick();
+        GenesisCinematic.tick();
         if (shakeTicks > 0) shakeTicks--;
         else shake *= 0.85f;
         flash *= 0.88f;

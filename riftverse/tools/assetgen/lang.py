@@ -123,6 +123,8 @@ SCREEN = {
 }
 
 SUBTITLES = {
+    "genesis.theme": "Creation sings", "genesis.ignite": "A spark of existence", "genesis.bang": "Space is born",
+    "genesis.form": "A world takes shape", "genesis.life": "Life stirs", "genesis.gate": "A gateway opens",
     "rift.ambient": "Rift hums", "rift.open": "Rift tears open", "rift.enter": "Reality folds", "portal.open": "Portal opens",
     "portal.enter": "Portal whooshes", "portal_gun.fire": "Portal projector fires", "black_hole.ambient": "Black hole rumbles",
     "black_hole.pull": "Gravity screams", "black_hole.collapse": "Black hole collapses", "wormhole.travel": "Wormhole roars",

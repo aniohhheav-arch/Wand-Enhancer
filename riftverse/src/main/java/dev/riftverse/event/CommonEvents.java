@@ -57,6 +57,7 @@ public final class CommonEvents {
             RealityState.onServerStopped();
             Scheduler.clear();
             EndProtocols.clear();
+            dev.riftverse.multiverse.GenesisManager.clear();
             RealityOps.clear();
             TransitManager.clear();
             TerrainSampler.clearCache();
@@ -67,6 +68,7 @@ public final class CommonEvents {
             RealityRewriter.tick(e.getServer());
             EventManager.tick(e.getServer());
             EndProtocols.tick(e.getServer());
+            dev.riftverse.multiverse.GenesisManager.tick(e.getServer());
         });
         bus.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer sp) UniverseSync.send(sp);
@@ -143,6 +145,7 @@ public final class CommonEvents {
 
     private static void onIncomingDamage(LivingIncomingDamageEvent e) {
         if (e.getEntity() instanceof Player p && TransitManager.isProtected(p)) e.setCanceled(true);
+        if (e.getEntity() instanceof ServerPlayer sp && dev.riftverse.multiverse.GenesisManager.inGenesis(sp)) e.setCanceled(true);
     }
 
     private static void onFall(LivingFallEvent e) {

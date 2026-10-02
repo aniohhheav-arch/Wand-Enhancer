@@ -15,6 +15,7 @@ public final class RvShaders {
     @Nullable public static ShaderInstance blackhole;
     @Nullable public static ShaderInstance rift;
     @Nullable public static ShaderInstance wormhole;
+    @Nullable public static ShaderInstance genesis;
     @Nullable public static ShaderInstance screenfx;
     @Nullable public static ShaderInstance cosmos;
     @Nullable public static ShaderInstance energy;
@@ -29,6 +30,7 @@ public final class RvShaders {
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("blackhole"), DefaultVertexFormat.POSITION), s -> blackhole = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("rift"), DefaultVertexFormat.POSITION), s -> rift = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("wormhole"), DefaultVertexFormat.POSITION), s -> wormhole = s);
+            event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("genesis"), DefaultVertexFormat.POSITION), s -> genesis = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("screenfx"), DefaultVertexFormat.POSITION), s -> screenfx = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("cosmos"), DefaultVertexFormat.POSITION), s -> cosmos = s);
             event.registerShader(new ShaderInstance(event.getResourceProvider(), Riftverse.id("energy"), DefaultVertexFormat.POSITION_TEX_COLOR), s -> energy = s);
@@ -50,6 +52,7 @@ public final class RvShaders {
         all.add(blackhole);
         all.add(rift);
         all.add(wormhole);
+        all.add(genesis);
         all.add(screenfx);
         all.add(cosmos);
         all.add(energy);

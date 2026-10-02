@@ -3,6 +3,7 @@ package dev.riftverse.client.hud;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.riftverse.client.cinematic.CinematicDirector;
 import dev.riftverse.client.cinematic.RealityCinematics;
+import dev.riftverse.client.cinematic.GenesisCinematic;
 import dev.riftverse.client.render.Fullscreen;
 import dev.riftverse.client.render.RvShaders;
 import dev.riftverse.util.ColorUtil;
@@ -62,6 +63,7 @@ public final class CinematicHud {
         String title = CinematicDirector.title();
         if (titleAlpha > 0.03f && title != null) drawTitle(g, mc.font, title, CinematicDirector.subtitle(), CinematicDirector.titleColor(), titleAlpha,
                 CinematicDirector.titleTime(partial), w, h);
+        GenesisCinematic.render(g, partial);
     }
 
     private static int argb(float alpha, int rgb) {

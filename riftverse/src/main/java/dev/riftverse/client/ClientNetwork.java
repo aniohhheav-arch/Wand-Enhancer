@@ -47,4 +47,12 @@ public final class ClientNetwork {
     public static void onOpenRemote(Payloads.OpenRemote p) {
         Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.RealityRemoteScreen(p));
     }
+
+    public static void onGenesis(Payloads.Genesis p) {
+        dev.riftverse.client.cinematic.GenesisCinematic.play(p);
+    }
+
+    public static void onGenesisEnd() {
+        dev.riftverse.client.cinematic.GenesisCinematic.finish();
+    }
 }

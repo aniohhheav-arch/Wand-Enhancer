@@ -248,12 +248,12 @@ public final class RealityOps {
         }
         List<BlockPos> centres = centres(id, playersIn(server, id));
         RealityRewriter.start(level, RealityRewriter.Mode.ERASE, id, null, centres, visibleRadius(server), () -> {
-            for (ServerPlayer p : playersIn(server, id)) evacuate(p, "The universe you stood in no longer exists.");
+            rebirth(server, playersIn(server, id));
             if (afterWave != null) afterWave.run();
         });
         Scheduler.later(evacuateAfter, () -> {
             ERASING.remove(id);
-            for (ServerPlayer p : playersIn(server, id)) evacuate(p, "The universe you stood in no longer exists.");
+            rebirth(server, playersIn(server, id));
         });
     }
 
@@ -490,6 +490,14 @@ public final class RealityOps {
         SEALING.clear();
     }
 
+    /** Everyone left in an unmade world witnesses the Genesis Protocol and wakes in a newborn universe. */
+    public static void rebirth(MinecraftServer server, List<ServerPlayer> players) {
+        List<ServerPlayer> list = new ArrayList<>();
+        for (ServerPlayer p : players) if (!p.isSpectator() && !TransitManager.inTransit(p) && !GenesisManager.inGenesis(p)) list.add(p);
+        if (list.isEmpty()) return;
+        if (GenesisManager.begin(server, list) == null) for (ServerPlayer p : list) evacuate(p, "The universe you stood in no longer exists.");
+    }
+
     /** Sends a player out of a universe that is no longer reachable. */
     public static void evacuate(ServerPlayer player, String reason) {
         if (TransitManager.inTransit(player)) return;
@@ -528,11 +536,11 @@ public final class RealityOps {
         for (ServerPlayer p : level.players()) centres.add(p.blockPosition());
         if (centres.isEmpty()) centres.add(level.getSharedSpawnPos());
         RealityRewriter.start(level, RealityRewriter.Mode.ERASE, null, null, centres, visibleRadius(server), () -> {
-            for (ServerPlayer p : new ArrayList<>(level.players())) evacuate(p, "This world no longer exists.");
+            rebirth(server, new ArrayList<>(level.players()));
         });
         Scheduler.later(evacuateAfter, () -> {
             SEALING.remove(level.dimension());
-            for (ServerPlayer p : new ArrayList<>(level.players())) evacuate(p, "This world no longer exists.");
+            rebirth(server, new ArrayList<>(level.players()));
         });
     }
 
@@ -551,12 +559,13 @@ public final class RealityOps {
     /** Called every second per player: pushes anyone found inside a sealed universe or ended dimension back to the Nexus. */
     public static void playerSecond(ServerPlayer player) {
         if (RealityState.isSealed(player.level().dimension()) && !SEALING.contains(player.level().dimension()) && !TransitManager.inTransit(player)
+                && !GenesisManager.inGenesis(player)
                 && !player.isSpectator()) {
             evacuate(player, worldName(player.serverLevel()) + " has ended. Nothing remains there.");
             return;
         }
         UniverseId id = universeOf(player);
-        if (id == null || RealityState.isAccessible(id) || ERASING.contains(id) || TransitManager.inTransit(player)) return;
+        if (id == null || RealityState.isAccessible(id) || ERASING.contains(id) || TransitManager.inTransit(player) || GenesisManager.inGenesis(player)) return;
         if (player.isSpectator()) return;
         evacuate(player, "This universe is " + RealityState.statusOf(id).name().toLowerCase(Locale.ROOT) + ". You are pulled back to the Nexus.");
     }

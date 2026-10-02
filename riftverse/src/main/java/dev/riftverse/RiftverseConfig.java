@@ -54,6 +54,7 @@ public final class RiftverseConfig {
     public static final Map<dev.riftverse.multiverse.EndProtocol, ModConfigSpec.IntValue> PROTOCOL_SECONDS = new java.util.EnumMap<>(dev.riftverse.multiverse.EndProtocol.class);
     public static final ModConfigSpec.BooleanValue CINEMATIC_CAMERA;
     public static final ModConfigSpec.BooleanValue HEAVY_EFFECTS;
+    public static final ModConfigSpec.IntValue GENESIS_SECONDS;
 
     static {
         BUILDER.push("events");
@@ -107,6 +108,8 @@ public final class RiftverseConfig {
                 .define("cinematicCamera", true);
         HEAVY_EFFECTS = BUILDER.comment("Whether expensive particle effects are used by events and reality rewrites.")
                 .define("heavyEffects", true);
+        GENESIS_SECONDS = BUILDER.comment("Length in seconds of the Genesis Protocol rebirth cinematic played after a universe is erased.")
+                .defineInRange("genesisSeconds", 48, 10, 180);
         BUILDER.pop();
     }
 

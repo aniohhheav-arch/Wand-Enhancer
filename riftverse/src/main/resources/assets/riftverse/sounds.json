@@ -342,5 +342,54 @@
       }
     ],
     "subtitle": "subtitles.riftverse.music.ancient"
+  },
+  "genesis.theme": {
+    "sounds": [
+      {
+        "name": "riftverse:genesis/theme",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.riftverse.genesis.theme"
+  },
+  "genesis.ignite": {
+    "sounds": [
+      {
+        "name": "riftverse:genesis/ignite"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.genesis.ignite"
+  },
+  "genesis.bang": {
+    "sounds": [
+      {
+        "name": "riftverse:genesis/bang"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.genesis.bang"
+  },
+  "genesis.form": {
+    "sounds": [
+      {
+        "name": "riftverse:genesis/form"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.genesis.form"
+  },
+  "genesis.life": {
+    "sounds": [
+      {
+        "name": "riftverse:genesis/life"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.genesis.life"
+  },
+  "genesis.gate": {
+    "sounds": [
+      {
+        "name": "riftverse:genesis/gate"
+      }
+    ],
+    "subtitle": "subtitles.riftverse.genesis.gate"
   }
 }

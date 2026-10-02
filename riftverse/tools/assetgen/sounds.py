@@ -24,6 +24,8 @@ SOUND_EVENTS = {
     "music.cosmic": {"stream": True}, "music.neon": {"stream": True}, "music.dream": {"stream": True},
     "music.void": {"stream": True}, "music.nexus": {"stream": True}, "music.ocean": {"stream": True},
     "music.ancient": {"stream": True},
+    "genesis.theme": {"stream": True}, "genesis.ignite": {}, "genesis.bang": {}, "genesis.form": {}, "genesis.life": {},
+    "genesis.gate": {},
 }
 
 
@@ -740,6 +742,67 @@ def music_ancient():
 
 # ------------------------------------------------------------------------------------------------------------ driver
 
+# ------------------------------------------------------------------------------------------------- genesis protocol
+
+def genesis_theme():
+    """56 s: silence, a lone tone, a swelling primordial drone, rising chords as space forms, a radiant final cadence."""
+    sr = MUSIC_SR
+    buf, beat = track(56, 60)
+    place(buf, sine(midi(74), 6, sr) * 0.05 * env_adsr(6, 2.5, 1, 0.6, 2.5, sr), 4)
+    place(buf, (sine(midi(26), 50, sr) * 0.22 + sine(midi(33), 50, sr) * 0.12) * env_adsr(50, 12, 4, 0.8, 8, sr), 6)
+    chords = [[38, 45, 50, 57], [41, 48, 53, 60, 64], [43, 50, 55, 62, 67], [45, 52, 57, 61, 64, 69], [50, 57, 62, 66, 69, 74]]
+    for i, ch in enumerate(chords):
+        place(buf, pad([midi(n) for n in ch], 11, sr, seed=900 + i, cutoff=900 + i * 450, attack=3.0, release=3.5) * (1.6 + i * 0.5), 12 + i * 8.5)
+    rng = np.random.default_rng(901)
+    for k in range(40):
+        t0 = 20 + k * 0.8 + rng.uniform(-0.1, 0.1)
+        if t0 > 52:
+            break
+        place(buf, bell(midi(int(rng.choice([69, 71, 74, 76, 78, 81, 83, 86]))), 3.0, sr, bright=0.6, decay=1.6) * 0.09, t0)
+    return finish(buf, 6.0, 0.55)
+
+
+def snd_genesis_ignite():
+    d = 3.0
+    x = mix(bell(midi(88), d, SR, bright=0.9, decay=2.2) * 0.6, sine(expline(d, 880, 1760, SR), d, SR) * 0.15 * env_adsr(d, 0.5, 1, 0.4, 1.2, SR))
+    return reverb(x, SR, seconds=4.0, mix=0.6)
+
+
+def snd_genesis_bang():
+    d = 6.0
+    boom = sine(expline(d, 90, 22, SR), d, SR) * env_exp(d, 2.2, SR)
+    rush = lowpass(noise(d, 931, SR, "pink"), 2400, SR) * env_adsr(d, 0.05, 1.2, 0.35, 3.5, SR)
+    shimmer = highpass(noise(d, 932, SR), 6000, SR) * env_exp(d, 1.4, SR) * 0.3
+    return reverb(soft_clip(mix(boom * 1.4, rush, shimmer), 1.4), SR, seconds=5.0, mix=0.45)
+
+
+def snd_genesis_form():
+    d = 5.0
+    grind = lowpass(noise(d, 941, SR, "brown"), 300, SR) * env_adsr(d, 1.0, 1, 0.8, 1.5, SR)
+    tone = (saw(midi(31), d, SR) * 0.3 + sine(midi(38), d, SR) * 0.4) * env_adsr(d, 1.5, 1, 0.7, 1.5, SR)
+    return reverb(mix(grind * 1.2, lowpass(tone, 600, SR)), SR, seconds=3.0, mix=0.35)
+
+
+def snd_genesis_life():
+    d = 5.0
+    out = np.zeros(n_of(d, SR))
+    rng = np.random.default_rng(951)
+    for k in range(14):
+        f0 = rng.uniform(2200, 4200)
+        dur = rng.uniform(0.08, 0.2)
+        chirp = sine(line(dur, f0, f0 * rng.uniform(1.2, 1.6), SR), dur, SR) * env_exp(dur, dur * 0.5, SR) * 0.25
+        out = mix(out, at(chirp, rng.uniform(0.2, 4.2), d, SR))
+    water = bandpass(noise(d, 952, SR), 400, 2400, SR) * 0.12 * env_adsr(d, 1.0, 1, 0.8, 1.0, SR)
+    return reverb(mix(out, water, pad([midi(n) for n in [62, 66, 69, 74]], d, SR, seed=953, cutoff=1600) * 0.4), SR, seconds=3.0, mix=0.4)
+
+
+def snd_genesis_gate():
+    d = 4.0
+    whoosh = sweep(noise(d, 961, SR, "pink"), expline(d, 300, 6000, SR), kind="lowpass", sr=SR) * env_adsr(d, 1.5, 0.5, 0.7, 1.5, SR)
+    chord = pad([midi(n) for n in [62, 69, 74, 78, 81]], d, SR, seed=962, cutoff=3000, attack=1.0, release=1.5) * 0.8
+    return reverb(mix(whoosh, chord), SR, seconds=4.0, mix=0.5)
+
+
 GENERATORS = {
     "rift.ambient": snd_rift_ambient, "rift.open": snd_rift_open, "rift.enter": snd_rift_enter, "portal.open": snd_portal_open,
     "portal.enter": snd_portal_enter, "portal_gun.fire": snd_portal_gun_fire, "black_hole.ambient": snd_black_hole_ambient,
@@ -752,6 +815,8 @@ GENERATORS = {
     "warden.charge": snd_warden_charge, "leviathan.roar": snd_leviathan_roar, "creature.hurt": snd_creature_hurt,
     "creature.death": snd_creature_death, "armor.equip": snd_armor_equip, "ability.activate": snd_ability_activate,
     "ui.select": snd_ui_select, "ui.manifest": snd_ui_manifest,
+    "genesis.theme": genesis_theme, "genesis.ignite": snd_genesis_ignite, "genesis.bang": snd_genesis_bang,
+    "genesis.form": snd_genesis_form, "genesis.life": snd_genesis_life, "genesis.gate": snd_genesis_gate,
     "music.cosmic": music_cosmic, "music.neon": music_neon, "music.dream": music_dream, "music.void": music_void,
     "music.nexus": music_nexus, "music.ocean": music_ocean, "music.ancient": music_ancient,
 }

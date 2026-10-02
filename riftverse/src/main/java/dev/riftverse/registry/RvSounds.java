@@ -47,6 +47,12 @@ public final class RvSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ABILITY_ACTIVATE = reg("ability.activate");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_SELECT = reg("ui.select");
     public static final DeferredHolder<SoundEvent, SoundEvent> UI_MANIFEST = reg("ui.manifest");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GENESIS_THEME = reg("genesis.theme");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GENESIS_IGNITE = reg("genesis.ignite");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GENESIS_BANG = reg("genesis.bang");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GENESIS_FORM = reg("genesis.form");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GENESIS_LIFE = reg("genesis.life");
+    public static final DeferredHolder<SoundEvent, SoundEvent> GENESIS_GATE = reg("genesis.gate");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_COSMIC = reg("music.cosmic");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_NEON = reg("music.neon");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_DREAM = reg("music.dream");

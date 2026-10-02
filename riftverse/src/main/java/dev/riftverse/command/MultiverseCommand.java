@@ -94,7 +94,8 @@ public final class MultiverseCommand {
         return SharedSuggestionProvider.suggest(s, b);
     };
     private static final SuggestionProvider<CommandSourceStack> CINEMATICS = (c, b) ->
-            SharedSuggestionProvider.suggest(Arrays.stream(CinematicType.values()).map(t -> t.id), b);
+            SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(java.util.stream.Stream.of("genesis"),
+                    Arrays.stream(CinematicType.values()).map(t -> t.id)), b);
     private static final SuggestionProvider<CommandSourceStack> PROTOCOLS = (c, b) ->
             SharedSuggestionProvider.suggest(Arrays.stream(EndProtocol.values()).map(p -> p.id), b);
     private static final SuggestionProvider<CommandSourceStack> TRAITS = (c, b) -> SharedSuggestionProvider.suggest(RealityOps.TRAITS, b);
@@ -374,6 +375,12 @@ public final class MultiverseCommand {
 
     private static int play(CommandContext<CommandSourceStack> c, Collection<ServerPlayer> targets) throws CommandSyntaxException {
         String raw = StringArgumentType.getString(c, "name");
+        if (raw.equalsIgnoreCase("genesis")) {
+            // the Genesis Protocol is not a mock-up: it really births a universe and carries the targets into it
+            var spec = dev.riftverse.multiverse.GenesisManager.begin(c.getSource().getServer(), new ArrayList<>(targets));
+            return reply(c.getSource(), spec == null ? Outcome.fail("Those players are already witnessing a genesis.")
+                    : Outcome.ok("Genesis Protocol: " + spec.name + " [" + spec.id.designation() + "] is being born for " + targets.size() + " player(s)."));
+        }
         CinematicType t = CinematicType.byId(raw);
         if (t == null) return reply(c.getSource(), Outcome.fail("Unknown cinematic '" + raw + "'. Try /multiverse cinematic list."));
         int[] colors = switch (t) {

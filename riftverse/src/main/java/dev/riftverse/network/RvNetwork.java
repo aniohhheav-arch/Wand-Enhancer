@@ -23,6 +23,11 @@ public final class RvNetwork {
         r.playToServer(Payloads.RemoteAction.TYPE, Payloads.RemoteAction.CODEC, (p, ctx) -> {
             if (ctx.player() instanceof ServerPlayer sp) dev.riftverse.multiverse.RealityRemoteService.handle(sp, p);
         });
+        r.playToClient(Payloads.Genesis.TYPE, Payloads.Genesis.CODEC, (p, ctx) -> ClientNetwork.onGenesis(p));
+        r.playBidirectional(Payloads.GenesisSkip.TYPE, Payloads.GenesisSkip.CODEC, (p, ctx) -> {
+            if (ctx.player() instanceof ServerPlayer sp) dev.riftverse.multiverse.GenesisManager.skip(sp);
+            else ClientNetwork.onGenesisEnd();
+        });
         r.playToServer(Payloads.BrowserAction.TYPE, Payloads.BrowserAction.CODEC, MultiverseService::handle);
         r.playToServer(Payloads.Ability.TYPE, Payloads.Ability.CODEC, (p, ctx) -> {
             if (ctx.player() instanceof ServerPlayer sp) ArmorAbilities.activate(sp, p.ability());

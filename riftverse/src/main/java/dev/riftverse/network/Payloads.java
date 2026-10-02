@@ -323,6 +323,49 @@ public final class Payloads {
         }
     }
 
+    /** Server → client: play the Genesis Protocol (a new universe is born and the player is carried into it). */
+    public record Genesis(int duration, String name, String designation, int colorA, int colorB, float seed) implements CustomPacketPayload {
+        public static final Type<Genesis> TYPE = payloadType("genesis");
+        public static final StreamCodec<FriendlyByteBuf, Genesis> CODEC = CustomPacketPayload.<FriendlyByteBuf, Genesis>codec(Genesis::write, Genesis::new);
+
+        Genesis(FriendlyByteBuf buf) {
+            this(buf.readVarInt(), buf.readUtf(128), buf.readUtf(32), buf.readInt(), buf.readInt(), buf.readFloat());
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(duration);
+            buf.writeUtf(name, 128);
+            buf.writeUtf(designation, 32);
+            buf.writeInt(colorA);
+            buf.writeInt(colorB);
+            buf.writeFloat(seed);
+        }
+
+        @Override
+        public Type<Genesis> type() {
+            return TYPE;
+        }
+    }
+
+    /** Client → server: the player asked to skip the Genesis cinematic. Server → client (empty): the cinematic is over. */
+    public record GenesisSkip(int unused) implements CustomPacketPayload {
+        public static final Type<GenesisSkip> TYPE = payloadType("genesis_skip");
+        public static final StreamCodec<FriendlyByteBuf, GenesisSkip> CODEC = CustomPacketPayload.<FriendlyByteBuf, GenesisSkip>codec(GenesisSkip::write, GenesisSkip::new);
+
+        GenesisSkip(FriendlyByteBuf buf) {
+            this(buf.readVarInt());
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(unused);
+        }
+
+        @Override
+        public Type<GenesisSkip> type() {
+            return TYPE;
+        }
+    }
+
     private static List<Integer> readInts(FriendlyByteBuf buf) {
         int n = Math.min(buf.readVarInt(), 4096);
         List<Integer> list = new ArrayList<>(n);
