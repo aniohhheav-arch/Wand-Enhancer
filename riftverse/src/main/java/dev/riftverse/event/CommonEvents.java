@@ -151,6 +151,7 @@ public final class CommonEvents {
         if (player.level().dimension() == RvWorldgen.EXPANSE) dev.riftverse.wormhole.WormholeManager.naturalSecond(player);
         RealityOps.playerSecond(player);
         dev.riftverse.temporal.TemporalManager.playerSecond(player);
+        dev.riftverse.multiverse.CorridorDirector.playerSecond(player);
         applyGravity(player);
         UniverseEffects.playerSecond(player, specOf(player));
     }

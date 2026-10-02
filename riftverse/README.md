@@ -404,3 +404,33 @@ Every terrain change an event makes (craters, crystals, snow, overgrowth, colour
 - `preview <event>` (a 10-second run)
 - `active`
 - `reset`
+
+## The Infinite Corridor, upgraded
+
+- **Zones:** every 128 blocks the corridor becomes one of **15 zones**, each with its own materials and features, and a title card when you enter:
+  - The Grand Hall
+  - The Endless Library
+  - The Drowned Passage (flooded floor)
+  - The Overgrown Way
+  - The Frozen Gallery
+  - The Burning Corridor
+  - The Crystal Vault
+  - The Void Gallery (glass walls onto the stars)
+  - **The Hall of Mirrors** (a glass floor over a full upside-down reflection of the hall)
+  - The Clockwork Passage
+  - The Neon Arcade
+  - The Ruined Wing (crumbling walls)
+  - The Deep Dark
+  - The Gilded Hall
+  - The Dreaming Corridor
+- **Doors and secrets:** rift doors still line the walls. Near some doors a cracked wall panel hides a gold alcove with an End City treasure chest.
+- **Time anomalies:** one segment in ten misbehaves. Time may slow down, speed up or skip a beat. In a **true loop**, walking off the end puts you back at the start.
+- **Corridor events:**
+  - The lights go out.
+  - The Walker comes down the hall after you.
+  - Every door slams at once.
+  - The corridor rearranges itself and moves you.
+  - Whispers.
+- **Evolving audio:** each zone has its own ambient voice, and the farther you walk from the start, the lower and darker the score gets.
+
+Only newly generated corridor chunks get the zones. Already-explored stretches keep their old look.
