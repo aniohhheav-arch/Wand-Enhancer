@@ -40,8 +40,8 @@ public final class ClientNetwork {
     }
 
     public static void onRealityCinematic(Payloads.RealityCinematic p) {
-        if (p.type() == Payloads.RealityCinematic.STOP) RealityCinematics.stop();
-        else RealityCinematics.play(p.type(), p.duration(), new Vec3(p.fx(), p.fy(), p.fz()), p.colorA(), p.colorB(), p.title(), p.subtitle());
+        if (p.kind() == Payloads.RealityCinematic.STOP) RealityCinematics.stop();
+        else RealityCinematics.play(p.kind(), p.duration(), new Vec3(p.fx(), p.fy(), p.fz()), p.colorA(), p.colorB(), p.title(), p.subtitle());
     }
 
     public static void onOpenRemote(Payloads.OpenRemote p) {

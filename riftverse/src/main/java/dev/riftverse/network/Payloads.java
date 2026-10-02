@@ -228,7 +228,7 @@ public final class Payloads {
      * Server → client: play (or, with type {@link #STOP}, end) a reality cinematic: erasure, reconstruction, events and
      * title-only announcements. The focus is the point the camera frames.
      */
-    public record RealityCinematic(int type, int duration, double fx, double fy, double fz, int colorA, int colorB, String title, String subtitle)
+    public record RealityCinematic(int kind, int duration, double fx, double fy, double fz, int colorA, int colorB, String title, String subtitle)
             implements CustomPacketPayload {
         public static final int STOP = -1;
         public static final Type<RealityCinematic> TYPE = payloadType("reality_cinematic");
@@ -239,7 +239,7 @@ public final class Payloads {
         }
 
         void write(FriendlyByteBuf buf) {
-            buf.writeVarInt(type);
+            buf.writeVarInt(kind);
             buf.writeVarInt(duration);
             buf.writeDouble(fx);
             buf.writeDouble(fy);
