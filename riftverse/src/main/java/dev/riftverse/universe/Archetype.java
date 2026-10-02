@@ -34,7 +34,19 @@ public enum Archetype {
     VERDIGRIS("verdigris", "Verdigris Ruins", 0x4AC8A8, new String[] {"Ruins", "Patina", "Overgrowth", "Greenbronze", "Mossworks"}),
     RADIANCE("radiance", "Radiant Expanse", 0xFFF0C8, new String[] {"Expanse", "Empyrean", "Aureole", "Dawnlands", "Halo"}),
     FERROUS("ferrous", "Ferrous Wastes", 0x9AA2AC, new String[] {"Wastes", "Slagworld", "Ironfall", "Scrapheap", "Oxide"}),
-    BLOOM("bloom", "Spectral Bloom", 0xFF5AD0, new String[] {"Bloom", "Petalfall", "Floradream", "Blossomreach", "Pollen"});
+    BLOOM("bloom", "Spectral Bloom", 0xFF5AD0, new String[] {"Bloom", "Petalfall", "Floradream", "Blossomreach", "Pollen"}),
+    AURORA("aurora", "Aurora Tundra", 0x7AFFC8, new String[] {"Tundra", "Borealis", "Polar Veil", "Lightfall", "Hush"}),
+    MAGMA("magma", "Magma Throne", 0xFF4A10, new String[] {"Throne", "Caldera", "Lavaheart", "Moltenreach", "Searing"}),
+    PRIMEVAL("primeval", "Primeval Jungle", 0x3ABF3A, new String[] {"Jungle", "Wildwood", "Primordia", "Greenhell", "Overgrowth"}),
+    NEBULA("nebula", "Nebula Drift", 0xC050FF, new String[] {"Drift", "Starcloud", "Gasreach", "Cosmos", "Nursery"}),
+    WASTELAND("wasteland", "Fallout Wastes", 0x9A9A40, new String[] {"Wastes", "Fallout", "Ruinlands", "Deadzone", "Rustbelt"}),
+    GEODE("geode", "Amethyst Geode", 0xA060FF, new String[] {"Geode", "Crystalheart", "Hollowgem", "Shardvault", "Resonance"}),
+    DEEPDARK("deepdark", "Sculk Depths", 0x0A6A7A, new String[] {"Depths", "Echo", "Underdark", "Sculkreach", "Whisper"}),
+    SAVANNA("savanna", "Golden Savanna", 0xE0B040, new String[] {"Savanna", "Plains", "Sunveld", "Grassreach", "Pride"}),
+    CHROME("chrome", "Chrome Metropolis", 0xE0F0FF, new String[] {"Metropolis", "Chromeplex", "Spirecity", "Utopia", "Mirrorgrid"}),
+    LUNAR("lunar", "Lunar Plains", 0xD8D8E8, new String[] {"Plains", "Mare", "Moonfield", "Selene", "Silence"}),
+    HIVE("hive", "Golden Hive", 0xFFC020, new String[] {"Hive", "Honeycomb", "Combworld", "Nectar", "Swarm"}),
+    MIRROR("mirror", "Mirror Realm", 0xB0E0FF, new String[] {"Realm", "Reflection", "Stillwater", "Looking-Glass", "Glassworld"});
 
     public final String id;
     public final String displayName;

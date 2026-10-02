@@ -40,7 +40,8 @@ public class NaturalRiftFeature extends Feature<NoneFeatureConfiguration> {
         if (roll < 62) return RiftType.NEXUS;
         // expansion rifts: each leads to its own family of new realities
         RiftType[] extra = {RiftType.SOLAR, RiftType.ABYSSAL, RiftType.FUNGAL, RiftType.SANGUINE, RiftType.BRASS,
-                RiftType.SACCHARINE, RiftType.TEMPEST, RiftType.UMBRAL, RiftType.PATINA};
+                RiftType.SACCHARINE, RiftType.TEMPEST, RiftType.UMBRAL, RiftType.PATINA, RiftType.AURORAL, RiftType.MOLTEN, RiftType.PRIMAL,
+                RiftType.CHROME, RiftType.SCULK, RiftType.NEBULAR};
         return extra[r.nextInt(extra.length)];
     }
 

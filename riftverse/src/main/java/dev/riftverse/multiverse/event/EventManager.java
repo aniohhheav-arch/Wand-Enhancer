@@ -109,11 +109,13 @@ public final class EventManager {
     }
 
     private static void announce(ActiveEvent e) {
+        EventKit.burst(e, e.focus, e.type.color, 1.2f);
+        if (!e.focus.equals(e.center)) EventKit.burst(e, e.center, e.type.color, 0.7f);
         CinematicType cine = cinematicFor(e.type);
         boolean bossTitle = e.type == EventType.COSMIC_LEVIATHAN || e.type == EventType.ANCIENT_GUARDIAN || e.type == EventType.VOID_WANDERER;
         for (ServerPlayer p : EventKit.playersNear(e, 160)) {
             if (TransitManager.inTransit(p)) continue;
-            RealityOps.cinematic(p, cine, 0, e.focus, e.type.color, 0xFFFFFF, bossTitle ? "" : e.type.title, bossTitle ? "" : e.type.subtitle);
+            RealityOps.cinematic(p, cine, e.type == EventType.UNIVERSE_BIRTH ? 380 : 0, e.focus, e.type.color, 0xFFFFFF, bossTitle ? "" : e.type.title, bossTitle ? "" : e.type.subtitle);
             p.getData(RvAttachments.MULTIVERSE.get()).eventsWitnessed++;
             RealityOps.research(p, 25, "witnessed " + e.type.id.replace('_', ' '));
         }
@@ -136,7 +138,10 @@ public final class EventManager {
                 ended.add(e);
             }
         }
-        for (ActiveEvent e : ended) HANDLERS.get(e.type).end(e, false);
+        for (ActiveEvent e : ended) {
+            HANDLERS.get(e.type).end(e, false);
+            EventKit.burst(e, e.center, e.type.color, 0.8f);
+        }
         rollNatural(server);
     }
 

@@ -146,6 +146,42 @@ public final class MaterialSet {
         m.put(Archetype.BLOOM, new MaterialSet(Blocks.MOSS_BLOCK, Blocks.CALCITE, Blocks.SMOOTH_BASALT, Blocks.WATER,
                 Blocks.AMETHYST_BLOCK, RvBlocks.RIFT_CRYSTAL.get(), RvBlocks.RIFT_CRYSTAL.get(), Blocks.CALCITE,
                 Blocks.PINK_STAINED_GLASS, Blocks.PINK_PETALS, Blocks.CHERRY_LOG, persistent(Blocks.CHERRY_LEAVES), false));
+        m.put(Archetype.AURORA, new MaterialSet(Blocks.SNOW_BLOCK, Blocks.PACKED_ICE, Blocks.CALCITE, Blocks.WATER,
+                Blocks.BLUE_ICE, Blocks.SEA_LANTERN, Blocks.PACKED_ICE, Blocks.SNOW_BLOCK,
+                Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.AIR, Blocks.SPRUCE_LOG, persistent(Blocks.SPRUCE_LEAVES), true));
+        m.put(Archetype.MAGMA, new MaterialSet(Blocks.MAGMA_BLOCK, Blocks.BASALT, Blocks.BLACKSTONE, Blocks.LAVA,
+                Blocks.SHROOMLIGHT, Blocks.OCHRE_FROGLIGHT, Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS,
+                Blocks.ORANGE_STAINED_GLASS, Blocks.AIR, Blocks.CRIMSON_STEM, Blocks.NETHER_WART_BLOCK.defaultBlockState(), false));
+        m.put(Archetype.PRIMEVAL, new MaterialSet(Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.MOSSY_COBBLESTONE, Blocks.WATER,
+                Blocks.MOSS_BLOCK, Blocks.VERDANT_FROGLIGHT, Blocks.MOSSY_STONE_BRICKS, Blocks.CHISELED_STONE_BRICKS,
+                Blocks.GREEN_STAINED_GLASS, Blocks.FERN, Blocks.JUNGLE_LOG, persistent(Blocks.JUNGLE_LEAVES), false));
+        m.put(Archetype.NEBULA, new MaterialSet(RvBlocks.STARDUST_SAND.get(), RvBlocks.SKYSTONE.get(), Blocks.PURPUR_BLOCK, Blocks.AIR,
+                Blocks.AMETHYST_BLOCK, Blocks.PEARLESCENT_FROGLIGHT, Blocks.PURPUR_PILLAR, RvBlocks.COSMIC_OBSIDIAN.get(),
+                Blocks.MAGENTA_STAINED_GLASS, Blocks.AIR, Blocks.PURPUR_PILLAR, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.WASTELAND, new MaterialSet(Blocks.COARSE_DIRT, Blocks.GRAVEL, Blocks.COBBLESTONE, Blocks.WATER,
+                Blocks.RAW_IRON_BLOCK, Blocks.REDSTONE_LAMP, Blocks.CRACKED_STONE_BRICKS, Blocks.GRAY_CONCRETE,
+                Blocks.TINTED_GLASS, Blocks.DEAD_BUSH, Blocks.STRIPPED_OAK_LOG, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.GEODE, new MaterialSet(Blocks.CALCITE, Blocks.SMOOTH_BASALT, Blocks.SMOOTH_BASALT, Blocks.AIR,
+                Blocks.AMETHYST_BLOCK, Blocks.BUDDING_AMETHYST, Blocks.CALCITE, Blocks.AMETHYST_BLOCK,
+                Blocks.PURPLE_STAINED_GLASS, Blocks.AIR, Blocks.CALCITE, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.DEEPDARK, new MaterialSet(Blocks.SCULK, Blocks.DEEPSLATE, Blocks.DEEPSLATE, Blocks.AIR,
+                Blocks.SCULK_CATALYST, Blocks.SOUL_LANTERN, Blocks.DEEPSLATE_TILES, Blocks.REINFORCED_DEEPSLATE,
+                Blocks.TINTED_GLASS, Blocks.AIR, Blocks.DEEPSLATE_BRICKS, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.SAVANNA, new MaterialSet(Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.STONE, Blocks.WATER,
+                Blocks.HAY_BLOCK, Blocks.LANTERN, Blocks.SMOOTH_SANDSTONE, Blocks.ORANGE_TERRACOTTA,
+                Blocks.GLASS, Blocks.SHORT_GRASS, Blocks.ACACIA_LOG, persistent(Blocks.ACACIA_LEAVES), false));
+        m.put(Archetype.CHROME, new MaterialSet(Blocks.WHITE_CONCRETE, Blocks.SMOOTH_STONE, Blocks.STONE, Blocks.WATER,
+                Blocks.SEA_LANTERN, Blocks.END_ROD, Blocks.IRON_BLOCK, Blocks.QUARTZ_BLOCK,
+                Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.AIR, Blocks.QUARTZ_PILLAR, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.LUNAR, new MaterialSet(RvBlocks.DEAD_REGOLITH.get(), Blocks.LIGHT_GRAY_CONCRETE_POWDER, Blocks.STONE, Blocks.AIR,
+                Blocks.END_STONE, Blocks.SEA_LANTERN, Blocks.END_STONE_BRICKS, Blocks.SMOOTH_STONE,
+                Blocks.GLASS, Blocks.AIR, Blocks.END_STONE_BRICKS, Blocks.AIR.defaultBlockState(), false));
+        m.put(Archetype.HIVE, new MaterialSet(Blocks.HONEYCOMB_BLOCK, Blocks.HONEY_BLOCK, Blocks.YELLOW_TERRACOTTA, Blocks.WATER,
+                Blocks.BEEHIVE, Blocks.OCHRE_FROGLIGHT, Blocks.HONEYCOMB_BLOCK, Blocks.YELLOW_CONCRETE,
+                Blocks.YELLOW_STAINED_GLASS, Blocks.SUNFLOWER, Blocks.OAK_LOG, persistent(Blocks.FLOWERING_AZALEA_LEAVES), false));
+        m.put(Archetype.MIRROR, new MaterialSet(Blocks.WHITE_CONCRETE, Blocks.QUARTZ_BLOCK, Blocks.CALCITE, Blocks.WATER,
+                Blocks.GLASS, Blocks.SEA_LANTERN, Blocks.SMOOTH_QUARTZ, Blocks.GLASS,
+                Blocks.GLASS, Blocks.AIR, Blocks.BIRCH_LOG, Blocks.AIR.defaultBlockState(), false));
         return m;
     }
 

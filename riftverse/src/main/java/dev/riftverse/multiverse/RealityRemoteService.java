@@ -72,8 +72,12 @@ public final class RealityRemoteService {
             stability.add(Math.round(p.stability));
             if (entries.size() >= 256) break;
         }
+        String hereName;
+        if (here != null) hereName = UniverseRegistry.specFor(here).name;
+        else if (player.level().dimension() == dev.riftverse.registry.RvWorldgen.NEXUS) hereName = "The Multiverse Nexus";
+        else hereName = RealityOps.worldName(player.serverLevel());
         PacketDistributor.sendToPlayer(player, new Payloads.OpenRemote(data.rank().ordinal(), data.research, here == null ? Payloads.OpenRemote.NONE : here.pack(),
-                entries, statuses, stability));
+                hereName, entries, statuses, stability));
     }
 
     private static void say(ServerPlayer p, RealityOps.Outcome o) {
@@ -124,8 +128,10 @@ public final class RealityRemoteService {
             case Payloads.RemoteAction.PROTOCOL -> {
                 if (target == null) yield RealityOps.Outcome.fail("Select a universe.");
                 EndProtocol p = EndProtocol.byOrdinal(a.option());
-                yield guardPrime(player, target, () -> EndProtocols.execute(server, target, p, player, a.flag()));
+                boolean permanent = "permanent".equals(a.text());
+                yield guardPrime(player, target, () -> EndProtocols.execute(server, target, p, player, a.flag(), permanent));
             }
+            case Payloads.RemoteAction.END_HERE -> endHere(player, EndProtocol.byOrdinal(a.option()));
             case Payloads.RemoteAction.PREVIEW -> EndProtocols.preview(player, EndProtocol.byOrdinal(a.option()));
             case Payloads.RemoteAction.STOP -> {
                 if (target != null && privileged(player)) yield EndProtocols.stop(server, target, null);
@@ -143,6 +149,19 @@ public final class RealityRemoteService {
             };
             if (cd > 0 && !player.isCreative()) player.getCooldowns().addCooldown(remote.getItem(), cd);
         }
+    }
+
+    private static RealityOps.Outcome endHere(ServerPlayer player, EndProtocol protocol) {
+        UniverseId here = RealityOps.universeOf(player);
+        if (here != null) {
+            if (InfiniteCorridor.isCorridor(here)) return RealityOps.Outcome.fail("The Infinite Corridor cannot be ended.");
+            return guardPrime(player, here, () -> EndProtocols.execute(player.server, here, protocol, player, false, true));
+        }
+        if (!RealityOps.canEndDimension(player.serverLevel())) return RealityOps.Outcome.fail("The Nexus cannot be ended. It is where survivors go.");
+        if (!RiftverseConfig.get(RiftverseConfig.ALLOW_ENDING_DIMENSIONS, true) && !player.hasPermissions(2)) {
+            return RealityOps.Outcome.fail("Ending Earth, the Nether or the End is disabled on this server (allowEndingVanillaDimensions).");
+        }
+        return EndProtocols.executeDimension(player.server, player.serverLevel(), protocol, player);
     }
 
     private static RealityOps.Outcome guardPrime(ServerPlayer player, UniverseId target, java.util.function.Supplier<RealityOps.Outcome> op) {

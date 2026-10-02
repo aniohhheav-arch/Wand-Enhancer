@@ -127,4 +127,26 @@ final class EventKit {
         it.setDefaultPickUpDelay();
         e.level.addFreshEntity(it);
     }
+
+    /** A cinematic burst: staggered shockwave rings, a pillar of light and a spray of sparks. */
+    static void burst(ActiveEvent e, Vec3 at, int color, float scale) {
+        ServerLevel level = e.level;
+        boolean heavy = dev.riftverse.RiftverseConfig.get(dev.riftverse.RiftverseConfig.HEAVY_EFFECTS, true);
+        for (int i = 0; i < 4; i++) {
+            final int k = i;
+            dev.riftverse.multiverse.Scheduler.later(i * 5, () -> level.sendParticles(dev.riftverse.registry.RvParticles.RING.get()
+                    .with(k % 2 == 0 ? color : 0xFFFFFF, (8f + k * 10f) * scale, 26), at.x, at.y + 0.5, at.z, 1, 0, 0, 0, 0));
+        }
+        int h = (int) (40 * scale);
+        for (int y = 0; y < h; y += 2) {
+            level.sendParticles(dev.riftverse.registry.RvParticles.STREAK.get().with(color, 1.6f * scale, 24), at.x, at.y + y, at.z, heavy ? 3 : 1, 0.3, 0.6, 0.3, 0.02);
+        }
+        level.sendParticles(dev.riftverse.registry.RvParticles.SPARK.get().with(color, 1f, 40), at.x, at.y + 2, at.z, heavy ? (int) (160 * scale) : 40,
+                2 * scale, 2 * scale, 2 * scale, 0.9);
+        level.sendParticles(dev.riftverse.registry.RvParticles.MOTE.get().with(0xFFFFFF, 1.4f, 60), at.x, at.y + 6, at.z, heavy ? 60 : 15, 10 * scale, 6, 10 * scale, 0.02);
+        level.playSound(null, at.x, at.y, at.z, dev.riftverse.registry.RvSounds.BLACK_HOLE_COLLAPSE.get(), net.minecraft.sounds.SoundSource.AMBIENT, 3f * scale, 1.3f);
+        for (ServerPlayer p : playersNear(e, 96)) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, new dev.riftverse.network.Payloads.Shake(0.5f * scale, 25, 0.35f, color));
+        }
+    }
 }

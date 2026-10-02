@@ -365,6 +365,114 @@ public final class SpecFactory {
                 creatures(s, CreatureKind.ASTRAL_JELLY, CreatureKind.CRYSTAL_SENTINEL, CreatureKind.LUMEN_STRIDER);
                 s.hostility = 0.4f; s.music = MusicKind.COSMIC; s.gradeTint = 0xFF70D0; s.gradeStrength = 0.12f; s.saturation = 1.25f;
             }
+            case AURORA -> {
+                sky(s, 0x020A1A, 0x1A4A6A, 0x2A5A7A, 0x40FFB0, 0xB060FF, 0xE0F0FF);
+                s.starDensity = 0.9f; s.nebulaIntensity = 0.3f; s.auroraIntensity = 1f; s.moons = 1;
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.SNOW; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.GLACIAL; s.baseHeight = 70; s.amplitude = 26; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.ICE_SPIRE; s.megaDensity = 0.45f; s.decorDensity = 0.7f;
+                creatures(s, CreatureKind.ASTRAL_JELLY, CreatureKind.SKY_WHALE);
+                s.hostility = 0.4f; s.music = MusicKind.DREAM; s.gradeTint = 0x80FFD0; s.gradeStrength = 0.08f; s.saturation = 1.15f;
+            }
+            case MAGMA -> {
+                sky(s, 0x1A0200, 0x8A2000, 0x601800, 0xFF4A10, 0xFFB030, 0xFFD080);
+                s.starDensity = 0.1f; s.nebulaIntensity = 0.4f; s.stormIntensity = 0.4f;
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.EMBERS; s.fogDensity = 0.4f;
+                s.terrain = TerrainMode.VOLCANIC; s.baseHeight = 72; s.amplitude = 40; s.hasSea = true; s.seaLevel = 50;
+                s.mega = MegaKind.VOLCANO; s.mega2 = MegaKind.RIBCAGE; s.megaDensity = 0.6f; s.decorDensity = 0.5f;
+                creatures(s, CreatureKind.VOID_STALKER, CreatureKind.RIFT_WRAITH);
+                s.hostility = 1.6f; s.music = MusicKind.VOID; s.gradeTint = 0xFF5010; s.gradeStrength = 0.16f; s.saturation = 1.2f;
+            }
+            case PRIMEVAL -> {
+                sky(s, 0x4A90C0, 0xC0E8A0, 0x80B070, 0x60FF60, 0x2080FF, 0xFFF8C0);
+                s.starDensity = 0.1f; s.nebulaIntensity = 0.05f; s.moons = 2;
+                s.time = TimeMode.CYCLE; s.weather = WeatherKind.RAIN; s.fogDensity = 0.35f;
+                s.terrain = TerrainMode.MOUNTAINS; s.baseHeight = 72; s.amplitude = 34; s.hasSea = true; s.seaLevel = 62;
+                s.mega = MegaKind.GIANT_TREE; s.mega2 = MegaKind.ZIGGURAT; s.megaDensity = 0.8f; s.decorDensity = 2f;
+                creatures(s, CreatureKind.LUMEN_STRIDER, CreatureKind.SKY_WHALE, CreatureKind.VOID_STALKER);
+                s.hostility = 1.1f; s.music = MusicKind.ANCIENT; s.gradeTint = 0x60D060; s.gradeStrength = 0.1f; s.saturation = 1.3f;
+            }
+            case NEBULA -> {
+                sky(s, 0x10021A, 0x5A1A8A, 0x3A105A, 0xFF40E0, 0x40A0FF, 0xFFE0FF);
+                s.starDensity = 1f; s.nebulaIntensity = 1f; s.galaxyIntensity = 0.8f; s.planetSize = 0.5f; s.planetRings = true;
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.STARDUST; s.fogDensity = 0.15f; s.gravity = 0.6f;
+                s.terrain = TerrainMode.FLOATING; s.baseHeight = 80; s.amplitude = 24; s.hasSea = false; s.islandDensity = 0.6f;
+                s.mega = MegaKind.HALO_RING; s.mega2 = MegaKind.CRYSTAL_SPIRE; s.megaDensity = 0.5f; s.decorDensity = 0.8f;
+                creatures(s, CreatureKind.ASTRAL_JELLY, CreatureKind.SKY_WHALE);
+                s.hostility = 0.3f; s.music = MusicKind.COSMIC; s.gradeTint = 0xC060FF; s.gradeStrength = 0.14f; s.saturation = 1.3f;
+            }
+            case WASTELAND -> {
+                sky(s, 0x5A5030, 0xA09060, 0x807850, 0x9A9A40, 0x606030, 0xFFF0A0);
+                s.starDensity = 0.05f; s.nebulaIntensity = 0.05f; s.stormIntensity = 0.3f;
+                s.time = TimeMode.ETERNAL_DUSK; s.weather = WeatherKind.ASH; s.fogDensity = 0.45f;
+                s.terrain = TerrainMode.CRATERS; s.baseHeight = 66; s.amplitude = 18; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.RIBCAGE; s.megaDensity = 0.4f; s.decorDensity = 0.5f;
+                creatures(s, CreatureKind.GLITCHLING, CreatureKind.VOID_STALKER, CreatureKind.NEON_DRONE);
+                s.hostility = 1.7f; s.music = MusicKind.VOID; s.gradeTint = 0xA0A040; s.gradeStrength = 0.15f; s.saturation = 0.7f;
+            }
+            case GEODE -> {
+                sky(s, 0x12061E, 0x3A1A5A, 0x2A1040, 0xA060FF, 0xFF80E0, 0xF0E0FF);
+                s.starDensity = 0.7f; s.nebulaIntensity = 0.5f; s.moons = 3;
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.STARDUST; s.fogDensity = 0.2f;
+                s.terrain = TerrainMode.SPIRES; s.baseHeight = 68; s.amplitude = 36; s.hasSea = false; s.seaLevel = 40;
+                s.mega = MegaKind.CRYSTAL_SPIRE; s.megaDensity = 0.9f; s.decorDensity = 1.2f;
+                creatures(s, CreatureKind.CRYSTAL_SENTINEL, CreatureKind.ASTRAL_JELLY);
+                s.hostility = 0.9f; s.music = MusicKind.DREAM; s.gradeTint = 0xA070FF; s.gradeStrength = 0.12f; s.saturation = 1.2f;
+            }
+            case DEEPDARK -> {
+                sky(s, 0x000508, 0x02141A, 0x020E12, 0x0A8A9A, 0x2040A0, 0x60E0F0);
+                s.starDensity = 0.2f; s.nebulaIntensity = 0.3f;
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.SPORES; s.fogDensity = 0.6f;
+                s.terrain = TerrainMode.SHATTERED; s.baseHeight = 60; s.amplitude = 30; s.hasSea = false; s.seaLevel = 30;
+                s.mega = MegaKind.RIBCAGE; s.mega2 = MegaKind.MONOLITH; s.megaDensity = 0.5f; s.decorDensity = 0.8f;
+                creatures(s, CreatureKind.VOID_STALKER, CreatureKind.RIFT_WRAITH);
+                s.hostility = 1.8f; s.music = MusicKind.VOID; s.gradeTint = 0x10A0B0; s.gradeStrength = 0.18f; s.saturation = 0.8f;
+            }
+            case SAVANNA -> {
+                sky(s, 0x5AA0E0, 0xFFE0A0, 0xE0C080, 0xFFB040, 0xFF7040, 0xFFF0B0);
+                s.starDensity = 0.1f; s.sunSize = 1.8f; s.binarySun = true;
+                s.time = TimeMode.CYCLE; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.15f;
+                s.terrain = TerrainMode.ROLLING; s.baseHeight = 68; s.amplitude = 14; s.hasSea = true; s.seaLevel = 60;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.GIANT_TREE; s.megaDensity = 0.4f; s.decorDensity = 1.1f;
+                creatures(s, CreatureKind.LUMEN_STRIDER, CreatureKind.SKY_WHALE);
+                s.hostility = 0.5f; s.music = MusicKind.ANCIENT; s.gradeTint = 0xFFC060; s.gradeStrength = 0.1f; s.saturation = 1.15f;
+            }
+            case CHROME -> {
+                sky(s, 0x9AC0E0, 0xF0F8FF, 0xD0E0F0, 0x80E0FF, 0xFFFFFF, 0xFFFFFF);
+                s.starDensity = 0.2f; s.planetSize = 0.6f; s.planetRings = true;
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.DATA_RAIN; s.fogDensity = 0.12f;
+                s.terrain = TerrainMode.CITY; s.baseHeight = 66; s.amplitude = 4; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.NEON_MEGATOWER; s.mega2 = MegaKind.HALO_RING; s.megaDensity = 0.7f; s.decorDensity = 0.6f;
+                creatures(s, CreatureKind.NEON_DRONE, CreatureKind.CRYSTAL_SENTINEL);
+                s.hostility = 0.8f; s.music = MusicKind.NEON; s.gradeTint = 0xE0F0FF; s.gradeStrength = 0.08f; s.saturation = 0.85f;
+            }
+            case LUNAR -> {
+                sky(s, 0x000000, 0x0A0A12, 0x08080C, 0x404060, 0x202040, 0xFFFFFF);
+                s.starDensity = 1f; s.nebulaIntensity = 0.2f; s.planetSize = 0.9f; s.galaxyIntensity = 0.6f;
+                s.time = TimeMode.ETERNAL_NIGHT; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.02f; s.gravity = 0.3f; s.vacuum = true;
+                s.terrain = TerrainMode.CRATERS; s.baseHeight = 64; s.amplitude = 12; s.hasSea = false; s.seaLevel = 30;
+                s.mega = MegaKind.MONOLITH; s.megaDensity = 0.2f; s.decorDensity = 0.2f;
+                creatures(s, CreatureKind.CRYSTAL_SENTINEL);
+                s.hostility = 0.6f; s.music = MusicKind.COSMIC; s.gradeTint = 0xD0D0E0; s.gradeStrength = 0.1f; s.saturation = 0.4f;
+            }
+            case HIVE -> {
+                sky(s, 0xE0A020, 0xFFE070, 0xF0C040, 0xFFC020, 0xFF8000, 0xFFF0A0);
+                s.starDensity = 0.05f; s.sunSize = 1.4f;
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.PETALS; s.fogDensity = 0.25f;
+                s.terrain = TerrainMode.SPIRES; s.baseHeight = 66; s.amplitude = 28; s.hasSea = true; s.seaLevel = 58;
+                s.mega = MegaKind.GIANT_TREE; s.mega2 = MegaKind.ZIGGURAT; s.megaDensity = 0.6f; s.decorDensity = 1.4f;
+                creatures(s, CreatureKind.ASTRAL_JELLY, CreatureKind.NEON_DRONE);
+                s.hostility = 0.9f; s.music = MusicKind.DREAM; s.gradeTint = 0xFFC030; s.gradeStrength = 0.14f; s.saturation = 1.2f;
+            }
+            case MIRROR -> {
+                sky(s, 0xA0D0FF, 0xFFFFFF, 0xE0F0FF, 0xB0E0FF, 0xFFE0FF, 0xFFFFFF);
+                s.starDensity = 0.3f; s.nebulaIntensity = 0.3f; s.moons = 2;
+                s.time = TimeMode.ETERNAL_DAY; s.weather = WeatherKind.CLEAR; s.fogDensity = 0.08f;
+                s.terrain = TerrainMode.OCEAN; s.baseHeight = 58; s.amplitude = 6; s.hasSea = true; s.seaLevel = 62;
+                s.mega = MegaKind.ARCH; s.mega2 = MegaKind.MONOLITH; s.megaDensity = 0.5f; s.decorDensity = 0.3f;
+                creatures(s, CreatureKind.SKY_WHALE, CreatureKind.ASTRAL_JELLY);
+                s.hostility = 0.2f; s.music = MusicKind.DREAM; s.gradeTint = 0xE0F0FF; s.gradeStrength = 0.1f; s.saturation = 0.9f;
+            }
         }
     }
 

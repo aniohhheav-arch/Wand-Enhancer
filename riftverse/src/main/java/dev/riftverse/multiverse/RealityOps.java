@@ -164,9 +164,16 @@ public final class RealityOps {
         return RiftverseConfig.get(RiftverseConfig.REWRITE_RADIUS, 96);
     }
 
+    /** Erasure reaches at least as far as anyone can see, so nothing visible survives. */
+    private static int visibleRadius(MinecraftServer server) {
+        int view = (server.getPlayerList().getViewDistance() + 1) * 16;
+        return Math.max(radius(), Math.min(view, 320));
+    }
+
     @Nullable
     private static Outcome guard(UniverseId id) {
         if (InfiniteCorridor.isCorridor(id)) return Outcome.fail("The Infinite Corridor exists outside reality and cannot be rewritten.");
+        if (RealityState.statusOf(id) == RealityStatus.ENDED) return Outcome.fail("That universe was ended forever. Nothing remains to work with.");
         if (RealityRewriter.busy(id)) return Outcome.fail("That universe is already being rewritten. Wait for the wave to finish.");
         return null;
     }
@@ -179,24 +186,32 @@ public final class RealityOps {
      */
     @Nullable
     public static Outcome prepareErase(MinecraftServer server, UniverseId id, @Nullable ServerPlayer actor, String how) {
+        return prepareErase(server, id, actor, how, false);
+    }
+
+    @Nullable
+    public static Outcome prepareErase(MinecraftServer server, UniverseId id, @Nullable ServerPlayer actor, String how, boolean permanent) {
         Outcome g = guard(id);
         if (g != null) return g;
         if (ERASING.contains(id)) return Outcome.fail("That universe is already being erased.");
         RealityState state = RealityState.get(server);
-        if (state.profile(id).status == RealityStatus.ERASED) return Outcome.fail("That universe has already been erased.");
+        if (state.profile(id).status.gone()) return Outcome.fail("That universe has already been erased.");
         ServerLevel level = server.getLevel(RvWorldgen.EXPANSE);
         if (level == null) return Outcome.fail("The Expanse dimension is not loaded.");
         UniverseSpec spec = spec(server, id);
-        state.backup(spec, level.getGameTime(), "before " + how, RiftverseConfig.get(RiftverseConfig.BACKUPS_PER_UNIVERSE, 5));
-        int n = 0;
-        for (ServerPlayer p : playersIn(server, id)) {
-            RealitySnapshots.save(level, p.blockPosition(), autoSnapshotName(id, n++));
+        if (permanent) {
+            state.forgetBackups(id);
+            state.setStatus(id, RealityStatus.ENDED);
+        } else {
+            state.backup(spec, level.getGameTime(), "before " + how, RiftverseConfig.get(RiftverseConfig.BACKUPS_PER_UNIVERSE, 5));
+            int n = 0;
+            for (ServerPlayer p : playersIn(server, id)) RealitySnapshots.save(level, p.blockPosition(), autoSnapshotName(id, n++));
+            state.setStatus(id, RealityStatus.ERASED);
         }
-        state.setStatus(id, RealityStatus.ERASED);
         UniverseProfile profile = state.profile(id);
         profile.erasures++;
         profile.stability = 0f;
-        state.record(how + " " + id.designation() + " (" + spec.name + ")" + (actor == null ? "" : " by " + actor.getGameProfile().getName()));
+        state.record((permanent ? "ENDED FOREVER: " : "") + how + " " + id.designation() + " (" + spec.name + ")" + (actor == null ? "" : " by " + actor.getGameProfile().getName()));
         EventManager.stopIn(server, id);
         ERASING.add(id);
         if (actor != null) {
@@ -232,7 +247,7 @@ public final class RealityOps {
             return;
         }
         List<BlockPos> centres = centres(id, playersIn(server, id));
-        RealityRewriter.start(level, RealityRewriter.Mode.ERASE, id, null, centres, radius(), () -> {
+        RealityRewriter.start(level, RealityRewriter.Mode.ERASE, id, null, centres, visibleRadius(server), () -> {
             for (ServerPlayer p : playersIn(server, id)) evacuate(p, "The universe you stood in no longer exists.");
             if (afterWave != null) afterWave.run();
         });
@@ -345,7 +360,7 @@ public final class RealityOps {
         if (InfiniteCorridor.isCorridor(id)) return Outcome.fail("The Infinite Corridor cannot be archived.");
         RealityState state = RealityState.get(server);
         UniverseProfile p = state.profile(id);
-        if (p.status == RealityStatus.ERASED) return Outcome.fail("That universe is erased; restore it first.");
+        if (p.status.gone()) return Outcome.fail("That universe is erased; restore it first.");
         if (p.status == RealityStatus.ARCHIVED) return Outcome.fail("That universe is already archived.");
         UniverseSpec spec = spec(server, id);
         ServerLevel level = server.getLevel(RvWorldgen.EXPANSE);
@@ -472,6 +487,7 @@ public final class RealityOps {
 
     public static void clear() {
         ERASING.clear();
+        SEALING.clear();
     }
 
     /** Sends a player out of a universe that is no longer reachable. */
@@ -481,8 +497,64 @@ public final class RealityOps {
         TransitManager.begin(player, TransitKind.CONSOLE, Destination.nexus(), player.getEyePosition().add(player.getLookAngle().scale(3)), 0xFF3A5A, 0xFFC14D, false);
     }
 
-    /** Called every second per player: pushes anyone found inside a sealed universe back to the Nexus. */
+    // ------------------------------------------------------------------ ending whole dimensions
+
+    /** Dimensions currently playing their ending sequence (occupants are evacuated on cue, not by the watchdog). */
+    private static final java.util.Set<net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level>> SEALING = new java.util.HashSet<>();
+
+    public static boolean canEndDimension(ServerLevel level) {
+        return level.dimension() != RvWorldgen.NEXUS && level.dimension() != RvWorldgen.EXPANSE;
+    }
+
+    /** Seals a vanilla/modded dimension forever (Overworld, Nether, End...). Travel, portals and respawns into it are refused from now on. */
+    @Nullable
+    public static Outcome prepareEndDimension(MinecraftServer server, ServerLevel level, @Nullable ServerPlayer actor, String how) {
+        if (!canEndDimension(level)) return Outcome.fail("The Nexus and the Expanse cannot be ended; end a universe inside the Expanse instead.");
+        if (RealityState.isSealed(level.dimension())) return Outcome.fail("That dimension has already been ended.");
+        if (SEALING.contains(level.dimension())) return Outcome.fail("That dimension is already ending.");
+        RealityState state = RealityState.get(server);
+        state.seal(level.dimension());
+        state.record("ENDED FOREVER: " + how + " " + level.dimension().location() + (actor == null ? "" : " by " + actor.getGameProfile().getName()));
+        SEALING.add(level.dimension());
+        if (actor != null) {
+            actor.getData(RvAttachments.MULTIVERSE.get()).realitiesErased++;
+            research(actor, 60, "a world ended");
+        }
+        return null;
+    }
+
+    public static void endDimensionWave(MinecraftServer server, ServerLevel level, int evacuateAfter) {
+        List<BlockPos> centres = new ArrayList<>();
+        for (ServerPlayer p : level.players()) centres.add(p.blockPosition());
+        if (centres.isEmpty()) centres.add(level.getSharedSpawnPos());
+        RealityRewriter.start(level, RealityRewriter.Mode.ERASE, null, null, centres, visibleRadius(server), () -> {
+            for (ServerPlayer p : new ArrayList<>(level.players())) evacuate(p, "This world no longer exists.");
+        });
+        Scheduler.later(evacuateAfter, () -> {
+            SEALING.remove(level.dimension());
+            for (ServerPlayer p : new ArrayList<>(level.players())) evacuate(p, "This world no longer exists.");
+        });
+    }
+
+    public static void abortEndDimension(MinecraftServer server, ServerLevel level) {
+        SEALING.remove(level.dimension());
+        RealityState.get(server).unseal(level.dimension());
+    }
+
+    public static String worldName(ServerLevel level) {
+        if (level.dimension() == net.minecraft.world.level.Level.OVERWORLD) return "Earth (the Overworld)";
+        if (level.dimension() == net.minecraft.world.level.Level.NETHER) return "the Nether";
+        if (level.dimension() == net.minecraft.world.level.Level.END) return "the End";
+        return level.dimension().location().toString();
+    }
+
+    /** Called every second per player: pushes anyone found inside a sealed universe or ended dimension back to the Nexus. */
     public static void playerSecond(ServerPlayer player) {
+        if (RealityState.isSealed(player.level().dimension()) && !SEALING.contains(player.level().dimension()) && !TransitManager.inTransit(player)
+                && !player.isSpectator()) {
+            evacuate(player, worldName(player.serverLevel()) + " has ended. Nothing remains there.");
+            return;
+        }
         UniverseId id = universeOf(player);
         if (id == null || RealityState.isAccessible(id) || ERASING.contains(id) || TransitManager.inTransit(player)) return;
         if (player.isSpectator()) return;

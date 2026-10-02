@@ -82,7 +82,25 @@ public final class CommonEvents {
             }
         });
         bus.addListener((PlayerEvent.PlayerRespawnEvent e) -> {
-            if (e.getEntity() instanceof ServerPlayer sp) UniverseSync.send(sp);
+            if (!(e.getEntity() instanceof ServerPlayer sp)) return;
+            if (RealityState.isSealed(sp.level().dimension())) {
+                // the respawn point lies in an ended world: wake up in the Nexus instead
+                ServerLevel nexus = sp.server.getLevel(RvWorldgen.NEXUS);
+                if (nexus != null) {
+                    net.minecraft.core.BlockPos a = dev.riftverse.world.NexusLayout.ARRIVAL;
+                    nexus.getChunk(a.getX() >> 4, a.getZ() >> 4);
+                    sp.teleportTo(nexus, a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);
+                }
+            }
+            UniverseSync.send(sp);
+        });
+        bus.addListener((net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent e) -> {
+            if (RealityState.isSealed(e.getDimension())) {
+                e.setCanceled(true);
+                if (e.getEntity() instanceof ServerPlayer sp) {
+                    sp.displayClientMessage(net.minecraft.network.chat.Component.literal("That world has ended. The way is closed forever.").withColor(0xFF8A9A), true);
+                }
+            }
         });
         bus.addListener(CommonEvents::onPlayerTick);
         bus.addListener(CommonEvents::onIncomingDamage);

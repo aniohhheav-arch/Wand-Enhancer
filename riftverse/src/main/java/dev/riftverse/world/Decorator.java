@@ -343,6 +343,12 @@ public final class Decorator {
             case TEMPEST -> RiftType.TEMPEST;
             case OBSIDIAN -> RiftType.UMBRAL;
             case VERDIGRIS, MESA -> RiftType.PATINA;
+            case AURORA, MIRROR -> RiftType.AURORAL;
+            case MAGMA, WASTELAND -> RiftType.MOLTEN;
+            case PRIMEVAL, SAVANNA, HIVE -> RiftType.PRIMAL;
+            case CHROME -> RiftType.CHROME;
+            case DEEPDARK, GEODE -> RiftType.SCULK;
+            case NEBULA, LUNAR -> RiftType.NEBULAR;
         };
     }
 

@@ -257,20 +257,21 @@ public final class Payloads {
     }
 
     /** Server → client: open the Reality Remote with the holder's rank, current universe and reachable targets. */
-    public record OpenRemote(int rank, int research, long current, List<UniverseEntry> targets, List<Integer> statuses, List<Integer> stability)
+    public record OpenRemote(int rank, int research, long current, String here, List<UniverseEntry> targets, List<Integer> statuses, List<Integer> stability)
             implements CustomPacketPayload {
         public static final long NONE = Long.MIN_VALUE;
         public static final Type<OpenRemote> TYPE = payloadType("open_remote");
         public static final StreamCodec<FriendlyByteBuf, OpenRemote> CODEC = CustomPacketPayload.<FriendlyByteBuf, OpenRemote>codec(OpenRemote::write, OpenRemote::new);
 
         OpenRemote(FriendlyByteBuf buf) {
-            this(buf.readVarInt(), buf.readVarInt(), buf.readLong(), readEntries(buf), readInts(buf), readInts(buf));
+            this(buf.readVarInt(), buf.readVarInt(), buf.readLong(), buf.readUtf(128), readEntries(buf), readInts(buf), readInts(buf));
         }
 
         void write(FriendlyByteBuf buf) {
             buf.writeVarInt(rank);
             buf.writeVarInt(research);
             buf.writeLong(current);
+            buf.writeUtf(here, 128);
             buf.writeVarInt(targets.size());
             for (UniverseEntry e : targets) e.write(buf);
             writeInts(buf, statuses);
@@ -298,6 +299,8 @@ public final class Payloads {
         public static final int STOP = 10;
         public static final int VISIT = 11;
         public static final int ERASE = 12;
+        /** End the world the holder stands in, whatever it is (universe, Earth, Nether, End...). Permanent. */
+        public static final int END_HERE = 13;
 
         public static final Type<RemoteAction> TYPE = payloadType("remote_action");
         public static final StreamCodec<FriendlyByteBuf, RemoteAction> CODEC = CustomPacketPayload.<FriendlyByteBuf, RemoteAction>codec(RemoteAction::write, RemoteAction::new);

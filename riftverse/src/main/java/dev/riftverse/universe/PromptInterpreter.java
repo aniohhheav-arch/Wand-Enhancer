@@ -91,6 +91,18 @@ public final class PromptInterpreter {
         words(Archetype.FERROUS, 2, "steel", "rust", "machines", "wasteland", "grey", "gray");
         words(Archetype.BLOOM, 3, "flowers", "flower", "blossom", "blossoms", "cherry", "sakura", "petals", "floral", "garden");
         words(Archetype.BLOOM, 2, "pink", "spring", "beautiful", "colorful", "colourful");
+        words(Archetype.AURORA, 3, "aurora", "borealis", "arctic", "tundra", "polar", "northern");
+        words(Archetype.MAGMA, 3, "magma", "lava", "volcano", "volcanic", "molten", "eruption");
+        words(Archetype.PRIMEVAL, 3, "jungle", "dinosaur", "dinosaurs", "prehistoric", "rainforest", "primeval", "tropical");
+        words(Archetype.NEBULA, 3, "nebula", "galaxy", "cosmic", "space", "starry", "stars");
+        words(Archetype.WASTELAND, 3, "wasteland", "apocalypse", "apocalyptic", "fallout", "nuclear", "radioactive", "ruined");
+        words(Archetype.GEODE, 3, "geode", "amethyst", "gem", "gems", "jewel", "crystals");
+        words(Archetype.DEEPDARK, 3, "sculk", "warden", "deep", "underground", "cave", "caves", "echo");
+        words(Archetype.SAVANNA, 3, "savanna", "safari", "africa", "plains", "grassland", "lions");
+        words(Archetype.CHROME, 3, "utopia", "chrome", "futuristic", "clean", "white", "metropolis", "solarpunk");
+        words(Archetype.LUNAR, 3, "moon", "lunar", "astronaut", "apollo", "crater", "craters");
+        words(Archetype.HIVE, 3, "bee", "bees", "honey", "hive", "honeycomb", "nectar");
+        words(Archetype.MIRROR, 3, "mirror", "reflection", "reflective", "glass", "salt", "flats");
 
         color(0xFF2A2A, "red", "scarlet", "ruby");
         color(0xDC143C, "crimson", "blood", "bloody");

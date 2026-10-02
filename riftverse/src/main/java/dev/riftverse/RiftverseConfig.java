@@ -47,6 +47,7 @@ public final class RiftverseConfig {
     public static final ModConfigSpec.IntValue SNAPSHOT_HEIGHT;
     public static final ModConfigSpec.BooleanValue REMOTE_REQUIRES_RANK;
     public static final ModConfigSpec.BooleanValue PROTECT_PRIME_UNIVERSES;
+    public static final ModConfigSpec.BooleanValue ALLOW_ENDING_DIMENSIONS;
 
     // ------------------------------------------------------------------ cinematics
 
@@ -80,7 +81,7 @@ public final class RiftverseConfig {
         REWRITE_RADIUS = BUILDER.comment("Radius (blocks) around each affected player / universe centre that erase and rebuild operations rewrite.")
                 .defineInRange("rewriteRadius", 96, 16, 512);
         REWRITE_COLUMNS_PER_TICK = BUILDER.comment("Block columns rewritten per server tick by erase/rebuild waves (lower = smoother TPS, slower waves).")
-                .defineInRange("rewriteColumnsPerTick", 96, 8, 4096);
+                .defineInRange("rewriteColumnsPerTick", 256, 8, 4096);
         BACKUPS_PER_UNIVERSE = BUILDER.comment("How many definition backups are kept per universe for restoration.")
                 .defineInRange("backupsPerUniverse", 5, 1, 64);
         SNAPSHOT_RADIUS = BUILDER.comment("Horizontal radius of block snapshots taken with /multiverse reality snapshot.")
@@ -96,7 +97,9 @@ public final class RiftverseConfig {
         }
         BUILDER.pop();
         PROTECT_PRIME_UNIVERSES = BUILDER.comment("Whether the Reality Remote refuses to erase the 28 prime realities (commands can still do it).")
-                .define("protectPrimeUniverses", true);
+                .define("protectPrimeUniverses", false);
+        ALLOW_ENDING_DIMENSIONS = BUILDER.comment("Whether the Reality Remote may permanently end whole dimensions (Overworld, Nether, End, modded worlds).")
+                .define("allowEndingVanillaDimensions", true);
         BUILDER.pop();
 
         BUILDER.push("cinematics");

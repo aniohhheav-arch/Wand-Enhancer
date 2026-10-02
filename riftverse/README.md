@@ -10,9 +10,9 @@ including universes you create just by describing them.
 ## Features
 
 ### Portals and rifts
-- **Natural rifts** tear open across the Overworld and inside other universes. There are eighteen rift types (Azure,
+- **Natural rifts** tear open across the Overworld and inside other universes. There are twenty-four rift types (Azure,
   Crimson, Verdant, Void, Prismatic, Nexus, Glitch, Stellar, Return, Solar, Abyssal, Fungal, Sanguine, Brass, Saccharine,
-  Tempest, Umbral and Patina), each with its own colours, shader animation and destination family. A rift lenses the world behind it, glows onto the ground and distorts your screen as you approach.
+  Tempest, Umbral, Patina, Auroral, Molten, Primal, Chrome, Sculk and Nebular), each with its own colours, shader animation and destination family. A rift lenses the world behind it, glows onto the ground and distorts your screen as you approach.
   Walk in to cross over, or **sneak-use** an open rift with an empty hand to harvest **Rift Shards**.
 - **Built portals:** ignite a rectangle of **Rift Frame** blocks with a **Rift Igniter** to open a stable gate to the Nexus.
   Hold an imprinted **Dimensional Key** in your off-hand to link the gate to that exact universe instead.
@@ -34,7 +34,7 @@ Black holes occur naturally in some universes and sit at the heart of the Nexus.
 **Singularity Core**, and the Event Horizon armour can collapse short-lived ones.
 
 ### The Multiverse Nexus and console
-The **Nexus** is a hub dimension floating around a captive singularity. It has 28 gates (one per prime reality),
+The **Nexus** is a hub dimension floating around a captive singularity. It has 40 gates (one per prime reality),
 satellite platforms and the **Rift Altar**. At a **Multiverse Console** you can:
 - browse every prime, discovered and manifested reality,
 - **travel** to any of them, roll a **random** universe, or spin up a **new variant** of an archetype,
@@ -48,11 +48,13 @@ satellite platforms and the **Rift Altar**. At a **Multiverse Console** you can:
   moons, weather, time of day, scale, creatures, gravity, colours and music. It then tells you what it understood.
 
 ### Universes
-All universes are generated analytically. There are **28 prime archetypes**, each mutated into infinite variants:
+All universes are generated analytically. There are **40 prime archetypes**, each mutated into infinite variants:
 Neon Sprawl, Xenoflora Wilds, Skyshatter Isles, Thalassic Expanse, Prismatic Reach, Ashen Remnant, Astral Vastness,
 Corrupted Sector, Elder Dominion, Inverted Heights, The Hollow Dark, Somnium, Cinder Forge, Rime Eternal, Sunscar Dunes,
 Rust Mesa, Coral Shallows, Myco Hollows, Clockwork Reach, Sanguine Expanse, Confection, Tempest Reach, Fenrot Mire,
-Obsidian Spires, Verdigris Ruins, Radiant Expanse, Ferrous Wastes and Spectral Bloom.
+Obsidian Spires, Verdigris Ruins, Radiant Expanse, Ferrous Wastes, Spectral Bloom, Aurora Tundra, Magma Throne,
+Primeval Jungle, Nebula Drift, Fallout Wastes, Amethyst Geode, Sculk Depths, Golden Savanna, Chrome Metropolis,
+Lunar Plains, Golden Hive and Mirror Realm.
 - 15 terrain modes, 13 kinds of megastructure (arcologies, rings, spires, colossal ruins and more), city street grids
   and treasure caches.
 - Each universe has its own shader skybox: nebulae, galaxies, auroras, ringed planets, multiple moons, suns and
@@ -105,6 +107,14 @@ from a description or from Universe DNA), **Events** (trigger any of the ten) an
 gated by cosmic rank (creative players and operators are exempt; configurable). Everything is validated again on the
 server.
 
+The console has four tabs (Universe, Reality, Events, END), fits any GUI scale and explains every button in tooltips.
+The END tab can end the selected universe, or **the world you are standing in, whatever it is**: any universe (dreams,
+cyberpunk...), Earth (the Overworld), the Nether, the End or a modded dimension. With *Forever* on (the default), the
+ending is permanent: no backup is kept, the universe can never be restored, rebuilt or visited again, and an ended
+dimension refuses every portal, rift, home trip and respawn (players respawn in the Nexus instead). Everything a player
+can see (the server view distance) is wiped, every block and every non-player entity, chunk by chunk in a fast
+expanding wave.
+
 **End Protocols**: six fully staged ways to unmake a universe. Each has its own camera work, particles, sounds,
 environmental reactions, screen effects and a configurable duration:
 1. *Orbital Annihilation*: an orbital platform is built in the sky. A targeting scan sweeps the land, then energy lances
@@ -122,6 +132,11 @@ during the sequence. At the point of no return the erase wave unmakes the terrai
 the Nexus, so no one can be trapped (a watchdog also pulls anyone found in a sealed universe back to the Nexus). Before
 the point of no return, `protocol stop` / the Remote's **Abort** cancels it cleanly. *Reconstruct after* restores the
 universe automatically when the wave ends. **Preview** plays any protocol for you alone without touching the world.
+
+Every event opens with a shockwave-and-light-pillar intro and closes with an outro burst. **Universe Birth** is a
+three-act cutscene: light spirals into a point in the sky, it ignites, and a little moon condenses there shell by shell
+(it stays). The newborn universe is then named, a stable rift opens beneath the moon, and inside a universe the sky
+gains a new moon.
 
 **Multiverse events** happen naturally (configurable rarity per event, per-event cooldown, global minimum gap, never in
 the Nexus or the Infinite Corridor) and can all be started by command or the Remote:
@@ -153,6 +168,9 @@ spire (east), the Convergence Spire with a ring of rifts to eight realities (sou
 fills empty space).
 
 #### Known limitations (honest notes)
+- Ending a vanilla dimension wipes what players can see and seals it forever, but region files further away are not
+  deleted (nobody can reach them). Worlds whose Nexus already existed keep their old gate ring; gates for the 12 newest
+  realities appear only where Nexus chunks are generated fresh (they are always reachable by rifts and the console).
 - Erase/rebuild/restore rewrite terrain within `rewriteRadius` of the universe origin and of every player inside it.
   Chunks of that universe generated elsewhere earlier stay on disk unchanged (they are unreachable while it is erased).
   After a *mutated* rebuild, those distant old chunks keep their previous look, so seams can appear there.
@@ -199,7 +217,8 @@ operations require `/multiverse confirm` within 30 s). Universes can be named `h
 /multiverse reality erase [universe] | rebuild [universe] [new|<archetype>] | restore [universe]
 /multiverse reality snapshot save|load|delete <name> | snapshot list
 /multiverse reality protocols
-/multiverse reality protocol <protocol> [universe] [reconstruct]
+/multiverse reality protocol <protocol> [universe] [reconstruct|permanent]
+/multiverse reality protocol <protocol> world      (end the dimension you stand in, forever)
 /multiverse reality protocol stop [universe] | protocol preview <protocol> [targets]
 /multiverse universe list [page] | info [universe] | dna [universe] | create <description | dna:CODE>
 /multiverse universe visit <universe> | archive <universe> | restore <universe>
@@ -214,7 +233,7 @@ operations require `/multiverse confirm` within 30 s). Universes can be named `h
 `[events]`: `naturalEvents`, `checkIntervalSeconds`, `minMinutesBetweenEvents`, `eventsAlterTerrain`,
 `eventsInVanillaDimensions`, plus `rarity` and `cooldownMinutes` for each event (both can also be overridden in-game,
 saved with the world). `[reality]`: `rewriteRadius`, `rewriteColumnsPerTick`, `backupsPerUniverse`, `snapshotRadius`,
-`snapshotHeight`, `remoteRequiresRank`, `protectPrimeUniverses`, and `[reality.protocols]` with the length of each End
+`snapshotHeight`, `remoteRequiresRank`, `protectPrimeUniverses`, `allowEndingVanillaDimensions`, and `[reality.protocols]` with the length of each End
 Protocol. `[cinematics]`: `cinematicCamera`, `heavyEffects`.
 
 ---

@@ -31,6 +31,8 @@ public final class RealityState extends SavedData {
 
     private static final Set<Long> ERASED = ConcurrentHashMap.newKeySet();
     private static final Set<Long> ARCHIVED = ConcurrentHashMap.newKeySet();
+    private static final Set<Long> ENDED = ConcurrentHashMap.newKeySet();
+    private static final Set<String> SEALED_DIMENSIONS = ConcurrentHashMap.newKeySet();
 
     public record Backup(CompoundTag spec, long gameTime, String reason) {
         public UniverseSpec restore() {
@@ -39,6 +41,7 @@ public final class RealityState extends SavedData {
     }
 
     private final Map<Long, UniverseProfile> profiles = new HashMap<>();
+    private final Set<String> sealed = new java.util.HashSet<>();
     private final Map<Long, List<Backup>> backups = new HashMap<>();
     private final Map<String, Long> eventReadyAt = new HashMap<>();
     private final Map<String, Integer> rarityOverride = new HashMap<>();
@@ -57,18 +60,25 @@ public final class RealityState extends SavedData {
     public static void onServerStarted(MinecraftServer server) {
         ERASED.clear();
         ARCHIVED.clear();
+        ENDED.clear();
+        SEALED_DIMENSIONS.clear();
         RealityState state = get(server);
         for (UniverseProfile p : state.profiles.values()) mirror(p);
+        SEALED_DIMENSIONS.addAll(state.sealed);
     }
 
     public static void onServerStopped() {
         ERASED.clear();
         ARCHIVED.clear();
+        ENDED.clear();
+        SEALED_DIMENSIONS.clear();
     }
 
     private static void mirror(UniverseProfile p) {
-        if (p.status == RealityStatus.ERASED) ERASED.add(p.id);
+        if (p.status.gone()) ERASED.add(p.id);
         else ERASED.remove(p.id);
+        if (p.status == RealityStatus.ENDED) ENDED.add(p.id);
+        else ENDED.remove(p.id);
         if (p.status == RealityStatus.ARCHIVED) ARCHIVED.add(p.id);
         else ARCHIVED.remove(p.id);
     }
@@ -86,6 +96,7 @@ public final class RealityState extends SavedData {
 
     public static RealityStatus statusOf(UniverseId id) {
         long k = id.pack();
+        if (ENDED.contains(k)) return RealityStatus.ENDED;
         if (ERASED.contains(k)) return RealityStatus.ERASED;
         if (ARCHIVED.contains(k)) return RealityStatus.ARCHIVED;
         return RealityStatus.ACTIVE;
@@ -114,6 +125,34 @@ public final class RealityState extends SavedData {
     }
 
     public void touch() {
+        setDirty();
+    }
+
+    // ------------------------------------------------------------------ sealed (ended) dimensions
+
+    /** Thread-safe: whether a whole dimension (Overworld, Nether, End, modded) has been permanently ended. */
+    public static boolean isSealed(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim) {
+        return !SEALED_DIMENSIONS.isEmpty() && SEALED_DIMENSIONS.contains(dim.location().toString());
+    }
+
+    public void seal(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim) {
+        sealed.add(dim.location().toString());
+        SEALED_DIMENSIONS.add(dim.location().toString());
+        setDirty();
+    }
+
+    public void unseal(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim) {
+        sealed.remove(dim.location().toString());
+        SEALED_DIMENSIONS.remove(dim.location().toString());
+        setDirty();
+    }
+
+    public java.util.List<String> sealedDimensions() {
+        return new java.util.ArrayList<>(sealed);
+    }
+
+    public void forgetBackups(UniverseId id) {
+        backups.remove(id.pack());
         setDirty();
     }
 
@@ -217,6 +256,9 @@ public final class RealityState extends SavedData {
         for (String s : history) hist.add(StringTag.valueOf(s));
         tag.put("history", hist);
         tag.putLong("lastNaturalEvent", lastNaturalEvent);
+        ListTag sl = new ListTag();
+        for (String d : sealed) sl.add(StringTag.valueOf(d));
+        tag.put("sealedDimensions", sl);
         return tag;
     }
 
@@ -242,6 +284,8 @@ public final class RealityState extends SavedData {
         ListTag hist = tag.getList("history", Tag.TAG_STRING);
         for (int i = 0; i < hist.size(); i++) s.history.addLast(hist.getString(i));
         if (tag.contains("lastNaturalEvent")) s.lastNaturalEvent = tag.getLong("lastNaturalEvent");
+        ListTag sl = tag.getList("sealedDimensions", Tag.TAG_STRING);
+        for (int i = 0; i < sl.size(); i++) s.sealed.add(sl.getString(i));
         return s;
     }
 }

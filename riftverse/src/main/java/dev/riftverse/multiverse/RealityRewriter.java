@@ -49,6 +49,7 @@ public final class RealityRewriter {
         public final int id;
         public final ServerLevel level;
         public final Mode mode;
+        @Nullable
         public final UniverseId universe;
         @Nullable
         public final UniverseSpec spec;
@@ -61,7 +62,7 @@ public final class RealityRewriter {
         BlockState[] buffer = new BlockState[0];
         boolean cancelled;
 
-        Job(int id, ServerLevel level, Mode mode, UniverseId universe, @Nullable UniverseSpec spec, List<ChunkPos> chunks, @Nullable Runnable onDone) {
+        Job(int id, ServerLevel level, Mode mode, @Nullable UniverseId universe, @Nullable UniverseSpec spec, List<ChunkPos> chunks, @Nullable Runnable onDone) {
             this.id = id;
             this.level = level;
             this.mode = mode;
@@ -84,7 +85,7 @@ public final class RealityRewriter {
      * Starts a wave. Centres are the epicentres (players, the universe origin); every chunk within radius of any centre
      * and inside the universe slot is rewritten, nearest first.
      */
-    public static Job start(ServerLevel level, Mode mode, UniverseId universe, @Nullable UniverseSpec spec, List<BlockPos> centres, int radius,
+    public static Job start(ServerLevel level, Mode mode, @Nullable UniverseId universe, @Nullable UniverseSpec spec, List<BlockPos> centres, int radius,
                             @Nullable Runnable onDone) {
         Set<Long> seen = new HashSet<>();
         List<ChunkPos> chunks = new ArrayList<>();
@@ -95,7 +96,7 @@ public final class RealityRewriter {
                 for (int dz = -cr; dz <= cr; dz++) {
                     if (dx * dx + dz * dz > cr * cr) continue;
                     ChunkPos cp = new ChunkPos(cc.x + dx, cc.z + dz);
-                    if (!UniverseId.ofBlock(cp.getMiddleBlockX(), cp.getMiddleBlockZ()).equals(universe)) continue;
+                    if (universe != null && !UniverseId.ofBlock(cp.getMiddleBlockX(), cp.getMiddleBlockZ()).equals(universe)) continue;
                     if (seen.add(cp.toLong())) chunks.add(cp);
                 }
             }
@@ -119,7 +120,7 @@ public final class RealityRewriter {
     }
 
     public static boolean busy(UniverseId universe) {
-        for (Job j : JOBS) if (j.universe.equals(universe)) return true;
+        for (Job j : JOBS) if (universe.equals(j.universe)) return true;
         return false;
     }
 
@@ -130,7 +131,7 @@ public final class RealityRewriter {
 
     public static void tick(MinecraftServer server) {
         if (JOBS.isEmpty()) return;
-        int budget = RiftverseConfig.get(RiftverseConfig.REWRITE_COLUMNS_PER_TICK, 96);
+        int budget = RiftverseConfig.get(RiftverseConfig.REWRITE_COLUMNS_PER_TICK, 256);
         int share = Math.max(8, budget / JOBS.size());
         Iterator<Job> it = JOBS.iterator();
         List<Runnable> finished = new ArrayList<>();
@@ -159,13 +160,19 @@ public final class RealityRewriter {
             job.landmarks = UniverseChunkGenerator.landmarks(job.spec, cp.getMinBlockX(), cp.getMinBlockZ());
             if (job.buffer.length != maxY - minY + 1) job.buffer = new BlockState[maxY - minY + 1];
         }
+        if (job.mode == Mode.ERASE) {
+            eraseChunk(level, chunk);
+            finishChunk(job, chunk, cp);
+            job.column = 0;
+            job.chunkIndex++;
+            return 32;
+        }
         int processed = 0;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         while (processed < max && job.column < 256) {
             int x = cp.getMinBlockX() + (job.column & 15);
             int z = cp.getMinBlockZ() + (job.column >> 4);
-            if (job.mode == Mode.ERASE) eraseColumn(level, chunk, x, z, minY, pos);
-            else if (job.spec != null) rebuildColumn(job, level, x, z, minY, maxY, pos);
+            if (job.spec != null) rebuildColumn(job, level, x, z, minY, maxY, pos);
             job.column++;
             processed++;
         }
@@ -177,18 +184,53 @@ public final class RealityRewriter {
         return Math.max(1, processed);
     }
 
-    private static void eraseColumn(ServerLevel level, LevelChunk chunk, int x, int z, int minY, BlockPos.MutableBlockPos pos) {
+    /**
+     * Unmakes a whole chunk at once: every section is emptied directly, block entities are dropped, heightmaps re-primed,
+     * sky light re-checked from the old surface down, and the chunk is resent to everyone tracking it.
+     */
+    private static void eraseChunk(ServerLevel level, LevelChunk chunk) {
         BlockState air = Blocks.AIR.defaultBlockState();
+        int minY = level.getMinBuildHeight();
+        for (BlockPos be : new ArrayList<>(chunk.getBlockEntities().keySet())) chunk.removeBlockEntity(be);
+        int[] tops = new int[256];
+        java.util.Arrays.fill(tops, Integer.MIN_VALUE);
         LevelChunkSection[] sections = chunk.getSections();
-        for (int si = sections.length - 1; si >= 0; si--) {
+        for (int si = 0; si < sections.length; si++) {
             LevelChunkSection section = sections[si];
             if (section.hasOnlyAir()) continue;
             int base = minY + si * 16;
-            for (int ly = 15; ly >= 0; ly--) {
-                pos.set(x, base + ly, z);
-                if (!section.getBlockState(x & 15, ly, z & 15).isAir()) level.setBlock(pos, air, FLAGS);
+            section.acquire();
+            try {
+                for (int ly = 0; ly < 16; ly++) {
+                    for (int lz = 0; lz < 16; lz++) {
+                        for (int lx = 0; lx < 16; lx++) {
+                            if (section.getBlockState(lx, ly, lz).isAir()) continue;
+                            section.setBlockState(lx, ly, lz, air, false);
+                            tops[lz * 16 + lx] = Math.max(tops[lz * 16 + lx], base + ly);
+                        }
+                    }
+                }
+            } finally {
+                section.release();
             }
         }
+        net.minecraft.world.level.levelgen.Heightmap.primeHeightmaps(chunk, java.util.EnumSet.of(Heightmap.Types.MOTION_BLOCKING,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE));
+        chunk.setUnsaved(true);
+        var light = level.getChunkSource().getLightEngine();
+        int x0 = chunk.getPos().getMinBlockX();
+        int z0 = chunk.getPos().getMinBlockZ();
+        for (int i = 0; i < 256; i++) {
+            if (tops[i] == Integer.MIN_VALUE) continue;
+            int x = x0 + (i & 15);
+            int z = z0 + (i >> 4);
+            for (int y = tops[i]; y >= minY; y -= 8) light.checkBlock(new BlockPos(x, y, z));
+        }
+        ChunkPos cp = chunk.getPos();
+        Scheduler.later(4, () -> {
+            var packet = new net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket(chunk, light, null, null);
+            for (net.minecraft.server.level.ServerPlayer p : level.getChunkSource().chunkMap.getPlayers(cp, false)) p.connection.send(packet);
+        });
     }
 
     private static void rebuildColumn(Job job, ServerLevel level, int x, int z, int minY, int maxY, BlockPos.MutableBlockPos pos) {

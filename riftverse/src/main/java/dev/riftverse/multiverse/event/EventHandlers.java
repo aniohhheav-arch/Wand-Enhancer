@@ -391,12 +391,23 @@ public final class EventHandlers {
 
     // ------------------------------------------------------------------ 7. universe birth
 
+    /**
+     * A cutscene in three acts: light and matter spiral into a point high in the sky; it ignites and a little moon
+     * condenses there, shell by shell, glowing craters and all (it stays); then the newborn universe is named, a stable
+     * rift opens beneath it and, inside the Expanse, the local sky gains a new moon.
+     */
     static final class UniverseBirth implements MultiverseEvent {
-        private static final int BIRTH = 300;
+        private static final int IGNITE = 160;
+        private static final int GROW_END = 300;
+        private static final int BIRTH = 330;
+        private static final int MOON_R = 5;
 
         @Override
         public String start(ActiveEvent e) {
-            e.focus = e.center.add(0, 24, 0);
+            BlockPos g = EventKit.ground(e.level, (int) e.center.x, (int) e.center.z, (int) e.center.y);
+            int top = Math.min(e.level.getMaxBuildHeight() - MOON_R - 4, g.getY() + 34);
+            e.focus = new Vec3(g.getX() + 0.5, top, g.getZ() + 0.5);
+            e.duration = 520;
             return null;
         }
 
@@ -404,32 +415,85 @@ public final class EventHandlers {
         public void tick(ActiveEvent e) {
             ServerLevel level = e.level;
             Vec3 c = e.focus;
-            if (e.age < BIRTH) {
-                float k = e.age / (float) BIRTH;
-                if (e.age % 2 == 0) {
-                    level.sendParticles(RvParticles.INFALL.get().with(0xFFF0C8, 0.6f + k, 30), c.x, c.y, c.z, heavy() ? (int) (6 + 20 * k) : 4, 6 * (1 - k) + 1, 6 * (1 - k) + 1, 6 * (1 - k) + 1, 0.02);
+            boolean heavy = heavy();
+            if (e.age < IGNITE) {
+                // act one: condensation — spiralling arms of light pour into a single point
+                float k = e.age / (float) IGNITE;
+                double spin = e.age * 0.15;
+                for (int arm = 0; arm < (heavy ? 4 : 2); arm++) {
+                    double rr = 22 * (1 - k) + 2;
+                    double a = spin + arm * Math.PI / 2;
+                    level.sendParticles(RvParticles.STREAK.get().with(arm % 2 == 0 ? 0xFFF0C8 : 0xFF7AF0, 1.3f, 24), c.x + Math.cos(a) * rr, c.y + Math.sin(spin) * 2,
+                            c.z + Math.sin(a) * rr, 1, 0, 0, 0, 0);
                 }
-                if (e.age % 40 == 0) {
-                    level.sendParticles(RvParticles.RING.get().with(0xFF7AF0, 4f + 14f * k, 24), c.x, c.y, c.z, 1, 0, 0, 0, 0);
-                    level.playSound(null, c.x, c.y, c.z, RvSounds.JELLY_CHIME.get(), SoundSource.AMBIENT, 3f, 0.5f + k);
+                if (e.age % 2 == 0) level.sendParticles(RvParticles.INFALL.get().with(0xFFF0C8, 0.8f + k, 30), c.x, c.y, c.z, heavy ? 14 : 4, 12 * (1 - k) + 1, 8 * (1 - k) + 1, 12 * (1 - k) + 1, 0.02);
+                if (e.age % 30 == 0) {
+                    level.sendParticles(RvParticles.RING.get().with(0xFF7AF0, 30f * (1 - k) + 3, 24), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                    level.playSound(null, c.x, c.y, c.z, RvSounds.JELLY_CHIME.get(), SoundSource.AMBIENT, 4f, 0.5f + k);
                 }
                 return;
+            }
+            if (e.age == IGNITE) {
+                level.sendParticles(RvParticles.RING.get().with(0xFFFFFF, 40f, 30), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                level.sendParticles(RvParticles.SPARK.get().with(0xFFF0C8, 1.4f, 50), c.x, c.y, c.z, heavy ? 300 : 80, 2, 2, 2, 1.5);
+                level.playSound(null, c.x, c.y, c.z, RvSounds.BLACK_HOLE_COLLAPSE.get(), SoundSource.AMBIENT, 6f, 1.8f);
+                for (ServerPlayer p : EventKit.playersNear(e, 160)) PacketDistributor.sendToPlayer(p, new Payloads.Shake(0.8f, 30, 1f, 0xFFF0C8));
+            }
+            if (e.age <= GROW_END) {
+                // act two: the moon condenses shell by shell
+                float k = (e.age - IGNITE) / (float) (GROW_END - IGNITE);
+                double radius = 0.8 + MOON_R * k;
+                double inner = Math.max(0, radius - 1.2);
+                BlockPos centre = BlockPos.containing(c);
+                int ri = (int) Math.ceil(radius);
+                for (int dx = -ri; dx <= ri; dx++) {
+                    for (int dy = -ri; dy <= ri; dy++) {
+                        for (int dz = -ri; dz <= ri; dz++) {
+                            double d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                            if (d > radius || d <= inner) continue;
+                            BlockPos p = centre.offset(dx, dy, dz);
+                            if (!level.getBlockState(p).isAir()) continue;
+                            long h = dev.riftverse.util.Hash.of(0x400DL, p.getX(), p.getY(), p.getZ());
+                            float u = dev.riftverse.util.Hash.unit(h);
+                            BlockState s = u < 0.07f ? dev.riftverse.registry.RvBlocks.NEXUS_GLOW.get().defaultBlockState()
+                                    : u < 0.22f ? dev.riftverse.registry.RvBlocks.COSMIC_OBSIDIAN.get().defaultBlockState()
+                                    : u < 0.45f ? dev.riftverse.registry.RvBlocks.DEAD_REGOLITH.get().defaultBlockState()
+                                    : Blocks.END_STONE.defaultBlockState();
+                            level.setBlock(p, s, 3);
+                        }
+                    }
+                }
+                if (e.age % 3 == 0) level.sendParticles(RvParticles.MOTE.get().with(0xFFF0C8, 1.2f, 30), c.x, c.y, c.z, heavy ? 20 : 6, radius + 2, radius + 2, radius + 2, 0.05);
+                if (e.age % 20 == 0) level.playSound(null, c.x, c.y, c.z, RvSounds.SENTINEL_STEP.get(), SoundSource.AMBIENT, 4f, 0.5f);
+                return;
+            }
+            if (e.age % 6 == 0) {
+                // the newborn moon glows and sheds dust for the rest of the scene
+                level.sendParticles(RvParticles.DUST.get().with(0xFFF0C8, 1.2f, 50), c.x, c.y, c.z, heavy ? 10 : 3, MOON_R + 2, MOON_R + 2, MOON_R + 2, 0.01);
             }
             if (e.age == BIRTH) {
                 UniverseSpec born = UniverseRegistry.get(level.getServer()).randomUniverse(new Random(), null);
                 e.data.putLong("born", born.id.pack());
-                level.sendParticles(RvParticles.RING.get().with(born.accent, 30f, 40), c.x, c.y, c.z, 1, 0, 0, 0, 0);
-                level.sendParticles(RvParticles.SPARK.get().with(born.accent, 1.2f, 50), c.x, c.y, c.z, heavy() ? 300 : 80, 3, 3, 3, 1.2);
-                level.playSound(null, c.x, c.y, c.z, RvSounds.BLACK_HOLE_COLLAPSE.get(), SoundSource.AMBIENT, 5f, 1.6f);
+                level.sendParticles(RvParticles.RING.get().with(born.accent, 50f, 40), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+                level.sendParticles(RvParticles.SPARK.get().with(born.accent, 1.2f, 50), c.x, c.y, c.z, heavy ? 300 : 80, 6, 6, 6, 1.2);
+                level.playSound(null, c.x, c.y, c.z, RvSounds.UNIVERSE_ARRIVE.get(), SoundSource.AMBIENT, 6f, 0.8f);
                 BlockPos g = EventKit.ground(level, (int) e.center.x, (int) e.center.z, (int) e.center.y).above(1);
                 for (int up = 0; up < 6 && !EventKit.openRift(e, g.above(up), RiftType.PRISMATIC, 12000, Destination.universe(born.id)); up++) {}
                 e.rifts.clear(); // the birth rift outlives the event
-                for (ServerPlayer p : EventKit.playersNear(e, 128)) {
+                if (e.universe != null) {
+                    // the sky of the universe this happened in gains the new moon
+                    UniverseSpec here = UniverseRegistry.specFor(e.universe).copy();
+                    here.moons = Math.min(6, here.moons + 1);
+                    UniverseRegistry.get(level.getServer()).replace(here);
+                    for (ServerPlayer p : dev.riftverse.multiverse.RealityOps.playersIn(level.getServer(), e.universe)) dev.riftverse.network.UniverseSync.send(p);
+                }
+                for (ServerPlayer p : EventKit.playersNear(e, 160)) {
                     PacketDistributor.sendToPlayer(p, new Payloads.Shake(0.7f, 30, 1f, born.accent));
                     RealityOps.cinematic(p, dev.riftverse.multiverse.CinematicType.ANNOUNCE, 0, c, born.accent, 0xFFFFFF, born.name.toUpperCase(),
-                            "A newborn reality [" + born.id.designation() + "] — a stable rift now leads there");
+                            "A newborn reality [" + born.id.designation() + "] — a stable rift beneath the new moon leads there");
+                    p.getData(dev.riftverse.registry.RvAttachments.MULTIVERSE.get()).discover(born.id.pack());
                 }
-                reward(e, 128, 30, "witnessed a universe being born");
+                reward(e, 160, 30, "witnessed a universe being born");
             }
         }
 

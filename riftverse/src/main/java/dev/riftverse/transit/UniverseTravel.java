@@ -60,6 +60,7 @@ public final class UniverseTravel {
             case NEXUS -> toNexus(server);
             case LOCATION -> {
                 ResourceKey<Level> key = dest.dimensionKey();
+                if (key != null && RealityState.isSealed(key)) yield toNexus(server);
                 ServerLevel level = key == null ? null : server.getLevel(key);
                 if (level == null) yield home(player);
                 BlockPos p = safeAround(level, dest.pos(), 12);
@@ -120,10 +121,12 @@ public final class UniverseTravel {
                 pos = BlockPos.of(data.homePos);
             }
         }
+        if (level != null && RealityState.isSealed(level.dimension())) level = null;
         if (level == null || pos == null) {
             level = server.overworld();
             pos = level.getSharedSpawnPos();
         }
+        if (RealityState.isSealed(level.dimension())) return toNexus(server);
         BlockPos safe = safeAround(level, pos, 16);
         return new Target(level, Vec3.atBottomCenterOf(safe), player.getYRot(), null, "HOME", "The familiar sky of your own reality", 0xFFFFFF, false);
     }

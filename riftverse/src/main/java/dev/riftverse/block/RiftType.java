@@ -23,7 +23,13 @@ public enum RiftType implements StringRepresentable {
     SACCHARINE("saccharine", 0xFF8FD0, 0xB0E0FF, 4, new Archetype[] {Archetype.CONFECTION, Archetype.SOMNIUM, Archetype.BLOOM}),
     TEMPEST("tempest", 0x5A8AFF, 0xC0E0FF, 0, new Archetype[] {Archetype.TEMPEST, Archetype.SKYSHATTER, Archetype.INVERTED}),
     UMBRAL("umbral", 0x6A2AC8, 0x200040, 3, new Archetype[] {Archetype.OBSIDIAN, Archetype.HOLLOW, Archetype.ASHEN}),
-    PATINA("patina", 0x3AC8A0, 0xC8E080, 2, new Archetype[] {Archetype.VERDIGRIS, Archetype.MESA, Archetype.ELDER});
+    PATINA("patina", 0x3AC8A0, 0xC8E080, 2, new Archetype[] {Archetype.VERDIGRIS, Archetype.MESA, Archetype.ELDER}),
+    AURORAL("auroral", 0x40FFB0, 0xB060FF, 4, new Archetype[] {Archetype.AURORA, Archetype.RIME, Archetype.MIRROR}),
+    MOLTEN("molten", 0xFF4A10, 0xFFD040, 1, new Archetype[] {Archetype.MAGMA, Archetype.WASTELAND, Archetype.CINDER}),
+    PRIMAL("primal", 0x3ABF3A, 0xFFE060, 2, new Archetype[] {Archetype.PRIMEVAL, Archetype.SAVANNA, Archetype.HIVE}),
+    CHROME("chrome", 0xE0F0FF, 0x80E0FF, 5, new Archetype[] {Archetype.CHROME, Archetype.MIRROR, Archetype.NEON_SPRAWL}),
+    SCULK("sculk", 0x0A8A9A, 0x002030, 3, new Archetype[] {Archetype.DEEPDARK, Archetype.GEODE, Archetype.HOLLOW}),
+    NEBULAR("nebular", 0xC050FF, 0x40A0FF, 7, new Archetype[] {Archetype.NEBULA, Archetype.LUNAR, Archetype.ASTRAL});
 
     private final String name;
     public final int colorA;

@@ -58,6 +58,9 @@ public final class EndProtocols {
         public final ServerLevel level;
         public final boolean preview;
         public final boolean reconstruct;
+        public boolean permanent;
+        /** True when this run ends a whole vanilla/modded dimension rather than a universe slot. */
+        public boolean wholeDimension;
         @Nullable
         public final UUID viewer;
         public final int duration;
@@ -83,7 +86,8 @@ public final class EndProtocols {
         }
 
         public String describe() {
-            return "#" + id + " " + protocol.id + (preview ? " (preview)" : " on " + (universe == null ? "?" : universe.designation()))
+            String what = wholeDimension ? RealityOps.worldName(level) : universe == null ? "?" : universe.designation();
+            return "#" + id + " " + protocol.id + (preview ? " (preview)" : " on " + what) + (permanent ? " • PERMANENT" : "")
                     + " — " + Math.max(0, (climax - age) / 20) + "s to " + (preview ? "climax" : "point of no return")
                     + (reconstruct ? " • reconstruct after" : "");
         }
@@ -104,13 +108,20 @@ public final class EndProtocols {
     // ------------------------------------------------------------------ control
 
     public static RealityOps.Outcome execute(MinecraftServer server, UniverseId id, EndProtocol protocol, @Nullable ServerPlayer actor, boolean reconstruct) {
-        RealityOps.Outcome fail = RealityOps.prepareErase(server, id, actor, protocol.id + " protocol");
+        return execute(server, id, protocol, actor, reconstruct, false);
+    }
+
+    public static RealityOps.Outcome execute(MinecraftServer server, UniverseId id, EndProtocol protocol, @Nullable ServerPlayer actor, boolean reconstruct,
+                                             boolean permanent) {
+        if (permanent) reconstruct = false;
+        RealityOps.Outcome fail = RealityOps.prepareErase(server, id, actor, protocol.id + " protocol", permanent);
         if (fail != null) return fail;
         ServerLevel level = server.getLevel(RvWorldgen.EXPANSE);
         UniverseSpec spec = RealityOps.spec(server, id);
         int duration = durationTicks(protocol);
         Vec3 origin = Vec3.atBottomCenterOf(surface(level, id.centerX(), id.centerZ(), 80));
         Run run = new Run(nextId++, protocol, id, level, false, reconstruct, actor == null ? null : actor.getUUID(), duration, origin);
+        run.permanent = permanent;
         RUNS.add(run);
         for (ServerPlayer p : RealityOps.playersIn(server, id)) {
             RealityOps.cinematic(p, protocol.cinematic, duration + 40, cinematicFocus(run, p.position()), protocol.colorA, protocol.colorB, protocol.title, protocol.subtitle);
@@ -122,7 +133,32 @@ public final class EndProtocols {
         }
         setup(run);
         return RealityOps.Outcome.ok(protocol.title + " engaged on " + spec.name + " [" + id.designation() + "]. Point of no return in " + run.climax / 20
-                + "s (/multiverse reality protocol stop aborts). Backup + snapshots saved" + (reconstruct ? "; it will be reconstructed afterwards." : "."));
+                + "s (/multiverse reality protocol stop aborts). " + (permanent ? "This ending is PERMANENT: no backup was kept." : "Backup + snapshots saved"
+                + (reconstruct ? "; it will be reconstructed afterwards." : ".")));
+    }
+
+    /** Ends the whole dimension a player stands in (Earth, the Nether, the End, modded worlds) — permanently. */
+    public static RealityOps.Outcome executeDimension(MinecraftServer server, ServerLevel level, EndProtocol protocol, @Nullable ServerPlayer actor) {
+        RealityOps.Outcome fail = RealityOps.prepareEndDimension(server, level, actor, protocol.id + " protocol");
+        if (fail != null) return fail;
+        int duration = durationTicks(protocol);
+        Vec3 origin = Vec3.atBottomCenterOf(level.getSharedSpawnPos());
+        Run run = new Run(nextId++, protocol, null, level, false, false, actor == null ? null : actor.getUUID(), duration, origin);
+        run.permanent = true;
+        run.wholeDimension = true;
+        RUNS.add(run);
+        String name = RealityOps.worldName(level);
+        for (ServerPlayer p : level.players()) {
+            RealityOps.cinematic(p, protocol.cinematic, duration + 40, cinematicFocus(run, p.position()), protocol.colorA, protocol.colorB, protocol.title,
+                    "The end of " + name);
+            RealityOps.shield(p, duration + 160);
+        }
+        if (actor != null && actor.level() != level) {
+            RealityOps.cinematic(actor, CinematicType.ANNOUNCE, 0, actor.getEyePosition(), protocol.colorA, 0xFFFFFF, protocol.title, "Executing on " + name);
+        }
+        setup(run);
+        return RealityOps.Outcome.ok(protocol.title + " engaged on " + name + ". It will be gone FOREVER in " + run.climax / 20
+                + "s; everyone there is carried to the Nexus. (/multiverse reality protocol stop aborts before then.)");
     }
 
     public static RealityOps.Outcome preview(ServerPlayer viewer, EndProtocol protocol) {
@@ -145,7 +181,10 @@ public final class EndProtocols {
             if (universe != null && !universe.equals(r.universe)) continue;
             if (viewer != null && universe == null && !(r.preview && viewer.equals(r.viewer)) && !viewer.equals(r.viewer)) continue;
             RUNS.remove(r);
-            if (!r.preview && !r.pastClimax && r.universe != null) {
+            if (!r.preview && !r.pastClimax && r.wholeDimension) {
+                RealityOps.abortEndDimension(server, r.level);
+                aborted++;
+            } else if (!r.preview && !r.pastClimax && r.universe != null) {
                 RealityOps.abortErase(server, r.universe);
                 aborted++;
             } else if (!r.preview) {
@@ -167,6 +206,7 @@ public final class EndProtocols {
             ServerPlayer p = r.viewer == null ? null : r.level.getServer().getPlayerList().getPlayer(r.viewer);
             return p == null ? List.of() : List.of(p);
         }
+        if (r.wholeDimension) return new ArrayList<>(r.level.players());
         return r.universe == null ? List.of() : RealityOps.playersIn(r.level.getServer(), r.universe);
     }
 
@@ -200,7 +240,7 @@ public final class EndProtocols {
                 if (r.age == r.climax) climax(r);
             } catch (RuntimeException ex) {
                 dev.riftverse.Riftverse.LOGGER.error("End protocol {} failed", r.describe(), ex);
-                if (!r.pastClimax && !r.preview && r.universe != null) climax(r);
+                if (!r.pastClimax && !r.preview) climax(r);
                 r.age = r.duration;
             }
             if (r.age >= r.duration) {
@@ -340,6 +380,16 @@ public final class EndProtocols {
         float k = Math.min(1f, r.age / (float) r.climax);
         boolean heavy = heavy();
         EndProtocol pr = r.protocol;
+        // shared atmosphere: the sky fills with drifting motes and falling streaks that thicken as the end approaches
+        if (r.age % 2 == 0) {
+            int n = (int) ((heavy ? 10 : 3) * (0.3f + k));
+            level.sendParticles(RvParticles.MOTE.get().with(pr.colorA, 1.2f, 50), a.x, a.y + 12, a.z, n, 28, 14, 28, 0.03);
+            if (k > 0.4f) level.sendParticles(RvParticles.STREAK.get().with(pr.colorB, 1.1f, 20), a.x, a.y + 30, a.z, n / 2 + 1, 30, 10, 30, 0.2);
+        }
+        if (r.age % 30 == 0) {
+            level.sendParticles(RvParticles.RING.get().with(pr.colorA, 12f + 40f * k, 26), a.x, a.y + 0.5, a.z, 1, 0, 0, 0, 0);
+            if (heavy && k > 0.5f) level.sendParticles(RvParticles.GLITCH.get().with(pr.colorB, 0.8f, 18), a.x, a.y + 2, a.z, 40, 20, 6, 20, 0.05);
+        }
         switch (pr) {
             case ORBITAL_ANNIHILATION -> {
                 Vec3 platform = a.add(0, 47, 0);
@@ -532,7 +582,31 @@ public final class EndProtocols {
             if (e != null) e.discard();
         }
         r.entities.clear();
-        if (r.preview || r.universe == null) return;
+        for (Vec3 a : anchors(r)) {
+            // shockwave rings racing outward, a pillar of light, and every creature in sight torn out of existence
+            for (int i = 0; i < 4; i++) {
+                final int k = i;
+                Scheduler.later(i * 4, () -> r.level.sendParticles(RvParticles.RING.get().with(k % 2 == 0 ? pr.colorA : 0xFFFFFF, 30f + k * 30f, 30),
+                        a.x, a.y + 1, a.z, 1, 0, 0, 0, 0));
+            }
+            for (int y = 0; y < 80; y += 2) r.level.sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 2f, 20), a.x, a.y + y, a.z, 2, 0.4, 0.5, 0.4, 0.02);
+            if (!r.preview) {
+                double reach = (r.level.getServer().getPlayerList().getViewDistance() + 1) * 16;
+                net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(a, a).inflate(reach, 512, reach);
+                for (Entity e : r.level.getEntities((Entity) null, box, e -> !(e instanceof net.minecraft.world.entity.player.Player))) {
+                    if (heavy() && r.level.random.nextInt(3) == 0) {
+                        r.level.sendParticles(RvParticles.GLITCH.get().with(pr.colorA, 0.6f, 14), e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
+                    }
+                    e.discard();
+                }
+            }
+        }
+        if (r.preview) return;
+        if (r.wholeDimension) {
+            RealityOps.endDimensionWave(server, r.level, 50);
+            return;
+        }
+        if (r.universe == null) return;
         UniverseId id = r.universe;
         boolean reconstruct = r.reconstruct;
         RealityOps.eraseWave(server, id, 50, reconstruct ? () -> Scheduler.later(60, () -> RealityOps.restore(server, id, null)) : null);

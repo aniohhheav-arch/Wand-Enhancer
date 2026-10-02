@@ -442,7 +442,7 @@ public final class MultiverseCommand {
                                 reply(c.getSource(), RealitySnapshots.delete(c.getSource().getServer(), StringArgumentType.getString(c, "name")))))))
                 .then(Commands.literal("protocols").executes(c -> {
                     List<String> out = new ArrayList<>();
-                    out.add("§6End Protocols§r — /multiverse reality protocol <id> [universe] [reconstruct]");
+                    out.add("§6End Protocols§r — /multiverse reality protocol <id> [universe] [reconstruct|permanent] | <id> world");
                     for (EndProtocol p : EndProtocol.values()) out.add(" " + p.id + " — " + p.title + " (" + EndProtocols.durationTicks(p) / 20 + "s): " + p.subtitle);
                     for (EndProtocols.Run r : EndProtocols.runs()) out.add(" §cRunning§r " + r.describe());
                     return lines(c.getSource(), out);
@@ -459,9 +459,11 @@ public final class MultiverseCommand {
                                     return n;
                                 }))))
                         .then(Commands.argument("protocol", StringArgumentType.word()).suggests(PROTOCOLS)
-                                .executes(c -> protocol(c, here(c), false))
-                                .then(universe().executes(c -> protocol(c, universeArg(c), false))
-                                        .then(Commands.literal("reconstruct").executes(c -> protocol(c, universeArg(c), true))))));
+                                .executes(c -> protocol(c, here(c), false, false))
+                                .then(Commands.literal("world").executes(MultiverseCommand::protocolWorld))
+                                .then(universe().executes(c -> protocol(c, universeArg(c), false, false))
+                                        .then(Commands.literal("reconstruct").executes(c -> protocol(c, universeArg(c), true, false)))
+                                        .then(Commands.literal("permanent").executes(c -> protocol(c, universeArg(c), false, true))))));
     }
 
     private static EndProtocol protocolArg(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
@@ -471,12 +473,23 @@ public final class MultiverseCommand {
         return p;
     }
 
-    private static int protocol(CommandContext<CommandSourceStack> c, UniverseId id, boolean reconstruct) throws CommandSyntaxException {
+    private static int protocol(CommandContext<CommandSourceStack> c, UniverseId id, boolean reconstruct, boolean permanent) throws CommandSyntaxException {
         EndProtocol p = protocolArg(c);
         MinecraftServer server = c.getSource().getServer();
         ServerPlayer actor = playerOrNull(c.getSource());
-        return confirmLater(c.getSource(), p.title + " on " + id.designation() + (reconstruct ? " (then reconstruct)" : ""),
-                () -> EndProtocols.execute(server, id, p, actor, reconstruct));
+        return confirmLater(c.getSource(), p.title + " on " + id.designation() + (reconstruct ? " (then reconstruct)" : permanent ? " (PERMANENT)" : ""),
+                () -> EndProtocols.execute(server, id, p, actor, reconstruct, permanent));
+    }
+
+    /** Ends the whole dimension the executor stands in (Overworld, Nether, End, modded) — permanently. */
+    private static int protocolWorld(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+        EndProtocol p = protocolArg(c);
+        ServerLevel level = c.getSource().getLevel();
+        MinecraftServer server = c.getSource().getServer();
+        ServerPlayer actor = playerOrNull(c.getSource());
+        if (level.dimension() == RvWorldgen.EXPANSE) return reply(c.getSource(), Outcome.fail("In the Expanse, end a universe: /multiverse reality protocol " + p.id + " here permanent"));
+        return confirmLater(c.getSource(), p.title + " on " + RealityOps.worldName(level) + " — FOREVER",
+                () -> EndProtocols.executeDimension(server, level, p, actor));
     }
 
     private static int erase(CommandContext<CommandSourceStack> c, UniverseId id) {
