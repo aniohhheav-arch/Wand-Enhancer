@@ -76,4 +76,27 @@ final class TimeCommands {
                 })))
                 .then(Commands.literal("recall").executes(c -> say(c.getSource(), "Recalled " + TemporalManager.recallAgents(c.getSource().getServer()) + " agents.")));
     }
+
+    static LiteralArgumentBuilder<CommandSourceStack> wormhole() {
+        var open = Commands.literal("open").executes(c -> {
+            dev.riftverse.wormhole.WormholeManager.openMouth(c.getSource().getPlayerOrException(), null);
+            return 1;
+        });
+        var enter = Commands.literal("enter").executes(c -> {
+            dev.riftverse.wormhole.WormholeManager.enter(c.getSource().getServer(), java.util.List.of(c.getSource().getPlayerOrException()), null);
+            return 1;
+        });
+        for (dev.riftverse.universe.Archetype a : dev.riftverse.universe.Archetype.values()) {
+            open.then(Commands.literal(a.id).executes(c -> {
+                dev.riftverse.wormhole.WormholeManager.openMouth(c.getSource().getPlayerOrException(), a);
+                return 1;
+            }));
+            enter.then(Commands.literal(a.id).executes(c -> {
+                dev.riftverse.wormhole.WormholeManager.enter(c.getSource().getServer(), java.util.List.of(c.getSource().getPlayerOrException()), a);
+                return 1;
+            }));
+        }
+        return Commands.literal("wormhole").requires(s -> s.hasPermission(2)).then(open).then(enter)
+                .then(Commands.literal("status").executes(c -> say(c.getSource(), dev.riftverse.wormhole.WormholeManager.active() + " wormhole tunnels active.")));
+    }
 }

@@ -349,3 +349,27 @@ All abilities depend on how you use it and where you look:
 | Sneak-use looking down | **FULL TIMELINE PRUNING** | Ultimate: an expanding wave prunes every hostile within 24 blocks. |
 
 TSA agents carry it as their baton (it doesn't drop).
+
+## Wormholes
+
+`/multiverse wormhole open [archetype]` tears open a swirling wormhole mouth in front of you. Walk into it to start the trip; anyone who walks in with you shares the journey. `/multiverse wormhole enter [archetype]` skips the mouth, and `status` shows how many tunnels are open.
+
+The trip is a real tunnel you walk through. It has four sections:
+
+1. **Event Horizon**: obsidian and amethyst.
+2. **The Starfield**: dark walls glittering with lights.
+3. **Time Echo**: weathered copper and sculk.
+4. **Exit Approach**: white glass and glowstone.
+
+The destination is only revealed when you reach the last section.
+
+A boss bar shows the tunnel's **stability**. It drains steadily, and faster the deeper you go. Random phenomena strike along the way:
+
+- **Gravity inversion**
+- **Spacetime debris**
+- **Time slips** that knock you back 14 blocks
+- **Echoes** that chase you
+- **Stability surges** that restore stability and give you speed
+- **Shudders** that cost stability
+
+Reach the far end and you arrive at the destination. If stability hits zero, the tunnel collapses and throws you into a random universe. Tunnels clean themselves up afterwards.

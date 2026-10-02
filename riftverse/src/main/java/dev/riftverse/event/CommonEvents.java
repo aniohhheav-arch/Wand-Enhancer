@@ -59,6 +59,7 @@ public final class CommonEvents {
             Scheduler.clear();
             EndProtocols.clear();
             dev.riftverse.multiverse.GenesisManager.clear();
+            dev.riftverse.wormhole.WormholeManager.clearAll();
             RealityOps.clear();
             TransitManager.clear();
             TerrainSampler.clearCache();
@@ -70,6 +71,7 @@ public final class CommonEvents {
             EventManager.tick(e.getServer());
             EndProtocols.tick(e.getServer());
             dev.riftverse.multiverse.GenesisManager.tick(e.getServer());
+            dev.riftverse.wormhole.WormholeManager.tick(e.getServer());
         });
         bus.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer sp) UniverseSync.send(sp);
