@@ -50,13 +50,21 @@ public final class ProjectileWardAbility extends PowerAbility implements OwnerDa
         this.requirementMessage = requirementMessage;
     }
 
+    private net.minecraft.resources.ResourceLocation scene = com.infinitemultiverse.core.cinematic.SceneIds.WARD_KINETIC;
+
+    /** Rendered ward scene (see SceneIds.WARD_*). */
+    public ProjectileWardAbility scene(net.minecraft.resources.ResourceLocation id) {
+        this.scene = id;
+        return this;
+    }
+
     @Override
     public boolean activate(AbilityContext ctx) {
         if (requirement != null && !requirement.test(ctx.player())) {
             AbilityManager.deny(ctx.player(), Component.translatable(requirementMessage));
             return false;
         }
-        MultiverseVfx.fx(ctx.level(), frontOnly ? VfxIds.MANDALA : VfxIds.AURA, frontPoint(ctx.player()), ctx.player().getLookAngle(), color);
+        com.infinitemultiverse.core.cinematic.Cinematics.attached(ctx.level(), scene, ctx.player(), color, 24, (float) radius);
         return true;
     }
 
@@ -90,11 +98,11 @@ public final class ProjectileWardAbility extends PowerAbility implements OwnerDa
                 projectile.setOwner(player);
             }
             projectile.hurtMarked = true;
-            MultiverseVfx.fx(ctx.level(), VfxIds.BURST, projectile.position(), Vec3.ZERO, color);
+            com.infinitemultiverse.core.cinematic.Cinematics.scene(ctx.level(), com.infinitemultiverse.core.cinematic.SceneIds.WARD_HIT, projectile.position(),
+                    toOwner.normalize(), color, 12, null, 1f);
         }
-        if (activeTicks % (frontOnly ? 6 : 16) == 0) {
-            MultiverseVfx.fx(ctx.level(), frontOnly ? VfxIds.MANDALA : VfxIds.AURA, frontOnly ? frontPoint(player) : player.position(),
-                    player.getLookAngle(), color);
+        if (activeTicks % 20 == 0) {
+            com.infinitemultiverse.core.cinematic.Cinematics.attached(ctx.level(), scene, player, color, 24, (float) radius);
         }
     }
 
@@ -117,7 +125,9 @@ public final class ProjectileWardAbility extends PowerAbility implements OwnerDa
         }
         event.setAmount(event.getAmount() - absorbed);
         if (sourcePos != null) {
-            MultiverseVfx.fx(ctx.level(), VfxIds.BURST, ctx.player().getEyePosition().lerp(sourcePos, 0.3), Vec3.ZERO, color);
+            Vec3 at = ctx.player().getEyePosition().lerp(sourcePos, 0.3);
+            com.infinitemultiverse.core.cinematic.Cinematics.scene(ctx.level(), com.infinitemultiverse.core.cinematic.SceneIds.WARD_HIT, at,
+                    sourcePos.subtract(at).normalize(), color, 12, null, 1f);
         }
     }
 }

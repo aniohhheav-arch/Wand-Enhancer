@@ -26,4 +26,8 @@ public final class ClientPayloadHandler {
     public static void handleTint(ScreenTintPayload payload) {
         ClientScreenTint.apply(payload);
     }
+
+    public static void handleScene(com.infinitemultiverse.core.network.ScenePayload payload) {
+        com.infinitemultiverse.client.cinematic.SceneManager.start(payload);
+    }
 }

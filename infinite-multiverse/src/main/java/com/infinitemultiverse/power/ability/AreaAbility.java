@@ -51,7 +51,7 @@ public final class AreaAbility extends PowerAbility {
             affected++;
             if (b.damage > 0) {
                 target.invulnerableTime = 0;
-                target.hurt(b.magic ? player.damageSources().indirectMagic(player, player) : player.damageSources().playerAttack(player), b.damage);
+                target.hurt(b.magic ? player.damageSources().indirectMagic(player, player) : player.damageSources().playerAttack(player), b.damage * mastery(player, system()));
             }
             if (b.fireSeconds > 0) {
                 target.igniteForSeconds(b.fireSeconds);
@@ -77,6 +77,8 @@ public final class AreaAbility extends PowerAbility {
             }
             MultiverseVfx.fx(ctx.level(), b.hitVfx, target.getBoundingBox().getCenter(), Vec3.ZERO, b.color);
         }
+        int flags = com.infinitemultiverse.power.mastery.Mastery.sceneFlags(player, system()) | (b.coneDot > -1.0 ? com.infinitemultiverse.core.cinematic.Cinematics.CONE : 0);
+        com.infinitemultiverse.core.cinematic.Cinematics.scene(ctx.level(), b.scene, player.position(), look, b.color, 22, player, (float) b.radius, flags);
         MultiverseVfx.fx(ctx.level(), b.vfx, b.vfx == VfxIds.SHOCKWAVE ? player.position() : player.position().add(0, 1, 0),
                 b.vfx == VfxIds.FROST || b.vfx == VfxIds.DOMAIN_OPEN ? new Vec3(b.radius, 0, 0) : look, b.color);
         if (b.sound != null) {
@@ -108,6 +110,7 @@ public final class AreaAbility extends PowerAbility {
         private int color = 0xFFFFFF;
         private ResourceLocation vfx = VfxIds.BURST;
         private ResourceLocation hitVfx = VfxIds.BURST;
+        private ResourceLocation scene = com.infinitemultiverse.core.cinematic.SceneIds.WAVE;
         @Nullable
         private Holder<SoundEvent> sound;
         private float pitch = 1f;
@@ -140,6 +143,8 @@ public final class AreaAbility extends PowerAbility {
         public Builder color(int v) { color = v; return this; }
         public Builder vfx(ResourceLocation v) { vfx = v; return this; }
         public Builder hitVfx(ResourceLocation v) { hitVfx = v; return this; }
+        /** Rendered scene for the burst (see SceneIds.WAVE_*). */
+        public Builder scene(ResourceLocation v) { scene = v; return this; }
         public Builder sound(Holder<SoundEvent> v, float p) { sound = v; pitch = p; return this; }
         public Builder shout(String key, ChatFormatting style) { shout = key; shoutStyle = style; return this; }
         /** Gear-gated: the ability is unlocked for everyone but needs {@code test} (e.g. a full suit) to activate. */

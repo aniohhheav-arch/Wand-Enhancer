@@ -31,12 +31,13 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
     private static final int BAR_HEIGHT = 5;
     private static final int POOL_ROW = 9 + BAR_HEIGHT + 3;
     private static final int SLOTS_HEIGHT = SLOT_SIZE + 8;
+    private static final int MASTERY_ROW = 9;
     private static final float OVERLAY_Z = 200f;
 
     @Override
     public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.options.hideGui || minecraft.player == null || minecraft.player.isSpectator()
+        if (minecraft.options.hideGui || minecraft.player == null || (minecraft.player.isSpectator() && ClientMultiverseState.activeCount() == 0)
                 || minecraft.getDebugOverlay().showDebugScreen()
                 || !MultiverseConfig.CLIENT.hudEnabled.get() || !ClientMultiverseState.isSynced()) {
             return;
@@ -44,7 +45,8 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
         int offsetX = MultiverseConfig.CLIENT.hudOffsetX.get();
         int offsetY = MultiverseConfig.CLIENT.hudOffsetY.get();
         List<EnergyPool> pools = poolsInUse();
-        int height = pools.size() * POOL_ROW + SLOTS_HEIGHT;
+        List<ResourceLocation> owned = ClientMultiverseState.powers().values().stream().sorted().toList();
+        int height = pools.size() * POOL_ROW + owned.size() * MASTERY_ROW + SLOTS_HEIGHT;
         int x = switch (MultiverseConfig.CLIENT.hudAnchor.get()) {
             case TOP_LEFT, BOTTOM_LEFT -> offsetX;
             case TOP_RIGHT, BOTTOM_RIGHT -> graphics.guiWidth() - WIDTH - offsetX;
@@ -63,6 +65,11 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
         for (EnergyPool pool : pools) {
             drawEnergy(graphics, font, pool, x, rowY, rowY + 9, WIDTH);
             rowY += POOL_ROW;
+        }
+
+        for (ResourceLocation set : owned) {
+            drawMastery(graphics, font, set, x, rowY, WIDTH);
+            rowY += MASTERY_ROW;
         }
 
         int slotY = rowY;
@@ -96,6 +103,27 @@ public final class AbilityHudLayer implements LayeredDraw.Layer {
             graphics.fill(x, barY, x + filled, barY + 1, 0x80FFFFFF);
         }
         graphics.renderOutline(x - 1, barY - 1, width + 2, BAR_HEIGHT + 2, 0xFF1F3550);
+    }
+
+    /** "LIMITLESS  ★ III" with a thin experience bar toward the next mastery level. */
+    private static void drawMastery(GuiGraphics graphics, Font font, ResourceLocation setId, int x, int y, int width) {
+        var set = MultiverseRegistries.POWER_SETS.get(setId);
+        if (set == null) {
+            return;
+        }
+        int xp = ClientMultiverseState.masteryXp(setId);
+        int level = com.infinitemultiverse.power.mastery.Mastery.levelFor(xp);
+        float progress = com.infinitemultiverse.power.mastery.Mastery.progress(xp);
+        String label = set.displayName().getString().toUpperCase(Locale.ROOT);
+        String lvl = "\u2605 " + com.infinitemultiverse.power.mastery.Mastery.roman(level);
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0);
+        graphics.pose().scale(0.75f, 0.75f, 1f);
+        graphics.drawString(font, font.plainSubstrByWidth(label, (int) (width / 0.75f) - font.width(lvl) - 4), 0, 0, 0xFF000000 | set.color(), false);
+        graphics.drawString(font, lvl, (int) (width / 0.75f) - font.width(lvl), 0, level >= 5 ? 0xFFFFD34D : 0xFFE6F7FF, false);
+        graphics.pose().popPose();
+        graphics.fill(x, y + 7, x + width, y + 8, 0xFF0D1626);
+        graphics.fill(x, y + 7, x + Math.round(width * progress), y + 8, 0xFF000000 | set.color());
     }
 
     private static void drawSlot(GuiGraphics graphics, Font font, int slot, int x, int y, float time) {

@@ -33,7 +33,8 @@ public final class PlayerMultiverseData {
             Codec.STRING.listOf().optionalFieldOf("loadout", List.of()).forGetter(PlayerMultiverseData::encodeLoadout),
             ResourceLocation.CODEC.listOf().optionalFieldOf("unlocked", List.of()).forGetter(data -> List.copyOf(data.unlocked)),
             ResourceLocation.CODEC.optionalFieldOf("stand").forGetter(data -> Optional.ofNullable(data.standType)),
-            Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC).optionalFieldOf("powers", Map.of()).forGetter(data -> data.powers)
+            Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC).optionalFieldOf("powers", Map.of()).forGetter(data -> data.powers),
+            Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT).optionalFieldOf("mastery", Map.of()).forGetter(data -> data.mastery)
     ).apply(instance, PlayerMultiverseData::new));
 
     /** Per pool; negative means "not initialised yet" and the first server tick fills it to the configured maximum. */
@@ -44,6 +45,8 @@ public final class PlayerMultiverseData {
     @Nullable
     private ResourceLocation standType;
     private final Map<String, ResourceLocation> powers = new HashMap<>();
+    /** Mastery experience per power set; kept when a set is replaced so returning to it keeps your progress. */
+    private final Map<ResourceLocation, Integer> mastery = new HashMap<>();
 
     private final Map<ResourceLocation, Integer> activeToggles = new LinkedHashMap<>();
     private int regenDelay;
@@ -56,7 +59,7 @@ public final class PlayerMultiverseData {
     }
 
     private PlayerMultiverseData(List<Float> energies, Map<ResourceLocation, Integer> cooldowns, List<String> loadout, List<ResourceLocation> unlocked,
-                                 Optional<ResourceLocation> standType, Map<String, ResourceLocation> powers) {
+                                 Optional<ResourceLocation> standType, Map<String, ResourceLocation> powers, Map<ResourceLocation, Integer> mastery) {
         java.util.Arrays.fill(this.energies, -1f);
         for (int i = 0; i < Math.min(energies.size(), this.energies.length); i++) {
             this.energies[i] = energies.get(i);
@@ -68,6 +71,7 @@ public final class PlayerMultiverseData {
         this.unlocked.addAll(unlocked);
         this.standType = standType.orElse(null);
         this.powers.putAll(powers);
+        this.mastery.putAll(mastery);
     }
 
     private List<String> encodeLoadout() {
@@ -296,6 +300,21 @@ public final class PlayerMultiverseData {
     }
 
     // ---- toggles ----
+
+    // ---- mastery ----
+
+    public int masteryXp(ResourceLocation set) {
+        return mastery.getOrDefault(set, 0);
+    }
+
+    public void setMasteryXp(ResourceLocation set, int xp) {
+        mastery.put(set, Math.max(0, xp));
+        structuralDirty = true;
+    }
+
+    public Map<ResourceLocation, Integer> masteryView() {
+        return Collections.unmodifiableMap(mastery);
+    }
 
     public boolean isActive(ResourceLocation ability) {
         return activeToggles.containsKey(ability);

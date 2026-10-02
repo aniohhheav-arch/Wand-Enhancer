@@ -32,6 +32,11 @@ public abstract class Ability {
 
     public abstract float energyCost();
 
+    /** Cost for a specific player (mastery discounts). */
+    public float energyCost(net.minecraft.server.level.ServerPlayer player) {
+        return energyCost();
+    }
+
     /** Pool the cost and upkeep are paid from; defaults to the system's pool. */
     public com.infinitemultiverse.core.energy.EnergyPool energyPool() {
         return com.infinitemultiverse.core.energy.EnergyPool.forSystem(system);

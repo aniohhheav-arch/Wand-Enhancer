@@ -21,6 +21,13 @@ public final class ModEntities {
                     .fireImmune()
                     .build("stand"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<com.infinitemultiverse.power.mystic.PhysicalBodyEntity>> PHYSICAL_BODY = ENTITY_TYPES.register("physical_body",
+            () -> EntityType.Builder.<com.infinitemultiverse.power.mystic.PhysicalBodyEntity>of(com.infinitemultiverse.power.mystic.PhysicalBodyEntity::new, MobCategory.MISC)
+                    .sized(0.6f, 1.8f)
+                    .clientTrackingRange(10)
+                    .noSummon()
+                    .build("physical_body"));
+
     private ModEntities() {
     }
 }

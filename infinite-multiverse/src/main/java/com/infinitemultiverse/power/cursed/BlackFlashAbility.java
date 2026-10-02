@@ -1,5 +1,7 @@
 package com.infinitemultiverse.power.cursed;
 
+import com.infinitemultiverse.core.cinematic.Cinematics;
+import com.infinitemultiverse.core.cinematic.SceneIds;
 import com.infinitemultiverse.core.MultiverseSystem;
 import com.infinitemultiverse.core.ability.AbilityContext;
 import com.infinitemultiverse.core.registry.ModSounds;
@@ -35,7 +37,7 @@ public final class BlackFlashAbility extends PowerAbility {
     public boolean activate(AbilityContext ctx) {
         ARMED.put(ctx.player().getUUID(), ctx.level().getGameTime());
         ctx.player().displayClientMessage(Component.translatable("message.infinitemultiverse.black_flash_armed").withStyle(ChatFormatting.DARK_RED), true);
-        MultiverseVfx.fx(ctx.level(), VfxIds.AURA, ctx.player().position(), Vec3.ZERO, 0x2A0010);
+        Cinematics.attached(ctx.level(), SceneIds.AURA_BLOOD, ctx.player(), 0x300008, EXPIRE, 1f);
         return true;
     }
 
@@ -55,7 +57,7 @@ public final class BlackFlashAbility extends PowerAbility {
         }
         event.setAmount(event.getAmount() * MULTIPLIER);
         Vec3 at = target.getBoundingBox().getCenter();
-        MultiverseVfx.fx(attacker.serverLevel(), VfxIds.BOLT, at.add(0, 2.5, 0), new Vec3(0, -3, 0), 0xD0102A);
+        Cinematics.scene(attacker.serverLevel(), SceneIds.BLACK_FLASH, at, at.subtract(attacker.getEyePosition()), 0xFF0A20, 16, attacker, 1f);
         MultiverseVfx.fx(attacker.serverLevel(), VfxIds.BURST, at, Vec3.ZERO, 0x100008);
         MultiverseVfx.sound(attacker.serverLevel(), at, ModSounds.STAND_HEAVY, 1.2f, 0.7f);
         MultiverseVfx.shout(attacker.serverLevel(), attacker.position(), Component.translatable("message.infinitemultiverse.shout.black_flash")

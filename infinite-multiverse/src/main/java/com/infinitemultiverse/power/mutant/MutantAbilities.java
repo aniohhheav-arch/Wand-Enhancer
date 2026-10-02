@@ -1,5 +1,7 @@
 package com.infinitemultiverse.power.mutant;
 
+import com.infinitemultiverse.core.cinematic.Cinematics;
+import com.infinitemultiverse.core.cinematic.SceneIds;
 import com.infinitemultiverse.core.MultiverseSystem;
 import com.infinitemultiverse.core.ability.AbilityContext;
 import com.infinitemultiverse.core.ability.AbilityManager;
@@ -63,7 +65,7 @@ public final class MutantAbilities {
                     String.format(java.util.Locale.ROOT, "%.1f/%.1f", target.getHealth(), target.getMaxHealth()),
                     target.getArmorValue(), mindTarget, target.getActiveEffects().size()).withStyle(ChatFormatting.LIGHT_PURPLE));
             target.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING, 200, 0, false, false), player);
-            MultiverseVfx.fx(ctx.level(), VfxIds.BEAM, eye, target.getEyePosition().subtract(eye), 0xE07AFF);
+            Cinematics.scene(ctx.level(), SceneIds.MIND_SCAN, target.position(), Vec3.ZERO, 0xE07AFF, 60, target, 1f, Cinematics.FOLLOW);
             return true;
         }
     }
@@ -88,7 +90,7 @@ public final class MutantAbilities {
             for (int jump = 0; jump < 5 && current != null; jump++) {
                 struck.add(current);
                 Vec3 to = current.getBoundingBox().getCenter();
-                MultiverseVfx.fx(ctx.level(), VfxIds.BOLT, from, to.subtract(from), 0x9FD8FF);
+                Cinematics.scene(ctx.level(), SceneIds.CHAIN_LIGHTNING, from, to.subtract(from), 0x9FD8FF, 10, ctx.player(), 0.5f);
                 current.invulnerableTime = 0;
                 current.hurt(player.damageSources().indirectMagic(player, player), 6f);
                 from = to;
@@ -121,6 +123,7 @@ public final class MutantAbilities {
             shard.shootFromRotation(player, player.getXRot(), player.getYRot(), 0f, 2.6f, 0.2f);
             shard.getPersistentData().putBoolean(ICE_SHARD_TAG, true);
             ctx.level().addFreshEntity(shard);
+            Cinematics.scene(ctx.level(), SceneIds.ICE_SHARD, shard.position(), Vec3.ZERO, 0xA8E8FF, 60, shard, 1f, Cinematics.FOLLOW);
             MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.STAND_KNIFE, 0.8f, 1.8f);
             return true;
         }
@@ -157,7 +160,7 @@ public final class MutantAbilities {
                 }
             }
             if (activeTicks % 5 == 0) {
-                MultiverseVfx.fx(level, VfxIds.FROST, player.position(), new Vec3(1.2, 0, 0), 0xBFEFFF);
+                Cinematics.attached(level, SceneIds.ICE_PATH, player, 0xBFEFFF, 22, 1f);
             }
         }
     }
@@ -182,7 +185,7 @@ public final class MutantAbilities {
                 entity.setDeltaMovement(toward.normalize().scale(Math.min(1.6, 0.4 + toward.length() * 0.12)).add(0, 0.25, 0));
                 entity.hurtMarked = true;
             }
-            MultiverseVfx.fx(ctx.level(), VfxIds.DOMAIN_CLOSE, player.position().add(0, 1, 0), new Vec3(6, 0, 0), 0xC0C8D8);
+            Cinematics.scene(ctx.level(), SceneIds.MAGNET_PULL, player.position(), Vec3.ZERO, 0xC02040, 20, player, 6f);
             MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.STAND_ACCELERATE, 0.8f, 0.6f);
             return true;
         }
@@ -204,7 +207,7 @@ public final class MutantAbilities {
                 target.invulnerableTime = 0;
                 target.hurt(ctx.player().damageSources().playerAttack(ctx.player()), 6f);
             }
-            MultiverseVfx.fx(ctx.level(), VfxIds.BOLT, path.start(), path.vector(), 0xFFD84A);
+            Cinematics.scene(ctx.level(), SceneIds.DASH, path.start().subtract(0, 1.6, 0), path.vector(), 0xFFD84A, 14, ctx.player(), 1f);
             return true;
         }
     }
@@ -235,7 +238,7 @@ public final class MutantAbilities {
             player.setDeltaMovement(toward.normalize().scale(Math.min(2.6, 0.8 + toward.length() * 0.09)).add(0, 0.4, 0));
             player.hurtMarked = true;
             ctx.data().grantFallProtection(80);
-            MultiverseVfx.fx(ctx.level(), VfxIds.BEAM, eye, hit.getLocation().subtract(eye), 0x2A2A2A);
+            Cinematics.scene(ctx.level(), SceneIds.GRAPPLE, eye, hit.getLocation().subtract(eye), 0x2A2A2A, 24, player, 1f);
             MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.STAND_NAIL, 0.8f, 0.8f);
             return true;
         }
@@ -265,6 +268,7 @@ public final class MutantAbilities {
             player.hurtMarked = true;
             ctx.data().grantFallProtection(160);
             MultiverseVfx.broadcast(ctx.level(), VfxIds.KINETIC_LEAP, player.position(), player.getDeltaMovement(), 1f);
+            Cinematics.scene(ctx.level(), SceneIds.WAVE_LANDING, player.position(), player.getLookAngle(), 0xFFE07A, 18, player, 4f);
             MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.KINETIC_LEAP, 1f, 0.8f);
             return true;
         }

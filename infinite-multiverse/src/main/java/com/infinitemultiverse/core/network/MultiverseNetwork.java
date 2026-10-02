@@ -9,7 +9,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class MultiverseNetwork {
     /** Bump when any payload layout changes so mismatched client/server versions refuse to connect. */
-    public static final String PROTOCOL_VERSION = "3";
+    public static final String PROTOCOL_VERSION = "4";
 
     private MultiverseNetwork() {
     }
@@ -47,6 +47,9 @@ public final class MultiverseNetwork {
 
         registrar.playToClient(ScreenTintPayload.TYPE, ScreenTintPayload.STREAM_CODEC, (payload, context) ->
                 context.enqueueWork(() -> ClientPayloadHandler.handleTint(payload)));
+
+        registrar.playToClient(ScenePayload.TYPE, ScenePayload.STREAM_CODEC, (payload, context) ->
+                context.enqueueWork(() -> ClientPayloadHandler.handleScene(payload)));
 
         registrar.playToClient(TimeStopPayload.TYPE, TimeStopPayload.STREAM_CODEC, (payload, context) ->
                 context.enqueueWork(() -> ClientPayloadHandler.handleTimeStop(payload)));

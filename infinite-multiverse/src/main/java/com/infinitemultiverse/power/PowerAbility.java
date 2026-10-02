@@ -29,6 +29,20 @@ public abstract class PowerAbility extends Ability {
     }
 
     @Override
+    public float energyCost(net.minecraft.server.level.ServerPlayer player) {
+        return energyCost() * com.infinitemultiverse.power.mastery.Mastery.costMultiplier(player, system());
+    }
+
+    /** Damage multiplier from mastery. */
+    protected static float mastery(net.minecraft.server.level.ServerPlayer player, com.infinitemultiverse.core.MultiverseSystem system) {
+        return com.infinitemultiverse.power.mastery.Mastery.damageMultiplier(player, system);
+    }
+
+    protected static int masteryLevel(net.minecraft.server.level.ServerPlayer player, com.infinitemultiverse.core.MultiverseSystem system) {
+        return com.infinitemultiverse.power.mastery.Mastery.level(player, system);
+    }
+
+    @Override
     public int cooldownTicks() {
         return MultiverseConfig.SERVER.powerTuning(id().getPath()).cooldown();
     }

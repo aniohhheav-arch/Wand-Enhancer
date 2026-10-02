@@ -1,5 +1,7 @@
 package com.infinitemultiverse.power.cursed;
 
+import com.infinitemultiverse.core.cinematic.Cinematics;
+import com.infinitemultiverse.core.cinematic.SceneIds;
 import com.infinitemultiverse.core.MultiverseSystem;
 import com.infinitemultiverse.core.ability.AbilityContext;
 import com.infinitemultiverse.core.ability.Summons;
@@ -36,7 +38,7 @@ public final class SummonShadowsAbility extends PowerAbility {
                 dog.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, LIFETIME, 1, false, false));
                 dog.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, LIFETIME, 1, false, false));
                 dog.setCustomName(Component.translatable("entity.infinitemultiverse.divine_dog").withStyle(side < 0 ? ChatFormatting.WHITE : ChatFormatting.DARK_GRAY));
-                MultiverseVfx.fx(ctx.level(), VfxIds.AURA, at, Vec3.ZERO, COLOR);
+                Cinematics.scene(ctx.level(), SceneIds.SHADOW_SUMMON, at, Vec3.ZERO, COLOR, 30, player, 1.4f);
             }
         }
         MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.STAND_SUMMON, 1.0f, 0.6f);

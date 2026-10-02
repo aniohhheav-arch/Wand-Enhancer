@@ -36,6 +36,7 @@ public final class BuffToggleAbility extends PowerAbility {
     private final BiConsumer<AbilityContext, Integer> perSecond;
     @Nullable
     private final Predicate<ServerPlayer> requirement;
+    private final net.minecraft.resources.ResourceLocation scene;
     @Nullable
     private final String requirementMessage;
 
@@ -46,6 +47,7 @@ public final class BuffToggleAbility extends PowerAbility {
         this.flight = b.flight;
         this.perSecond = b.perSecond;
         this.requirement = b.requirement;
+        this.scene = b.scene;
         this.requirementMessage = b.requirementMessage;
     }
 
@@ -63,6 +65,7 @@ public final class BuffToggleAbility extends PowerAbility {
             Flight.grant(ctx.player(), id());
         }
         MultiverseVfx.fx(ctx.level(), VfxIds.AURA, ctx.player().position(), Vec3.ZERO, auraColor);
+        com.infinitemultiverse.core.cinematic.Cinematics.attached(ctx.level(), scene, ctx.player(), auraColor, 24, 1f);
         return true;
     }
 
@@ -78,8 +81,8 @@ public final class BuffToggleAbility extends PowerAbility {
                 player.addEffect(new MobEffectInstance(buff.effect, 40, buff.amplifier, false, false, true));
             }
         }
-        if (activeTicks % 12 == 0) {
-            MultiverseVfx.fx(ctx.level(), VfxIds.AURA, player.position(), Vec3.ZERO, auraColor);
+        if (activeTicks % 20 == 0) {
+            com.infinitemultiverse.core.cinematic.Cinematics.attached(ctx.level(), scene, player, auraColor, 24, 1f);
         }
         if (perSecond != null && activeTicks % 20 == 0) {
             perSecond.accept(ctx, activeTicks / 20);
@@ -103,6 +106,7 @@ public final class BuffToggleAbility extends PowerAbility {
         private final float upkeep;
         private final List<Buff> buffs = new ArrayList<>();
         private int auraColor = 0xFFFFFF;
+        private net.minecraft.resources.ResourceLocation scene = com.infinitemultiverse.core.cinematic.SceneIds.AURA;
         private boolean flight;
         @Nullable
         private BiConsumer<AbilityContext, Integer> perSecond;
@@ -118,6 +122,8 @@ public final class BuffToggleAbility extends PowerAbility {
 
         public Builder buff(Holder<MobEffect> effect, int amplifier) { buffs.add(new Buff(effect, amplifier)); return this; }
         public Builder aura(int color) { auraColor = color; return this; }
+        /** Rendered aura scene (see SceneIds.AURA_*). */
+        public Builder scene(net.minecraft.resources.ResourceLocation v) { scene = v; return this; }
         public Builder flight() { flight = true; return this; }
         public Builder perSecond(BiConsumer<AbilityContext, Integer> action) { perSecond = action; return this; }
         public Builder requires(Predicate<ServerPlayer> test, String messageKey) { requirement = test; requirementMessage = messageKey; return this; }

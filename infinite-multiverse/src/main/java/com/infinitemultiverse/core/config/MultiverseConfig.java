@@ -85,6 +85,7 @@ public final class MultiverseConfig {
             add("cleave", 25, 120);
             add("fuga", 45, 500);
             add("domain_malevolent_shrine", 90, 2400);
+            add("world_slash", 70, 1200);
             add("divine_dogs", 30, 600);
             add("nue", 25, 160);
             add("shadow_storage", 5, 20);
@@ -372,6 +373,9 @@ public final class MultiverseConfig {
         public final ModConfigSpec.IntValue hudOffsetY;
 
         public final ModConfigSpec.EnumValue<VfxQuality> vfxQuality;
+        public final ModConfigSpec.BooleanValue cutscenes;
+        public final ModConfigSpec.BooleanValue othersCutscenes;
+        public final ModConfigSpec.BooleanValue screenShake;
         public final ModConfigSpec.IntValue vfxMaxDistance;
         public final ModConfigSpec.IntValue maxParticlesPerEffect;
 
@@ -385,6 +389,9 @@ public final class MultiverseConfig {
 
             b.push("vfx");
             vfxQuality = b.comment("Particle density preset. Vanilla's particle setting is applied on top of this.").defineEnum("quality", VfxQuality.HIGH);
+            cutscenes = b.comment("Play cinematic cutscenes (camera moves) for your own big techniques: domains, Hollow Purple, Fuga...").define("cutscenes", true);
+            othersCutscenes = b.comment("Also play the cutscene when another player casts a big technique near you.").define("othersCutscenes", true);
+            screenShake = b.comment("Camera shake on impacts.").define("screenShake", true);
             vfxMaxDistance = b.comment("Effects further than this many blocks from the camera are skipped.").defineInRange("maxDistance", 48, 8, 256);
             maxParticlesPerEffect = b.comment("Hard cap on particles spawned by a single effect.").defineInRange("maxParticlesPerEffect", 160, 8, 2_000);
             b.pop();

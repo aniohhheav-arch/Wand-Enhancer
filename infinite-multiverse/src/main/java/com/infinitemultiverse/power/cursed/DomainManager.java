@@ -17,6 +17,7 @@ import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -84,16 +85,47 @@ public final class DomainManager {
         return false;
     }
 
-    public static void open(ServerPlayer owner, DomainType type) {
+    private static final java.util.Set<UUID> RESERVED = new java.util.HashSet<>();
+
+    /** Held while a domain's opening cutscene plays, so it cannot be cast twice. */
+    public static void reserve(ServerPlayer player) {
+        RESERVED.add(player.getUUID());
+    }
+
+    public static void unreserve(ServerPlayer player) {
+        RESERVED.remove(player.getUUID());
+    }
+
+    public static boolean isReserved(ServerPlayer player) {
+        return RESERVED.contains(player.getUUID());
+    }
+
+    /** Limitless mastery V (Domain Amplification) widens Unlimited Void by 50%. */
+    public static double radiusFor(ServerPlayer owner, DomainType type) {
         double radius = MultiverseConfig.SERVER.domainRadius.get() * type.radiusScale();
+        if (type == DomainType.UNLIMITED_VOID && com.infinitemultiverse.power.mastery.Mastery.level(owner, com.infinitemultiverse.core.MultiverseSystem.CURSED_TECHNIQUES) >= 5) {
+            radius *= 1.5;
+        }
+        return radius;
+    }
+
+    public static void open(ServerPlayer owner, DomainType type) {
+        double radius = radiusFor(owner, type);
         int duration = MultiverseConfig.SERVER.domainDuration.get();
+        if (type == DomainType.UNLIMITED_VOID && com.infinitemultiverse.power.mastery.Mastery.level(owner, com.infinitemultiverse.core.MultiverseSystem.CURSED_TECHNIQUES) >= 5) {
+            duration = duration * 3 / 2;
+        }
         Domain domain = new Domain(owner, type, radius, duration);
         ACTIVE.put(owner.getUUID(), domain);
 
         MultiverseVfx.shout(domain.level, domain.center, Component.translatable("message.infinitemultiverse.shout.domain",
                 Component.translatable("domain.infinitemultiverse." + type.id())).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD), radius * 2.5);
         MultiverseVfx.sound(domain.level, domain.center, ModSounds.TIME_STOP, 1.6f, 0.5f);
-        MultiverseVfx.fx(domain.level, VfxIds.DOMAIN_OPEN, domain.center.add(0, 1, 0), new Vec3(radius, 0, 0), type.color());
+        com.infinitemultiverse.core.cinematic.Cinematics.scene(domain.level, switch (type) {
+            case UNLIMITED_VOID -> com.infinitemultiverse.core.cinematic.SceneIds.UNLIMITED_VOID;
+            case MALEVOLENT_SHRINE -> com.infinitemultiverse.core.cinematic.SceneIds.MALEVOLENT_SHRINE;
+            case CHIMERA_SHADOW_GARDEN -> com.infinitemultiverse.core.cinematic.SceneIds.CHIMERA_GARDEN;
+        }, domain.center, owner.getLookAngle(), type.color(), duration + BUILD_TICKS, owner, (float) radius);
         MultiverseVfx.tint(domain.level, domain.center, radius * 1.3, type.color(), 0.32f, duration + BUILD_TICKS);
     }
 
@@ -198,6 +230,15 @@ public final class DomainManager {
     }
 
     private static void collapse(Domain domain) {
+        ResourceLocation interior = switch (domain.type) {
+            case UNLIMITED_VOID -> com.infinitemultiverse.core.cinematic.SceneIds.UNLIMITED_VOID;
+            case MALEVOLENT_SHRINE -> com.infinitemultiverse.core.cinematic.SceneIds.MALEVOLENT_SHRINE;
+            case CHIMERA_SHADOW_GARDEN -> com.infinitemultiverse.core.cinematic.SceneIds.CHIMERA_GARDEN;
+        };
+        ServerPlayer ownerNow = domain.level.getServer().getPlayerList().getPlayer(domain.owner);
+        if (ownerNow != null) {
+            com.infinitemultiverse.core.cinematic.Cinematics.stop(domain.level, interior, domain.center, ownerNow);
+        }
         TemporaryBlocks.revertGroup(domain.level, domain.group);
         domain.bar.removeAllPlayers();
         MultiverseVfx.fx(domain.level, VfxIds.DOMAIN_CLOSE, domain.center.add(0, 1, 0), new Vec3(domain.radius, 0, 0), domain.type.color());

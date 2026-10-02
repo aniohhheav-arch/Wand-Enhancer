@@ -8,6 +8,12 @@ import com.infinitemultiverse.core.ability.AbilityTargeting;
 import com.infinitemultiverse.core.ability.ActivationType;
 import com.infinitemultiverse.core.ability.DeactivationReason;
 import com.infinitemultiverse.core.registry.ModSounds;
+import com.infinitemultiverse.core.cinematic.Cinematics;
+import com.infinitemultiverse.core.cinematic.SceneIds;
+import com.infinitemultiverse.core.registry.ModEntities;
+import com.infinitemultiverse.power.ability.Flight;
+import com.infinitemultiverse.stand.StandScheduler;
+import net.minecraft.world.effect.MobEffects;
 import com.infinitemultiverse.core.vfx.MultiverseVfx;
 import com.infinitemultiverse.core.vfx.VfxIds;
 import com.infinitemultiverse.core.world.SafeTeleport;
@@ -50,7 +56,6 @@ import net.minecraft.world.phys.Vec3;
 public final class MysticArts {
     public static final ResourceKey<Level> MIRROR = ResourceKey.create(Registries.DIMENSION, InfiniteMultiverse.id("mirror"));
     private static final MultiverseSystem MYSTIC = MultiverseSystem.MYSTIC_ARTS;
-    private static final String ASTRAL_TAG = "infinitemultiverse_astral";
     private static final String MIRROR_TAG = "infinitemultiverse_mirror_return";
     private static final int PORTAL_COLOR = 0xFF9A2A;
 
@@ -59,7 +64,7 @@ public final class MysticArts {
 
     // ===================== Sling Ring portals =====================
 
-    private record Portal(ServerLevel level, Vec3 center, Vec3 normal, ServerLevel targetLevel, Vec3 target, long expiry) {
+    private record Portal(ServerLevel level, Vec3 center, Vec3 normal, ServerLevel targetLevel, Vec3 target, long open, long expiry) {
     }
 
     private static final List<Portal> PORTALS = new ArrayList<>();
@@ -94,9 +99,15 @@ public final class MysticArts {
             Vec3 there = Vec3.atBottomCenterOf(destination.get().pos());
             targetLevel.getChunk(destination.get().pos());
             Vec3 exit = SafeTeleport.findSafeSpot(targetLevel, player, there, 3, 4).orElse(there);
-            long expiry = ctx.level().getGameTime() + LIFETIME;
-            PORTALS.add(new Portal(ctx.level(), here, look, targetLevel, exit, expiry));
-            PORTALS.add(new Portal(targetLevel, exit.add(look.scale(2.5)).add(0, 1.2, 0), look.scale(-1), ctx.level(), player.position(), expiry));
+            // The gateway is drawn first (16 ticks of the ring being traced), then becomes passable.
+            long open = ctx.level().getGameTime() + 14;
+            long expiry = open + LIFETIME;
+            Vec3 far = exit.add(look.scale(2.5)).add(0, 1.2, 0);
+            PORTALS.add(new Portal(ctx.level(), here, look, targetLevel, exit, open, expiry));
+            PORTALS.add(new Portal(targetLevel, far, look.scale(-1), ctx.level(), player.position(), open, expiry));
+            Cinematics.attached(ctx.level(), SceneIds.SPELL_CIRCLE, player, PORTAL_COLOR, 24, 1f);
+            Cinematics.scene(ctx.level(), SceneIds.SLING_PORTAL, here, look, PORTAL_COLOR, LIFETIME + 14, player, 1.7f);
+            Cinematics.scene(targetLevel, SceneIds.SLING_PORTAL, far, look.scale(-1), PORTAL_COLOR, LIFETIME + 14, null, 1.7f);
             MultiverseVfx.sound(ctx.level(), here, ModSounds.STAND_TIME_ERASE, 1.0f, 1.4f);
             return true;
         }
@@ -118,12 +129,11 @@ public final class MysticArts {
             Portal portal = it.next();
             long now = portal.level.getGameTime();
             if (now >= portal.expiry) {
-                MultiverseVfx.fx(portal.level, VfxIds.BURST, portal.center, Vec3.ZERO, PORTAL_COLOR);
                 it.remove();
                 continue;
             }
-            if (now % 3 == 0) {
-                MultiverseVfx.fx(portal.level, VfxIds.PORTAL_RING, portal.center, portal.normal, PORTAL_COLOR);
+            if (now < portal.open) {
+                continue;
             }
             AABB box = new AABB(portal.center, portal.center).inflate(1.2, 1.6, 1.2);
             for (Entity entity : portal.level.getEntities((Entity) null, box, e -> e.isAlive() && !e.isPassenger() && !(e instanceof ArmorStand))) {
@@ -145,8 +155,13 @@ public final class MysticArts {
 
     // ===================== Astral Projection =====================
 
+    /**
+     * Astral Projection: your body stays behind (a still copy with your skin and gear) while your spirit floats free —
+     * same game mode, flying, passing through blocks, unable to touch blocks, items or creatures, and unseen by mobs.
+     * Toggle again to return; you are also pulled back if your body is struck, your mana runs out, or you stray too far.
+     */
     public static final class AstralProjection extends PowerAbility {
-        private static final double LEASH = 48;
+        private static final double LEASH = 64;
 
         public AstralProjection() {
             super(MYSTIC, ActivationType.TOGGLE, 4f);
@@ -155,19 +170,15 @@ public final class MysticArts {
         @Override
         public boolean activate(AbilityContext ctx) {
             ServerPlayer player = ctx.player();
-            if (player.isSpectator() || player.isCreative()) {
-                AbilityManager.deny(player, Component.translatable("message.infinitemultiverse.astral_survival_only"));
+            if (player.isSpectator()) {
                 return false;
             }
-            ArmorStand body = new ArmorStand(ctx.level(), player.getX(), player.getY(), player.getZ());
-            body.setYRot(player.getYRot());
-            body.setShowArms(true);
-            body.setInvulnerable(true);
-            body.setNoGravity(true);
-            ItemStack head = new ItemStack(Items.PLAYER_HEAD);
-            head.set(DataComponents.PROFILE, new ResolvableProfile(player.getGameProfile()));
-            body.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, head);
-            body.setCustomName(Component.translatable("entity.infinitemultiverse.physical_body", player.getName()));
+            PhysicalBodyEntity body = ModEntities.PHYSICAL_BODY.get().create(ctx.level());
+            if (body == null) {
+                return false;
+            }
+            body.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 25f);
+            body.setOwner(player);
             ctx.level().addFreshEntity(body);
 
             CompoundTag tag = new CompoundTag();
@@ -175,23 +186,48 @@ public final class MysticArts {
             tag.putDouble("x", player.getX());
             tag.putDouble("y", player.getY());
             tag.putDouble("z", player.getZ());
-            tag.putString("mode", player.gameMode.getGameModeForPlayer().getName());
             tag.putUUID("body", body.getUUID());
-            player.getPersistentData().put(ASTRAL_TAG, tag);
-            player.setGameMode(GameType.SPECTATOR);
-            MultiverseVfx.fx(ctx.level(), VfxIds.AURA, player.position(), Vec3.ZERO, 0xFFE6A0);
-            MultiverseVfx.tint(ctx.level(), player.position(), 1, 0xFFE6A0, 0.18f, 72000);
+            player.getPersistentData().put(AstralState.TAG, tag);
+            Flight.grant(player, id());
+            player.getAbilities().flying = true;
+            player.onUpdateAbilities();
+            player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false));
+            player.setDeltaMovement(0, 0.25, 0);
+            player.hurtMarked = true;
+            Cinematics.scene(ctx.level(), SceneIds.ASTRAL_EXIT, player.position(), player.getLookAngle(), 0xFFE6A0, 32, player, 1f);
+            Cinematics.attached(ctx.level(), SceneIds.ASTRAL_SPIRIT, player, 0xFFE6A0, 24, 1f);
+            MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.STAND_SUMMON, 1f, 1.6f);
             return true;
         }
 
         @Override
         public void tickActive(AbilityContext ctx, int activeTicks) {
-            CompoundTag tag = ctx.player().getPersistentData().getCompound(ASTRAL_TAG);
+            ServerPlayer player = ctx.player();
+            CompoundTag tag = player.getPersistentData().getCompound(AstralState.TAG);
+            if (tag.isEmpty()) {
+                AbilityManager.deactivate(player, ctx.data(), this, DeactivationReason.MANUAL);
+                return;
+            }
+            player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false));
+            player.fallDistance = 0;
+            if (!player.getAbilities().flying) {
+                // A spirit always floats; without this it would sink straight through the ground.
+                player.getAbilities().flying = true;
+                player.onUpdateAbilities();
+            }
+            if (activeTicks % 20 == 0) {
+                Cinematics.attached(ctx.level(), SceneIds.ASTRAL_SPIRIT, player, 0xFFE6A0, 24, 1f);
+            }
             Vec3 body = new Vec3(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"));
-            if (ctx.player().position().distanceTo(body) > LEASH) {
-                Vec3 back = body.add(ctx.player().position().subtract(body).normalize().scale(LEASH - 1));
-                ctx.player().teleportTo(back.x, back.y, back.z);
-                ctx.player().displayClientMessage(Component.translatable("message.infinitemultiverse.astral_leash").withStyle(ChatFormatting.GOLD), true);
+            boolean sameLevel = player.level().dimension().location().toString().equals(tag.getString("dimension"));
+            if (!sameLevel) {
+                AbilityManager.deactivate(player, ctx.data(), this, DeactivationReason.MANUAL);
+                return;
+            }
+            if (player.position().distanceTo(body) > LEASH) {
+                Vec3 back = body.add(player.position().subtract(body).normalize().scale(LEASH - 1));
+                player.teleportTo(back.x, back.y, back.z);
+                player.displayClientMessage(Component.translatable("message.infinitemultiverse.astral_leash").withStyle(ChatFormatting.GOLD), true);
             }
         }
 
@@ -201,30 +237,55 @@ public final class MysticArts {
         }
     }
 
-    /** Puts the player back in their body and restores their game mode. Safe to call when not projecting. */
+    /** Ends a projection from outside the ability (body struck, admin...). */
+    public static void forceReturn(ServerPlayer player) {
+        var data = AbilityManager.data(player);
+        var ability = AbilityManager.lookup(AstralState.ABILITY);
+        if (ability != null && data.isActive(AstralState.ABILITY)) {
+            AbilityManager.deactivate(player, data, ability, DeactivationReason.MANUAL);
+            AbilityManager.syncNow(player);
+        } else {
+            returnFromAstral(player);
+        }
+    }
+
+    /** Puts the player back in their body. Safe to call when not projecting. */
     public static void returnFromAstral(ServerPlayer player) {
-        if (!player.getPersistentData().contains(ASTRAL_TAG)) {
+        if (!player.getPersistentData().contains(AstralState.TAG)) {
             return;
         }
-        CompoundTag tag = player.getPersistentData().getCompound(ASTRAL_TAG);
-        player.getPersistentData().remove(ASTRAL_TAG);
+        CompoundTag tag = player.getPersistentData().getCompound(AstralState.TAG);
+        player.getPersistentData().remove(AstralState.TAG);
         ResourceLocation dimension = ResourceLocation.tryParse(tag.getString("dimension"));
         ServerLevel level = dimension == null ? null : player.server.getLevel(ResourceKey.create(Registries.DIMENSION, dimension));
         if (level == null) {
             level = player.server.overworld();
         }
-        if (tag.hasUUID("body") && level.getEntity(tag.getUUID("body")) instanceof ArmorStand body) {
+        if (tag.hasUUID("body") && level.getEntity(tag.getUUID("body")) instanceof net.minecraft.world.entity.Entity body
+                && (body instanceof PhysicalBodyEntity || body instanceof ArmorStand)) {
             body.discard();
         }
-        GameType mode = GameType.byName(tag.getString("mode"), GameType.SURVIVAL);
-        player.teleportTo(level, tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"), Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
-        player.setGameMode(mode == GameType.SPECTATOR ? GameType.SURVIVAL : mode);
-        MultiverseVfx.tint(level, player.position(), 1, 0xFFE6A0, 0f, 0);
-        MultiverseVfx.fx(level, VfxIds.AURA, player.position(), Vec3.ZERO, 0xFFE6A0);
+        Vec3 spirit = player.position();
+        Vec3 home = new Vec3(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"));
+        player.noPhysics = false;
+        Flight.revoke(player, AstralState.ABILITY);
+        player.removeEffect(MobEffects.INVISIBILITY);
+        player.teleportTo(level, home.x, home.y, home.z, Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
+        if (tag.contains("mode") && player.isSpectator()) {
+            // Projections made by older versions switched to spectator; restore the original mode.
+            GameType mode = GameType.byName(tag.getString("mode"), GameType.SURVIVAL);
+            player.setGameMode(mode == GameType.SPECTATOR ? GameType.SURVIVAL : mode);
+        }
+        player.setDeltaMovement(Vec3.ZERO);
+        player.fallDistance = 0;
+        Cinematics.stop(level, SceneIds.ASTRAL_SPIRIT, home, player);
+        Cinematics.scene(level, SceneIds.ASTRAL_RETURN, home, spirit.subtract(home), 0xFFE6A0, 16, player, 1f);
+        MultiverseVfx.sound(level, home, ModSounds.STAND_DISMISS, 1f, 1.4f);
     }
 
     // ===================== Eye of Agamotto: Time Reversal =====================
 
+    /** Eye of Agamotto: a short cutscene of the eye opening and a backward-spinning clock, then time is turned back on you. */
     public static final class TimeReversal extends PowerAbility {
         public TimeReversal() {
             super(MYSTIC);
@@ -233,34 +294,47 @@ public final class MysticArts {
         @Override
         public boolean activate(AbilityContext ctx) {
             ServerPlayer player = ctx.player();
-            player.setHealth(player.getMaxHealth());
-            player.getFoodData().setFoodLevel(20);
-            player.getFoodData().setSaturation(10f);
-            player.clearFire();
-            player.setTicksFrozen(0);
-            List<MobEffectInstance> harmful = player.getActiveEffects().stream()
-                    .filter(e -> e.getEffect().value().getCategory() == MobEffectCategory.HARMFUL).toList();
-            harmful.forEach(e -> player.removeEffect(e.getEffect()));
-            ItemStack held = player.getMainHandItem();
-            if (held.isDamageableItem()) {
-                held.setDamageValue(0);
-            }
-            MultiverseVfx.broadcast(ctx.level(), VfxIds.REWIND, player.position().add(0, 1, 0), Vec3.ZERO, 0x5CFF8A);
-            MultiverseVfx.fx(ctx.level(), VfxIds.MANDALA, player.getEyePosition().add(player.getLookAngle()), player.getLookAngle(), 0x5CFF8A);
+            Cinematics.scene(ctx.level(), SceneIds.TIME_EYE, player.position(), player.getLookAngle(), 0x5CFF8A, 50, player, 1f);
             MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.STAND_REWIND, 1f, 1.2f);
-            MultiverseVfx.shout(ctx.level(), player.position(), Component.translatable("message.infinitemultiverse.shout.agamotto")
-                    .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), 16);
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 4, false, false));
+            StandScheduler.later(28, () -> {
+                if (!player.isAlive()) {
+                    return;
+                }
+                player.setHealth(player.getMaxHealth());
+                player.getFoodData().setFoodLevel(20);
+                player.getFoodData().setSaturation(10f);
+                player.clearFire();
+                player.setTicksFrozen(0);
+                List<MobEffectInstance> harmful = player.getActiveEffects().stream()
+                        .filter(e -> e.getEffect().value().getCategory() == MobEffectCategory.HARMFUL).toList();
+                harmful.forEach(e -> player.removeEffect(e.getEffect()));
+                ItemStack held = player.getMainHandItem();
+                if (held.isDamageableItem()) {
+                    held.setDamageValue(0);
+                }
+                MultiverseVfx.broadcast(player.serverLevel(), VfxIds.REWIND, player.position().add(0, 1, 0), Vec3.ZERO, 0x5CFF8A);
+                MultiverseVfx.shout(player.serverLevel(), player.position(), Component.translatable("message.infinitemultiverse.shout.agamotto")
+                        .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), 16);
+            });
             return true;
         }
     }
 
     // ===================== Mirror Dimension =====================
 
+    /**
+     * Mirror Dimension: a 40-tick cutscene — spell circles, reality cracking like glass, mirrored shards peeling off
+     * the world — then on the shatter you, and every creature near you, are pulled into a mirrored copy of the area.
+     * Inside, the sky folds into kaleidoscope rings and mirror panels hang around you. Toggle off to return (the
+     * shards fly home and the cracks heal).
+     */
     public static final class MirrorDimension extends PowerAbility {
         private static final int RADIUS = 12;
         private static final int DOWN = 6;
         private static final int UP = 12;
         private static final int TINT = 0xB070FF;
+        private static final int SHATTER = 28;
 
         public MirrorDimension() {
             super(MYSTIC, ActivationType.TOGGLE, 2f);
@@ -274,38 +348,46 @@ public final class MysticArts {
                 AbilityManager.deny(player, Component.translatable("message.infinitemultiverse.mirror_unavailable"));
                 return false;
             }
+            ServerLevel home = ctx.level();
             BlockPos origin = player.blockPosition();
-            copyRegion(ctx.level(), mirror, origin);
+            copyRegion(home, mirror, origin);
             CompoundTag tag = new CompoundTag();
-            tag.putString("dimension", ctx.level().dimension().location().toString());
+            tag.putString("dimension", home.dimension().location().toString());
             tag.putDouble("x", player.getX());
             tag.putDouble("y", player.getY());
             tag.putDouble("z", player.getZ());
             player.getPersistentData().put(MIRROR_TAG, tag);
-
-            for (LivingEntity foe : AbilityTargeting.hostilesInRadius(player, 8)) {
-                if (!(foe instanceof Player)) {
-                    foe.teleportTo(mirror, foe.getX(), foe.getY(), foe.getZ(), Set.<RelativeMovement>of(), foe.getYRot(), foe.getXRot());
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, SHATTER + 10, 4, false, false));
+            Cinematics.scene(home, SceneIds.MIRROR_ENTER, player.position(), player.getLookAngle(), TINT, 40, player, 12f);
+            MultiverseVfx.sound(home, player.position(), ModSounds.STAND_EPITAPH, 1.2f, 1.5f);
+            StandScheduler.later(SHATTER - 6, () -> MultiverseVfx.sound(home, player.position(), ModSounds.STAND_TIME_ERASE, 1.4f, 0.7f));
+            StandScheduler.later(SHATTER, () -> {
+                if (!player.isAlive() || player.level() != home || !player.getPersistentData().contains(MIRROR_TAG)) {
+                    return;
                 }
-            }
-            MultiverseVfx.fx(ctx.level(), VfxIds.MANDALA, player.getEyePosition().add(player.getLookAngle()), player.getLookAngle(), TINT);
-            player.teleportTo(mirror, player.getX(), player.getY(), player.getZ(), Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
-            MultiverseVfx.tint(mirror, player.position(), 1, TINT, 0.22f, 200);
-            MultiverseVfx.sound(mirror, player.position(), ModSounds.STAND_TIME_ERASE, 1f, 0.7f);
+                for (LivingEntity foe : AbilityTargeting.hostilesInRadius(player, 10)) {
+                    if (!(foe instanceof Player)) {
+                        foe.teleportTo(mirror, foe.getX(), foe.getY(), foe.getZ(), Set.<RelativeMovement>of(), foe.getYRot(), foe.getXRot());
+                    }
+                }
+                player.teleportTo(mirror, player.getX(), player.getY(), player.getZ(), Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
+                Cinematics.scene(mirror, SceneIds.MIRROR_WORLD, player.position(), Vec3.ZERO, TINT, 400, player, 20f);
+                MultiverseVfx.sound(mirror, player.position(), ModSounds.TIME_STOP, 1.2f, 1.4f);
+            });
             return true;
         }
 
         @Override
         public void tickActive(AbilityContext ctx, int activeTicks) {
+            if (activeTicks < SHATTER + 10) {
+                return;
+            }
             if (ctx.player().level().dimension() != MIRROR) {
                 AbilityManager.deactivate(ctx.player(), ctx.data(), this, DeactivationReason.MANUAL);
                 return;
             }
-            if (activeTicks % 180 == 0) {
-                MultiverseVfx.tint(ctx.level(), ctx.player().position(), 1, TINT, 0.22f, 200);
-            }
-            if (activeTicks % 10 == 0) {
-                MultiverseVfx.fx(ctx.level(), VfxIds.FROST, ctx.player().position().add(0, 2, 0), new Vec3(6, 0, 0), TINT);
+            if (activeTicks % 360 == 0) {
+                Cinematics.scene(ctx.level(), SceneIds.MIRROR_WORLD, ctx.player().position(), Vec3.ZERO, TINT, 400, ctx.player(), 20f);
             }
         }
 
@@ -328,7 +410,7 @@ public final class MysticArts {
                         }
                         BlockState state = from.getBlockState(source);
                         if (from.getBlockEntity(source) != null) {
-                            state = state.getBlock().defaultBlockState().hasBlockEntity() ? net.minecraft.world.level.block.Blocks.AIR.defaultBlockState() : state;
+                            state = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
                         }
                         to.setBlock(source, state, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
                     }
@@ -352,13 +434,15 @@ public final class MysticArts {
         Vec3 back = new Vec3(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"));
         if (player.level().dimension() == MIRROR) {
             ServerLevel mirror = player.serverLevel();
+            Cinematics.stop(mirror, SceneIds.MIRROR_WORLD, player.position(), player);
             for (LivingEntity creature : mirror.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(48), e -> !(e instanceof Player))) {
                 creature.teleportTo(home, creature.getX(), creature.getY(), creature.getZ(), Set.<RelativeMovement>of(), creature.getYRot(), creature.getXRot());
             }
+            Vec3 safe = SafeTeleport.findSafeSpot(home, player, back, 2, 4).orElse(back);
+            player.teleportTo(home, safe.x, safe.y, safe.z, Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
+            Cinematics.scene(home, SceneIds.MIRROR_EXIT, player.position(), player.getLookAngle(), 0xB070FF, 36, player, 12f);
+            MultiverseVfx.sound(home, player.position(), ModSounds.STAND_TIME_ERASE, 1.2f, 1.3f);
         }
-        Vec3 safe = SafeTeleport.findSafeSpot(home, player, back, 2, 4).orElse(back);
-        player.teleportTo(home, safe.x, safe.y, safe.z, Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
-        MultiverseVfx.tint(home, player.position(), 1, 0xB070FF, 0f, 0);
     }
 
     // ===================== lifecycle =====================
@@ -371,7 +455,7 @@ public final class MysticArts {
 
     /** Repairs a player who logged out or crashed while projecting or inside the mirror. */
     public static void onLogin(ServerPlayer player) {
-        returnFromAstral(player);
+        forceReturn(player);
         if (player.level().dimension() == MIRROR || player.getPersistentData().contains(MIRROR_TAG)) {
             if (!player.getPersistentData().contains(MIRROR_TAG)) {
                 CompoundTag tag = new CompoundTag();

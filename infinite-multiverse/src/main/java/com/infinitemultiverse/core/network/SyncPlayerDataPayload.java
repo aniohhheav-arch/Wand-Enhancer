@@ -23,7 +23,8 @@ public record SyncPlayerDataPayload(
         Set<ResourceLocation> active,
         Set<ResourceLocation> unlocked,
         Optional<ResourceLocation> standType,
-        Map<String, ResourceLocation> powers
+        Map<String, ResourceLocation> powers,
+        Map<ResourceLocation, Integer> mastery
 ) implements CustomPacketPayload {
     public static final Type<SyncPlayerDataPayload> TYPE = new Type<>(InfiniteMultiverse.id("sync_player_data"));
     public static final StreamCodec<FriendlyByteBuf, SyncPlayerDataPayload> STREAM_CODEC =
@@ -38,7 +39,8 @@ public record SyncPlayerDataPayload(
                 Set.copyOf(data.activeView()),
                 Set.copyOf(data.unlockedView()),
                 data.standType(),
-                Map.copyOf(data.powersView()));
+                Map.copyOf(data.powersView()),
+                Map.copyOf(data.masteryView()));
     }
 
     private static float[] clampNonNegative(float[] values) {
@@ -73,6 +75,11 @@ public record SyncPlayerDataPayload(
             buf.writeUtf(system);
             buf.writeResourceLocation(set);
         });
+        buf.writeVarInt(mastery.size());
+        mastery.forEach((set, xp) -> {
+            buf.writeResourceLocation(set);
+            buf.writeVarInt(xp);
+        });
     }
 
     private static SyncPlayerDataPayload read(FriendlyByteBuf buf) {
@@ -99,7 +106,12 @@ public record SyncPlayerDataPayload(
         for (int i = 0; i < powerCount; i++) {
             powers.put(buf.readUtf(), buf.readResourceLocation());
         }
-        return new SyncPlayerDataPayload(energies, maxEnergy, cooldowns, loadout, active, unlocked, standType, powers);
+        int masteryCount = buf.readVarInt();
+        Map<ResourceLocation, Integer> mastery = new HashMap<>(masteryCount);
+        for (int i = 0; i < masteryCount; i++) {
+            mastery.put(buf.readResourceLocation(), buf.readVarInt());
+        }
+        return new SyncPlayerDataPayload(energies, maxEnergy, cooldowns, loadout, active, unlocked, standType, powers, mastery);
     }
 
     private static void writeIds(FriendlyByteBuf buf, Set<ResourceLocation> ids) {

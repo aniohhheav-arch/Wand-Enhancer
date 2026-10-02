@@ -49,7 +49,7 @@ public final class TelekineticGripAbility extends PowerAbility {
             return false;
         }
         HELD.put(player.getUUID(), hit.getEntity().getId());
-        MultiverseVfx.fx(ctx.level(), VfxIds.BEAM, eye, hit.getEntity().position().subtract(eye), color);
+        bands(ctx.level(), hit.getEntity(), player);
         return true;
     }
 
@@ -66,9 +66,15 @@ public final class TelekineticGripAbility extends PowerAbility {
         held.setDeltaMovement(target.subtract(held.position()).scale(0.5));
         held.fallDistance = 0;
         held.hurtMarked = true;
-        if (activeTicks % 4 == 0) {
-            MultiverseVfx.fx(ctx.level(), VfxIds.AURA, held.position(), Vec3.ZERO, color);
+        if (activeTicks % 20 == 0) {
+            bands(ctx.level(), held, player);
         }
+    }
+
+    private void bands(net.minecraft.server.level.ServerLevel level, Entity target, ServerPlayer caster) {
+        com.infinitemultiverse.core.cinematic.Cinematics.scene(level, system() == com.infinitemultiverse.core.MultiverseSystem.MYSTIC_ARTS
+                        ? com.infinitemultiverse.core.cinematic.SceneIds.MYSTIC_BANDS : com.infinitemultiverse.core.cinematic.SceneIds.GRIP,
+                target.position(), new Vec3(1, 0, 0), color, 24, target, caster.getId(), com.infinitemultiverse.core.cinematic.Cinematics.FOLLOW);
     }
 
     @Override

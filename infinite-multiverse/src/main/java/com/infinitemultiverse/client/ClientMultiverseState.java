@@ -26,6 +26,8 @@ public final class ClientMultiverseState {
     private static Set<ResourceLocation> active = Set.of();
     private static Set<ResourceLocation> unlocked = Set.of();
     private static Optional<ResourceLocation> standType = Optional.empty();
+    private static Map<String, ResourceLocation> powers = Map.of();
+    private static Map<ResourceLocation, Integer> mastery = Map.of();
 
     static {
         reset();
@@ -50,8 +52,19 @@ public final class ClientMultiverseState {
             LOADOUT.add(i < payload.loadout().size() ? payload.loadout().get(i) : Optional.empty());
         }
         active = Set.copyOf(payload.active());
+        com.infinitemultiverse.power.mystic.AstralState.localProjecting = active.contains(com.infinitemultiverse.power.mystic.AstralState.ABILITY);
         unlocked = Set.copyOf(payload.unlocked());
         standType = payload.standType();
+        powers = Map.copyOf(payload.powers());
+        mastery = Map.copyOf(payload.mastery());
+    }
+
+    public static Map<String, ResourceLocation> powers() {
+        return powers;
+    }
+
+    public static int masteryXp(ResourceLocation set) {
+        return mastery.getOrDefault(set, 0);
     }
 
     static void tick() {
@@ -73,6 +86,7 @@ public final class ClientMultiverseState {
 
     static void reset() {
         synced = false;
+        com.infinitemultiverse.power.mystic.AstralState.localProjecting = false;
         java.util.Arrays.fill(ENERGY, 0f);
         java.util.Arrays.fill(DISPLAYED, 0f);
         maxEnergy = 100f;
@@ -112,6 +126,10 @@ public final class ClientMultiverseState {
 
     public static Optional<ResourceLocation> loadoutSlot(int slot) {
         return LOADOUT.get(slot);
+    }
+
+    public static int activeCount() {
+        return active.size();
     }
 
     public static boolean isActive(ResourceLocation ability) {

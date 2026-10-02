@@ -1,5 +1,7 @@
 package com.infinitemultiverse.power.cursed;
 
+import com.infinitemultiverse.core.cinematic.Cinematics;
+import com.infinitemultiverse.core.cinematic.SceneIds;
 import com.infinitemultiverse.core.MultiverseSystem;
 import com.infinitemultiverse.core.ability.AbilityContext;
 import com.infinitemultiverse.core.ability.AbilityTargeting;
@@ -42,11 +44,17 @@ public final class BlueAbility extends PowerAbility {
         Vec3 point = hit.getType() == HitResult.Type.MISS ? eye.add(player.getLookAngle().scale(DISTANCE)) : hit.getLocation().subtract(player.getLookAngle());
         MultiverseVfx.shout(level, player.position(), Component.translatable("message.infinitemultiverse.shout.blue").withStyle(ChatFormatting.BLUE, ChatFormatting.BOLD), 32);
         MultiverseVfx.sound(level, point, ModSounds.TIME_STOP, 0.8f, 1.6f);
+        // Mastery III (Maximum Output): a far larger, stronger singularity.
+        boolean maxOutput = masteryLevel(player, system()) >= 3;
+        double pullRadius = maxOutput ? PULL_RADIUS * 1.7 : PULL_RADIUS;
+        float damage = 2.5f * mastery(player, system()) * (maxOutput ? 1.6f : 1f);
+        Cinematics.scene(level, SceneIds.BLUE, point, Vec3.ZERO, COLOR, DURATION + 6, player, (float) pullRadius,
+                com.infinitemultiverse.power.mastery.Mastery.sceneFlags(player, system()));
         StandScheduler.repeat(1, 2, DURATION / 2, index -> {
             if (!player.isAlive()) {
                 return false;
             }
-            for (Entity entity : level.getEntities(player, new AABB(point, point).inflate(PULL_RADIUS))) {
+            for (Entity entity : level.getEntities(player, new AABB(point, point).inflate(pullRadius))) {
                 boolean pullable = entity instanceof ItemEntity || entity instanceof Projectile
                         || (entity instanceof LivingEntity && AbilityTargeting.isHostileTarget(player, entity));
                 if (!pullable) {
@@ -58,15 +66,12 @@ public final class BlueAbility extends PowerAbility {
                     entity.setDeltaMovement(entity.getDeltaMovement().scale(0.2));
                     if (entity instanceof LivingEntity living && index % 5 == 0) {
                         living.invulnerableTime = 0;
-                        living.hurt(player.damageSources().indirectMagic(player, player), 2.5f);
+                        living.hurt(player.damageSources().indirectMagic(player, player), damage);
                     }
                 } else {
                     entity.setDeltaMovement(toward.normalize().scale(Math.min(0.9, 0.25 + distance * 0.08)));
                 }
                 entity.hurtMarked = true;
-            }
-            if (index % 2 == 0) {
-                MultiverseVfx.fx(level, VfxIds.ORB, point, new Vec3(1.4, 0, 0), COLOR);
             }
             return true;
         });

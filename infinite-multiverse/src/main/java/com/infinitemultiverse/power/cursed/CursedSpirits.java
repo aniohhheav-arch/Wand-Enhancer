@@ -1,5 +1,7 @@
 package com.infinitemultiverse.power.cursed;
 
+import com.infinitemultiverse.core.cinematic.Cinematics;
+import com.infinitemultiverse.core.cinematic.SceneIds;
 import com.infinitemultiverse.core.MultiverseSystem;
 import com.infinitemultiverse.core.ability.AbilityContext;
 import com.infinitemultiverse.core.ability.AbilityManager;
@@ -62,7 +64,7 @@ public final class CursedSpirits {
             }
             spirits.add(StringTag.valueOf(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString()));
             player.getPersistentData().put(TAG, spirits);
-            MultiverseVfx.fx(ctx.level(), VfxIds.DOMAIN_CLOSE, mob.getBoundingBox().getCenter(), new Vec3(1.5, 0, 0), COLOR);
+            Cinematics.scene(ctx.level(), SceneIds.SPIRIT_ABSORB, mob.getBoundingBox().getCenter(), player.getEyePosition().subtract(mob.getBoundingBox().getCenter()), COLOR, 16, player, 1f);
             MultiverseVfx.sound(ctx.level(), mob.position(), ModSounds.STAND_DISMISS, 1f, 0.6f);
             mob.discard();
             player.displayClientMessage(Component.translatable("message.infinitemultiverse.spirit_absorbed", mob.getType().getDescription(), spirits.size(), CAPACITY)
@@ -101,7 +103,7 @@ public final class CursedSpirits {
                     ally.setCustomName(Component.translatable("entity.infinitemultiverse.cursed_spirit", type.getDescription()).withStyle(ChatFormatting.DARK_PURPLE));
                 }
             }
-            MultiverseVfx.fx(ctx.level(), VfxIds.DOMAIN_OPEN, at.add(0, 1, 0), new Vec3(2, 0, 0), COLOR);
+            Cinematics.scene(ctx.level(), SceneIds.SPIRIT_RELEASE, at.add(0, 1.2, 0), player.getLookAngle(), COLOR, 24, player, 1f);
             return true;
         }
     }
@@ -119,14 +121,20 @@ public final class CursedSpirits {
                 AbilityManager.deny(player, Component.translatable("message.infinitemultiverse.need_spirits", 3));
                 return false;
             }
-            float damage = 5f * spirits.size();
+            float damage = 5f * spirits.size() * mastery(player, system());
             player.getPersistentData().put(TAG, new ListTag());
-            Beams.Result trace = Beams.trace(player, 40, 2.0, 12);
-            MultiverseVfx.fx(ctx.level(), VfxIds.BEAM_HEAVY, trace.start(), trace.vector(), COLOR);
-            for (LivingEntity target : trace.hits()) {
-                target.invulnerableTime = 0;
-                target.hurt(player.damageSources().indirectMagic(player, player), damage);
-            }
+            Cinematics.scene(ctx.level(), SceneIds.UZUMAKI, player.getEyePosition(), player.getLookAngle().scale(40), COLOR, 50, player, 40f);
+            player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, 30, 3, false, false));
+            com.infinitemultiverse.stand.StandScheduler.later(22, () -> {
+                if (!player.isAlive()) {
+                    return;
+                }
+                Beams.Result trace = Beams.trace(player, 40, 2.0, 12);
+                for (LivingEntity target : trace.hits()) {
+                    target.invulnerableTime = 0;
+                    target.hurt(player.damageSources().indirectMagic(player, player), damage);
+                }
+            });
             MultiverseVfx.shout(ctx.level(), player.position(), Component.translatable("message.infinitemultiverse.shout.uzumaki")
                     .withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD), 32);
             MultiverseVfx.sound(ctx.level(), player.position(), ModSounds.SHOCKWAVE, 1.4f, 0.6f);

@@ -38,6 +38,8 @@ public final class InfiniteMultiverse {
         com.infinitemultiverse.power.gear.ModGear.MATERIALS.register(modBus);
         com.infinitemultiverse.power.gear.ModGear.ALL.size();
         ModItems.ITEMS.register(modBus);
+        modBus.addListener((net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent event) ->
+                event.put(com.infinitemultiverse.core.registry.ModEntities.PHYSICAL_BODY.get(), com.infinitemultiverse.power.mystic.PhysicalBodyEntity.attributes().build()));
         ModItems.CREATIVE_TABS.register(modBus);
         ModAttachments.ATTACHMENT_TYPES.register(modBus);
         ModSounds.SOUNDS.register(modBus);

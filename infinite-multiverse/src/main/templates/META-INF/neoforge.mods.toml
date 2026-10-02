@@ -30,3 +30,6 @@ type="required"
 versionRange="${geckolib_version_range}"
 ordering="NONE"
 side="BOTH"
+
+[[mixins]]
+config="infinitemultiverse.mixins.json"

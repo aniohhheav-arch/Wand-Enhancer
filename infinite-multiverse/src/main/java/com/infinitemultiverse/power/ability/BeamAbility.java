@@ -55,15 +55,25 @@ public final class BeamAbility extends PowerAbility {
         if (b.shout != null) {
             MultiverseVfx.shout(ctx.level(), player.position(), Component.translatable(b.shout).withStyle(b.shoutStyle, ChatFormatting.BOLD), 32.0);
         }
-        if (b.chargeTicks > 0) {
-            MultiverseVfx.fx(ctx.level(), VfxIds.ORB, player.getEyePosition().add(player.getLookAngle().scale(1.5)), new Vec3(1.2, 0, 0), b.color);
+        if (b.cinematic != null) {
+            int flags = com.infinitemultiverse.power.mastery.Mastery.sceneFlags(player, system());
+            com.infinitemultiverse.core.cinematic.Cinematics.scene(ctx.level(), b.cinematic, player.getEyePosition(), player.getLookAngle().scale(b.length), b.color,
+                    b.cinematicDuration, player, (float) b.length, flags);
+            player.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, b.cinematicDelay + 10, 3, false, false));
+            StandScheduler.later(b.cinematicDelay, () -> {
+                if (player.isAlive() && player.level() == ctx.level()) {
+                    fire(player, true);
+                }
+            });
+        } else if (b.chargeTicks > 0) {
+            com.infinitemultiverse.core.cinematic.Cinematics.attached(ctx.level(), com.infinitemultiverse.core.cinematic.SceneIds.CHARGE, player, b.color, b.chargeTicks, (float) b.radius * 0.6f);
             StandScheduler.later(b.chargeTicks, () -> {
                 if (player.isAlive() && player.level() == ctx.level()) {
-                    fire(player);
+                    fire(player, false);
                 }
             });
         } else {
-            fire(player);
+            fire(player, false);
         }
         if (b.selfDamage > 0f) {
             player.hurt(player.damageSources().magic(), b.selfDamage);
@@ -71,11 +81,19 @@ public final class BeamAbility extends PowerAbility {
         return true;
     }
 
-    private void fire(ServerPlayer player) {
+    private void fire(ServerPlayer player, boolean quiet) {
         ServerLevel level = player.serverLevel();
         Beams.Result result = Beams.trace(player, b.length, b.radius, b.maxHits);
-        MultiverseVfx.fx(level, b.heavy ? VfxIds.BEAM_HEAVY : VfxIds.BEAM, result.start().add(player.getLookAngle().scale(0.8)).subtract(0, 0.2, 0),
-                result.vector().subtract(player.getLookAngle().scale(0.8)), b.color);
+        Vec3 muzzle = result.start().add(player.getLookAngle().scale(0.8)).subtract(0, 0.2, 0);
+        Vec3 span = result.vector().subtract(player.getLookAngle().scale(0.8));
+        int flags = com.infinitemultiverse.power.mastery.Mastery.sceneFlags(player, system());
+        float width = (float) b.radius * ((flags & com.infinitemultiverse.core.cinematic.Cinematics.EMPOWERED) != 0 ? 0.75f : 0.5f);
+        if (!quiet) {
+            com.infinitemultiverse.core.cinematic.Cinematics.scene(level, b.scene, muzzle, span, b.color, b.heavy ? 22 : 14, player, width, flags);
+        }
+        if (b.heavy) {
+            MultiverseVfx.fx(level, VfxIds.BEAM_HEAVY, muzzle, span, b.color);
+        }
         if (b.sound != null) {
             MultiverseVfx.sound(level, player.position(), b.sound, 1.0f, b.pitch);
         }
@@ -83,7 +101,7 @@ public final class BeamAbility extends PowerAbility {
         for (LivingEntity target : result.hits()) {
             DamageSource source = b.magic ? player.damageSources().indirectMagic(player, player) : player.damageSources().playerAttack(player);
             target.invulnerableTime = 0;
-            float damage = b.damage + (float) (b.maxHealthFraction * target.getMaxHealth());
+            float damage = (b.damage + (float) (b.maxHealthFraction * target.getMaxHealth())) * mastery(player, system());
             target.hurt(source, damage);
             if (b.fireSeconds > 0) {
                 target.igniteForSeconds(b.fireSeconds);
@@ -110,6 +128,8 @@ public final class BeamAbility extends PowerAbility {
                 }
             }
             MultiverseVfx.fx(level, b.hitVfx, target.getBoundingBox().getCenter(), dir, b.color);
+            com.infinitemultiverse.core.cinematic.Cinematics.scene(level, b.hitVfx == VfxIds.SLASH ? com.infinitemultiverse.core.cinematic.SceneIds.IMPACT_SLASH
+                    : com.infinitemultiverse.core.cinematic.SceneIds.IMPACT, target.getBoundingBox().getCenter(), dir, b.color, 8, null, target.getBbWidth() + 0.3f);
         }
         if (b.endBurst) {
             MultiverseVfx.fx(level, VfxIds.BURST, result.end(), Vec3.ZERO, b.color);
@@ -134,6 +154,11 @@ public final class BeamAbility extends PowerAbility {
         private int chargeTicks;
         private int color = 0xFFFFFF;
         private ResourceLocation hitVfx = VfxIds.BURST;
+        private ResourceLocation scene = com.infinitemultiverse.core.cinematic.SceneIds.BEAM;
+        @Nullable
+        private ResourceLocation cinematic;
+        private int cinematicDelay;
+        private int cinematicDuration;
         @Nullable
         private Holder<SoundEvent> sound;
         private float pitch = 1f;
@@ -166,6 +191,10 @@ public final class BeamAbility extends PowerAbility {
         public Builder charge(int ticks) { chargeTicks = ticks; return this; }
         public Builder color(int v) { color = v; return this; }
         public Builder hitVfx(ResourceLocation v) { hitVfx = v; return this; }
+        /** Rendered scene for the beam (see SceneIds.BEAM_*). */
+        public Builder scene(ResourceLocation v) { scene = v; return this; }
+        /** Plays a cutscene scene first and fires {@code fireDelay} ticks into it (the caster is shielded meanwhile). */
+        public Builder cinematic(ResourceLocation v, int fireDelay, int duration) { cinematic = v; cinematicDelay = fireDelay; cinematicDuration = duration; return this; }
         public Builder sound(Holder<SoundEvent> v, float p) { sound = v; pitch = p; return this; }
         public Builder shout(String key, ChatFormatting style) { shout = key; shoutStyle = style; return this; }
         /** Gear-gated: the ability is unlocked for everyone but needs {@code test} (e.g. a full suit) to activate. */

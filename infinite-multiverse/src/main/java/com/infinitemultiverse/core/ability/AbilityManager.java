@@ -102,6 +102,17 @@ public final class AbilityManager {
 
     public static boolean tryActivate(ServerPlayer player, Ability ability) {
         if (player.isSpectator()) {
+            // Spectators (e.g. an astral projection) may still switch their active toggles off.
+            PlayerMultiverseData spectating = data(player);
+            if (ability.activationType() == ActivationType.TOGGLE && spectating.isActive(ability.id())) {
+                deactivate(player, spectating, ability, DeactivationReason.MANUAL);
+                syncNow(player);
+                return true;
+            }
+            return false;
+        }
+        if (com.infinitemultiverse.power.mystic.AstralState.isProjecting(player) && !ability.id().equals(com.infinitemultiverse.power.mystic.AstralState.ABILITY)) {
+            deny(player, Component.translatable("message.infinitemultiverse.astral_no_abilities"));
             return false;
         }
         if (!MultiverseConfig.isSystemEnabled(ability.system())) {
@@ -126,7 +137,7 @@ public final class AbilityManager {
             return false;
         }
         boolean free = isEnergyFree(player);
-        float cost = ability.energyCost();
+        float cost = ability.energyCost(player);
         if (!free && data.energy(ability.energyPool()) < cost) {
             deny(player, Component.translatable("message.infinitemultiverse.not_enough_energy", ability.displayName(), (int) Math.ceil(cost),
                     ability.energyPool().displayName()));
@@ -145,6 +156,7 @@ public final class AbilityManager {
         } else {
             data.startCooldown(id, ability.cooldownTicks());
         }
+        com.infinitemultiverse.power.mastery.Mastery.onUsed(player, ability);
         syncNow(player);
         return true;
     }

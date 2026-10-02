@@ -39,6 +39,7 @@ public final class ClientEvents {
         @SubscribeEvent
         public static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
             event.registerAbove(VanillaGuiLayers.HOTBAR, AbilityHudLayer.ID, new AbilityHudLayer());
+            event.registerAboveAll(com.infinitemultiverse.client.cinematic.SceneManager.OVERLAY_ID, com.infinitemultiverse.client.cinematic.SceneManager::renderOverlay);
             event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, ClientTimeStop.LAYER_ID, ClientTimeStop::renderOverlay);
             event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, ClientScreenTint.LAYER_ID, ClientScreenTint::render);
         }
@@ -46,6 +47,7 @@ public final class ClientEvents {
         @SubscribeEvent
         public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.STAND.get(), StandRenderer::new);
+            event.registerEntityRenderer(ModEntities.PHYSICAL_BODY.get(), com.infinitemultiverse.client.mystic.PhysicalBodyRenderer::new);
         }
 
         @SubscribeEvent

@@ -53,6 +53,12 @@ public final class ClientVfx {
     private ClientVfx() {
     }
 
+    /** Budgeted particle emitter for scenes. */
+    public static VfxSpawner spawner() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return new VfxSpawner(minecraft.particleEngine, minecraft.level.random, VfxBudget.current());
+    }
+
     public static void play(VfxPayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientLevel level = minecraft.level;

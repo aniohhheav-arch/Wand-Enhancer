@@ -115,7 +115,11 @@ public final class MultiverseCommand {
                                                 .executes(MultiverseCommand::setPower))))
                         .then(Commands.literal("clear")
                                 .then(Commands.argument("targets", EntityArgument.players())
-                                        .executes(MultiverseCommand::clearPowers))))
+                                        .executes(MultiverseCommand::clearPowers)))
+                        .then(Commands.literal("mastery")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(1, 5))
+                                                .executes(MultiverseCommand::setMastery)))))
                 .then(Commands.literal("deactivate")
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("targets", EntityArgument.players())
@@ -287,6 +291,21 @@ public final class MultiverseCommand {
             }
         }
         ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.power.clear", targets.size()), true);
+        return targets.size();
+    }
+
+    private static int setMastery(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        int level = IntegerArgumentType.getInteger(ctx, "level");
+        Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
+        for (ServerPlayer player : targets) {
+            for (com.infinitemultiverse.core.MultiverseSystem system : com.infinitemultiverse.core.MultiverseSystem.values()) {
+                com.infinitemultiverse.power.PowerSet set = com.infinitemultiverse.power.PowerManager.powerOf(player, system);
+                if (set != null) {
+                    com.infinitemultiverse.power.mastery.Mastery.setLevel(player, set, level);
+                }
+            }
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.infinitemultiverse.power.mastery", com.infinitemultiverse.power.mastery.Mastery.roman(level), targets.size()), true);
         return targets.size();
     }
 }
