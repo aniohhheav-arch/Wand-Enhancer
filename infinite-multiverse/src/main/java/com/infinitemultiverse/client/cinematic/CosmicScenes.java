@@ -390,8 +390,8 @@ final class CosmicScenes {
             Vec3 f = fist(e, 0).add(0, 0.4, 0);
             if (age < SNAP_AT) {
                 int lit = Math.min(6, age / 8);
-                for (int i = 0; i < s.count(lit * 2); i++) {
-                    int c = InfinityStone.values()[i % lit == 0 ? 0 : i % lit].color();
+                for (int i = 0; lit > 0 && i < s.count(lit * 2); i++) {
+                    int c = InfinityStone.values()[i % lit].color();
                     s.spark(f.add(s.randomUnit().scale(0.6)), s.randomUnit().scale(0.05), 0xFFFFFF, c, 0.08f, 10, 0.9f);
                 }
             } else if (age == SNAP_AT) {

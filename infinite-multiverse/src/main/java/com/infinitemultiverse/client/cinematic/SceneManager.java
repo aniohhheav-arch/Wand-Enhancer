@@ -95,6 +95,15 @@ public final class SceneManager {
         return scene.localIsCaster() || MultiverseConfig.CLIENT.othersCutscenes.get();
     }
 
+    /** A broken effect must never take the game down: log it once and drop the scene. */
+    private static void fail(Scene scene, RuntimeException e) {
+        InfiniteMultiverse.LOGGER.error("Scene {} failed and was removed", scene.p.scene(), e);
+        ACTIVE.remove(scene);
+        if (scene == cutscene) {
+            cutscene = null;
+        }
+    }
+
     @Nullable
     public static Scene cutscene() {
         return cutscene;
@@ -115,7 +124,12 @@ public final class SceneManager {
         VfxSpawner spawner = ACTIVE.isEmpty() ? null : ClientVfx.spawner();
         for (int i = ACTIVE.size() - 1; i >= 0; i--) {
             Scene scene = ACTIVE.get(i);
-            scene.tick(spawner);
+            try {
+                scene.tick(spawner);
+            } catch (RuntimeException e) {
+                fail(scene, e);
+                continue;
+            }
             scene.age++;
             if (scene.done()) {
                 ACTIVE.remove(i);
@@ -153,16 +167,24 @@ public final class SceneManager {
         if (orbit) {
             OrbitSky.render(ink.glow(), cam, mc.level.getGameTime() + pt);
         }
-        for (Scene scene : ACTIVE) {
-            scene.render(ink.glow(), pt);
+        for (Scene scene : List.copyOf(ACTIVE)) {
+            try {
+                scene.render(ink.glow(), pt);
+            } catch (RuntimeException e) {
+                fail(scene, e);
+            }
         }
         buffers.endBatch(RenderType.debugQuads());
         FxDraw glow = new FxDraw(pose, buffers.getBuffer(RenderType.lightning()), false, cam, look);
         if (orbit) {
             OrbitSky.render(glow.glow(), cam, mc.level.getGameTime() + pt);
         }
-        for (Scene scene : ACTIVE) {
-            scene.render(glow.glow(), pt);
+        for (Scene scene : List.copyOf(ACTIVE)) {
+            try {
+                scene.render(glow.glow(), pt);
+            } catch (RuntimeException e) {
+                fail(scene, e);
+            }
         }
         buffers.endBatch(RenderType.lightning());
     }
@@ -232,6 +254,14 @@ public final class SceneManager {
         return false;
     }
 
+    /** The first-person hand must not float in front of a cutscene camera. */
+    @SubscribeEvent
+    public static void onRenderHand(net.neoforged.neoforge.client.event.RenderHandEvent event) {
+        if (cutscene != null) {
+            event.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent
     public static void onGuiLayer(RenderGuiLayerEvent.Pre event) {
         if (cutscene != null && !event.getName().equals(OVERLAY_ID)) {
@@ -246,9 +276,13 @@ public final class SceneManager {
         float pt = delta.getGameTimeDeltaPartialTick(false);
         int w = g.guiWidth(), h = g.guiHeight();
         float flash = 0;
-        for (Scene scene : ACTIVE) {
-            scene.overlay(g, pt, scene == cutscene);
-            flash = Math.max(flash, scene.flash(pt));
+        for (Scene scene : List.copyOf(ACTIVE)) {
+            try {
+                scene.overlay(g, pt, scene == cutscene);
+                flash = Math.max(flash, scene.flash(pt));
+            } catch (RuntimeException e) {
+                fail(scene, e);
+            }
         }
         float bars = Mth.lerp(pt, letterboxPrev, letterbox);
         if (bars > 0.001f) {
