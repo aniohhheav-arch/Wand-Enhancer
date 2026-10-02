@@ -64,4 +64,8 @@ public final class ClientNetwork {
         if (p.action() == Payloads.Vehicle.OPEN_EVENTS) Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.EventControlScreen(p.entityId(), (p.value() & 1) != 0, (p.value() & 2) != 0));
         if (p.action() == Payloads.Vehicle.OPEN_CIRCUITS) Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.TimeCircuitScreen(p.entityId(), p.value()));
     }
+
+    public static void onFusionOpen(Payloads.FusionOpen p) {
+        Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.FusionScreen(p.slots(), p.specs()));
+    }
 }

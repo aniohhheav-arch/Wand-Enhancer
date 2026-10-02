@@ -226,6 +226,7 @@ public final class MultiverseCommand {
         root.then(TimeCommands.time());
         root.then(TimeCommands.tsa());
         root.then(TimeCommands.wormhole());
+        root.then(TimeCommands.fusion());
         root.then(WeaponCommands.rupture());
         root.then(debugTree());
         d.register(root);

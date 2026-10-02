@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " R ",
+    "G G",
+    " G "
+  ],
+  "key": {
+    "R": {
+      "item": "riftverse:rift_shard"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    }
+  },
+  "result": {
+    "id": "riftverse:universe_sample",
+    "count": 4
+  }
+}

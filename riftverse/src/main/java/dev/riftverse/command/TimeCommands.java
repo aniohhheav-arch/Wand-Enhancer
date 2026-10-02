@@ -99,4 +99,33 @@ final class TimeCommands {
         return Commands.literal("wormhole").requires(s -> s.hasPermission(2)).then(open).then(enter)
                 .then(Commands.literal("status").executes(c -> say(c.getSource(), dev.riftverse.wormhole.WormholeManager.active() + " wormhole tunnels active.")));
     }
+
+    static LiteralArgumentBuilder<CommandSourceStack> fusion() {
+        return Commands.literal("fusion")
+                .then(Commands.literal("open").executes(c -> {
+                    dev.riftverse.fusion.FusionService.open(c.getSource().getPlayerOrException());
+                    return 1;
+                }))
+                .then(Commands.literal("sample").requires(s -> s.hasPermission(2)).executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    var id = dev.riftverse.multiverse.RealityOps.universeOf(p);
+                    if (id == null) return 0;
+                    var stack = new net.minecraft.world.item.ItemStack(dev.riftverse.registry.RvItems.UNIVERSE_SAMPLE.get());
+                    dev.riftverse.fusion.UniverseSampleItem.fill(stack, dev.riftverse.multiverse.RealityOps.spec(p.server, id));
+                    p.getInventory().placeItemBackInInventory(stack);
+                    return say(c.getSource(), "Sample extracted.");
+                })
+                        .then(Commands.argument("archetype", com.mojang.brigadier.arguments.StringArgumentType.word()).suggests((ctx, b) ->
+                                net.minecraft.commands.SharedSuggestionProvider.suggest(java.util.Arrays.stream(dev.riftverse.universe.Archetype.values()).map(a -> a.id), b))
+                                .executes(c -> {
+                                    ServerPlayer p = c.getSource().getPlayerOrException();
+                                    var a = dev.riftverse.universe.Archetype.byName(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "archetype"));
+                                    if (a == null) return 0;
+                                    var spec = dev.riftverse.universe.UniverseRegistry.get(p.server).primeSpec(a);
+                                    var stack = new net.minecraft.world.item.ItemStack(dev.riftverse.registry.RvItems.UNIVERSE_SAMPLE.get());
+                                    dev.riftverse.fusion.UniverseSampleItem.fill(stack, spec);
+                                    p.getInventory().placeItemBackInInventory(stack);
+                                    return say(c.getSource(), "Sample of " + spec.name + " created.");
+                                })));
+    }
 }

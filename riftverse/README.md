@@ -438,3 +438,21 @@ Only newly generated corridor chunks get the zones. Already-explored stretches k
 ## Building an obfuscated release
 
 `./gradlew obfuscate` produces `build/libs/riftverse-<version>-obf.jar`, which is the jar to distribute. ProGuard renames every internal class, method and field into `dev.riftverse.z`. The things NeoForge, Mixin and the game look up by name are kept: the mod class, event subscribers, mixins, enum constants, records, and anything that overrides Minecraft or GeckoLib code. The rules are in `proguard.pro`.
+
+## Universe DNA samples and the Dimension Fusion Engine
+
+**Universe Sample**
+- Recipe: a rift shard over glass, which makes 4.
+- Use an empty one inside any universe to extract its complete DNA.
+- A filled sample shows the universe's name, type and DNA code. Samples are kept and can be reused in any number of fusions.
+
+**Dimension Fusion Engine**
+- Recipe: exotic ingots, singularity fragments, stellar dust and a crafting table. You can also open it with `/multiverse fusion open`.
+- Pick 2–4 carried samples; they become parents A–D.
+- A universe is treated as 10 gene groups: terrain, biomes and materials, structures, creatures, weather, sky and atmosphere, gravity, time flow, hazards, and special mechanics. For each group, take it from one parent or **BLEND** all of them. Number values are averaged and colours are mixed.
+- The screen shows live **compatibility** and **instability risk**. Differences in gravity, vacuum next to oceans, clashing terrain or time, and high glitch all lower compatibility.
+- Low compatibility can mutate the result.
+- Combinations that can't coexist are fixed automatically and reported. For example, vacuum and oceans makes the seas boil away, and extreme gravity or terrain height is clamped.
+- **FUSE** creates a permanent new universe from the normal procedural generator, so it is always fully playable. A rift opens to it, and it is added to your Remote's targets.
+
+**Commands:** `/multiverse fusion open` and `/multiverse fusion sample [archetype]` (op).

@@ -429,6 +429,65 @@ public final class Payloads {
         }
     }
 
+    /** Server → client: the samples a player carries (inventory slot + full spec), opening the Fusion Engine. */
+    public record FusionOpen(List<Integer> slots, List<net.minecraft.nbt.CompoundTag> specs) implements CustomPacketPayload {
+        public static final Type<FusionOpen> TYPE = payloadType("fusion_open");
+        public static final StreamCodec<FriendlyByteBuf, FusionOpen> CODEC = CustomPacketPayload.<FriendlyByteBuf, FusionOpen>codec(FusionOpen::write, FusionOpen::new);
+
+        FusionOpen(FriendlyByteBuf buf) {
+            this(readInts(buf), readTags(buf));
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(slots.size());
+            for (int i : slots) buf.writeVarInt(i);
+            buf.writeVarInt(specs.size());
+            for (net.minecraft.nbt.CompoundTag t : specs) buf.writeNbt(t);
+        }
+
+        private static List<net.minecraft.nbt.CompoundTag> readTags(FriendlyByteBuf buf) {
+            int n = Math.min(buf.readVarInt(), 64);
+            List<net.minecraft.nbt.CompoundTag> list = new ArrayList<>(n);
+            for (int i = 0; i < n; i++) list.add(buf.readNbt());
+            return list;
+        }
+
+        @Override
+        public Type<FusionOpen> type() {
+            return TYPE;
+        }
+    }
+
+    /** Client → server: fuse these sample slots, picking each gene group from a parent (or -1 to blend). */
+    public record FusionRequest(List<Integer> slots, List<Integer> choice, String name) implements CustomPacketPayload {
+        public static final Type<FusionRequest> TYPE = payloadType("fusion_request");
+        public static final StreamCodec<FriendlyByteBuf, FusionRequest> CODEC = CustomPacketPayload.<FriendlyByteBuf, FusionRequest>codec(FusionRequest::write, FusionRequest::new);
+
+        FusionRequest(FriendlyByteBuf buf) {
+            this(readInts(buf), readSignedInts(buf), buf.readUtf(48));
+        }
+
+        void write(FriendlyByteBuf buf) {
+            buf.writeVarInt(slots.size());
+            for (int i : slots) buf.writeVarInt(i);
+            buf.writeVarInt(choice.size());
+            for (int i : choice) buf.writeInt(i);
+            buf.writeUtf(name, 48);
+        }
+
+        private static List<Integer> readSignedInts(FriendlyByteBuf buf) {
+            int n = Math.min(buf.readVarInt(), 32);
+            List<Integer> list = new ArrayList<>(n);
+            for (int i = 0; i < n; i++) list.add(buf.readInt());
+            return list;
+        }
+
+        @Override
+        public Type<FusionRequest> type() {
+            return TYPE;
+        }
+    }
+
     private static List<Integer> readInts(FriendlyByteBuf buf) {
         int n = Math.min(buf.readVarInt(), 4096);
         List<Integer> list = new ArrayList<>(n);

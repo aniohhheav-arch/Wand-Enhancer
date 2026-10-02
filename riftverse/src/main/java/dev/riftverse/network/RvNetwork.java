@@ -42,6 +42,10 @@ public final class RvNetwork {
                 ClientNetwork.onVehicle(p);
             }
         });
+        r.playToClient(Payloads.FusionOpen.TYPE, Payloads.FusionOpen.CODEC, (p, ctx) -> ClientNetwork.onFusionOpen(p));
+        r.playToServer(Payloads.FusionRequest.TYPE, Payloads.FusionRequest.CODEC, (p, ctx) -> {
+            if (ctx.player() instanceof ServerPlayer sp) dev.riftverse.fusion.FusionService.request(sp, p);
+        });
         r.playToServer(Payloads.BrowserAction.TYPE, Payloads.BrowserAction.CODEC, MultiverseService::handle);
         r.playToServer(Payloads.Ability.TYPE, Payloads.Ability.CODEC, (p, ctx) -> {
             if (ctx.player() instanceof ServerPlayer sp) ArmorAbilities.activate(sp, p.ability());

@@ -73,6 +73,8 @@ def recipes():
            category="equipment")
     shaped("reality_remote", ["FWF", "XCX", "FLF"], {"F": "singularity_fragment", "W": "warden_core", "X": "exotic_ingot",
                                                     "C": "singularity_core", "L": "leviathan_scale"}, category="equipment")
+    shaped("universe_sample", [" R ", "G G", " G "], {"R": "rift_shard", "G": "minecraft:glass"}, count=4)
+    shaped("fusion_engine", ["XSX", "DCD", "XSX"], {"X": "exotic_ingot", "S": "singularity_fragment", "D": "stellar_dust", "C": "minecraft:crafting_table"}, category="equipment")
     shaped("dimensional_key", ["RX", "X "], {"R": "rift_shard", "X": "minecraft:gold_ingot"})
     shaped("universe_compass", [" R ", "RCR", " R "], {"R": "rift_shard", "C": "minecraft:compass"}, category="equipment")
     shapeless("homeward_rift", ["rift_shard", "minecraft:ender_pearl", "stellar_dust"], count=2)

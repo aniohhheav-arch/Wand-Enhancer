@@ -20,7 +20,7 @@ ITEMS = {
     "gravity_gauntlet": "Gravity Gauntlet", "singularity_grenade": "Singularity Grenade", "singularity_core": "Singularity Core",
     "reality_shaper": "Reality Shaper", "dimensional_key": "Dimensional Key", "universe_compass": "Universe Compass",
     "homeward_rift": "Homeward Rift", "rift_igniter": "Rift Igniter", "rift_sigil": "Rift Sigil",
-    "reality_remote": "Reality Remote", "reality_rupture": "The Reality Rupture", "delorean": "DeLorean Time Machine", "tardis": "TARDIS", "pruning_staff": "TSA Temporal Pruning Staff", "relic_blade": "Relic Blade", "relic_blaster": "Relic Blaster",
+    "reality_remote": "Reality Remote", "reality_rupture": "The Reality Rupture", "delorean": "DeLorean Time Machine", "tardis": "TARDIS", "pruning_staff": "TSA Temporal Pruning Staff", "universe_sample": "Universe Sample", "fusion_engine": "Dimension Fusion Engine", "relic_blade": "Relic Blade", "relic_blaster": "Relic Blaster",
 }
 
 SETS = {

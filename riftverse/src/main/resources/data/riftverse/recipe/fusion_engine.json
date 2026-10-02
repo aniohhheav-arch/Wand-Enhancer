@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "XSX",
+    "DCD",
+    "XSX"
+  ],
+  "key": {
+    "X": {
+      "item": "riftverse:exotic_ingot"
+    },
+    "S": {
+      "item": "riftverse:singularity_fragment"
+    },
+    "D": {
+      "item": "riftverse:stellar_dust"
+    },
+    "C": {
+      "item": "minecraft:crafting_table"
+    }
+  },
+  "result": {
+    "id": "riftverse:fusion_engine",
+    "count": 1
+  }
+}
