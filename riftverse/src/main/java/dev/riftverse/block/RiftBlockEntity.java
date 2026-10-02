@@ -135,8 +135,15 @@ public class RiftBlockEntity extends BlockEntity {
             if (be.resolved) be.destination = null;
             be.resolve((ServerLevel) level);
         }
-        if (level.getGameTime() % 20 == Math.floorMod(pos.hashCode(), 20) && !be.destName.isEmpty()) {
-            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(6))) {
+        if (level.getGameTime() % 5 == Math.floorMod(pos.hashCode(), 5) && !be.destName.isEmpty()) {
+            Vec3 c = Vec3.atCenterOf(pos);
+            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(20))) {
+                // only when the player is actually looking at the rift
+                Vec3 to = c.subtract(p.getEyePosition());
+                double d = to.length();
+                if (d < 0.5 || d > 20) continue;
+                double cos = to.scale(1.0 / d).dot(p.getLookAngle());
+                if (cos < Math.cos(Math.atan2(1.4, d))) continue;
                 p.displayClientMessage(net.minecraft.network.chat.Component.literal("Rift → " + be.destName).withColor(be.colorA()), true);
             }
         }

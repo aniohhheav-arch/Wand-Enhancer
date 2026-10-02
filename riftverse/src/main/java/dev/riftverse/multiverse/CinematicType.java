@@ -23,12 +23,12 @@ public enum CinematicType {
     SCAN("scan",                   50, 0f, 0f, 0.12f, 0.00f, false, false),
     ANNOUNCE("announce",           80, 0f, 0f, 0.00f, 0.15f, false, true),
     // End Protocols (duration comes from the protocol's config)
-    PROTOCOL_ORBITAL("orbital_annihilation",   400, 26f, 30f, 0.30f, 0.50f, true, true),
-    PROTOCOL_SINGULARITY("singularity_collapse", 400, 22f, 14f, 0.35f, 0.45f, true, true),
-    PROTOCOL_DEVOURER("celestial_devourer",    440, 30f, 6f, 0.30f, 0.40f, true, true),
-    PROTOCOL_DISASSEMBLY("reality_disassembly", 400, 16f, 18f, 0.25f, 0.25f, true, true),
-    PROTOCOL_BLACK_HOLE("black_hole_infusion",  420, 24f, 10f, 0.30f, 0.55f, true, true),
-    PROTOCOL_TIMELINE("timeline_erasure",       400, 14f, 12f, 0.40f, 0.20f, true, true);
+    PROTOCOL_ORBITAL("orbital_annihilation",   400, 26f, 30f, 0.30f, 0.50f, false, true),
+    PROTOCOL_SINGULARITY("singularity_collapse", 400, 22f, 14f, 0.35f, 0.45f, false, true),
+    PROTOCOL_DEVOURER("celestial_devourer",    440, 30f, 6f, 0.30f, 0.40f, false, true),
+    PROTOCOL_DISASSEMBLY("reality_disassembly", 400, 16f, 18f, 0.25f, 0.25f, false, true),
+    PROTOCOL_BLACK_HOLE("black_hole_infusion",  420, 24f, 10f, 0.30f, 0.55f, false, true),
+    PROTOCOL_TIMELINE("timeline_erasure",       400, 14f, 12f, 0.40f, 0.20f, false, true);
 
     public final String id;
     public final int defaultTicks;

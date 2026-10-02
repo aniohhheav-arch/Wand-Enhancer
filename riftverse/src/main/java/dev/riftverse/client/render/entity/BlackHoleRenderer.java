@@ -49,6 +49,24 @@ public class BlackHoleRenderer extends EntityRenderer<BlackHoleEntity> {
         }
         float bloom = entity.bloom(partial);
         if (entity.lifetime() >= 0 && entity.lifetime() < 20) bloom *= Math.max(0.05f, (entity.lifetime() - partial) / 20f);
+        if (entity.isNexusCore()) {
+            // the Nexus core is drawn without the lensing pass so it never warps the gates around it
+            float age = entity.tickCount + partial;
+            float r = entity.horizonRadius();
+            var pose = ps.last();
+            org.joml.Vector3f n = entity.diskNormal();
+            org.joml.Vector3f o = new org.joml.Vector3f(0, (float) (c.y - entity.getY()), 0);
+            dev.riftverse.client.render.FxDraw.billboard(buffers.getBuffer(RvRenderTypes.softGlow()), pose, 0, o.y, 0, r * 3.2f, cool, 0.35f * bloom);
+            for (int i = 0; i < 6; i++) {
+                float rr = r * (1.4f + i * 0.35f);
+                dev.riftverse.client.render.FxDraw.ring(buffers.getBuffer(RvRenderTypes.ENERGY), pose, o, n, rr, r * 0.12f, i % 2 == 0 ? hot : cool,
+                        0.55f - i * 0.07f, 64);
+            }
+            dev.riftverse.client.render.FxDraw.ellipsoid(buffers.getBuffer(RvRenderTypes.solid()), pose, 0, o.y, 0, r, r, r, 24, 0x000000, 0x000000, 1f,
+                    dev.riftverse.client.render.FxDraw.FULL_BRIGHT, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, -1f);
+            if (age < 0) return;
+            return;
+        }
         SpatialFx.hole(c, entity.horizonRadius(), entity.diskNormal(), style, bloom, hot, cool);
     }
 

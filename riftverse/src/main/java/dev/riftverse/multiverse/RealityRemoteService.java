@@ -68,6 +68,10 @@ public final class RealityRemoteService {
             UniverseSpec s = UniverseRegistry.specFor(uid);
             entries.add(UniverseEntry.of(s, uid.isPrime() ? UniverseEntry.PRIME : UniverseEntry.DISCOVERED));
             UniverseProfile p = state.profile(uid);
+            if (p.status.gone()) {
+                entries.remove(entries.size() - 1);
+                continue;
+            }
             statuses.add(p.status.ordinal());
             stability.add(Math.round(p.stability));
             if (entries.size() >= 256) break;
@@ -124,10 +128,14 @@ public final class RealityRemoteService {
             case Payloads.RemoteAction.CREATE -> create(player, a.text());
             case Payloads.RemoteAction.EVENT -> EventManager.start(EventType.values()[Math.floorMod(a.option(), EventType.values().length)], player.serverLevel(),
                     player.position().add(player.getLookAngle().scale(12)), player, false);
-            case Payloads.RemoteAction.ERASE -> target == null ? RealityOps.Outcome.fail("Select a universe.") : guardPrime(player, target, () -> RealityOps.erase(server, target, player));
+            case Payloads.RemoteAction.ERASE -> target == null || !target.equals(RealityOps.universeOf(player))
+                    ? RealityOps.Outcome.fail("You can only erase the universe you are standing in.") : guardPrime(player, target, () -> RealityOps.erase(server, target, player));
             case Payloads.RemoteAction.PROTOCOL -> {
                 if (target == null) yield RealityOps.Outcome.fail("Select a universe.");
                 EndProtocol p = EndProtocol.byOrdinal(a.option());
+                if (!target.equals(RealityOps.universeOf(player))) {
+                    yield RealityOps.Outcome.fail("End Protocols can only be run on the universe you are standing in. Travel there first.");
+                }
                 boolean permanent = "permanent".equals(a.text());
                 yield guardPrime(player, target, () -> EndProtocols.execute(server, target, p, player, a.flag(), permanent));
             }

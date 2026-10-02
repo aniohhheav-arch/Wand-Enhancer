@@ -108,6 +108,7 @@ public final class TransitManager {
             }
             t.tick++;
             player.fallDistance = 0;
+            if (!t.arrived) departureFx(player, t);
             if (!t.arrived && t.tick >= t.kind.teleportTick) {
                 arrive(player, t);
                 t.arrived = true;
@@ -117,6 +118,32 @@ public final class TransitManager {
                 it.remove();
                 COOLDOWN.put(e.getKey(), 40);
             }
+        }
+    }
+
+    /**
+     * What everyone else sees while a player is leaving: a tightening vortex of light around them, a column of energy
+     * and finally a collapse flash at the moment they vanish.
+     */
+    private static void departureFx(ServerPlayer player, Transit t) {
+        net.minecraft.server.level.ServerLevel level = player.serverLevel();
+        float k = Math.min(1f, t.tick / (float) Math.max(1, t.kind.teleportTick));
+        double x = player.getX();
+        double y = player.getY();
+        double z = player.getZ();
+        int color = t.kind == TransitKind.BLACK_HOLE ? 0xFF8A3A : 0x8F6BFF;
+        for (int i = 0; i < 3; i++) {
+            double a = t.tick * 0.45 + i * Math.PI * 2 / 3;
+            double r = 1.6 * (1.0 - k) + 0.3;
+            level.sendParticles(dev.riftverse.registry.RvParticles.STREAK.get().with(i == 1 ? 0xFFFFFF : color, 0.8f, 14),
+                    x + Math.cos(a) * r, y + 0.2 + (t.tick % 20) * 0.1, z + Math.sin(a) * r, 1, 0, 0.05, 0, 0.01);
+        }
+        if (t.tick % 6 == 0) level.sendParticles(dev.riftverse.registry.RvParticles.RING.get().with(color, 1.5f + 2f * k, 12), x, y + 0.1, z, 1, 0, 0, 0, 0);
+        if (k > 0.5f && t.tick % 2 == 0) level.sendParticles(dev.riftverse.registry.RvParticles.INFALL.get().with(0xFFFFFF, 0.6f, 20), x, y + 1, z, 4, 0.6, 1, 0.6, 0.05);
+        if (t.tick == t.kind.teleportTick - 1) {
+            level.sendParticles(dev.riftverse.registry.RvParticles.RING.get().with(0xFFFFFF, 6f, 16), x, y + 1, z, 1, 0, 0, 0, 0);
+            level.sendParticles(dev.riftverse.registry.RvParticles.SPARK.get().with(color, 0.8f, 30), x, y + 1, z, 60, 0.4, 0.9, 0.4, 0.4);
+            level.playSound(null, x, y, z, RvSounds.SINGULARITY_IMPLODE.get(), SoundSource.PLAYERS, 1.2f, 1.6f);
         }
     }
 
@@ -148,6 +175,8 @@ public final class TransitManager {
             placeReturnRift(player, target, t);
         }
 
+        target.level().sendParticles(dev.riftverse.registry.RvParticles.RING.get().with(target.color(), 5f, 18), p.x, p.y + 1, p.z, 1, 0, 0, 0, 0);
+        target.level().sendParticles(dev.riftverse.registry.RvParticles.SPARK.get().with(target.color(), 0.8f, 30), p.x, p.y + 1, p.z, 50, 0.4, 0.9, 0.4, 0.3);
         UniverseSync.send(player);
         PacketDistributor.sendToPlayer(player, new Payloads.Arrival(target.title(), target.subtitle(), target.color(), t.kind.ordinal()));
         target.level().playSound(null, p.x, p.y, p.z, RvSounds.UNIVERSE_ARRIVE.get(), SoundSource.PLAYERS, 1.0f, 1.0f);

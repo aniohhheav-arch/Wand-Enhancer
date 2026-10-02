@@ -59,7 +59,7 @@ public final class ClientEffects {
         }
 
         LocalPlayer player = mc.player;
-        if (player == null || player.isSpectator()) return;
+        if (player == null || player.isSpectator() || hole.isNexusCore()) return;
         Vec3 to = c.subtract(player.position().add(0, player.getBbHeight() * 0.5, 0));
         double d = to.length();
         float influence = hole.influenceRadius();

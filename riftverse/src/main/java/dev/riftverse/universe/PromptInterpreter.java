@@ -187,7 +187,30 @@ public final class PromptInterpreter {
         Map<Archetype, Float> scores = new EnumMap<>(Archetype.class);
         for (Map.Entry<Archetype, Map<String, Float>> e : ARCHETYPE_WORDS.entrySet()) {
             float score = 0;
-            for (String tok : tokens) score += e.getValue().getOrDefault(tok, 0f);
+            for (String tok : tokens) {
+                Float exact = e.getValue().get(tok);
+                if (exact != null) {
+                    score += exact;
+                    continue;
+                }
+                // plurals, -y/-ic/-ish forms and partial words still count ("volcanoes", "crystalline", "dreamy")
+                if (tok.length() >= 4) {
+                    for (Map.Entry<String, Float> w : e.getValue().entrySet()) {
+                        String k = w.getKey();
+                        if (k.length() >= 4 && (tok.startsWith(k) || k.startsWith(tok))) {
+                            score += w.getValue() * 0.6f;
+                            break;
+                        }
+                    }
+                }
+            }
+            // the reality's own name and epithets are keywords too ("tundra", "sprawl", "hive")
+            Archetype a = e.getKey();
+            for (String tok : tokens) {
+                if (tok.length() < 4) continue;
+                if (a.displayName.toLowerCase(java.util.Locale.ROOT).contains(tok) || a.id.contains(tok)) score += 2.5f;
+                for (String ep : a.epithets) if (ep.toLowerCase(java.util.Locale.ROOT).equals(tok)) score += 1.5f;
+            }
             if (score > 0) scores.put(e.getKey(), score);
         }
         Random r = new Random(seed);
@@ -207,7 +230,8 @@ public final class PromptInterpreter {
             }
         }
         if (primary == null) {
-            primary = Archetype.byId(r.nextInt(Archetype.values().length));
+            // nothing recognised: derive the reality from the words themselves, never a fixed default
+            primary = Archetype.byId(Math.floorMod(String.join(" ", tokens).hashCode(), Archetype.values().length));
             notes.add("No familiar concepts — the rift chose: " + primary.displayName);
         } else {
             notes.add("Core reality: " + primary.displayName);
