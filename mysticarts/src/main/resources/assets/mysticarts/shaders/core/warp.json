@@ -1,0 +1,87 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "1",
+    "dstrgb": "0"
+  },
+  "vertex": "mysticarts:fullscreen",
+  "fragment": "mysticarts:warp",
+  "attributes": [
+    "Position"
+  ],
+  "samplers": [
+    {
+      "name": "Sampler0"
+    },
+    {
+      "name": "Sampler1"
+    }
+  ],
+  "uniforms": [
+    {
+      "name": "RvTime",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "ScreenSize",
+      "type": "float",
+      "count": 2,
+      "values": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "WarpCenter",
+      "type": "float",
+      "count": 2,
+      "values": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "name": "WarpU",
+      "type": "float",
+      "count": 2,
+      "values": [
+        0.1,
+        0.0
+      ]
+    },
+    {
+      "name": "WarpV",
+      "type": "float",
+      "count": 2,
+      "values": [
+        0.0,
+        0.1
+      ]
+    },
+    {
+      "name": "WarpParams",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "WarpColor",
+      "type": "float",
+      "count": 3,
+      "values": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ]
+}
