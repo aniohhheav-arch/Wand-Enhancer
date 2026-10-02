@@ -45,7 +45,7 @@ ENTITIES = {
     "lumen_strider": "Lumen Strider", "neon_drone": "Neon Drone", "glitchling": "Glitchling", "void_stalker": "Void Stalker",
     "crystal_sentinel": "Crystal Sentinel", "rift_wraith": "Rift Wraith", "rift_warden": "The Rift Warden",
     "abyssal_leviathan": "The Abyssal Leviathan", "cosmic_deity": "The Cosmic Deity",
-    "void_cultist": "Void Cultist", "crystal_spider": "Crystal Spider", "star_moth": "Star Moth", "lunar_golem": "Lunar Golem", "denizen": "Denizen", "tsa_agent": "TSA Agent", "delorean": "DeLorean", "tardis": "TARDIS",
+    "void_cultist": "Void Cultist", "crystal_spider": "Crystal Spider", "star_moth": "Star Moth", "lunar_golem": "Lunar Golem", "denizen": "Denizen", "tsa_agent": "TSA Agent", "time_door": "Time Door", "delorean": "DeLorean", "tardis": "TARDIS",
 }
 
 TOOLTIPS = {
