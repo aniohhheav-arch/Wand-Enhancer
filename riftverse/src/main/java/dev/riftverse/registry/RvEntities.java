@@ -87,6 +87,16 @@ public final class RvEntities {
             () -> EntityType.Builder.<dev.riftverse.entity.creature.DenizenEntity>of(dev.riftverse.entity.creature.DenizenEntity::new, MobCategory.CREATURE)
                     .sized(0.6F, 1.95F).clientTrackingRange(10).build("denizen"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.creature.TsaAgentEntity>> TSA_AGENT = ENTITIES.register("tsa_agent",
+            () -> EntityType.Builder.<dev.riftverse.entity.creature.TsaAgentEntity>of(dev.riftverse.entity.creature.TsaAgentEntity::new, MobCategory.MISC)
+                    .sized(0.6F, 1.95F).clientTrackingRange(10).fireImmune().build("tsa_agent"));
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.vehicle.DeLoreanEntity>> DELOREAN = ENTITIES.register("delorean",
+            () -> EntityType.Builder.<dev.riftverse.entity.vehicle.DeLoreanEntity>of(dev.riftverse.entity.vehicle.DeLoreanEntity::new, MobCategory.MISC)
+                    .sized(2.0F, 1.3F).clientTrackingRange(10).updateInterval(1).fireImmune().build("delorean"));
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.riftverse.entity.vehicle.TardisEntity>> TARDIS = ENTITIES.register("tardis",
+            () -> EntityType.Builder.<dev.riftverse.entity.vehicle.TardisEntity>of(dev.riftverse.entity.vehicle.TardisEntity::new, MobCategory.MISC)
+                    .sized(1.4F, 2.8F).clientTrackingRange(10).fireImmune().build("tardis"));
+
     private RvEntities() {}
 
     public static void registerAttributes(EntityAttributeCreationEvent event) {
@@ -105,6 +115,7 @@ public final class RvEntities {
         event.put(STAR_MOTH.get(), dev.riftverse.entity.creature.StarMothEntity.createAttributes().build());
         event.put(LUNAR_GOLEM.get(), dev.riftverse.entity.creature.LunarGolemEntity.createAttributes().build());
         event.put(DENIZEN.get(), dev.riftverse.entity.creature.DenizenEntity.createAttributes().build());
+        event.put(TSA_AGENT.get(), dev.riftverse.entity.creature.TsaAgentEntity.createAttributes().build());
         event.put(COSMIC_DEITY.get(), dev.riftverse.entity.boss.CosmicDeityEntity.createAttributes().build());
     }
 }

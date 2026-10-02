@@ -87,4 +87,19 @@ public final class CreatureSkins {
             return TEX;
         }
     }
+
+    public static final class TsaAgent extends HumanoidMobRenderer<dev.riftverse.entity.creature.TsaAgentEntity, PlayerModel<dev.riftverse.entity.creature.TsaAgentEntity>> {
+        private static final ResourceLocation AGENT = Riftverse.id("textures/entity/tsa_agent.png");
+        private static final ResourceLocation ENFORCER = Riftverse.id("textures/entity/tsa_enforcer.png");
+
+        public TsaAgent(EntityRendererProvider.Context ctx) {
+            super(ctx, new PlayerModel<>(ctx.bakeLayer(ModelLayers.PLAYER), false), 0.5f);
+            addLayer(new net.minecraft.client.renderer.entity.layers.ItemInHandLayer<>(this, ctx.getItemInHandRenderer()));
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(dev.riftverse.entity.creature.TsaAgentEntity entity) {
+            return entity.rank() > 0 ? ENFORCER : AGENT;
+        }
+    }
 }

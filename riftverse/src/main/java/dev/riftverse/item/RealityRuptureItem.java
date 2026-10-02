@@ -1,6 +1,5 @@
 package dev.riftverse.item;
 
-import dev.riftverse.creator.CreatorAuthority;
 import dev.riftverse.creator.RuptureService;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -8,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,16 +28,6 @@ public class RealityRuptureItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (player instanceof ServerPlayer sp) RuptureService.use(sp, stack);
         return InteractionResultHolder.consume(stack);
-    }
-
-    @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity holder, int slot, boolean selected) {
-        if (level.isClientSide || !(holder instanceof ServerPlayer sp) || holder.tickCount % 20 != 0) return;
-        long serial = ItemData.read(stack).getLong("rupture_serial");
-        if (!CreatorAuthority.mayWield(sp) || !CreatorAuthority.validSerial(serial)) {
-            stack.setCount(0);
-            sp.displayClientMessage(Component.literal("The artifact crumbles into nothing. It does not recognise you.").withColor(0x8080A0), true);
-        }
     }
 
     @Override

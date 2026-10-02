@@ -59,7 +59,7 @@ public final class RvItems {
     public static final DeferredItem<dev.riftverse.item.relic.RelicBlasterItem> RELIC_BLASTER = add("relic_blaster",
             () -> new dev.riftverse.item.relic.RelicBlasterItem(new Item.Properties().rarity(Rarity.RARE).durability(900).fireResistant()));
     /** Deliberately not in the creative tab and without a recipe: only the creator interface can forge one. */
-    public static final DeferredItem<dev.riftverse.item.RealityRuptureItem> REALITY_RUPTURE = ITEMS.register("reality_rupture",
+    public static final DeferredItem<dev.riftverse.item.RealityRuptureItem> REALITY_RUPTURE = add("reality_rupture",
             () -> new dev.riftverse.item.RealityRuptureItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));
     public static final DeferredItem<dev.riftverse.item.RealityRemoteItem> REALITY_REMOTE = add("reality_remote",
             () -> new dev.riftverse.item.RealityRemoteItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant()));
@@ -95,6 +95,11 @@ public final class RvItems {
     public static final DeferredItem<DeferredSpawnEggItem> CRYSTAL_SPIDER_EGG = egg("crystal_spider_spawn_egg", RvEntities.CRYSTAL_SPIDER, 0x2A1040, 0xC080FF);
     public static final DeferredItem<DeferredSpawnEggItem> STAR_MOTH_EGG = egg("star_moth_spawn_egg", RvEntities.STAR_MOTH, 0x1A1030, 0xFFE8A0);
     public static final DeferredItem<DeferredSpawnEggItem> LUNAR_GOLEM_EGG = egg("lunar_golem_spawn_egg", RvEntities.LUNAR_GOLEM, 0xB8B8C0, 0x7DF9FF);
+    public static final DeferredItem<dev.riftverse.item.VehicleItem> DELOREAN = add("delorean",
+            () -> new dev.riftverse.item.VehicleItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1), () -> RvEntities.DELOREAN.get()));
+    public static final DeferredItem<dev.riftverse.item.VehicleItem> TARDIS = add("tardis",
+            () -> new dev.riftverse.item.VehicleItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1), () -> RvEntities.TARDIS.get()));
+    public static final DeferredItem<DeferredSpawnEggItem> TSA_AGENT_EGG = egg("tsa_agent_spawn_egg", RvEntities.TSA_AGENT, 0x14161C, 0x60A0FF);
     public static final DeferredItem<DeferredSpawnEggItem> DENIZEN_EGG = egg("denizen_spawn_egg", RvEntities.DENIZEN, 0x3A2A5A, 0xFFC14D);
     public static final DeferredItem<DeferredSpawnEggItem> COSMIC_DEITY_EGG = egg("cosmic_deity_spawn_egg", RvEntities.COSMIC_DEITY, 0x05010F, 0xC070FF);
     public static final DeferredItem<DeferredSpawnEggItem> ABYSSAL_LEVIATHAN_EGG = egg("abyssal_leviathan_spawn_egg", RvEntities.ABYSSAL_LEVIATHAN, 0x0A1A3A, 0x40FFE0);

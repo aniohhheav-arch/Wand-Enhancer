@@ -21,8 +21,7 @@ final class WeaponCommands {
     private WeaponCommands() {}
 
     private static boolean eligible(CommandSourceStack s) {
-        ServerPlayer p = s.getPlayer();
-        return p == null ? s.hasPermission(4) : CreatorAuthority.eligible(p);
+        return s.hasPermission(2);
     }
 
     private static int msg(CommandSourceStack s, String text, boolean ok) {
@@ -31,35 +30,30 @@ final class WeaponCommands {
     }
 
     private static ServerPlayer session(CommandSourceStack s) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        ServerPlayer p = s.getPlayerOrException();
-        if (!CreatorAuthority.inSession(p)) throw new com.mojang.brigadier.exceptions.SimpleCommandExceptionType(
-                Component.literal("Authorise first: /multiverse weapon authorize")).create();
-        return p;
+        return s.getPlayerOrException();
     }
 
     static LiteralArgumentBuilder<CommandSourceStack> weapon() {
         return Commands.literal("weapon").requires(WeaponCommands::eligible)
-                .then(Commands.literal("authorize").executes(c -> {
+                .then(Commands.literal("give").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
-                    RuptureService.open(p, CreatorAuthority.credentialSet() ? RuptureService.PROMPT : RuptureService.CREDENTIAL);
-                    return 1;
-                }).then(Commands.literal("credential").executes(c -> {
-                    RuptureService.open(c.getSource().getPlayerOrException(), RuptureService.CREDENTIAL);
-                    return 1;
-                })))
-                .then(Commands.literal("grant").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
-                    session(c.getSource());
+                    p.getInventory().placeItemBackInInventory(RuptureService.forge(c.getSource().getServer(), p.getUUID()));
+                    return msg(c.getSource(), "THE REALITY RUPTURE is yours.", true);
+                }).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
                     ServerPlayer t = EntityArgument.getPlayer(c, "player");
-                    CreatorAuthority.grant(c.getSource().getServer(), t.getUUID());
                     t.getInventory().placeItemBackInInventory(RuptureService.forge(c.getSource().getServer(), t.getUUID()));
-                    return msg(c.getSource(), t.getGameProfile().getName() + " may now wield the Rupture.", true);
+                    return msg(c.getSource(), "Gave the Rupture to " + t.getGameProfile().getName() + ".", true);
                 })))
-                .then(Commands.literal("revoke").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
-                    session(c.getSource());
-                    ServerPlayer t = EntityArgument.getPlayer(c, "player");
-                    CreatorAuthority.revoke(c.getSource().getServer(), t.getUUID());
-                    return msg(c.getSource(), "Authority withdrawn from " + t.getGameProfile().getName() + ". Their copy will crumble.", true);
-                })))
+                .then(Commands.literal("discover").executes(c -> {
+                    RuptureService.materialize(c.getSource().getPlayerOrException());
+                    return 1;
+                }))
+                .then(Commands.literal("aura").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    CreatorAuthority.toggleAura(c.getSource().getServer(), p.getUUID());
+                    p.refreshDisplayName();
+                    return msg(c.getSource(), "Aura " + (CreatorAuthority.aura(p.getUUID()) ? "on" : "off") + ".", true);
+                }))
                 .then(Commands.literal("inspect").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayer();
                     String held = "";

@@ -20,7 +20,7 @@ ITEMS = {
     "gravity_gauntlet": "Gravity Gauntlet", "singularity_grenade": "Singularity Grenade", "singularity_core": "Singularity Core",
     "reality_shaper": "Reality Shaper", "dimensional_key": "Dimensional Key", "universe_compass": "Universe Compass",
     "homeward_rift": "Homeward Rift", "rift_igniter": "Rift Igniter", "rift_sigil": "Rift Sigil",
-    "reality_remote": "Reality Remote", "reality_rupture": "The Reality Rupture", "relic_blade": "Relic Blade", "relic_blaster": "Relic Blaster",
+    "reality_remote": "Reality Remote", "reality_rupture": "The Reality Rupture", "delorean": "DeLorean Time Machine", "tardis": "TARDIS", "relic_blade": "Relic Blade", "relic_blaster": "Relic Blaster",
 }
 
 SETS = {
@@ -45,7 +45,7 @@ ENTITIES = {
     "lumen_strider": "Lumen Strider", "neon_drone": "Neon Drone", "glitchling": "Glitchling", "void_stalker": "Void Stalker",
     "crystal_sentinel": "Crystal Sentinel", "rift_wraith": "Rift Wraith", "rift_warden": "The Rift Warden",
     "abyssal_leviathan": "The Abyssal Leviathan", "cosmic_deity": "The Cosmic Deity",
-    "void_cultist": "Void Cultist", "crystal_spider": "Crystal Spider", "star_moth": "Star Moth", "lunar_golem": "Lunar Golem", "denizen": "Denizen",
+    "void_cultist": "Void Cultist", "crystal_spider": "Crystal Spider", "star_moth": "Star Moth", "lunar_golem": "Lunar Golem", "denizen": "Denizen", "tsa_agent": "TSA Agent", "delorean": "DeLorean", "tardis": "TARDIS",
 }
 
 TOOLTIPS = {
@@ -176,7 +176,7 @@ def english():
     for k, v in ENTITIES.items():
         out[f"entity.riftverse.{k}"] = v
         if k in ("astral_jelly", "sky_whale", "lumen_strider", "neon_drone", "glitchling", "void_stalker", "crystal_sentinel",
-                 "rift_wraith", "rift_warden", "abyssal_leviathan", "cosmic_deity", "void_cultist", "crystal_spider", "star_moth", "lunar_golem", "denizen"):
+                 "rift_wraith", "rift_warden", "abyssal_leviathan", "cosmic_deity", "void_cultist", "crystal_spider", "star_moth", "lunar_golem", "denizen", "tsa_agent"):
             out[f"item.riftverse.{k}_spawn_egg"] = f"{v.replace('The ', '')} Spawn Egg"
     out.update(TOOLTIPS)
     out.update(MESSAGES)

@@ -32,6 +32,16 @@ public final class RvNetwork {
         r.playToServer(Payloads.CreatorSubmit.TYPE, Payloads.CreatorSubmit.CODEC, (p, ctx) -> {
             if (ctx.player() instanceof ServerPlayer sp) dev.riftverse.creator.RuptureService.submit(sp, p);
         });
+        r.playBidirectional(Payloads.Vehicle.TYPE, Payloads.Vehicle.CODEC, (p, ctx) -> {
+            if (ctx.player() instanceof ServerPlayer sp) {
+                if (sp.level().getEntity(p.entityId()) instanceof dev.riftverse.entity.vehicle.DeLoreanEntity car && car.distanceToSqr(sp) < 64) {
+                    if (p.action() == Payloads.Vehicle.SET_YEAR) car.setCircuits(Math.max(-1_000_000, Math.min(1_000_000, p.value())), car.armed());
+                    else if (p.action() == Payloads.Vehicle.ARM) car.setCircuits(car.targetYear(), p.value() != 0);
+                }
+            } else {
+                ClientNetwork.onVehicle(p);
+            }
+        });
         r.playToServer(Payloads.BrowserAction.TYPE, Payloads.BrowserAction.CODEC, MultiverseService::handle);
         r.playToServer(Payloads.Ability.TYPE, Payloads.Ability.CODEC, (p, ctx) -> {
             if (ctx.player() instanceof ServerPlayer sp) ArmorAbilities.activate(sp, p.ability());

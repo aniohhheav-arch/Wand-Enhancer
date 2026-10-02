@@ -141,6 +141,7 @@ def loot():
     entity_loot("crystal_spider", [("minecraft:amethyst_shard", 1, 3), ("minecraft:string", 0, 2)])
     entity_loot("star_moth", [("stellar_dust", 0, 1)])
     entity_loot("lunar_golem", [("minecraft:iron_ingot", 2, 5), ("stellar_dust", 1, 3)])
+    entity_loot("tsa_agent", [("minecraft:clock", 0, 1), ("singularity_fragment", 0, 1)])
     entity_loot("denizen", [("minecraft:emerald", 0, 2), ("rift_shard", 0, 1)])
     entity_loot("cosmic_deity", [("singularity_core", 1, 1), ("singularity_fragment", 6, 10), ("warden_core", 1, 2), ("stellar_dust", 16, 32)])
     entity_loot("abyssal_leviathan", [("leviathan_scale", 4, 6), ("singularity_fragment", 1, 3), ("stellar_dust", 8, 12)])

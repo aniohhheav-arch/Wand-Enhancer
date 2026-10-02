@@ -59,4 +59,8 @@ public final class ClientNetwork {
     public static void onCreatorScreen(Payloads.CreatorScreen p) {
         Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.CreatorScreen(p.mode(), p.credentialSet()));
     }
+
+    public static void onVehicle(Payloads.Vehicle p) {
+        if (p.action() == Payloads.Vehicle.OPEN_CIRCUITS) Minecraft.getInstance().setScreen(new dev.riftverse.client.screen.TimeCircuitScreen(p.entityId(), p.value()));
+    }
 }

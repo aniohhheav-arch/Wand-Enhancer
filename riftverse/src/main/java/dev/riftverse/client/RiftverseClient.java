@@ -121,6 +121,9 @@ public final class RiftverseClient {
         e.registerEntityRenderer(RvEntities.STAR_MOTH.get(), dev.riftverse.client.render.entity.CreatureSkins.StarMoth::new);
         e.registerEntityRenderer(RvEntities.LUNAR_GOLEM.get(), dev.riftverse.client.render.entity.CreatureSkins.LunarGolem::new);
         e.registerEntityRenderer(RvEntities.DENIZEN.get(), dev.riftverse.client.render.entity.CreatureSkins.Denizen::new);
+        e.registerEntityRenderer(RvEntities.TSA_AGENT.get(), dev.riftverse.client.render.entity.CreatureSkins.TsaAgent::new);
+        e.registerEntityRenderer(RvEntities.DELOREAN.get(), dev.riftverse.client.render.entity.VehicleRenderers.DeLorean::new);
+        e.registerEntityRenderer(RvEntities.TARDIS.get(), dev.riftverse.client.render.entity.VehicleRenderers.Tardis::new);
         e.registerEntityRenderer(RvEntities.COSMIC_DEITY.get(), dev.riftverse.client.render.entity.CosmicDeityRenderer::new);
         e.registerBlockEntityRenderer(RvBlockEntities.RIFT.get(), RiftRenderer::new);
         e.registerBlockEntityRenderer(RvBlockEntities.PORTAL_FIELD.get(), PortalFieldRenderer::new);

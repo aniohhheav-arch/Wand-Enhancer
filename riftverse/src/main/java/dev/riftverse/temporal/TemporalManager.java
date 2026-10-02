@@ -75,6 +75,11 @@ public final class TemporalManager {
         return data(p).getInt("paradox");
     }
 
+    public static void setYear(ServerPlayer p, int year) {
+        data(p).putInt("year", year);
+        data(p).putString("line", (year < PRESENT ? Timeline.PAST : year > PRESENT ? Timeline.FUTURE : Timeline.PRIME).name());
+    }
+
     public static void setParadox(ServerPlayer p, int v) {
         data(p).putInt("paradox", Math.max(0, Math.min(100, v)));
     }
@@ -188,32 +193,20 @@ public final class TemporalManager {
             double a = level.random.nextDouble() * Math.PI * 2;
             BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     BlockPos.containing(target.getX() + Math.cos(a) * 5, target.getY(), target.getZ() + Math.sin(a) * 5));
-            Vindicator agent = EntityType.VINDICATOR.create(level);
+            dev.riftverse.entity.creature.TsaAgentEntity agent = dev.riftverse.registry.RvEntities.TSA_AGENT.get().create(level);
             if (agent == null) continue;
             agent.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, (float) Math.toDegrees(-a), 0);
-            agent.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null);
-            agent.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(Items.MACE));
-            agent.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(Items.NETHERITE_HELMET));
+            agent.setRank(i == 0 && paradox(target) >= 80 ? 1 : 0);
+            agent.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(Items.BREEZE_ROD));
             agent.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0f);
-            agent.setDropChance(net.minecraft.world.entity.EquipmentSlot.HEAD, 0f);
-            agent.setCustomName(Component.literal("TSA Agent").withColor(0x60A0FF));
-            agent.setCustomNameVisible(true);
-            agent.setGlowingTag(true);
-            agent.setCanJoinRaid(false);
-            agent.getAttribute(Attributes.MAX_HEALTH).setBaseValue(40);
-            agent.setHealth(40);
+            agent.setCustomName(Component.literal(agent.rank() > 0 ? "TSA Temporal Enforcer" : "TSA Agent").withColor(agent.rank() > 0 ? 0xFF4050 : 0x60A0FF));
             agent.addTag(AGENT_TAG);
+            agent.setWarrant(20 * 90);
             agent.setTarget(target);
             level.addFreshEntity(agent);
             level.sendParticles(RvParticles.RING.get().with(0x60A0FF, 2f, 16), agent.getX(), agent.getY() + 1, agent.getZ(), 1, 0, 0, 0, 0);
             level.sendParticles(RvParticles.STREAK.get().with(0xFFFFFF, 1f, 14), agent.getX(), agent.getY() + 1, agent.getZ(), 30, 0.3, 1, 0.3, 0.2);
             out.add(agent);
-            Scheduler.later(20 * 90, () -> {
-                if (agent.isAlive()) {
-                    level.sendParticles(RvParticles.RING.get().with(0x60A0FF, 2f, 16), agent.getX(), agent.getY() + 1, agent.getZ(), 1, 0, 0, 0, 0);
-                    agent.discard();
-                }
-            });
         }
         return out;
     }

@@ -982,6 +982,42 @@ ITEM_ART = {
         "................",
         "................",
     ], {"w": 0xB0B0B0, "W": 0xFFFFFF}),
+    "delorean": ([
+        "................",
+        "................",
+        "................",
+        "................",
+        "......ssssss....",
+        ".....sggggggs...",
+        "....sgcFFcggss..",
+        "..sssssssssssss.",
+        ".sssssssssssssss",
+        ".sddddddddddddds",
+        ".sRsssssssssssYs",
+        "..ooo.......ooo.",
+        "..ooo.......ooo.",
+        "................",
+        "................",
+        "................",
+    ], {"s": 0xB8BCC4, "g": 0x1A2430, "c": 0x80C0FF, "F": 0xFFFFFF, "d": 0x2A2C30, "R": 0xC02020, "Y": 0xFFFFE0, "o": 0x101010}),
+    "tardis": ([
+        ".......ww.......",
+        "......dddd......",
+        "....dddddddd....",
+        "....dkkkkkkd....",
+        "....bbbbbbbb....",
+        "....bwwbbwwb....",
+        "....bwwbbwwb....",
+        "....bbbbbbbb....",
+        "....bddbbddb....",
+        "....bddbbddb....",
+        "....bbbbbbbb....",
+        "....bddbbddb....",
+        "....bddbbddb....",
+        "....bbbbbbbb....",
+        "...dddddddddd...",
+        "................",
+    ], {"b": 0x1A3A8A, "d": 0x10265A, "w": 0xE8F0FF, "k": 0x101010}),
     "reality_rupture": ([
         "............wW..",
         "...........wPPW.",
@@ -1568,6 +1604,12 @@ def generate():
                                             (0x101018, 0x00F0FF, 0xD0A080), (0xE0E0F0, 0x8F6BFF, 0xF0D0B0), (0x6A3A1A, 0x40E0C0, 0x6A4028),
                                             (0x5A1A6A, 0xFF7AF0, 0xB08070), (0x3A3A3A, 0xFF4A10, 0x9A6A50)]):
         save(tex_denizen(robe, trim, skin, 700 + i), f"entity/denizen_{i}.png", preview)
+    for name, trim, visor, seed in [("tsa_agent", 0x60A0FF, 0x80E0FF, 801), ("tsa_enforcer", 0xFF4050, 0xFF8080, 802)]:
+        img = tex_denizen(0x14161C, trim, 0xC8A080, seed)
+        img[10:12, 8:16, :3] = hexc(visor)
+        img[20:32, 20:22, :3] = hexc(0xE0E0E0)
+        img[22:24, 26:28, :3] = hexc(trim)
+        save(img, f"entity/{name}.png", preview)
     for name, stops, seed in [("void_cultist", [(0, 0x05010A), (0.6, 0x2A0A4A), (1, 0x9B30FF)], 501),
                               ("crystal_spider", [(0, 0x1A0A2A), (0.5, 0x6A3AAA), (1, 0xE0B0FF)], 502),
                               ("star_moth", [(0, 0x1A1030), (0.6, 0x8A70C0), (1, 0xFFE8A0)], 503),

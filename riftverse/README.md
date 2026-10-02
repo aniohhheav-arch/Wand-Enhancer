@@ -300,16 +300,14 @@ Licensed under MIT.
 
 ## The Reality Rupture (creator weapon)
 
-A secret artifact that can't be crafted, isn't in the creative tab and can't be duplicated: every copy carries a registered serial, and in unauthorised hands it crumbles.
+The ultimate artifact. Ops get it with `/multiverse weapon give [player]` (it's also in the creative tab). There's no password or authorisation step: whoever holds it can use it.
 
-- **Setup:** a level-4 operator runs `/multiverse weapon authorize`. The first time, this opens a masked interface where you seal a secret of 8 or more characters. The secret is stored as a salted PBKDF2 hash in `<world>/serverconfig/riftverse_creator.json`. Commands never take it as an argument. To change it later, use `/multiverse weapon authorize credential`.
-- **Unlock:** run `/multiverse weapon authorize` and enter the secret. This opens the creator console: Materialize (discovery sequence), Toggle Aura ("✦ Reality Architect"), Announce, Preview, Seal Session. Three failed attempts trigger a lockout.
 - **Abilities:**
   - **Use — Reality Tear:** opens a tear that pulls creatures in and migrates them.
   - **Sneak-use — Existence Disassembly:** removes a creature, or a region of terrain that can be restored.
   - **Sneak-use looking straight up — THE FINAL RUPTURE.**
 - **Config `[rupture]`:** `radius`; `ultimateMode` = `visual` | `area` (terrain comes back by itself after 60 s) | `universe` (normal erase with a backup).
-- **Commands:** `/multiverse weapon grant|revoke <player>`, `inspect`, `test`, `restore`, and `/multiverse reality rupture preview|activate [visual|area|universe]`.
+- **Commands:** `/multiverse weapon give [player]`, `discover` (discovery cinematic + weapon), `aura`, `inspect`, `test`, `restore`, and `/multiverse reality rupture preview|activate [visual|area|universe]`.
 
 ## Time travel and the TSA
 
@@ -317,3 +315,19 @@ A secret artifact that can't be crafted, isn't in the creative tab and can't be 
 - At 60%+ paradox, **TSA agents** (Time and Space Authority) are dispatched after you.
 - Flying above the temporal airspace ceiling (Y=300 by default) gets you warned and then arrested. The TSA halts you, pulls you to the ground and leaves agents to watch you.
 - `/multiverse tsa status|enable|disable|ceiling <y>|dispatch <p>|arrest <p>|pardon <p>|recall`.
+
+## Time machines
+
+- **DeLorean** (item, place on the ground):
+  - Right-click to drive with WASD. Your speed shows above the hotbar.
+  - Sneak-right-click to open the **time circuits**, where you set the destination year and press ARM.
+  - Hit **88 MPH** and you get fire trails and a flash, then you arrive in the destination year. The car rematerialises a moment later.
+  - Sneak-punch to pick it back up.
+- **TARDIS** (item, place it):
+  - Right-click to step inside. It's bigger on the inside: a private console room built far out in the Nexus.
+  - Use the console to dematerialise. The police box fades out and lands in a random universe and a random year.
+  - Sneak-use the console to step out wherever it landed.
+- **TSA agents** are now custom mobs (black suits, glowing visors):
+  - They blink through time toward their target, and their batons slow and weaken you.
+  - At 80%+ paradox a red-trimmed **Temporal Enforcer** leads them.
+  - They leave when their warrant expires.

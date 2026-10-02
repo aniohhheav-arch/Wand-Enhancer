@@ -154,7 +154,6 @@ public final class RuptureService {
     }
 
     public static void use(ServerPlayer p, ItemStack stack) {
-        if (!CreatorAuthority.mayWield(p) || !CreatorAuthority.validSerial(ItemData.read(stack).getLong("rupture_serial"))) return;
         if (p.isShiftKeyDown() && p.getXRot() < -70f) {
             if (ready(p, 400)) finalRupture(p, mode());
         } else if (p.isShiftKeyDown()) {
