@@ -92,6 +92,17 @@ public final class PortalGunItem extends Item {
             up = player.getDirection();
         }
         Vec3 face = Vec3.atCenterOf(wall).add(PortalEntity.vec(facing).scale(0.5 + 0.02));
+        // Wall portals slide down to stand on the floor when there is one within a couple of blocks, so you can walk in.
+        if (facing.getAxis() != Direction.Axis.Y) {
+            for (int drop = 0; drop < 3; drop++) {
+                BlockPos below = wall.below();
+                if (solid(level, below, facing) && open(level, below.relative(facing))) {
+                    wall = below;
+                } else {
+                    break;
+                }
+            }
+        }
         for (int shift : new int[]{0, -1}) {
             BlockPos a = wall.relative(up, shift), b = a.relative(up);
             if (solid(level, a, facing) && solid(level, b, facing) && open(level, a.relative(facing)) && open(level, b.relative(facing))) {

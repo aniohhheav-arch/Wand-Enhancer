@@ -58,10 +58,10 @@ The full design spec is far bigger than one release, so it ships in eight phases
 ### Phase 3 — Cosmic
 - [x] Infinity Gauntlet item, six stones with individual abilities and ultimates
 - [x] Stone combinations and the Snap (visual-only and safe modes)
-- [ ] Portal guns, linked portals, momentum, projectile redirection, loop prevention
-- [ ] Dimensional rifts
-- [ ] Space foundation: suits, oxygen, gravity
-- [ ] Time manipulation abilities
+- [x] Portal guns, linked portals, momentum, projectile redirection, loop prevention
+- [x] Dimensional rifts
+- [x] Space foundation: suits, oxygen, gravity
+- [x] Time manipulation abilities
 
 ### Phase 4 — Technology
 - [ ] Drivable time machine (doors, wheels, steering, dashboard, lights, audio)

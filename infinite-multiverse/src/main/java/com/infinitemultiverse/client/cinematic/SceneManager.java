@@ -238,7 +238,8 @@ public final class SceneManager {
     @SubscribeEvent
     public static void onScreen(net.neoforged.neoforge.client.event.ScreenEvent.Opening event) {
         if (event.getNewScreen() instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen && hasRecent(
-                com.infinitemultiverse.core.cinematic.SceneIds.MIRROR_ENTER, com.infinitemultiverse.core.cinematic.SceneIds.MIRROR_EXIT)) {
+                com.infinitemultiverse.core.cinematic.SceneIds.MIRROR_ENTER, com.infinitemultiverse.core.cinematic.SceneIds.MIRROR_EXIT,
+                com.infinitemultiverse.core.cinematic.SceneIds.LAUNCH, com.infinitemultiverse.core.cinematic.SceneIds.REENTRY)) {
             event.setCanceled(true);
         }
     }
