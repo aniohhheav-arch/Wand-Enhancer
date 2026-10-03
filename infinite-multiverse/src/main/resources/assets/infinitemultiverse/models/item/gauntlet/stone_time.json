@@ -1,0 +1,76 @@
+{
+ "textures": {
+  "gem": "infinitemultiverse:item/gauntlet/gem_time",
+  "particle": "infinitemultiverse:item/gauntlet/gem_time"
+ },
+ "elements": [
+  {
+   "from": [
+    7.2,
+    7.2,
+    11.75
+   ],
+   "to": [
+    8.8,
+    8.8,
+    12.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "south": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "east": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "west": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "up": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "down": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    }
+   }
+  }
+ ]
+}

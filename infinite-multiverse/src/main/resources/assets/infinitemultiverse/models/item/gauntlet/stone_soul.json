@@ -1,0 +1,76 @@
+{
+ "textures": {
+  "gem": "infinitemultiverse:item/gauntlet/gem_soul",
+  "particle": "infinitemultiverse:item/gauntlet/gem_soul"
+ },
+ "elements": [
+  {
+   "from": [
+    13.55,
+    7.4,
+    6.8
+   ],
+   "to": [
+    14.3,
+    8.8,
+    8.6
+   ],
+   "faces": {
+    "north": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "south": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "east": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "west": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "up": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    },
+    "down": {
+     "texture": "#gem",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
+    }
+   }
+  }
+ ]
+}
