@@ -1,0 +1,124 @@
+{
+  "textures": {
+    "blued": "finalframe:item/revolver/steel_blued",
+    "polished": "finalframe:item/revolver/steel_polished",
+    "engraved": "finalframe:item/revolver/steel_engraved",
+    "walnut": "finalframe:item/revolver/walnut",
+    "brass": "finalframe:item/revolver/brass",
+    "face": "finalframe:item/revolver/cylinder_face",
+    "flutes": "finalframe:item/revolver/cylinder_flutes",
+    "leather": "finalframe:item/revolver/leather",
+    "bore": "finalframe:item/revolver/bore",
+    "particle": "finalframe:item/revolver/steel_blued"
+  },
+  "elements": [
+    {
+      "from": [
+        5.05,
+        8.1,
+        7.68
+      ],
+      "to": [
+        6.05,
+        9.85,
+        8.32
+      ],
+      "faces": {
+        "north": {
+          "texture": "#polished"
+        },
+        "south": {
+          "texture": "#polished"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "name": "hammer_body"
+    },
+    {
+      "from": [
+        4.15,
+        9.65,
+        7.6
+      ],
+      "to": [
+        5.25,
+        10.2,
+        8.4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#engraved"
+        },
+        "south": {
+          "texture": "#engraved"
+        },
+        "east": {
+          "texture": "#engraved"
+        },
+        "west": {
+          "texture": "#engraved"
+        },
+        "up": {
+          "texture": "#engraved"
+        },
+        "down": {
+          "texture": "#engraved"
+        }
+      },
+      "rotation": {
+        "angle": -22.5,
+        "axis": "z",
+        "origin": [
+          5.1000000000000005,
+          9.899999999999999,
+          8
+        ]
+      },
+      "name": "hammer_spur"
+    },
+    {
+      "from": [
+        6.05,
+        8.8,
+        7.92
+      ],
+      "to": [
+        6.25,
+        9.05,
+        8.08
+      ],
+      "faces": {
+        "north": {
+          "texture": "#polished"
+        },
+        "south": {
+          "texture": "#polished"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "name": "firing_pin"
+    }
+  ]
+}

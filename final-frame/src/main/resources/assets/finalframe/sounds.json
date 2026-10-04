@@ -1,0 +1,164 @@
+{
+  "revolver.shot": {
+    "sounds": [
+      {
+        "name": "finalframe:revolver/shot"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.revolver.shot"
+  },
+  "revolver.dry_fire": {
+    "sounds": [
+      {
+        "name": "finalframe:revolver/dry_fire"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.revolver.dry_fire"
+  },
+  "revolver.hammer_cock": {
+    "sounds": [
+      {
+        "name": "finalframe:revolver/hammer_cock"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.revolver.hammer_cock"
+  },
+  "revolver.cylinder_spin": {
+    "sounds": [
+      {
+        "name": "finalframe:revolver/cylinder_spin"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.revolver.cylinder_spin"
+  },
+  "revolver.reload": {
+    "sounds": [
+      {
+        "name": "finalframe:revolver/reload"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.revolver.reload"
+  },
+  "finisher.last_word_shot": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/last_word_shot"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.last_word_shot"
+  },
+  "finisher.revolver_spin": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/revolver_spin"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.revolver_spin"
+  },
+  "finisher.draw": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/draw"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.draw"
+  },
+  "finisher.holster": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/holster"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.holster"
+  },
+  "finisher.catch": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/catch"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.catch"
+  },
+  "finisher.whoosh": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/whoosh"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.whoosh"
+  },
+  "finisher.shove": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/shove"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.shove"
+  },
+  "finisher.cloth": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/cloth"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.cloth"
+  },
+  "finisher.stumble": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/stumble"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.stumble"
+  },
+  "finisher.impact": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/impact"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.impact"
+  },
+  "finisher.slowmo_in": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/slowmo_in"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.slowmo_in"
+  },
+  "finisher.slowmo_out": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/slowmo_out"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.slowmo_out"
+  },
+  "finisher.ear_ring": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/ear_ring",
+        "stream": false
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.ear_ring"
+  },
+  "finisher.smoke_hiss": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/smoke_hiss"
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.smoke_hiss"
+  },
+  "finisher.stinger": {
+    "sounds": [
+      {
+        "name": "finalframe:finisher/stinger",
+        "stream": false
+      }
+    ],
+    "subtitle": "subtitles.finalframe.finisher.stinger"
+  }
+}

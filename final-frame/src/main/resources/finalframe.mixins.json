@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "dev.finalframe.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [],
+  "client": [
+    "client.CameraMixin",
+    "client.EntityTurnMixin",
+    "client.HumanoidModelMixin",
+    "client.PostChainAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

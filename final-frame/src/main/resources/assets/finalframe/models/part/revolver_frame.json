@@ -1,0 +1,1081 @@
+{
+  "textures": {
+    "blued": "finalframe:item/revolver/steel_blued",
+    "polished": "finalframe:item/revolver/steel_polished",
+    "engraved": "finalframe:item/revolver/steel_engraved",
+    "walnut": "finalframe:item/revolver/walnut",
+    "brass": "finalframe:item/revolver/brass",
+    "face": "finalframe:item/revolver/cylinder_face",
+    "flutes": "finalframe:item/revolver/cylinder_flutes",
+    "leather": "finalframe:item/revolver/leather",
+    "bore": "finalframe:item/revolver/bore",
+    "particle": "finalframe:item/revolver/steel_blued"
+  },
+  "elements": [
+    {
+      "from": [
+        9.6,
+        8.0,
+        7.4
+      ],
+      "to": [
+        15.4,
+        9.2,
+        8.6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#blued"
+        },
+        "south": {
+          "texture": "#blued"
+        },
+        "east": {
+          "texture": "#blued"
+        },
+        "west": {
+          "texture": "#blued"
+        },
+        "up": {
+          "texture": "#blued"
+        },
+        "down": {
+          "texture": "#blued"
+        }
+      },
+      "name": "barrel"
+    },
+    {
+      "from": [
+        9.6,
+        9.2,
+        7.68
+      ],
+      "to": [
+        15.2,
+        9.42,
+        8.32
+      ],
+      "faces": {
+        "north": {
+          "texture": "#polished"
+        },
+        "south": {
+          "texture": "#polished"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "name": "rib"
+    },
+    {
+      "from": [
+        15.2,
+        7.86,
+        7.26
+      ],
+      "to": [
+        15.75,
+        9.34,
+        8.74
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "muzzle_band"
+    },
+    {
+      "from": [
+        15.751,
+        8.3,
+        7.74
+      ],
+      "to": [
+        15.76,
+        8.9,
+        8.26
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bore"
+        },
+        "south": {
+          "texture": "#bore"
+        },
+        "east": {
+          "texture": "#bore"
+        },
+        "west": {
+          "texture": "#bore"
+        },
+        "up": {
+          "texture": "#bore"
+        },
+        "down": {
+          "texture": "#bore"
+        }
+      },
+      "name": "bore"
+    },
+    {
+      "from": [
+        14.55,
+        9.42,
+        7.87
+      ],
+      "to": [
+        15.15,
+        10.05,
+        8.13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#polished"
+        },
+        "south": {
+          "texture": "#polished"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "rotation": {
+        "angle": -22.5,
+        "axis": "z",
+        "origin": [
+          14.85,
+          9.42,
+          8
+        ]
+      },
+      "name": "front_sight"
+    },
+    {
+      "from": [
+        10.4,
+        7.25,
+        7.58
+      ],
+      "to": [
+        14.6,
+        8.0,
+        8.42
+      ],
+      "faces": {
+        "north": {
+          "texture": "#blued"
+        },
+        "south": {
+          "texture": "#blued"
+        },
+        "east": {
+          "texture": "#blued"
+        },
+        "west": {
+          "texture": "#blued"
+        },
+        "up": {
+          "texture": "#blued"
+        },
+        "down": {
+          "texture": "#blued"
+        }
+      },
+      "name": "ejector_housing"
+    },
+    {
+      "from": [
+        14.6,
+        7.36,
+        7.76
+      ],
+      "to": [
+        15.05,
+        7.9,
+        8.24
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "ejector_head"
+    },
+    {
+      "from": [
+        5.9,
+        9.15,
+        7.28
+      ],
+      "to": [
+        9.8,
+        9.75,
+        8.72
+      ],
+      "faces": {
+        "north": {
+          "texture": "#blued"
+        },
+        "south": {
+          "texture": "#blued"
+        },
+        "east": {
+          "texture": "#blued"
+        },
+        "west": {
+          "texture": "#blued"
+        },
+        "up": {
+          "texture": "#blued"
+        },
+        "down": {
+          "texture": "#blued"
+        }
+      },
+      "name": "top_strap"
+    },
+    {
+      "from": [
+        6.2,
+        9.75,
+        7.88
+      ],
+      "to": [
+        7.0,
+        9.95,
+        8.12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#polished"
+        },
+        "south": {
+          "texture": "#polished"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "name": "rear_sight_notch"
+    },
+    {
+      "from": [
+        9.0,
+        6.3,
+        7.18
+      ],
+      "to": [
+        9.9,
+        9.75,
+        8.82
+      ],
+      "faces": {
+        "north": {
+          "texture": "#engraved",
+          "uv": [
+            0,
+            0,
+            6,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#engraved",
+          "uv": [
+            0,
+            0,
+            6,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#blued"
+        },
+        "west": {
+          "texture": "#blued"
+        },
+        "up": {
+          "texture": "#blued"
+        },
+        "down": {
+          "texture": "#blued"
+        }
+      },
+      "name": "front_frame"
+    },
+    {
+      "from": [
+        5.2,
+        6.1,
+        7.18
+      ],
+      "to": [
+        9.9,
+        6.65,
+        8.82
+      ],
+      "faces": {
+        "north": {
+          "texture": "#blued"
+        },
+        "south": {
+          "texture": "#blued"
+        },
+        "east": {
+          "texture": "#blued"
+        },
+        "west": {
+          "texture": "#blued"
+        },
+        "up": {
+          "texture": "#blued"
+        },
+        "down": {
+          "texture": "#blued"
+        }
+      },
+      "name": "frame_floor"
+    },
+    {
+      "from": [
+        4.9,
+        6.1,
+        7.05
+      ],
+      "to": [
+        6.15,
+        9.75,
+        8.95
+      ],
+      "faces": {
+        "north": {
+          "texture": "#engraved",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#engraved",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "name": "recoil_shield"
+    },
+    {
+      "from": [
+        9.9,
+        7.55,
+        7.82
+      ],
+      "to": [
+        10.4,
+        8.1,
+        8.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#polished"
+        },
+        "south": {
+          "texture": "#polished"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "name": "cylinder_pin"
+    },
+    {
+      "from": [
+        5.25,
+        6.8,
+        7.0
+      ],
+      "to": [
+        5.65,
+        7.2,
+        7.05
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "screw"
+    },
+    {
+      "from": [
+        5.25,
+        6.8,
+        8.95
+      ],
+      "to": [
+        5.65,
+        7.2,
+        9.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "screw"
+    },
+    {
+      "from": [
+        5.25,
+        8.9,
+        7.0
+      ],
+      "to": [
+        5.65,
+        9.3,
+        7.05
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "screw"
+    },
+    {
+      "from": [
+        5.25,
+        8.9,
+        8.95
+      ],
+      "to": [
+        5.65,
+        9.3,
+        9.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "screw"
+    },
+    {
+      "from": [
+        9.25,
+        6.7,
+        7.0
+      ],
+      "to": [
+        9.65,
+        7.1,
+        7.05
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "screw"
+    },
+    {
+      "from": [
+        9.25,
+        6.7,
+        8.95
+      ],
+      "to": [
+        9.65,
+        7.1,
+        9.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "screw"
+    },
+    {
+      "from": [
+        5.1,
+        6.9,
+        8.93
+      ],
+      "to": [
+        6.0,
+        8.8,
+        9.05
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "loading_gate"
+    },
+    {
+      "from": [
+        3.7,
+        2.4,
+        7.3
+      ],
+      "to": [
+        5.9,
+        6.5,
+        8.7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#blued"
+        },
+        "south": {
+          "texture": "#blued"
+        },
+        "east": {
+          "texture": "#blued"
+        },
+        "west": {
+          "texture": "#blued"
+        },
+        "up": {
+          "texture": "#blued"
+        },
+        "down": {
+          "texture": "#blued"
+        }
+      },
+      "rotation": {
+        "angle": 22.5,
+        "axis": "z",
+        "origin": [
+          5.6,
+          6.4,
+          8
+        ]
+      },
+      "name": "grip_frame"
+    },
+    {
+      "from": [
+        3.55,
+        2.75,
+        7.02
+      ],
+      "to": [
+        5.75,
+        6.25,
+        8.98
+      ],
+      "faces": {
+        "north": {
+          "texture": "#walnut",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#walnut",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#walnut"
+        },
+        "west": {
+          "texture": "#walnut"
+        },
+        "up": {
+          "texture": "#walnut"
+        },
+        "down": {
+          "texture": "#walnut"
+        }
+      },
+      "rotation": {
+        "angle": 22.5,
+        "axis": "z",
+        "origin": [
+          5.6,
+          6.4,
+          8
+        ]
+      },
+      "name": "grip_panels"
+    },
+    {
+      "from": [
+        3.45,
+        2.0,
+        7.1
+      ],
+      "to": [
+        6.0,
+        2.5,
+        8.9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "rotation": {
+        "angle": 22.5,
+        "axis": "z",
+        "origin": [
+          5.6,
+          6.4,
+          8
+        ]
+      },
+      "name": "butt_cap"
+    },
+    {
+      "from": [
+        4.3,
+        1.4,
+        7.88
+      ],
+      "to": [
+        5.1,
+        2.0,
+        8.12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "rotation": {
+        "angle": 22.5,
+        "axis": "z",
+        "origin": [
+          5.6,
+          6.4,
+          8
+        ]
+      },
+      "name": "lanyard_ring"
+    },
+    {
+      "from": [
+        3.4,
+        5.9,
+        7.4
+      ],
+      "to": [
+        4.4,
+        7.3,
+        8.6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#blued"
+        },
+        "south": {
+          "texture": "#blued"
+        },
+        "east": {
+          "texture": "#blued"
+        },
+        "west": {
+          "texture": "#blued"
+        },
+        "up": {
+          "texture": "#blued"
+        },
+        "down": {
+          "texture": "#blued"
+        }
+      },
+      "rotation": {
+        "angle": 22.5,
+        "axis": "z",
+        "origin": [
+          5.6,
+          6.4,
+          8
+        ]
+      },
+      "name": "backstrap_tang"
+    },
+    {
+      "from": [
+        6.0,
+        4.55,
+        7.82
+      ],
+      "to": [
+        8.7,
+        4.85,
+        8.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "guard_bottom"
+    },
+    {
+      "from": [
+        8.4,
+        4.55,
+        7.82
+      ],
+      "to": [
+        8.7,
+        6.1,
+        8.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "guard_front"
+    },
+    {
+      "from": [
+        5.8,
+        4.7,
+        7.82
+      ],
+      "to": [
+        6.15,
+        5.8,
+        8.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "rotation": {
+        "angle": 22.5,
+        "axis": "z",
+        "origin": [
+          6.0,
+          4.7,
+          8
+        ]
+      },
+      "name": "guard_rear"
+    },
+    {
+      "from": [
+        6.9,
+        4.95,
+        7.86
+      ],
+      "to": [
+        7.25,
+        6.1,
+        8.14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#polished"
+        },
+        "south": {
+          "texture": "#polished"
+        },
+        "east": {
+          "texture": "#polished"
+        },
+        "west": {
+          "texture": "#polished"
+        },
+        "up": {
+          "texture": "#polished"
+        },
+        "down": {
+          "texture": "#polished"
+        }
+      },
+      "rotation": {
+        "angle": -22.5,
+        "axis": "z",
+        "origin": [
+          7.1,
+          6.1,
+          8
+        ]
+      },
+      "name": "trigger"
+    }
+  ]
+}

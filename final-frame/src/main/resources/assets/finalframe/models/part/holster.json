@@ -1,0 +1,160 @@
+{
+  "textures": {
+    "blued": "finalframe:item/revolver/steel_blued",
+    "polished": "finalframe:item/revolver/steel_polished",
+    "engraved": "finalframe:item/revolver/steel_engraved",
+    "walnut": "finalframe:item/revolver/walnut",
+    "brass": "finalframe:item/revolver/brass",
+    "face": "finalframe:item/revolver/cylinder_face",
+    "flutes": "finalframe:item/revolver/cylinder_flutes",
+    "leather": "finalframe:item/revolver/leather",
+    "bore": "finalframe:item/revolver/bore",
+    "particle": "finalframe:item/revolver/steel_blued"
+  },
+  "elements": [
+    {
+      "from": [
+        8.7,
+        6.7,
+        6.95
+      ],
+      "to": [
+        16.1,
+        9.95,
+        9.05
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#leather",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      },
+      "name": "pouch"
+    },
+    {
+      "from": [
+        5.9,
+        6.0,
+        6.85
+      ],
+      "to": [
+        9.2,
+        7.0,
+        9.15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      },
+      "name": "mouth"
+    },
+    {
+      "from": [
+        10.5,
+        9.95,
+        6.88
+      ],
+      "to": [
+        12.5,
+        11.6,
+        9.12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#leather"
+        },
+        "south": {
+          "texture": "#leather"
+        },
+        "east": {
+          "texture": "#leather"
+        },
+        "west": {
+          "texture": "#leather"
+        },
+        "up": {
+          "texture": "#leather"
+        },
+        "down": {
+          "texture": "#leather"
+        }
+      },
+      "name": "belt_loop"
+    },
+    {
+      "from": [
+        11.2,
+        8.0,
+        6.78
+      ],
+      "to": [
+        11.8,
+        8.6,
+        6.88
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "concho"
+    }
+  ]
+}

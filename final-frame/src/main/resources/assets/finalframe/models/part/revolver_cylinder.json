@@ -1,0 +1,220 @@
+{
+  "textures": {
+    "blued": "finalframe:item/revolver/steel_blued",
+    "polished": "finalframe:item/revolver/steel_polished",
+    "engraved": "finalframe:item/revolver/steel_engraved",
+    "walnut": "finalframe:item/revolver/walnut",
+    "brass": "finalframe:item/revolver/brass",
+    "face": "finalframe:item/revolver/cylinder_face",
+    "flutes": "finalframe:item/revolver/cylinder_flutes",
+    "leather": "finalframe:item/revolver/leather",
+    "bore": "finalframe:item/revolver/bore",
+    "particle": "finalframe:item/revolver/steel_blued"
+  },
+  "elements": [
+    {
+      "from": [
+        6.2,
+        6.67,
+        6.82
+      ],
+      "to": [
+        9.0,
+        9.03,
+        9.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#flutes"
+        },
+        "south": {
+          "texture": "#flutes"
+        },
+        "east": {
+          "texture": "#face",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#face",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#flutes"
+        },
+        "down": {
+          "texture": "#flutes"
+        }
+      },
+      "name": "cylinder_0"
+    },
+    {
+      "from": [
+        6.24,
+        6.67,
+        6.82
+      ],
+      "to": [
+        8.96,
+        9.03,
+        9.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#flutes"
+        },
+        "south": {
+          "texture": "#flutes"
+        },
+        "east": {
+          "texture": "#flutes"
+        },
+        "west": {
+          "texture": "#flutes"
+        },
+        "up": {
+          "texture": "#flutes"
+        },
+        "down": {
+          "texture": "#flutes"
+        }
+      },
+      "rotation": {
+        "angle": 22.5,
+        "axis": "x",
+        "origin": [
+          6.2,
+          7.85,
+          8.0
+        ]
+      },
+      "name": "cylinder_1"
+    },
+    {
+      "from": [
+        6.24,
+        6.67,
+        6.82
+      ],
+      "to": [
+        8.96,
+        9.03,
+        9.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#flutes"
+        },
+        "south": {
+          "texture": "#flutes"
+        },
+        "east": {
+          "texture": "#flutes"
+        },
+        "west": {
+          "texture": "#flutes"
+        },
+        "up": {
+          "texture": "#flutes"
+        },
+        "down": {
+          "texture": "#flutes"
+        }
+      },
+      "rotation": {
+        "angle": 45,
+        "axis": "x",
+        "origin": [
+          6.2,
+          7.85,
+          8.0
+        ]
+      },
+      "name": "cylinder_2"
+    },
+    {
+      "from": [
+        6.24,
+        6.67,
+        6.82
+      ],
+      "to": [
+        8.96,
+        9.03,
+        9.18
+      ],
+      "faces": {
+        "north": {
+          "texture": "#flutes"
+        },
+        "south": {
+          "texture": "#flutes"
+        },
+        "east": {
+          "texture": "#flutes"
+        },
+        "west": {
+          "texture": "#flutes"
+        },
+        "up": {
+          "texture": "#flutes"
+        },
+        "down": {
+          "texture": "#flutes"
+        }
+      },
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          6.2,
+          7.85,
+          8.0
+        ]
+      },
+      "name": "cylinder_3"
+    },
+    {
+      "from": [
+        6.0,
+        7.3,
+        7.45
+      ],
+      "to": [
+        6.2,
+        8.4,
+        8.55
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      },
+      "name": "ratchet"
+    }
+  ]
+}
