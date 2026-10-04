@@ -198,7 +198,8 @@ def muzzle_flash():
         a = max(0.0, 1 - r / spikes)
         a = a ** 1.4
         col = mix((255, 150, 40), (255, 250, 220), a)
-        return (*col, 255 * min(1, a * 1.6))
+        k = min(1, a * 1.6)  # premultiplied: the flash is drawn with additive blending
+        return (col[0] * k, col[1] * k, col[2] * k, 255 * k)
 
     return f
 

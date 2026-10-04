@@ -76,6 +76,7 @@ public final class FinalFrameClient {
         game.addListener(WorldFx::onRenderStage);
         game.addListener(CinematicHud::onLayer);
         game.addListener(AudioDucker::onPlaySound);
+        game.addListener(FinalFrameClient::onToast);
         AutoDirector.install(game);
     }
 
@@ -135,9 +136,24 @@ public final class FinalFrameClient {
         }
     }
 
+    /** Toasts (advancements, recipes) wait until the cinematic hands the screen back. */
+    private static final java.util.List<net.minecraft.client.gui.components.toasts.Toast> HELD_TOASTS = new java.util.ArrayList<>();
+
+    private static void onToast(net.neoforged.neoforge.client.event.ToastAddEvent event) {
+        if (ClientFinisherManager.INSTANCE.local() != null) {
+            HELD_TOASTS.add(event.getToast());
+            event.setCanceled(true);
+        }
+    }
+
     private static void onClientTickPost(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         RevolverAnimator.tick();
+        if (!HELD_TOASTS.isEmpty() && ClientFinisherManager.INSTANCE.local() == null) {
+            var toasts = new java.util.ArrayList<>(HELD_TOASTS);
+            HELD_TOASTS.clear();
+            toasts.forEach(mc.getToasts()::addToast);
+        }
         if (mc.level == null) {
             ClientFinisherManager.INSTANCE.clear();
             return;

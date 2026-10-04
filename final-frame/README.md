@@ -93,3 +93,15 @@ performs the finisher, saving screenshots of every beat to `run-autotest/screens
 
 Crafting recipe: three iron ingots across the top row; gold ingot, diamond and gunpowder in the middle row; any planks in
 the bottom-right slot.
+
+## Screenshots
+
+Captured by `./gradlew runAutotest` with software rendering (no shaders or resource packs):
+
+| | |
+|---|---|
+| ![Item](docs/screenshots/04_item_showcase.png) | ![First person](docs/screenshots/05_recoil.png) |
+| Draw orbit — ![Draw](docs/screenshots/f030.png) | Flourish — ![Flourish](docs/screenshots/f060.png) |
+| Peak of the throw — ![Peak](docs/screenshots/f106.png) | The catch — ![Catch](docs/screenshots/f125.png) |
+| Side profile — ![Profile](docs/screenshots/f141.png) | Hero shot — ![Hero](docs/screenshots/f149.png) |
+| The Last Word — ![Fire](docs/screenshots/f154.png) | Final pose — ![Title](docs/screenshots/f182.png) |

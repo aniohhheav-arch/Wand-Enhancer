@@ -150,8 +150,8 @@ def item_model():
             "head": {"rotation": [0, 0, 0], "translation": [0, 13, 7], "scale": [1, 1, 1]},
             "thirdperson_righthand": {"rotation": [0, -90, 0], "translation": [-0.5, 3.5, 1.5], "scale": [0.85, 0.85, 0.85]},
             "thirdperson_lefthand": {"rotation": [0, 90, 0], "translation": [-0.5, 3.5, 1.5], "scale": [0.85, 0.85, 0.85]},
-            "firstperson_righthand": {"rotation": [0, -90, 0], "translation": [2.5, 4.5, -1.0], "scale": [0.9, 0.9, 0.9]},
-            "firstperson_lefthand": {"rotation": [0, 90, 0], "translation": [2.5, 4.5, -1.0], "scale": [0.9, 0.9, 0.9]},
+            "firstperson_righthand": {"rotation": [0, 90, 0], "translation": [2.5, 4.5, -1.0], "scale": [0.9, 0.9, 0.9]},
+            "firstperson_lefthand": {"rotation": [0, -90, 0], "translation": [2.5, 4.5, -1.0], "scale": [0.9, 0.9, 0.9]},
         },
     }
 

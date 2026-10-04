@@ -168,7 +168,7 @@ public final class SheriffFinisher extends FinisherDefinition {
         if (t > CONTACT && t <= STUMBLE_END && t % 4 == 0) {
             groundDust(s, s.target().position(), 6);
         }
-        if (t > FIRE && t < LOWER && t % 2 == 0) {
+        if (t > FIRE && t < LOWER && t % 4 == 0) {
             Vec3 muzzle = muzzleWorld(snap);
             s.particleWithVelocity(ParticleTypes.SMOKE, muzzle, new Vec3(0, 0.025, 0));
         }

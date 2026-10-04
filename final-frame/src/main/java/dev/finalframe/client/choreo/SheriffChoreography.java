@@ -145,9 +145,9 @@ public final class SheriffChoreography implements Choreography {
 
     private static CameraPose tossTrack(ClientSession s, float t, CameraPose g) {
         float p = Ease.range(t, TOSS, PEAK);
-        Vec3 pos = w(s, Mth.lerp(p, 1.5, 1.7), Mth.lerp(p, 0.95, 1.7), Mth.lerp(p, 1.65, 1.35));
+        Vec3 pos = w(s, Mth.lerp(p, 1.3, 1.1), Mth.lerp(p, 1.0, 2.3), Mth.lerp(p, 1.4, 1.05));
         Vec3 gun = s.snapshot().frame().toWorld(airbornePosition(Math.max(t, TOSS)));
-        return CameraPose.lookAt(pos, gun, 3f * p, Mth.lerp(p, 55f, 44f));
+        return CameraPose.lookAt(pos, gun, 3f * p, Mth.lerp(p, 52f, 38f));
     }
 
     private static CameraPose peakCloseUp(ClientSession s, float t, CameraPose g) {
@@ -160,16 +160,16 @@ public final class SheriffChoreography implements Choreography {
 
     private static CameraPose lowAngle(ClientSession s, float t, CameraPose g) {
         float push = Ease.outCubic(Ease.range(t, CATCH, AIM));
-        Vec3 pos = w(s, Mth.lerp(push, 1.2, 0.95), Mth.lerp(push, 0.32, 0.45), Mth.lerp(push, 1.95, 1.5));
+        Vec3 pos = w(s, Mth.lerp(push, 1.25, 1.0), Mth.lerp(push, 0.45, 0.55), Mth.lerp(push, 1.95, 1.5));
         Vec3 gun = s.snapshot().frame().toWorld(airbornePosition(Math.min(t, CATCH)));
-        Vec3 look = SheriffScript.lerp(w(s, 0.3, 1.95, 0.3), gun, 0.35 * (1 - Ease.range(t, CATCH, CATCH + 4)));
+        Vec3 look = SheriffScript.lerp(w(s, 0.2, 1.25, 0.2), gun, 0.18 * (1 - Ease.range(t, CATCH, CATCH + 4)));
         return CameraPose.lookAt(pos, look, 2f, 50f - 4f * push);
     }
 
     private static CameraPose barrelCloseUp(ClientSession s, float t, CameraPose g) {
         float p = Ease.range(t, AIM, CUT_PROFILE);
-        Vec3 pos = w(s, 0.66, 1.5, Mth.lerp(p, 0.42, 0.55));
-        return CameraPose.lookAt(pos, targetChest(s, t), -3f, 40f);
+        Vec3 pos = w(s, 0.8, 1.62, Mth.lerp(p, -0.12, 0.02));
+        return CameraPose.lookAt(pos, targetChest(s, t), -3f, 42f);
     }
 
     private static CameraPose sideProfile(ClientSession s, float t, CameraPose g) {
@@ -201,8 +201,8 @@ public final class SheriffChoreography implements Choreography {
     private static CameraPose smokeCloseUp(ClientSession s, float t, CameraPose g) {
         float p = Ease.range(t, FINISH, LOWER + 4);
         Vec3 muzzle = w(s, MUZZLE_AT_AIM.x, MUZZLE_AT_AIM.y, MUZZLE_AT_AIM.z);
-        Vec3 pos = w(s, 0.95 + 0.1 * p, 1.52 + 0.06 * p, 0.62 + 0.1 * p);
-        return CameraPose.lookAt(pos, muzzle.add(0, 0.06 * p, 0), 0, 36f);
+        Vec3 pos = w(s, 2.3 + 0.2 * p, 1.5 + 0.05 * p, 1.35 + 0.1 * p);
+        return CameraPose.lookAt(pos, muzzle.add(0, 0.08 * p, 0), 0, 36f);
     }
 
     private static CameraPose pullAway(ClientSession s, float t, CameraPose g) {
@@ -337,7 +337,7 @@ public final class SheriffChoreography implements Choreography {
             WorldFx.renderAirborneRevolver(poseStack, buffers, camera, pos, f.yaw(), airborneSpin(t), weapon(s, t));
             float glint = Ease.bump(t, PEAK - 2, PEAK_END + 2);
             if (glint > 0) {
-                WorldFx.renderGlint(poseStack, buffers, camera, pos.add(0, 0.05, 0), 0.35f * glint, t);
+                WorldFx.renderGlint(poseStack, buffers, camera, pos.add(0, 0.05, 0), 0.16f * glint, t);
             }
         }
         if (t >= FIRE && t < FIRE + 1.6f) {
@@ -360,7 +360,7 @@ public final class SheriffChoreography implements Choreography {
         float saturation = 1 - on * (0.18f + 0.62f * slow + 0.25f * post);
         float flash = 0;
         if (t >= FIRE && t < FIRE + 3) {
-            flash = 0.85f * (1 - (t - FIRE) / 3f);
+            flash = 0.6f * (1 - (t - FIRE) / 3f);
         } else if (t >= CATCH && t < CATCH + 2) {
             flash = 0.12f * (1 - (t - CATCH) / 2f);
         }

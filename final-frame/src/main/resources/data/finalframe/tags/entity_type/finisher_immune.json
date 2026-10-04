@@ -9,11 +9,8 @@
     "minecraft:ghast",
     "minecraft:ravager",
     "minecraft:iron_golem",
-    "minecraft:slime",
-    "minecraft:magma_cube",
     "minecraft:phantom",
     "minecraft:bat",
-    "minecraft:shulker",
-    "minecraft:ender_dragon"
+    "minecraft:shulker"
   ]
 }
