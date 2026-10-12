@@ -97,7 +97,7 @@ public final class FinisherManager {
         AnchorFrame frame = new AnchorFrame(origin, yaw);
         Vec3 end = definition.planTargetEnd(player.serverLevel(), player, target, frame);
         FinisherSnapshot snapshot = new FinisherSnapshot(nextId++, definition.id(), player.getId(), target.getId(), origin, yaw,
-            target.position(), end, target.yBodyRot, target.getBbHeight());
+            target.position(), end, target.yBodyRot, target.getBbHeight(), definition.auxPoint(player, target));
         FinisherSession session = new FinisherSession(definition, snapshot, player, target);
 
         SESSIONS.put(snapshot.sessionId(), session);

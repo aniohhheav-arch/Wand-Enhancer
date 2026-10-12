@@ -42,6 +42,11 @@ public abstract class FinisherDefinition {
         return FinisherRules.Verdict.OK;
     }
 
+    /** A finisher-specific world point carried to every client in the snapshot (e.g. where an earlier shot landed). */
+    public Vec3 auxPoint(Player performer, LivingEntity target) {
+        return Vec3.ZERO;
+    }
+
     /** Where the server holds the performer, in the anchor's local frame. Lets a finisher walk its performer. */
     public Vec3 performerLocalOffset(FinisherSnapshot snapshot, float t) {
         return Vec3.ZERO;

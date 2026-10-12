@@ -19,7 +19,8 @@ public record FinisherSnapshot(
     Vec3 targetStart,
     Vec3 targetEnd,
     float targetStartYaw,
-    float targetHeight
+    float targetHeight,
+    Vec3 aux
 ) {
     public static final StreamCodec<RegistryFriendlyByteBuf, FinisherSnapshot> STREAM_CODEC = StreamCodec.of(
         (buf, s) -> {
@@ -33,9 +34,10 @@ public record FinisherSnapshot(
             writeVec(buf, s.targetEnd);
             buf.writeFloat(s.targetStartYaw);
             buf.writeFloat(s.targetHeight);
+            writeVec(buf, s.aux);
         },
         buf -> new FinisherSnapshot(buf.readVarInt(), buf.readResourceLocation(), buf.readVarInt(), buf.readVarInt(),
-            readVec(buf), buf.readFloat(), readVec(buf), readVec(buf), buf.readFloat(), buf.readFloat()));
+            readVec(buf), buf.readFloat(), readVec(buf), readVec(buf), buf.readFloat(), buf.readFloat(), readVec(buf)));
 
     public AnchorFrame frame() {
         return new AnchorFrame(anchor, anchorYaw);

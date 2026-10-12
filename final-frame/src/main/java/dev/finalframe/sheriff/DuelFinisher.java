@@ -34,6 +34,8 @@ public final class DuelFinisher extends FinisherDefinition {
     public static final DuelFinisher INSTANCE = new DuelFinisher();
 
     private static final Holder<SoundEvent> STEP = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.GRAVEL_STEP);
+    private static final Holder<SoundEvent> BELL = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BELL_BLOCK);
+    private static final Holder<SoundEvent> HEART = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.WARDEN_HEARTBEAT);
 
     private static final Timeline TIMELINE = Timeline.builder()
         .phase(FinisherPhase.ACTIVATION, 0)
@@ -103,8 +105,9 @@ public final class DuelFinisher extends FinisherDefinition {
         Vec3 pos = SheriffScript.lerp(s.targetStart(), s.targetEnd(), p);
         float facing = s.anchorYaw() + 180f;
         float body = s.targetStartYaw() + Mth.wrapDegrees(facing - s.targetStartYaw()) * Ease.inOutSine(Ease.range(t, 0, 8));
-        float head = body + 22f * Ease.bump(t, STANDOFF - 2, HAND_P) - 6f * Ease.bump(t, RAPID, DRAW);
-        float lean = -24f * Ease.bump(t, CONTACT, STUMBLE_END + 2) - 85f * Ease.inCubic(Ease.range(t, FALL, FATAL));
+        float head = body - 25f * Ease.bump(t, CATCH - 2, SHERIFF_HOLSTER + 2) + 4f * Mth.sin(t * 0.05f) * Ease.bump(t, STANDOFF, DRAW);
+        float lean = -16f * Ease.bump(t, CONTACT, CONTACT + 10) - 6f * Ease.bump(t, CONTACT + 8, STUMBLE_END)
+            - 85f * Ease.inCubic(Ease.range(t, FALL, FATAL));
         float roll = 5f * Mth.sin(p * (float) Math.PI * 2f) * (1 - p) + 10f * Ease.range(t, FALL, FATAL);
         return new TargetMotion(pos, body, head, lean, roll);
     }
@@ -126,22 +129,36 @@ public final class DuelFinisher extends FinisherDefinition {
                 s.sound(FFSounds.SHOVE, chest, 1f, 0.8f);
                 s.particles(ParticleTypes.POOF, chest, 6, 0.2, 0.2, 0.2, 0.02);
             }
-            case CONTACT + 3 -> s.sound(FFSounds.STUMBLE, s.target().position(), 0.9f, 0.9f);
-            case STUMBLE_END - 2 -> dust(s, snap.targetEnd(), 10);
-            case SECOND_DRAW -> s.sound(FFSounds.DRAW, 0.8f, 1.1f);
+            case CONTACT + 3, CONTACT + 8, CONTACT + 13 -> {
+                Vec3 feet = s.target().position();
+                s.sound(STEP, feet, 0.8f, 0.75f);
+                dust(s, feet, 5);
+            }
+            case STUMBLE_END - 2 -> s.sound(FFSounds.STUMBLE, s.target().position(), 0.9f, 0.9f);
+            case SECOND_DRAW + 1 -> s.sound(FFSounds.DRAW, 0.8f, 1.1f);
             case SECOND_DRAW + 4 -> s.sound(FFSounds.REVOLVER_SPIN, 0.7f, 1.15f);
             case THROW -> s.sound(FFSounds.WHOOSH, 0.8f, 1.2f);
-            case CATCH -> {
-                s.sound(FFSounds.CATCH, world(snap, targetHand(snap)), 0.9f, 0.9f);
-                s.freezeNearby(16);
+            case CATCH -> s.sound(FFSounds.CATCH, world(snap, targetHand(snap)), 0.9f, 0.9f);
+            case SHERIFF_SPIN -> s.sound(FFSounds.REVOLVER_SPIN, 0.8f, 1f);
+            case SHERIFF_HOLSTER -> {
+                s.sound(FFSounds.HOLSTER, 0.9f, 0.95f);
+                s.sound(FFSounds.CLOTH, world(snap, targetHand(snap)), 0.6f, 0.8f);
             }
+            case STANDOFF -> {
+                s.freezeNearby(16);
+                s.sound(BELL, f.toWorld(0, 4, DuelScript.endDistance(snap) * 0.5), 0.9f, 0.5f);
+            }
+            case STANDOFF + 30 -> s.sound(BELL, f.toWorld(0, 4, DuelScript.endDistance(snap) * 0.5), 0.6f, 0.5f);
+            // The revolver in the holster turns over by itself. Nobody touched it.
             case SELF_CYLINDER -> s.sound(FFSounds.CYLINDER_SPIN, 0.35f, 0.7f);
+            case POV_T + 4, RAPID, RAPID + 5, RAPID + 9, RAPID + 12, RAPID + 14 ->
+                s.sound(HEART, s.performer().position().add(0, 1, 0), 0.9f, 0.9f);
             case DRAW -> {
                 s.sound(FFSounds.DRAW, 0.9f, 0.85f);
                 s.sound(FFSounds.DRAW, world(snap, targetHand(snap)), 0.9f, 0.8f);
             }
             case DRAW + 2 -> s.sound(FFSounds.HAMMER_COCK, 0.6f, 0.9f);
-            // One shot, and it arrives two ticks before either muzzle flashes.
+            // One shot for two guns, and it arrives before either muzzle flashes.
             case SHOT_HEARD -> s.sound(FFSounds.LAST_WORD_SHOT, f.toWorld(0, 1.4, DuelScript.endDistance(snap) * 0.5), 2.2f, 0.92f);
             case FIRE -> {
                 s.particles(ParticleTypes.SMOKE, world(snap, performerMuzzle(snap)), 6, 0.05, 0.05, 0.05, 0.01);

@@ -11,6 +11,8 @@ public final class FFConfig {
     public static final ModConfigSpec.DoubleValue BEHIND_ANGLE;
     public static final ModConfigSpec.DoubleValue DUEL_RANGE;
     public static final ModConfigSpec.DoubleValue DUEL_FACING_ANGLE;
+    public static final ModConfigSpec.IntValue MISS_WINDOW_TICKS;
+    public static final ModConfigSpec.DoubleValue MISS_DISTANCE;
     public static final ModConfigSpec.BooleanValue REQUIRE_SNEAK;
     public static final ModConfigSpec.IntValue COOLDOWN_TICKS;
     public static final ModConfigSpec.BooleanValue ALLOW_PLAYER_TARGETS;
@@ -41,6 +43,10 @@ public final class FFConfig {
             .defineInRange("duelRange", 8.0, 2.0, 16.0);
         DUEL_FACING_ANGLE = s.comment("How directly (cone width, degrees) the target must be facing you to accept a duel.")
             .defineInRange("duelFacingAngle", 50.0, 10.0, 180.0);
+        MISS_WINDOW_TICKS = s.comment("How long (ticks) after a near miss the target stays open to what follows.")
+            .defineInRange("missWindowTicks", 60, 5, 400);
+        MISS_DISTANCE = s.comment("How close (blocks) a shot must pass to a target without hitting it to count as a near miss.")
+            .defineInRange("missDistance", 2.0, 0.3, 6.0);
         REQUIRE_SNEAK = s.comment("Require sneaking while using the weapon on the target, so ordinary combat never triggers it.")
             .define("requireSneak", true);
         COOLDOWN_TICKS = s.comment("Cooldown applied to the weapon after a finisher (ticks).")

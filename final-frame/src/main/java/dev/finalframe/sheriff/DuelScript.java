@@ -10,33 +10,37 @@ import net.minecraft.world.phys.Vec3;
 public final class DuelScript {
     public static final int APPROACH_END = 28;
     public static final int CONTACT = 32;
-    public static final int STUMBLE_END = 46;
-    public static final int SECOND_DRAW = 46;
-    public static final int THROW = 54;
-    public static final int CATCH = 70;
-    public static final int STANDOFF = 70;
-    public static final int HAND_P = 88;
-    public static final int SELF_CYLINDER = 92;
-    public static final int HAND_T = 100;
-    public static final int POV_P = 112;
-    public static final int POV_T = 124;
-    public static final int RAPID = 136;
-    public static final int DRAW = 152;
-    public static final int SHOT_HEARD = 156;
-    public static final int FIRE = 158;
-    public static final int CASING_CU = 160;
-    public static final int BLACK = 166;
-    public static final int REVEAL = 184;
-    public static final int LOWER = 196;
-    public static final int SPIN = 204;
-    public static final int HOLSTER = 218;
-    public static final int TURN = 222;
-    public static final int WALK = 230;
-    public static final int WALK_END = 262;
-    public static final int FALL = 248;
-    public static final int FATAL = 258;
-    public static final int RETURN = 266;
-    public static final int END = 290;
+    public static final int STUMBLE_END = 50;
+    public static final int SECOND_DRAW = 50;
+    public static final int THROW = 58;
+    public static final int CATCH = 72;
+    /** The sheriff twirls his own revolver home; the target tucks the gift into its belt. */
+    public static final int SHERIFF_SPIN = 74;
+    public static final int SHERIFF_HOLSTER = 84;
+    public static final int STANDOFF = 88;
+    public static final int HAND_P = 106;
+    public static final int SELF_CYLINDER = 111;
+    public static final int HAND_T = 118;
+    public static final int POV_P = 130;
+    public static final int POV_T = 142;
+    public static final int RAPID = 154;
+    public static final int SILENCE = 168;
+    public static final int DRAW = 174;
+    public static final int SHOT_HEARD = 178;
+    public static final int FIRE = 180;
+    public static final int CASING_CU = 182;
+    public static final int BLACK = 190;
+    public static final int REVEAL = 208;
+    public static final int LOWER = 220;
+    public static final int SPIN = 228;
+    public static final int HOLSTER = 242;
+    public static final int TURN = 246;
+    public static final int WALK = 254;
+    public static final int WALK_END = 286;
+    public static final int FALL = 272;
+    public static final int FATAL = 282;
+    public static final int RETURN = 290;
+    public static final int END = 314;
 
     public static final double PUSH = 4.0;
     public static final double CLOSE = 1.6;
@@ -77,6 +81,11 @@ public final class DuelScript {
     /** The target's gun hand at rest (its right is the anchor's left). */
     public static Vec3 targetHand(FinisherSnapshot s) {
         return new Vec3(-0.38, s.targetHeight() * 0.42, endDistance(s) - 0.18);
+    }
+
+    /** Where the target tucks the gift revolver: the front of its belt, on its right. */
+    public static Vec3 targetBelt(FinisherSnapshot s) {
+        return new Vec3(-0.24, s.targetHeight() * 0.5, endDistance(s) - 0.12);
     }
 
     public static Vec3 targetEyes(FinisherSnapshot s) {

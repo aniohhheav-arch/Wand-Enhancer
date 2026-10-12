@@ -46,8 +46,11 @@ public final class HolsterLayer extends RenderLayer<AbstractClientPlayer, Player
             return;
         }
         boolean gunInHolster;
+        float cylinder = 0;
         if (s != null && !s.isAborting()) {
-            gunInHolster = s.choreography().weapon(s, s.time(partialTick)).placement() == WeaponState.Placement.HOLSTER;
+            WeaponState state = s.choreography().weapon(s, s.time(partialTick));
+            gunInHolster = state.placement() == WeaponState.Placement.HOLSTER;
+            cylinder = state.cylinder();
         } else {
             gunInHolster = carried && !held;
         }
@@ -62,7 +65,7 @@ public final class HolsterLayer extends RenderLayer<AbstractClientPlayer, Player
         ps.translate(-10f / 16f, -8.4f / 16f, -0.5f);
         RevolverRenderer.drawHolster(ps, buffers, light, OverlayTexture.NO_OVERLAY);
         if (gunInHolster) {
-            RevolverRenderer.drawParts(ps, buffers, light, OverlayTexture.NO_OVERLAY, 0f, 0f, ItemStack.EMPTY);
+            RevolverRenderer.drawParts(ps, buffers, light, OverlayTexture.NO_OVERLAY, cylinder, 0f, ItemStack.EMPTY);
         }
         ps.popPose();
     }
