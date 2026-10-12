@@ -37,6 +37,16 @@ public abstract class FinisherDefinition {
     /** Called once per server tick with the session's current tick. */
     public abstract void serverTick(FinisherSession session, int tick);
 
+    /** Situational condition (range, angle, awareness) on top of the shared eligibility rules. */
+    public FinisherRules.Verdict condition(Player performer, LivingEntity target) {
+        return FinisherRules.Verdict.OK;
+    }
+
+    /** Where the server holds the performer, in the anchor's local frame. Lets a finisher walk its performer. */
+    public Vec3 performerLocalOffset(FinisherSnapshot snapshot, float t) {
+        return Vec3.ZERO;
+    }
+
     /** Tick range [start, end) during which world slow motion may be applied, or null for none. */
     public int[] slowMotionWindow() {
         return null;

@@ -72,11 +72,12 @@ public final class FinisherManager {
         if (!(stack.getItem() instanceof FinisherWeaponItem weapon)) {
             return;
         }
-        if (FinisherRules.check(player, target, stack) != FinisherRules.Verdict.OK) {
+        FinisherRules.Selection selection = FinisherRules.select(player, target, stack);
+        if (selection.verdict() != FinisherRules.Verdict.OK) {
             return;
         }
         if (player instanceof ServerPlayer serverPlayer) {
-            tryStart(serverPlayer, target, weapon.finisher());
+            tryStart(serverPlayer, target, selection.finisher());
         }
         event.setCancellationResult(InteractionResult.sidedSuccess(player.level().isClientSide));
         event.setCanceled(true);
@@ -86,7 +87,8 @@ public final class FinisherManager {
         if (isPerforming(player) || isTargeted(player) || isTargeted(target) || target instanceof Player p && isPerforming(p)) {
             return false;
         }
-        if (FinisherRules.check(player, target, player.getMainHandItem()) != FinisherRules.Verdict.OK) {
+        FinisherRules.Selection selection = FinisherRules.select(player, target, player.getMainHandItem());
+        if (selection.verdict() != FinisherRules.Verdict.OK || selection.finisher() != definition) {
             return false;
         }
         Vec3 origin = player.position();
@@ -141,9 +143,9 @@ public final class FinisherManager {
         // Hold the performer on their mark. Clients lock input; this corrects any drift.
         ServerPlayer player = session.performer;
         player.setDeltaMovement(Vec3.ZERO);
-        if (player.position().distanceToSqr(session.snapshot.anchor()) > 0.36) {
-            Vec3 a = session.snapshot.anchor();
-            player.connection.teleport(a.x, a.y, a.z, session.snapshot.anchorYaw(), player.getXRot());
+        Vec3 mark = session.frame().toWorld(def.performerLocalOffset(session.snapshot, t));
+        if (player.position().distanceToSqr(mark) > 0.36) {
+            player.connection.teleport(mark.x, mark.y, mark.z, session.snapshot.anchorYaw(), player.getXRot());
         }
 
         // Keep the target on its choreographed path until it is defeated.
@@ -228,6 +230,7 @@ public final class FinisherManager {
         BY_PERFORMER.remove(session.performer.getUUID());
         BY_TARGET.remove(session.target.getId());
         restoreTickRate(session.level.getServer(), session);
+        session.runCleanups();
 
         LivingEntity target = session.target;
         if (target instanceof Mob mob && !target.isRemoved()) {
@@ -239,6 +242,12 @@ public final class FinisherManager {
             ItemStack held = player.getMainHandItem();
             if (cooldown > 0 && held.getItem() instanceof FinisherWeaponItem) {
                 player.getCooldowns().addCooldown(held.getItem(), aborted ? cooldown / 3 : cooldown);
+            }
+        }
+        if (!player.hasDisconnected()) {
+            Vec3 mark = session.frame().toWorld(session.definition.performerLocalOffset(session.snapshot, session.definition.timeline().length()));
+            if (player.position().distanceToSqr(mark) > 0.01) {
+                player.connection.teleport(mark.x, mark.y, mark.z, player.getYRot(), player.getXRot());
             }
         }
         broadcast(session, new FFNetwork.End(session.snapshot.sessionId(), aborted));

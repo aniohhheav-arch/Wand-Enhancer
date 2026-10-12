@@ -74,6 +74,10 @@ public final class CinematicHud {
             }
         }
 
+        if (grade.black() > 0.001f) {
+            g.fill(0, 0, w, h, FastColor.ARGB32.color(Mth.clamp((int) (grade.black() * fade * 255), 0, 255), 0, 0, 0));
+        }
+
         if (FFConfig.get(FFConfig.LETTERBOX) && grade.letterbox() > 0) {
             int bar = Math.round(h * 0.115f * grade.letterbox() * fade);
             g.fill(0, 0, w, bar, 0xFF000000);
@@ -122,12 +126,10 @@ public final class CinematicHud {
             return;
         }
         FinisherRules.Verdict v = FinisherRules.check(mc.player, target, mc.player.getMainHandItem());
+        // Only readiness is shown; what made the moment possible is for the player to work out.
         String key = switch (v) {
             case OK -> FFConfig.get(FFConfig.REQUIRE_SNEAK) ? "finalframe.prompt.ready_sneak" : "finalframe.prompt.ready";
             case NEEDS_SNEAK -> "finalframe.prompt.needs_sneak";
-            case NOT_BEHIND -> "finalframe.prompt.not_behind";
-            case TOO_FAR -> "finalframe.prompt.too_far";
-            case COOLDOWN -> "finalframe.prompt.cooldown";
             default -> null;
         };
         if (key == null) {

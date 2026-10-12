@@ -29,6 +29,7 @@ public final class FinalFrame {
         container.registerConfig(ModConfig.Type.SERVER, FFConfig.SERVER_SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, FFConfig.CLIENT_SPEC);
         FinisherRegistry.register(SheriffFinisher.INSTANCE);
+        FinisherRegistry.register(dev.finalframe.sheriff.DuelFinisher.INSTANCE);
         NeoForge.EVENT_BUS.register(FinisherManager.class);
     }
 

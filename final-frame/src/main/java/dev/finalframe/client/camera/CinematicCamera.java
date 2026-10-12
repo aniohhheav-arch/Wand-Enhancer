@@ -109,6 +109,6 @@ public final class CinematicCamera {
 
     private static Grade fade(Grade g, float w) {
         return new Grade(1 + (g.saturation() - 1) * w, g.warmth() * w, 1 + (g.contrast() - 1) * w, g.vignette() * w,
-            g.flash() * w, g.grain() * w, g.letterbox() * w, g.title() * w, g.duck() * w);
+            g.flash() * w, g.grain() * w, g.letterbox() * w, g.title() * w, g.duck() * w, g.black() * w);
     }
 }

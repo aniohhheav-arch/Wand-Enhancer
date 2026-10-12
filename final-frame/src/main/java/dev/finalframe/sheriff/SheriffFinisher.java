@@ -56,6 +56,15 @@ public final class SheriffFinisher extends FinisherDefinition {
     }
 
     @Override
+    public dev.finalframe.finisher.FinisherRules.Verdict condition(Player performer, LivingEntity target) {
+        if (!dev.finalframe.finisher.FinisherRules.withinRange(performer, target, dev.finalframe.FFConfig.get(dev.finalframe.FFConfig.ACTIVATION_RANGE))) {
+            return dev.finalframe.finisher.FinisherRules.Verdict.TOO_FAR;
+        }
+        return dev.finalframe.finisher.FinisherRules.isBehind(performer, target)
+            ? dev.finalframe.finisher.FinisherRules.Verdict.OK : dev.finalframe.finisher.FinisherRules.Verdict.NOT_BEHIND;
+    }
+
+    @Override
     public int fatalTick() {
         return IMPACT;
     }

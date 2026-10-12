@@ -74,7 +74,7 @@ public final class EntityPoses {
     private static boolean placePerformer(PoseStack ps, LivingEntity entity, ClientSession s) {
         float t = s.time(partialTick);
         AnchorFrame frame = s.snapshot().frame();
-        float yaw = frame.yaw();
+        float yaw = frame.yaw() + s.choreography().performerBodyYaw(s, t);
         float headYaw = yaw + s.choreography().performerHeadYaw(s, t);
         entity.yBodyRot = entity.yBodyRotO = yaw;
         entity.yHeadRot = entity.yHeadRotO = headYaw;

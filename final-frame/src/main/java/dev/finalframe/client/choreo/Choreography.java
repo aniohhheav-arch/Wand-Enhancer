@@ -35,6 +35,11 @@ public interface Choreography {
         return Vec3.ZERO;
     }
 
+    /** Body yaw of the performer relative to the anchor yaw (degrees). */
+    default float performerBodyYaw(ClientSession session, float t) {
+        return 0;
+    }
+
     /** Head yaw of the performer relative to the anchor yaw (degrees). */
     default float performerHeadYaw(ClientSession session, float t) {
         return 0;

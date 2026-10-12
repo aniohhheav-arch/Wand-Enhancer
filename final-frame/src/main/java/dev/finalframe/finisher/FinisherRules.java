@@ -30,31 +30,54 @@ public final class FinisherRules {
     private FinisherRules() {
     }
 
+    /** The verdict for this player/target pair and, when one applies, the finisher that would play. */
+    public record Selection(Verdict verdict, FinisherDefinition finisher) {
+    }
+
     public static Verdict check(Player player, LivingEntity target, ItemStack stack) {
-        if (!(stack.getItem() instanceof FinisherWeaponItem)) {
-            return Verdict.NO_WEAPON;
+        return select(player, target, stack).verdict();
+    }
+
+    public static Selection select(Player player, LivingEntity target, ItemStack stack) {
+        if (!(stack.getItem() instanceof FinisherWeaponItem weapon)) {
+            return new Selection(Verdict.NO_WEAPON, null);
         }
         if (player.getCooldowns().isOnCooldown(stack.getItem())) {
-            return Verdict.COOLDOWN;
+            return new Selection(Verdict.COOLDOWN, null);
         }
-        if (!isEligible(player, target)) {
-            return Verdict.INELIGIBLE;
+        if (!isEligible(player, target) || player.isPassenger() || player.isSpectator() || player.isSleeping()) {
+            return new Selection(Verdict.INELIGIBLE, null);
         }
-        if (player.isPassenger() || player.isSpectator() || player.isSleeping()) {
-            return Verdict.INELIGIBLE;
+        Verdict best = Verdict.INELIGIBLE;
+        for (FinisherDefinition def : weapon.finishers()) {
+            Verdict v = def.condition(player, target);
+            if (v == Verdict.OK) {
+                boolean sneakOk = !FFConfig.get(FFConfig.REQUIRE_SNEAK) || player.isShiftKeyDown();
+                return new Selection(sneakOk ? Verdict.OK : Verdict.NEEDS_SNEAK, def);
+            }
+            if (v.ordinal() > best.ordinal()) {
+                best = v;
+            }
         }
-        Vec3 toPlayer = player.position().subtract(target.position());
-        double horizontal = Math.sqrt(toPlayer.x * toPlayer.x + toPlayer.z * toPlayer.z);
-        if (horizontal > FFConfig.get(FFConfig.ACTIVATION_RANGE) || Math.abs(toPlayer.y) > 1.5) {
-            return Verdict.TOO_FAR;
+        return new Selection(best, null);
+    }
+
+    public static boolean withinRange(Player player, LivingEntity target, double range) {
+        Vec3 d = player.position().subtract(target.position());
+        return Math.sqrt(d.x * d.x + d.z * d.z) <= range && Math.abs(d.y) <= 1.5;
+    }
+
+    /** True when the target's gaze points at the player inside a cone of {@code coneDegrees} and it can see them. */
+    public static boolean isFacing(LivingEntity target, Player player, double coneDegrees) {
+        Vec3 toPlayer = player.getEyePosition().subtract(target.getEyePosition());
+        double len = Math.sqrt(toPlayer.x * toPlayer.x + toPlayer.z * toPlayer.z);
+        if (len < 1.0E-4) {
+            return false;
         }
-        if (!isBehind(player, target)) {
-            return Verdict.NOT_BEHIND;
-        }
-        if (FFConfig.get(FFConfig.REQUIRE_SNEAK) && !player.isShiftKeyDown()) {
-            return Verdict.NEEDS_SNEAK;
-        }
-        return Verdict.OK;
+        float yaw = target.getYHeadRot() * Mth.DEG_TO_RAD;
+        double cos = (-Mth.sin(yaw) * toPlayer.x + Mth.cos(yaw) * toPlayer.z) / len;
+        double angle = Math.toDegrees(Math.acos(Mth.clamp(cos, -1.0, 1.0)));
+        return angle <= coneDegrees / 2.0 && target.hasLineOfSight(player);
     }
 
     public static boolean isEligible(Player player, LivingEntity target) {

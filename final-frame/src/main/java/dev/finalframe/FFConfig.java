@@ -9,6 +9,8 @@ public final class FFConfig {
     // Gameplay (server-authoritative, synced to clients so the activation prompt agrees).
     public static final ModConfigSpec.DoubleValue ACTIVATION_RANGE;
     public static final ModConfigSpec.DoubleValue BEHIND_ANGLE;
+    public static final ModConfigSpec.DoubleValue DUEL_RANGE;
+    public static final ModConfigSpec.DoubleValue DUEL_FACING_ANGLE;
     public static final ModConfigSpec.BooleanValue REQUIRE_SNEAK;
     public static final ModConfigSpec.IntValue COOLDOWN_TICKS;
     public static final ModConfigSpec.BooleanValue ALLOW_PLAYER_TARGETS;
@@ -35,6 +37,10 @@ public final class FFConfig {
             .defineInRange("activationRange", 3.0, 1.0, 6.0);
         BEHIND_ANGLE = s.comment("Width of the cone behind the target (degrees) you must stand in.")
             .defineInRange("behindAngle", 110.0, 30.0, 270.0);
+        DUEL_RANGE = s.comment("Maximum distance (blocks) at which a target that is staring you down can be challenged.")
+            .defineInRange("duelRange", 8.0, 2.0, 16.0);
+        DUEL_FACING_ANGLE = s.comment("How directly (cone width, degrees) the target must be facing you to accept a duel.")
+            .defineInRange("duelFacingAngle", 50.0, 10.0, 180.0);
         REQUIRE_SNEAK = s.comment("Require sneaking while using the weapon on the target, so ordinary combat never triggers it.")
             .define("requireSneak", true);
         COOLDOWN_TICKS = s.comment("Cooldown applied to the weapon after a finisher (ticks).")

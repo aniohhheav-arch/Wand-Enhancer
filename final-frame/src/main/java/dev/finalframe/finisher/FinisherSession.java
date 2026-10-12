@@ -25,6 +25,7 @@ public final class FinisherSession {
     final LivingEntity target;
     final ServerLevel level;
     final boolean targetHadNoAi;
+    private final java.util.List<Runnable> cleanups = new java.util.ArrayList<>();
     int tick;
     boolean targetDefeated;
     boolean slowMotion;
@@ -95,6 +96,40 @@ public final class FinisherSession {
         DamageSource source = new DamageSource(type, performer, performer);
         target.invulnerableTime = 0;
         target.hurt(source, Math.max(1000f, target.getMaxHealth() * 4f));
+    }
+
+    /** Registers state to restore when the session ends for any reason (completion, abort, server stop). */
+    public void onStop(Runnable cleanup) {
+        cleanups.add(cleanup);
+    }
+
+    void runCleanups() {
+        for (int i = cleanups.size() - 1; i >= 0; i--) {
+            try {
+                cleanups.get(i).run();
+            } catch (RuntimeException e) {
+                com.mojang.logging.LogUtils.getLogger().warn("Finisher cleanup failed", e);
+            }
+        }
+        cleanups.clear();
+    }
+
+    /** Freezes every other mob within {@code radius} until the session ends. */
+    public void freezeNearby(double radius) {
+        for (Mob mob : level.getEntitiesOfClass(Mob.class, performer.getBoundingBox().inflate(radius))) {
+            if (mob == target || mob.isNoAi()) {
+                continue;
+            }
+            Vec3 motion = mob.getDeltaMovement();
+            mob.setNoAi(true);
+            mob.setDeltaMovement(Vec3.ZERO);
+            onStop(() -> {
+                if (!mob.isRemoved()) {
+                    mob.setNoAi(false);
+                    mob.setDeltaMovement(motion);
+                }
+            });
+        }
     }
 
     boolean isLastWord(DamageSource source) {

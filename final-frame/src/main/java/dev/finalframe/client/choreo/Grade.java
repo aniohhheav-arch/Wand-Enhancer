@@ -12,13 +12,19 @@ package dev.finalframe.client.choreo;
  * @param letterbox  0..1 letterbox bar coverage
  * @param title      0..1 title card visibility
  * @param duck       0..1 world audio ducking
+ * @param black      0..1 cut-to-black coverage
  */
 public record Grade(float saturation, float warmth, float contrast, float vignette, float flash, float grain, float letterbox,
-                    float title, float duck) {
+                    float title, float duck, float black) {
+    public Grade(float saturation, float warmth, float contrast, float vignette, float flash, float grain, float letterbox,
+                 float title, float duck) {
+        this(saturation, warmth, contrast, vignette, flash, grain, letterbox, title, duck, 0);
+    }
+
     public static final Grade NEUTRAL = new Grade(1, 0, 1, 0, 0, 0, 0, 0, 0);
 
     public boolean isNeutral() {
         return letterbox <= 0.001f && warmth <= 0.001f && flash <= 0.001f && Math.abs(saturation - 1) < 0.001f
-            && Math.abs(contrast - 1) < 0.001f && vignette <= 0.001f;
+            && Math.abs(contrast - 1) < 0.001f && vignette <= 0.001f && black <= 0.001f;
     }
 }

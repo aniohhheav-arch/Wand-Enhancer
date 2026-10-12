@@ -56,8 +56,8 @@ public final class SheriffsLastWordItem extends FinisherWeaponItem {
     }
 
     @Override
-    public FinisherDefinition finisher() {
-        return SheriffFinisher.INSTANCE;
+    public java.util.List<FinisherDefinition> finishers() {
+        return java.util.List.of(SheriffFinisher.INSTANCE, DuelFinisher.INSTANCE);
     }
 
     public static int rounds(ItemStack stack) {
