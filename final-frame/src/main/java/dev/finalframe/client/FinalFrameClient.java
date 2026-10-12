@@ -54,6 +54,8 @@ public final class FinalFrameClient {
     public FinalFrameClient(IEventBus modBus, ModContainer container) {
         Choreographies.register(SheriffFinisher.INSTANCE.id(), SheriffChoreography.INSTANCE);
         Choreographies.register(dev.finalframe.sheriff.DuelFinisher.INSTANCE.id(), dev.finalframe.client.choreo.DuelChoreography.INSTANCE);
+        Choreographies.register(dev.finalframe.sheriff.ImpossibleShotFinisher.INSTANCE.id(),
+            dev.finalframe.client.choreo.ImpossibleShotChoreography.INSTANCE);
         FFNetwork.clientSink = ClientFinisherManager.INSTANCE;
         SheriffsLastWordItem.clientListener = RevolverAnimator::onUse;
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);

@@ -57,7 +57,7 @@ public final class SheriffsLastWordItem extends FinisherWeaponItem {
 
     @Override
     public java.util.List<FinisherDefinition> finishers() {
-        return java.util.List.of(SheriffFinisher.INSTANCE, DuelFinisher.INSTANCE);
+        return java.util.List.of(ImpossibleShotFinisher.INSTANCE, SheriffFinisher.INSTANCE, DuelFinisher.INSTANCE);
     }
 
     public static int rounds(ItemStack stack) {
@@ -82,6 +82,10 @@ public final class SheriffsLastWordItem extends FinisherWeaponItem {
         int rounds = rounds(stack);
         boolean fire = rounds > 0;
         if (level.isClientSide) {
+            if (fire) {
+                Trace t = trace(level, player);
+                ShotMemory.record(level, player, t.eye(), t.stop(), t.entityHit() == null ? null : t.entityHit().getEntity());
+            }
             clientListener.onUse(player, fire);
             return InteractionResultHolder.consume(stack);
         }
@@ -98,7 +102,10 @@ public final class SheriffsLastWordItem extends FinisherWeaponItem {
         return InteractionResultHolder.consume(stack);
     }
 
-    private static void shoot(ServerLevel level, Player player) {
+    private record Trace(Vec3 eye, Vec3 stop, BlockHitResult block, EntityHitResult entityHit) {
+    }
+
+    private static Trace trace(Level level, Player player) {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getViewVector(1f);
         Vec3 end = eye.add(look.scale(RANGE));
@@ -110,6 +117,17 @@ public final class SheriffsLastWordItem extends FinisherWeaponItem {
         if (entityHit != null) {
             stop = entityHit.getLocation();
         }
+        return new Trace(eye, stop, block, entityHit);
+    }
+
+    private static void shoot(ServerLevel level, Player player) {
+        Trace trace = trace(level, player);
+        Vec3 eye = trace.eye();
+        Vec3 look = player.getViewVector(1f);
+        Vec3 stop = trace.stop();
+        BlockHitResult block = trace.block();
+        EntityHitResult entityHit = trace.entityHit();
+        ShotMemory.record(level, player, eye, stop, entityHit == null ? null : entityHit.getEntity());
 
         Vec3 right = look.cross(new Vec3(0, 1, 0)).normalize();
         Vec3 muzzle = eye.add(look.scale(0.9)).add(right.scale(0.28)).add(0, -0.22, 0);
