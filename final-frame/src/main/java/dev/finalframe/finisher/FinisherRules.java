@@ -62,6 +62,25 @@ public final class FinisherRules {
         return new Selection(best, null);
     }
 
+    /** Furthest distance any finisher can be started from. */
+    public static double maxReach() {
+        return Math.max(FFConfig.get(FFConfig.ACTIVATION_RANGE), FFConfig.get(FFConfig.DUEL_RANGE));
+    }
+
+    /** The living entity the player is aiming at within {@code range}, ignoring vanilla's short interaction reach. */
+    public static LivingEntity findTarget(Player player, double range) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 look = player.getViewVector(1f);
+        Vec3 end = eye.add(look.scale(range));
+        net.minecraft.world.phys.BlockHitResult block = player.level().clip(new net.minecraft.world.level.ClipContext(eye, end,
+            net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+        Vec3 stop = block.getType() == net.minecraft.world.phys.HitResult.Type.MISS ? end : block.getLocation();
+        net.minecraft.world.phys.AABB sweep = player.getBoundingBox().expandTowards(look.scale(range)).inflate(1.0);
+        net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(
+            player.level(), player, eye, stop, sweep, e -> e instanceof LivingEntity && e.isPickable() && !e.isSpectator() && e != player, 0.3f);
+        return hit != null && hit.getEntity() instanceof LivingEntity living ? living : null;
+    }
+
     public static boolean withinRange(Player player, LivingEntity target, double range) {
         Vec3 d = player.position().subtract(target.position());
         return Math.sqrt(d.x * d.x + d.z * d.z) <= range && Math.abs(d.y) <= 1.5;

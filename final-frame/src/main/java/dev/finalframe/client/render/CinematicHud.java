@@ -122,7 +122,11 @@ public final class CinematicHud {
         if (!FFConfig.get(FFConfig.SHOW_PROMPT) || mc.player == null || mc.screen != null) {
             return;
         }
-        if (!(mc.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity target)) {
+        if (!(mc.player.getMainHandItem().getItem() instanceof dev.finalframe.finisher.FinisherWeaponItem)) {
+            return;
+        }
+        LivingEntity target = FinisherRules.findTarget(mc.player, FinisherRules.maxReach());
+        if (target == null) {
             return;
         }
         FinisherRules.Verdict v = FinisherRules.check(mc.player, target, mc.player.getMainHandItem());

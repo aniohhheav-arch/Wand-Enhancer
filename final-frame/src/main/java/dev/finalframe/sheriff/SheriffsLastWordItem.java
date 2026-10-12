@@ -67,6 +67,18 @@ public final class SheriffsLastWordItem extends FinisherWeaponItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if (hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown()) {
+            LivingEntity target = dev.finalframe.finisher.FinisherRules.findTarget(player, dev.finalframe.finisher.FinisherRules.maxReach());
+            if (target != null) {
+                var selection = dev.finalframe.finisher.FinisherRules.select(player, target, stack);
+                if (selection.verdict() == dev.finalframe.finisher.FinisherRules.Verdict.OK) {
+                    if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                        dev.finalframe.finisher.FinisherManager.tryStart(sp, target, selection.finisher());
+                    }
+                    return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+                }
+            }
+        }
         int rounds = rounds(stack);
         boolean fire = rounds > 0;
         if (level.isClientSide) {

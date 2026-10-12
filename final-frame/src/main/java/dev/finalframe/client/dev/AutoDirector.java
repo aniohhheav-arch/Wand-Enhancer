@@ -49,6 +49,8 @@ public final class AutoDirector {
         2, 7, 10, 13, 18, 25, 30, 38, 44, 52, 60, 66, 72, 77, 82, 86, 92, 98, 106, 110, 116, 121, 125, 130, 136, 141, 145,
         149, 153, 154, 156, 159, 165, 170, 176, 182, 190, 198, 204, 210));
 
+    private static final boolean DUEL = "duel".equals(System.getenv("FINALFRAME_FINISHER"));
+
     private static boolean worldRequested;
     private static int ticksInWorld;
     private static int sessionSeen = -1;
@@ -142,7 +144,7 @@ public final class AutoDirector {
         ClientSession s = ClientFinisherManager.INSTANCE.local();
         if (s != null) {
             sessionSeen = s.tick();
-            if (BEATS.contains(s.tick())) {
+            if (DUEL ? s.tick() % 6 == 0 || s.tick() == dev.finalframe.sheriff.DuelScript.FIRE : BEATS.contains(s.tick())) {
                 shot(String.format("f%03d", s.tick()));
             }
         } else if (sessionSeen >= 0) {
@@ -193,9 +195,10 @@ public final class AutoDirector {
 
         Vindicator v = EntityType.VINDICATOR.create(level);
         if (v != null) {
-            v.moveTo(0.5, y, 2.6, 0f, 0f);
-            v.setYHeadRot(0f);
-            v.setYBodyRot(0f);
+            float facing = DUEL ? 180f : 0f;
+            v.moveTo(0.5, y, DUEL ? 6.5 : 2.6, facing, 0f);
+            v.setYHeadRot(facing);
+            v.setYBodyRot(facing);
             v.setNoAi(true);
             v.setPersistenceRequired();
             v.finalizeSpawn(level, level.getCurrentDifficultyAt(v.blockPosition()), MobSpawnType.COMMAND, null);
@@ -214,7 +217,9 @@ public final class AutoDirector {
             return;
         }
         player.setShiftKeyDown(true);
-        boolean ok = FinisherManager.tryStart(player, v, SheriffFinisher.INSTANCE);
+        dev.finalframe.finisher.FinisherRules.Selection sel = dev.finalframe.finisher.FinisherRules.select(player, v, player.getMainHandItem());
+        LOGGER.info("Auto director: selection {} {}", sel.verdict(), sel.finisher() == null ? null : sel.finisher().id());
+        boolean ok = FinisherManager.tryStart(player, v, DUEL ? dev.finalframe.sheriff.DuelFinisher.INSTANCE : SheriffFinisher.INSTANCE);
         player.setShiftKeyDown(false);
         LOGGER.info("Auto director: finisher started = {}", ok);
     }

@@ -168,10 +168,10 @@ public final class DuelChoreography implements Choreography {
     private static CameraPose eyes(ClientSession s, float t, boolean performer) {
         if (performer) {
             Vec3 face = w(s, drift(t), 1.62, pz(s, t));
-            return CameraPose.lookAt(face.add(w(s, 0.05, 0.02, 0.55).subtract(s.snapshot().frame().origin())), face, 0, 18f);
+            return CameraPose.lookAt(face.add(w(s, 0.05, 0.04, 1.0).subtract(s.snapshot().frame().origin())), face, 0, 24f);
         }
         Vec3 face = w(s, targetEyes(s.snapshot()));
-        return CameraPose.lookAt(face.add(w(s, -0.05, 0.02, -0.55).subtract(s.snapshot().frame().origin())), face, 0, 18f);
+        return CameraPose.lookAt(face.add(w(s, -0.05, 0.04, -1.0).subtract(s.snapshot().frame().origin())), face, 0, 24f);
     }
 
     private static CameraPose hand(ClientSession s, float t, boolean performer) {
