@@ -1,0 +1,48 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = mod_version
+group = mod_group_id
+base { archivesName = mod_id }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+}
+
+neoForge {
+    version = project.neo_version
+    runs {
+        client {
+            client()
+            gameDirectory = project.file('run-client')
+            // ./gradlew runClient -PsfJoin=localhost:25565 joins a server directly (used for automated testing)
+            if (project.hasProperty('sfJoin')) {
+                programArguments.addAll('--quickPlayMultiplayer', project.property('sfJoin').toString(), '--username', 'Bucciarati')
+            }
+        }
+        server { server() }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.INFO
+        }
+    }
+    mods {
+        "${mod_id}" { sourceSet(sourceSets.main) }
+    }
+}
+
+dependencies {
+    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+}
+
+tasks.withType(ProcessResources).configureEach {
+    var props = [minecraft_version: minecraft_version, neo_version: neo_version, geckolib_version: geckolib_version,
+                 mod_id: mod_id, mod_name: mod_name, mod_version: mod_version]
+    inputs.properties props
+    filesMatching(['META-INF/neoforge.mods.toml']) { expand props }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

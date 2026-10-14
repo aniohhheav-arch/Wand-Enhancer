@@ -1,0 +1,162 @@
+{
+ "zipper_open": {
+  "subtitle": "subtitles.stickyfingers.zipper_open",
+  "sounds": [
+   {
+    "name": "stickyfingers:zipper_open"
+   }
+  ]
+ },
+ "zipper_close": {
+  "subtitle": "subtitles.stickyfingers.zipper_close",
+  "sounds": [
+   {
+    "name": "stickyfingers:zipper_close"
+   }
+  ]
+ },
+ "zipper_place": {
+  "subtitle": "subtitles.stickyfingers.zipper_place",
+  "sounds": [
+   {
+    "name": "stickyfingers:zipper_place"
+   }
+  ]
+ },
+ "zipper_snap": {
+  "subtitle": "subtitles.stickyfingers.zipper_snap",
+  "sounds": [
+   {
+    "name": "stickyfingers:zipper_snap"
+   }
+  ]
+ },
+ "punch": {
+  "subtitle": "subtitles.stickyfingers.punch",
+  "sounds": [
+   {
+    "name": "stickyfingers:punch"
+   }
+  ]
+ },
+ "punch_barrage": {
+  "subtitle": "subtitles.stickyfingers.punch_barrage",
+  "sounds": [
+   {
+    "name": "stickyfingers:punch_barrage"
+   }
+  ]
+ },
+ "punch_heavy": {
+  "subtitle": "subtitles.stickyfingers.punch_heavy",
+  "sounds": [
+   {
+    "name": "stickyfingers:punch_heavy"
+   }
+  ]
+ },
+ "stand_summon": {
+  "subtitle": "subtitles.stickyfingers.stand_summon",
+  "sounds": [
+   {
+    "name": "stickyfingers:stand_summon"
+   }
+  ]
+ },
+ "stand_dismiss": {
+  "subtitle": "subtitles.stickyfingers.stand_dismiss",
+  "sounds": [
+   {
+    "name": "stickyfingers:stand_dismiss"
+   }
+  ]
+ },
+ "teleport": {
+  "subtitle": "subtitles.stickyfingers.teleport",
+  "sounds": [
+   {
+    "name": "stickyfingers:teleport"
+   }
+  ]
+ },
+ "projectile_fire": {
+  "subtitle": "subtitles.stickyfingers.projectile_fire",
+  "sounds": [
+   {
+    "name": "stickyfingers:projectile_fire"
+   }
+  ]
+ },
+ "projectile_hit": {
+  "subtitle": "subtitles.stickyfingers.projectile_hit",
+  "sounds": [
+   {
+    "name": "stickyfingers:projectile_hit"
+   }
+  ]
+ },
+ "storage_open": {
+  "subtitle": "subtitles.stickyfingers.storage_open",
+  "sounds": [
+   {
+    "name": "stickyfingers:storage_open"
+   }
+  ]
+ },
+ "dodge": {
+  "subtitle": "subtitles.stickyfingers.dodge",
+  "sounds": [
+   {
+    "name": "stickyfingers:dodge"
+   }
+  ]
+ },
+ "decoy_pop": {
+  "subtitle": "subtitles.stickyfingers.decoy_pop",
+  "sounds": [
+   {
+    "name": "stickyfingers:decoy_pop"
+   }
+  ]
+ },
+ "world_slam": {
+  "subtitle": "subtitles.stickyfingers.world_slam",
+  "sounds": [
+   {
+    "name": "stickyfingers:world_slam"
+   }
+  ]
+ },
+ "world_open": {
+  "subtitle": "subtitles.stickyfingers.world_open",
+  "sounds": [
+   {
+    "name": "stickyfingers:world_open"
+   }
+  ]
+ },
+ "world_close": {
+  "subtitle": "subtitles.stickyfingers.world_close",
+  "sounds": [
+   {
+    "name": "stickyfingers:world_close"
+   }
+  ]
+ },
+ "final_impact": {
+  "subtitle": "subtitles.stickyfingers.final_impact",
+  "sounds": [
+   {
+    "name": "stickyfingers:final_impact"
+   }
+  ]
+ },
+ "slowmo": {
+  "subtitle": "subtitles.stickyfingers.slowmo",
+  "sounds": [
+   {
+    "name": "stickyfingers:slowmo"
+   }
+  ]
+ }
+}
