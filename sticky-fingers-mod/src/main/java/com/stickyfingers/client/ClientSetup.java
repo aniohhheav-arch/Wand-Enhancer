@@ -35,6 +35,21 @@ public final class ClientSetup {
     }
 
     @SubscribeEvent
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void layers(EntityRenderersEvent.AddLayers event) {
+        for (var type : event.getEntityTypes()) {
+            if (event.getRenderer(type) instanceof net.minecraft.client.renderer.entity.LivingEntityRenderer r) {
+                r.addLayer(new ZipperOverlayLayer(r));
+            }
+        }
+        for (var skin : event.getSkins()) {
+            if (event.getSkin(skin) instanceof net.minecraft.client.renderer.entity.LivingEntityRenderer r) {
+                r.addLayer(new ZipperOverlayLayer(r));
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void particles(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.ZIPPER_SPARK.get(), ZipperParticles.Spark::new);
         event.registerSpriteSet(ModParticles.ZIPPER_TOOTH.get(), ZipperParticles.Tooth::new);

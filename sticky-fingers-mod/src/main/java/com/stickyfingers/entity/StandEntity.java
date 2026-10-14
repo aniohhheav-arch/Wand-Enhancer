@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 public class StandEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Integer> OWNER = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> ANIM = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> STRIKING = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> ANIM_SEQ = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -58,6 +59,7 @@ public class StandEntity extends Entity implements GeoEntity {
         b.define(OWNER, -1);
         b.define(ANIM, StandAnim.IDLE.ordinal());
         b.define(ANIM_SEQ, 0);
+        b.define(STRIKING, false);
     }
 
     @Nullable
@@ -90,10 +92,12 @@ public class StandEntity extends Entity implements GeoEntity {
         }
     }
 
+    public boolean isStriking() { return entityData.get(STRIKING); }
+
     public boolean isDismissing() { return dismissTimer >= 0; }
     public int age() { return age; }
 
-    private Vec3 restPosition(Player owner) {
+    public Vec3 restPosition(Player owner) {
         float yaw = owner.getYRot() * Mth.DEG_TO_RAD;
         Vec3 back = new Vec3(Mth.sin(yaw), 0, -Mth.cos(yaw)).scale(0.6);
         Vec3 right = new Vec3(-Mth.cos(yaw), 0, -Mth.sin(yaw)).scale(0.85);
@@ -106,6 +110,12 @@ public class StandEntity extends Entity implements GeoEntity {
         age++;
         Player owner = owner();
         if (level().isClientSide) {
+            // follow the owner locally every tick so the Stand turns and moves with you without network lag
+            if (owner != null && !isStriking()) {
+                Vec3 p = restPosition(owner);
+                setPos(p.x, p.y, p.z);
+                setYRot(owner.getYHeadRot());
+            }
             if (random.nextInt(4) == 0) {
                 level().addParticle(ModParticles.VOID_MOTE.get(), getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0.01, 0);
             }
@@ -119,6 +129,7 @@ public class StandEntity extends Entity implements GeoEntity {
 
         Vec3 target;
         float yaw;
+        entityData.set(STRIKING, strikePos != null && strikeTicks > 0);
         if (strikePos != null && strikeTicks > 0) {
             strikeTicks--;
             target = strikePos;
@@ -127,7 +138,7 @@ public class StandEntity extends Entity implements GeoEntity {
         } else {
             strikePos = null;
             target = restPosition(owner);
-            yaw = owner.getYRot();
+            yaw = owner.getYHeadRot();
         }
         Vec3 next = position().lerp(target, strikePos != null ? 0.6 : 0.35);
         if (position().distanceToSqr(target) > 64) next = target;

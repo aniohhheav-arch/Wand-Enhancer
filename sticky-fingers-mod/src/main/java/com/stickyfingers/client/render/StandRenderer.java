@@ -25,6 +25,16 @@ public class StandRenderer extends GeoEntityRenderer<StandEntity> {
         this.shadowRadius = 0.0f;
     }
 
+    /** Idle: face exactly where the owner looks (interpolated per frame). Striking: face the synced attack direction. */
+    @Override
+    protected void applyRotations(StandEntity stand, com.mojang.blaze3d.vertex.PoseStack ps, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
+        var owner = stand.owner();
+        float yaw = owner != null && !stand.isStriking()
+                ? Mth.rotLerp(partialTick, owner.yHeadRotO, owner.yHeadRot)
+                : Mth.rotLerp(partialTick, stand.yRotO, stand.getYRot());
+        ps.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f - yaw));
+    }
+
     @Override
     public RenderType getRenderType(StandEntity animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
         return RenderType.entityTranslucent(texture);

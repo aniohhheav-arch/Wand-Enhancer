@@ -35,7 +35,7 @@ import java.util.*;
  * owns any temporary block separation it caused, and acts as a portal endpoint when linked.
  * Zippers are never saved with the world; every world change they make is restored by {@link SeparationManager}.
  */
-public class ZipperEntity extends Entity {
+public class ZipperEntity extends Entity implements net.neoforged.neoforge.entity.IEntityWithComplexSpawn {
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(ZipperEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Vector3f> NORMAL = SynchedEntityData.defineId(ZipperEntity.class, EntityDataSerializers.VECTOR3);
     private static final EntityDataAccessor<Float> ANGLE = SynchedEntityData.defineId(ZipperEntity.class, EntityDataSerializers.FLOAT);
@@ -63,6 +63,10 @@ public class ZipperEntity extends Entity {
     private int closingTimer = -1;
     private int effectDuration = 60;
     private boolean registered;
+    private int restoreTimer = -1;
+    /** Blocks this zipper parted (both sides keep a copy so clients can animate them). */
+    private long[] sepPositions = new long[0];
+    private int[] sepStates = new int[0];
 
     public ZipperEntity(EntityType<? extends ZipperEntity> type, Level level) {
         super(type, level);
@@ -128,7 +132,7 @@ public class ZipperEntity extends Entity {
     public ZipperEntity life(int ticks) { this.life = ticks; return this; }
     public ZipperEntity effectDuration(int ticks) { this.effectDuration = ticks; return this; }
     /** Blocks that get separated while this zipper is open. */
-    public ZipperEntity opensArea(List<BlockPos> area, int ticks) { this.openArea = area; this.separationTicks = ticks; return this; }
+    public ZipperEntity opensArea(List<BlockPos> area, int ticks) { this.openArea = area; this.separationTicks = ticks > 0 ? ticks + 40 : 0; return this; }
 
     public boolean isOwnedBy(Entity e) { return e.getUUID().equals(ownerId()); }
 
@@ -148,8 +152,21 @@ public class ZipperEntity extends Entity {
         entityData.set(OPEN, true);
         closingTimer = -1;
         ServerPlayer owner = ownerPlayer();
+        restoreTimer = -1;
         if (!openArea.isEmpty()) {
-            SeparationManager.get(sl).separate(sl, owner, openArea, getUUID(), separationTicks);
+            java.util.Map<BlockPos, net.minecraft.world.level.block.state.BlockState> before = new java.util.HashMap<>();
+            for (BlockPos p : openArea) before.put(p.immutable(), sl.getBlockState(p));
+            List<BlockPos> done = SeparationManager.get(sl).separate(sl, owner, openArea, getUUID(), separationTicks);
+            if (!done.isEmpty()) {
+                sepPositions = new long[done.size()];
+                sepStates = new int[done.size()];
+                for (int i = 0; i < done.size(); i++) {
+                    sepPositions[i] = done.get(i).asLong();
+                    sepStates[i] = net.minecraft.world.level.block.Block.getId(before.get(done.get(i)));
+                }
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntity(this,
+                        new com.stickyfingers.network.SeparatedBlocksPayload(getId(), sepPositions, sepStates));
+            }
         }
         sl.playSound(null, getX(), getY(), getZ(), ModSounds.ZIPPER_OPEN.get(), SoundSource.PLAYERS, 1.0f, 0.9f + random.nextFloat() * 0.2f);
         burst(sl, 10);
@@ -159,7 +176,7 @@ public class ZipperEntity extends Entity {
         if (!(level() instanceof ServerLevel sl)) return;
         boolean wasOpen = isOpen();
         entityData.set(OPEN, false);
-        SeparationManager.get(sl).restoreOwner(sl, getUUID());
+        if (sepPositions.length > 0) restoreTimer = 10; else SeparationManager.get(sl).restoreOwner(sl, getUUID());
         if (wasOpen) sl.playSound(null, getX(), getY(), getZ(), ModSounds.ZIPPER_CLOSE.get(), SoundSource.PLAYERS, 1.0f, 0.9f + random.nextFloat() * 0.2f);
         Entity target = attachedEntity();
         if (target instanceof LivingEntity le && (kind() == ZipperKind.MOB || kind() == ZipperKind.CHAIN)) {
@@ -228,6 +245,9 @@ public class ZipperEntity extends Entity {
         ServerLevel sl = (ServerLevel) level();
         if (!registered) { ZipperNetwork.register(this); registered = true; }
 
+        if (restoreTimer >= 0 && --restoreTimer < 0) {
+            SeparationManager.get(sl).restoreOwner(sl, getUUID());
+        }
         if (closingTimer >= 0 && --closingTimer <= 0) { discard(); return; }
         if (life > 0 && --life == 0) { closeAndDiscard(); return; }
         if (tickCount % 20 == 0) {
@@ -328,6 +348,22 @@ public class ZipperEntity extends Entity {
         UUID id = ownerId();
         if (id == null || level().getServer() == null) return null;
         return level().getServer().getPlayerList().getPlayer(id);
+    }
+
+    public void setSeparated(long[] positions, int[] states) { sepPositions = positions; sepStates = states; }
+    public long[] separatedPositions() { return sepPositions; }
+    public int[] separatedStates() { return sepStates; }
+
+    @Override
+    public void writeSpawnData(net.minecraft.network.RegistryFriendlyByteBuf buf) {
+        buf.writeLongArray(sepPositions);
+        buf.writeVarIntArray(sepStates);
+    }
+
+    @Override
+    public void readSpawnData(net.minecraft.network.RegistryFriendlyByteBuf buf) {
+        sepPositions = buf.readLongArray();
+        sepStates = buf.readVarIntArray();
     }
 
     public float getOpenProgress(float partial) { return Mth.lerp(partial, prevOpenProgress, openProgress); }

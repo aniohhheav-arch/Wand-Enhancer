@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
  * C2S: generic Stand action. {@code a}/{@code b} are action specific (ability id, zipper ids).
  */
 public record StandActionPayload(Action action, int a, int b) implements CustomPacketPayload {
-    public enum Action { TOGGLE_STAND, SELECT, REQUEST_NETWORK, REFRESH_NETWORK, NET_TRAVEL, NET_LINK, NET_UNLINK, NET_CLOSE, NET_SET_EXIT, NET_TOGGLE_OPEN, CLOSE_ALL, SET_ORIENT }
+    public enum Action { TOGGLE_STAND, SELECT, REQUEST_NETWORK, REFRESH_NETWORK, NET_TRAVEL, NET_LINK, NET_UNLINK, NET_CLOSE, NET_SET_EXIT, NET_TOGGLE_OPEN, CLOSE_ALL, SET_ORIENT, INTERACT }
 
     public static final Type<StandActionPayload> TYPE = new Type<>(StickyFingersMod.id("stand_action"));
     public static final StreamCodec<FriendlyByteBuf, StandActionPayload> CODEC = CustomPacketPayload.codec(

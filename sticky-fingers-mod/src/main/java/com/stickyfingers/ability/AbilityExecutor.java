@@ -46,6 +46,8 @@ public final class AbilityExecutor {
             data.setEnergy(data.energy() - cost);
             data.setCooldownEnd(type, now + SFConfig.cooldown(type));
             StandManager.sync(player);
+        } else if (type != AbilityType.ZIPPER_BODY) {
+            fail(player, "message.stickyfingers.no_target");
         }
     }
 

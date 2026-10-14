@@ -75,7 +75,7 @@
  "ability.stickyfingers.zipper_world": "Zipper World",
  "ability.stickyfingers.zipper_world.desc": "ULTIMATE. Slam the world and cover the battlefield in seams, warp through them in a storm of blows, then close it all.",
  "ability.stickyfingers.zipper_mob": "Zipper on Mob",
- "ability.stickyfingers.zipper_mob.desc": "Unzip a creature: frozen in place, its body distorts around the seam. Close it to restore them.",
+ "ability.stickyfingers.zipper_mob.desc": "Unzip a creature: frozen and covered in seams. Right-click it while open to climb inside and ride hidden; sneak to unzip out.",
  "ability.stickyfingers.aerial_zipper": "Aerial Zipper",
  "ability.stickyfingers.aerial_zipper.desc": "Unzip empty air into a floating platform and portal anchor.",
  "ability.stickyfingers.zipper_escape": "Zipper Escape",
@@ -129,5 +129,7 @@
  "subtitles.stickyfingers.world_open": "Countless zippers open",
  "subtitles.stickyfingers.world_close": "Every zipper closes",
  "subtitles.stickyfingers.final_impact": "Devastating impact",
- "subtitles.stickyfingers.slowmo": "Time holds its breath"
+ "subtitles.stickyfingers.slowmo": "Time holds its breath",
+ "message.stickyfingers.no_target": "Nothing to unzip there — aim at a block, wall or creature in range.",
+ "message.stickyfingers.inside": "You slipped inside %s. Sneak to unzip yourself out."
 }

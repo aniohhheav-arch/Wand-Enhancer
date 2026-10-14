@@ -108,6 +108,8 @@ public final class StandManager {
     }
 
     public static void cleanup(ServerPlayer player) {
+        if (player.getPersistentData().getBoolean("sf_inside")) player.setInvisible(false);
+        player.getPersistentData().remove("sf_inside");
         Scheduler.cancelAll(player);
         Hiding.forceEmerge(player);
         StandEntity s = STANDS.remove(player.getUUID());

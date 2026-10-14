@@ -25,6 +25,10 @@ public final class ModNetwork {
                 (p, ctx) -> com.stickyfingers.client.ClientState.onSync(p));
         r.playToClient(ScreenFxPayload.TYPE, ScreenFxPayload.CODEC,
                 (p, ctx) -> com.stickyfingers.client.fx.CameraFx.trigger(p));
+        r.playToClient(SeparatedBlocksPayload.TYPE, SeparatedBlocksPayload.CODEC, (p, ctx) -> {
+            var level = net.minecraft.client.Minecraft.getInstance().level;
+            if (level != null && level.getEntity(p.entityId()) instanceof com.stickyfingers.entity.ZipperEntity z) z.setSeparated(p.positions(), p.states());
+        });
         r.playToClient(NetworkSnapshotPayload.TYPE, NetworkSnapshotPayload.CODEC,
                 (p, ctx) -> com.stickyfingers.client.ClientState.onNetwork(p));
     }
@@ -42,6 +46,7 @@ public final class ModNetwork {
             case NET_SET_EXIT -> ZipperNetwork.setExit(sp, p.a());
             case NET_TOGGLE_OPEN -> ZipperNetwork.toggleOpen(sp, p.a());
             case CLOSE_ALL -> ZipperNetwork.closeAll(sp);
+            case INTERACT -> com.stickyfingers.ability.Interactions.interact(sp, p.a());
             case SET_ORIENT -> com.stickyfingers.data.StandData.get(sp).setOrientation(p.a());
         }
     }

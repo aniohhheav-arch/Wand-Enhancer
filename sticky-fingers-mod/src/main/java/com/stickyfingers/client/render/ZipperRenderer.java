@@ -47,6 +47,7 @@ public class ZipperRenderer extends EntityRenderer<ZipperEntity> {
         Vec3 here = new Vec3(Mth.lerp(partial, z.xo, z.getX()), Mth.lerp(partial, z.yo, z.getY()), Mth.lerp(partial, z.zo, z.getZ()));
         Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         ZipperKind kind = z.kind();
+        PartedBlocks.render(z, ps, buffers, here, open);
 
         switch (kind) {
             case CHAIN -> {

@@ -115,6 +115,13 @@ public final class CommonEvents {
     }
 
     @SubscribeEvent
+    public static void onMount(net.neoforged.neoforge.event.entity.EntityMountEvent event) {
+        if (event.isDismounting() && event.getEntityMounting() instanceof ServerPlayer sp && event.getEntityBeingMounted() != null) {
+            Interactions.exitMob(sp, event.getEntityBeingMounted());
+        }
+    }
+
+    @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("stickyfingers")
                 .requires(src -> src.hasPermission(2))

@@ -53,6 +53,38 @@ public final class ClientEvents {
         }
     }
 
+    /** Right-click a zipper you own (or a creature you unzipped) to use it: enter, travel, open storage, toggle. */
+    @SubscribeEvent
+    public static void onInteract(net.neoforged.neoforge.client.event.InputEvent.InteractionKeyMappingTriggered event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!event.isUseItem() || mc.player == null || mc.level == null || !ClientState.hasStand) return;
+        var eye = mc.player.getEyePosition();
+        var end = eye.add(mc.player.getLookAngle().scale(8));
+        Integer target = null;
+        double best = Double.MAX_VALUE;
+        if (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult eh && ClientState.isUnzipped(eh.getEntity().getId())) {
+            target = eh.getEntity().getId();
+            best = eh.getLocation().distanceToSqr(eye);
+        }
+        double blockDist = mc.hitResult != null && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
+                ? mc.hitResult.getLocation().distanceToSqr(eye) + 0.5 : Double.MAX_VALUE;
+        for (var z : mc.level.getEntitiesOfClass(com.stickyfingers.entity.ZipperEntity.class, mc.player.getBoundingBox().inflate(9),
+                zz -> zz.isOwnedBy(mc.player))) {
+            if (z.kind() == com.stickyfingers.entity.ZipperKind.FIELD || z.kind() == com.stickyfingers.entity.ZipperKind.CHAIN) continue;
+            double r = Math.max(0.5, Math.max(z.length(), z.width()) * 0.5);
+            var hit = new net.minecraft.world.phys.AABB(z.position(), z.position()).inflate(r).clip(eye, end);
+            if (hit.isPresent()) {
+                double dd = hit.get().distanceToSqr(eye);
+                if (dd < best && dd <= blockDist) { best = dd; target = z.getId(); }
+            }
+        }
+        if (target != null) {
+            PacketDistributor.sendToServer(new StandActionPayload(StandActionPayload.Action.INTERACT, target, -1));
+            event.setCanceled(true);
+            event.setSwingHand(true);
+        }
+    }
+
     public static String orientationKey() {
         return ORIENT_KEYS[ClientState.orientation];
     }
