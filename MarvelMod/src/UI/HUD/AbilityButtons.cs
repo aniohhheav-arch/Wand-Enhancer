@@ -29,6 +29,8 @@ public static class AbilityButtons
 
     private static readonly ActionButton?[] Buttons = new ActionButton?[AbilitySlots + 1];
     private static HudManager? _hud;
+    private static HudManager? _failedHud;   // never retry creation every frame on a HUD where it failed
+    private static readonly BepInEx.Logging.ManualLogSource Log = BepInEx.Logging.Logger.CreateLogSource("MarvelMod.HUD");
     private static int _tab;
     private static int _shownTab = -1;
     private static bool _visible = true;
@@ -49,10 +51,24 @@ public static class AbilityButtons
     /// <summary>Called every frame from HudManager.Update.</summary>
     public static void Update(HudManager hud)
     {
-        var lp = PlayerControl.LocalPlayer;
-        if (lp == null || hud.KillButton == null) return;
+        try
+        {
+            UpdateInner(hud);
+        }
+        catch (Exception e)
+        {
+            // Log once per HUD instead of spamming the console every frame.
+            if (_failedHud != hud) Log.LogError($"Ability buttons disabled for this HUD: {e}");
+            _failedHud = hud;
+        }
+    }
 
-        if (_hud != hud || Buttons[0] == null) Create(hud);
+    private static void UpdateInner(HudManager hud)
+    {
+        var lp = PlayerControl.LocalPlayer;
+        if (lp == null || hud.KillButton == null || _failedHud == hud) return;
+
+        if (_hud != hud || !AllCreated()) Create(hud);
 
         TrackMovement(lp);
         HandleKeys(lp);
@@ -73,9 +89,17 @@ public static class AbilityButtons
 
     // ── creation ─────────────────────────────────────────────────────────────
 
+    private static bool AllCreated()
+    {
+        foreach (var b in Buttons)
+            if (b == null) return false;
+        return true;
+    }
+
     private static void Create(HudManager hud)
     {
         _hud = hud;
+        _failedHud = hud;   // cleared below only if every button was built
         _shownTab = -1;
         var template = hud.KillButton;
 
@@ -85,6 +109,7 @@ public static class AbilityButtons
 
             var b = Object.Instantiate(template, hud.transform);
             b.name = $"MarvelButton_{i}";
+            Buttons[i] = b;   // track immediately so a failure below can never leak clones
 
             // match the on-screen size of the original regardless of parent scaling
             var want = template.transform.lossyScale;
@@ -99,11 +124,12 @@ public static class AbilityButtons
             int slot = i;
             passive.OnClick.AddListener((Action)(() => OnClick(slot)));
 
-            b.SetInfiniteUses();
+            // The Kill button has no uses counter (SetInfiniteUses() throws on it), so only hide it if present.
             if (b.usesRemainingSprite != null) b.usesRemainingSprite.gameObject.SetActive(false);
-            b.gameObject.SetActive(true);
-            Buttons[i] = b;
+            if (b.usesRemainingText != null) b.usesRemainingText.gameObject.SetActive(false);
+            b.gameObject.SetActive(false);   // Layout() shows it once it's in place
         }
+        _failedHud = null;
     }
 
     private static void RefreshTab()
