@@ -23,7 +23,7 @@ function runEvents(ev,horizon,onDeferred,visual){
   while(ev.length){const e=ev.shift();
     if(e.click){clickSound(e.t,e.acc);continue}
     if(e.audio){playAudioClip(e);continue}
-    if(e.on){const h=trigger(e.tr,e.nt.p,e.nt.v,e.t);if(visual)flashNote(e.tr,e.nt.p,e.t,e.dur);if(!h)continue;const off={t:e.t+e.dur,h};
+    if(e.on){e.tr._evDur=e.dur;const h=trigger(e.tr,e.nt.p,e.nt.v,e.t);e.tr._evDur=null;if(visual)flashNote(e.tr,e.nt.p,e.t,e.dur);if(!h)continue;const off={t:e.t+e.dur,h};
       if(off.t<horizon){let i=ev.findIndex(x=>evCmp(off,x)<0);if(i<0)i=ev.length;ev.splice(i,0,off)}else onDeferred(off)}
     else e.h.off(e.t)}}
 function clickSound(t,acc){const o=O('square',acc?1760:1180,t,Z),g=G(0);g.gain.setValueAtTime(acc?0.22:0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.04);o.connect(F('bandpass',acc?1760:1180,4)).connect(g).connect(GR.bus);o.stop(t+0.06)}

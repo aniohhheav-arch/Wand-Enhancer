@@ -11,9 +11,11 @@
 KIND.rec='Recorded';
 const ORCH={buf:new Map(),loading:new Map(),failed:new Set()};
 const LIB_IDS=()=>Object.keys(typeof SAMPLE_LIB==='object'?SAMPLE_LIB:{});
-const ART_NAMES={sus:'Sustain',stac:'Short (spiccato / staccato)',pizz:'Pizzicato',mute:'Muted',pluck:'Plucked',hit:'Struck'};
+const ART_NAMES={auto:'Auto (short notes use the staccato recordings)',sus:'Sustain',stac:'Short (spiccato / staccato)',pizz:'Pizzicato',mute:'Muted',pluck:'Plucked',hit:'Struck'};
 async function assetBytes(f){if(window.native&&window.native.readAsset)return await window.native.readAsset(f);const r=await fetch(f);if(!r.ok)throw new Error('HTTP '+r.status);return await r.arrayBuffer()}
 function orchArt(iid,art){const L=SAMPLE_LIB[iid];if(!L)return null;return L.arts[art]||L.arts.sus||Object.values(L.arts)[0]}
+/* Auto: the scheduler tells the engine each note's length (tr._evDur); live playing uses the sustain recordings. */
+function autoArt(tr,iid,art){if(art!=='auto')return art;const L=SAMPLE_LIB[iid];return tr._evDur!=null&&tr._evDur<0.3&&L&&L.arts.stac?'stac':'sus'}
 function orchLoad(iid,art){const L=SAMPLE_LIB[iid],a=orchArt(iid,art);if(!a)return Promise.resolve(false);const key=iid+':'+(L.arts[art]?art:'*');
   if(ORCH.loading.has(key))return ORCH.loading.get(key);
   const p=Promise.all(a.zones.map(async z=>{if(ORCH.buf.has(z.f)||ORCH.failed.has(z.f))return;try{const b=await assetBytes(z.f);ORCH.buf.set(z.f,await decoderCtx().decodeAudioData(b))}catch(e){ORCH.failed.add(z.f);errLog.push('sample '+z.f+': '+e.message)}}))
@@ -21,7 +23,8 @@ function orchLoad(iid,art){const L=SAMPLE_LIB[iid],a=orchArt(iid,art);if(!a)retu
   ORCH.loading.set(key,p);return p}
 function orchReady(iid,art){const a=orchArt(iid,art);return !!a&&a.zones.every(z=>ORCH.buf.has(z.f))}
 /* Every recorded instrument a track (or a whole project) needs, loaded before playing or rendering. */
-function trackOrchNeeds(tr){const P=tr.params;if(tr.engine==='orch')return [[P.inst,P.art]];if(tr.engine==='section')return (BANDS[P.band]||[]).map(p=>[p.inst,partArt(p,P.art)]);return []}
+function trackOrchNeeds(tr){const P=tr.params,arts=P.art==='auto'?['sus','stac']:[P.art];if(tr.engine==='orch')return arts.map(a=>[P.inst,a]).filter(([i,a])=>a==='sus'||(SAMPLE_LIB[i]&&SAMPLE_LIB[i].arts[a]));if(tr.engine==='section')return (BANDS[P.band]||[]).flatMap(p=>arts.map(a=>[p.inst,partArt(p,a)]));
+  if(tr.engine==='fusion')return [0,1,2,3].flatMap(i=>{const pre=P['L'+i+'on']&&presetById(P['L'+i+'src']);return pre&&(pre.engine==='orch'||pre.engine==='section')?trackOrchNeeds({engine:pre.engine,params:Object.assign(defaultsOf(ENG[pre.engine].params),pre.params)}):[]});return []}
 function ensureTrackSamples(tr){return Promise.all(trackOrchNeeds(tr).map(([i,a])=>orchLoad(i,a)))}
 function ensureProjectOrch(){return Promise.all(S.tracks.map(ensureTrackSamples))}
 /* nearest recorded root (a root above wins ties: pitching down sounds more natural), then round robin */
@@ -30,7 +33,9 @@ function orchZone(a,n,layer,rr){let best=null,bd=1e9;for(const z of a.zones){con
 /* Play one recorded note. Returns {amp, srcs, layers} or null when the recordings are not loaded yet. */
 function orchNote(tr,iid,art,n,v,t,dst,P,o={}){
   const a=orchArt(iid,art);if(!a)return null;const sus=a.kind==='sus',dynMW=sus&&P.dyn==='mw';
-  const lvl=dynMW?(tr._mw!=null?tr._mw:0.6):v,x=lvl*(a.layers-1),l0=Math.max(0,Math.floor(x)),l1=Math.min(a.layers-1,l0+1),fr=x-l0;
+  // velocity chooses one recorded layer: mixing two different takes of a note at once sounds phasey, like two
+  // players slightly out of sync. Only mod-wheel dynamics crossfade between layers (as orchestral libraries do).
+  const lvl=dynMW?(tr._mw!=null?tr._mw:0.6):v,x=lvl*(a.layers-1);let l0=Math.max(0,Math.floor(x)),l1=Math.min(a.layers-1,l0+1),fr=x-l0;if(!dynMW){l0=l1=Math.min(a.layers-1,Math.round(x));fr=0}
   const key=iid+art+n;tr._rrc=tr._rrc||{};const rr=tr._rrc[key]=(tr._rrc[key]||0)+1+(o.rrOffset||0);
   const amp=G(0),srcs=[],gains=[];const start=t+(o.delay||0);
   [[l0,Math.cos(fr*Math.PI/2)],[l1,Math.sin(fr*Math.PI/2)]].forEach(([l,w],i)=>{if(i===1&&l1===l0)return;const z=orchZone(a,n,l,rr);if(!z)return;const b=ORCH.buf.get(z.f);if(!b)return;
@@ -53,10 +58,10 @@ ENG.orch={name:'Recorded Instrument',kind:KIND.rec,family:'strings',
   desc:'Real multisampled recordings (VSCO 2 Community Edition, CC0): several dynamic layers, round robins, tuned zones and looped sustains. Choose the articulation; with "Mod wheel" dynamics, sustained notes crossfade between the recorded soft and loud takes as you move the wheel.',
   params:[C('inst','Instrument','Source',LIB_IDS().map(k=>[k,SAMPLE_LIB[k].name]),'violin',{open:true}),C('art','Articulation','Source',Object.entries(ART_NAMES),'sus'),
     C('mode','Playing','Source',[['poly','Polyphonic'],['legato','Legato (mono, connected notes)'],['slide','Slide (mono, glides between notes)']],'poly'),P('glide','Slide time','Source',0.02,0.6,0.12,{log:true,fmt:FMT.s}),...ORCH_COMMON()],
-  on(tr,n,v,t,out,P,M){const a=orchArt(P.inst,P.art);if(!a){M.missing='instrument '+P.inst;return null}
+  on(tr,n,v,t,out,P,M){const art=autoArt(tr,P.inst,P.art),a=orchArt(P.inst,art);if(!a){M.missing='instrument '+P.inst;return null}
     const dst=outStage(P,M,out),con=M.prev!=null&&P.mode!=='poly'&&a.kind==='sus';
     // legato: start the new recording past its attack and crossfade, so phrases connect like one breath or bow
-    const h=orchNote(tr,P.inst,P.art,con&&P.mode==='slide'?M.prev:n,v,t,dst,P,con?{offset:0.09,fade:0.06}:{});if(!h)return null;
+    const h=orchNote(tr,P.inst,art,con&&P.mode==='slide'?M.prev:n,v,t,dst,P,con?{offset:0.09,fade:0.06}:{});if(!h)return null;
     if(con&&P.mode==='slide'){const span=(n-M.prev)*100;h.srcs.forEach(s=>{s._d+=span;s.detune.setValueAtTime(s.detune.value,t);s.detune.linearRampToValueAtTime(s._d+((tr._bend)||0)*100,t+P.glide)})}
     const vo=voice(h.amp,h.srcs,orchRelease(P,a));vo.setMod=m=>h.setDyn(m==null?0.6:m);return vo}};
 
@@ -83,7 +88,7 @@ ENG.section={name:'Recorded Section',kind:KIND.rec,family:'brass',
     const chord=recent.length>0||[...(tr._rt?tr._rt.live:[])].some(h=>h.sec);recent.forEach(x=>x.dbl&&x.dbl.forEach(d=>{hold(d.amp.gain,Math.max(now,ctx.currentTime));d.amp.gain.setTargetAtTime(0,Math.max(now,ctx.currentTime),0.008);d.srcs.forEach(s=>{try{s.stop(Math.max(now,ctx.currentTime)+0.08)}catch(e){}})}));
     const n2=P.unison==='double'&&!chord?2:1,parts=rk.slice(0,n2).map(x=>x.p),hs=[],load=tr._secLoad;
     parts.forEach((p,i)=>{const pan=ctx.createStereoPanner();pan.pan.value=p.pan*P.width;pan.connect(dst);
-      const jit=((n*7919+(tr._rrc&&tr._rrc[p.inst+n]||0)*104729)%97)/97-0.5,delay=P.loose*(p.delay+jit*0.008),art=partArt(p,P.art);
+      const jit=((n*7919+(tr._rrc&&tr._rrc[p.inst+n]||0)*104729)%97)/97-0.5,delay=P.loose*(p.delay+jit*0.008),art=partArt(p,autoArt(tr,p.inst,P.art));
       const h=orchNote(tr,p.inst,art,n,v,t,pan,P,{delay:Math.max(0,delay),level:p.level*(i?0.8:1)*(n2>1?0.78:1),rrOffset:i});if(h){h.part=p;h.art=art;hs.push(h);load[p.id]=(load[p.id]||0)+1}});
     if(!hs.length)return null;
     tr._secRecent.push({t:now,dbl:hs.slice(1)});

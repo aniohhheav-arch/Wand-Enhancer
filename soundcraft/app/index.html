@@ -87,7 +87,9 @@
       <button class="btn" id="btnDupTrack">Duplicate track</button>
       <span class="sep"></span>
       <label class="tf">Snap <select id="clipSnap"><option value="1">Bar</option><option value="0.25">Beat</option></select></label>
-      <button class="btn" id="zoomOut" aria-label="Zoom out">−</button><button class="btn" id="zoomIn" aria-label="Zoom in">+</button>
+      <span class="tf">Zoom</span><button class="btn" id="zoomOut" aria-label="Zoom out" title="Zoom out (Ctrl + mouse wheel)">−</button><button class="btn" id="zoomIn" aria-label="Zoom in" title="Zoom in (Ctrl + mouse wheel)">+</button>
+      <span class="tf">Track height</span><button class="btn" id="rowOut" aria-label="Smaller tracks" title="Smaller tracks (Alt + mouse wheel)">−</button><button class="btn" id="rowIn" aria-label="Taller tracks" title="Taller tracks (Alt + mouse wheel)">+</button>
+      <button class="btn" id="btnMaxTl" aria-pressed="false" title="Give the whole window to the timeline (double-click the divider)">⤢ Big timeline</button>
       <span class="sep"></span>
       <button class="btn" id="btnMarker">+ Section marker</button>
       <button class="btn" id="btnSplitClip" title="Split the selected clip at the play cursor">Split</button>
@@ -95,10 +97,10 @@
       <button class="btn" id="btnUniqueClip" title="Give the selected clip its own copy of the pattern">Make unique</button>
       <button class="btn danger" id="btnDelClip">Delete clip</button>
       <span class="spacer"></span>
-      <span class="hint">Click an empty lane to add a clip · drag to move · drag the end to resize · drag the ruler to set the loop · click the ruler to place the cursor</span>
+      <span class="hint">Ctrl+wheel zoom · Alt+wheel track height · drag a header's bottom edge to resize one track</span>
     </div>
     <div class="arr-body" id="arrBody">
-      <div class="arr-heads" id="arrHeads"><div class="arr-heads-inner" id="arrHeadsInner"></div></div>
+      <div class="arr-heads" id="arrHeads"><div class="arr-heads-inner" id="arrHeadsInner"></div><div class="head-split" id="headSplit" title="Drag to change the header width"></div></div>
       <div class="arr-scroll" id="arrScroll"><canvas id="tl"></canvas></div>
     </div>
     <div class="splitter" id="splitter" role="separator" aria-orientation="horizontal" aria-label="Resize timeline" tabindex="0"></div>

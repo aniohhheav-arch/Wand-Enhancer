@@ -131,3 +131,41 @@ $('#dockAudio').addEventListener('change',e=>{const a=e.target.dataset.au;
 $('#dockAudio').addEventListener('input',e=>{if(e.target.dataset.au!=='gain')return;const tr=selTrack(),c=S.selClip&&tr.clips.find(x=>x.id===S.selClip.clip);if(!c)return;c.gain=+e.target.value;const l=$('#auGain');if(l)l.textContent=gainToDb(c.gain).toFixed(1)+' dB'});
 $('#dockAudio').addEventListener('pointerdown',e=>{if(e.target.dataset.au==='gain')pushUndo()});
 function syncDock(){const a=isAudio(selTrack()),au=$('#dockAudio');if(!au)return;const was=au.hidden;au.hidden=!a;$('#dockRoll').hidden=a||PREF.dock!=='roll';$('#dockInst').hidden=a||PREF.dock!=='inst';if(a&&(was||au.dataset.tr!==selTrack().id)){au.dataset.tr=selTrack().id;renderAudioDock()}}
+
+/* ───────── recording straight into the Sampler ───────── */
+/* Free-running capture from the open input (no transport needed). Returns {stop(), elapsed(), level()}. */
+async function micCapture(maxSec=60){
+  if(!(await openMic()))throw new Error(MIC.err);if(!workletOK())throw new Error('this system does not provide AudioWorklet, which recording needs');
+  const ch=PREF.recCh===2&&MIC.ch>=2?2:1,node=new AudioWorkletNode(ctx,'sc-rec',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[1],channelCount:ch,channelCountMode:'explicit',processorOptions:{ch}}),sink=G(0);
+  MIC.src.connect(node);node.connect(sink).connect(ctx.destination);const chunks=[],t0=ctx.currentTime+0.01;let start=null,done=null;
+  node.port.onmessage=e=>{const m=e.data;if(m.start!=null)start=m.start;if(m.data)chunks.push(m.data);if(m.done&&done)done()};node.port.postMessage({cmd:'start',at:t0});
+  const cap={elapsed:()=>Math.max(0,ctx.currentTime-t0),level:micLevel,async stop(){node.port.postMessage({cmd:'stop',at:ctx.currentTime});await new Promise(r=>{done=r;setTimeout(r,1500)});clearTimeout(cap.timer);
+    try{node.disconnect();sink.disconnect();MIC.src&&MIC.src.disconnect(node)}catch(e){}const len=chunks.reduce((a,c)=>a+c[0].length,0);if(!len)return null;
+    const buf=new AudioBuffer({length:len,numberOfChannels:ch,sampleRate:ctx.sampleRate});let o=0;chunks.forEach(c=>{for(let k=0;k<ch;k++)buf.getChannelData(k).set(c[k],o);o+=c[0].length});return buf}};
+  cap.timer=setTimeout(()=>cap.onLimit&&cap.onLimit(),maxSec*1000);return cap}
+/* Trim leading/trailing silence, normalize to -1 dBFS and add tiny fades, so a raw mic recording plays at once. */
+function cleanSample(buf){const n=buf.length,sr=buf.sampleRate,chs=[...Array(buf.numberOfChannels).keys()].map(c=>buf.getChannelData(c));let pk=0;for(const d of chs)for(let i=0;i<n;i++){const v=Math.abs(d[i]);if(v>pk)pk=v}
+  if(pk<0.003)return null;const th=pk*0.03,loud=i=>chs.some(d=>Math.abs(d[i])>th);let a=0,b=n-1;while(a<n&&!loud(a))a++;while(b>a&&!loud(b))b--;
+  a=Math.max(0,a-Math.round(sr*0.008));b=Math.min(n,b+Math.round(sr*0.08));const len=b-a,g=0.89/pk,out=new AudioBuffer({length:len,numberOfChannels:chs.length,sampleRate:sr}),fi=Math.round(sr*0.002),fo=Math.min(Math.round(sr*0.03),len>>2);
+  chs.forEach((d,c)=>{const o=out.getChannelData(c);for(let i=0;i<len;i++){let w=g;if(i<fi)w*=i/fi;if(i>len-fo)w*=(len-i)/fo;o[i]=d[a+i]*w}});return out}
+/* Fundamental of a recorded note (normalized autocorrelation; the first strong peak avoids octave errors). */
+function detectPitch(buf){const sr=buf.sampleRate,d=buf.getChannelData(0),n=d.length;if(n<sr*0.08)return null;
+  let s0=Math.floor(n*0.12),best=0;for(let i=Math.floor(n*0.08);i<n*0.6;i+=Math.floor(sr*0.01)){let e=0;for(let j=i;j<Math.min(n,i+2048);j++)e+=d[j]*d[j];if(e>best){best=e;s0=i}}
+  const W=Math.min(4096,n-s0-1),minL=Math.floor(sr/1500),maxL=Math.min(Math.floor(sr/50),W>>1);if(W<1024)return null;
+  const C=L=>{let s=0,e1=0,e2=0;for(let i=0;i<W-L;i++){const x=d[s0+i],y=d[s0+i+L];s+=x*y;e1+=x*x;e2+=y*y}return s/Math.sqrt(e1*e2+1e-12)};
+  const cs=[];let mx=0;for(let L=minL;L<=maxL;L++){const c=C(L);cs.push(c);if(c>mx)mx=c}if(mx<0.6)return null;
+  let k=-1;for(let i=1;i<cs.length-1;i++)if(cs[i]>=mx*0.92&&cs[i]>=cs[i-1]&&cs[i]>=cs[i+1]){k=i;break}if(k<0)return null;
+  const y0=cs[k-1],y1=cs[k],y2=cs[k+1],den=y0-2*y1+y2,L=minL+k+(Math.abs(den)>1e-9?0.5*(y0-y2)/den:0),midi=69+12*Math.log2(sr/L/440);return {midi,conf:mx}}
+
+/* Store a buffer as a sample and return a zone pitched by detection (root + cents), or at C4 when unpitched. */
+async function bufferToZone(buf,name,tune=true){const bytes=encodeWav(buf,24),id='smp_'+await hashBytes(bytes.buffer);
+  await putSample({id,name,type:'audio/wav',size:bytes.byteLength,added:Date.now(),duration:buf.duration,bytes:bytes.buffer,recorded:true});SAMPLE_BUF.set(id,buf);SAMPLE_META.set(id,{name,duration:buf.duration});SAMPLE_MISSING.delete(id);
+  const p=tune?detectPitch(buf):null,z=newZone(id,name);if(p){const r=Math.round(p.midi);z.root=clamp(r,0,127);z.tune=Math.round(-(p.midi-r)*100)}return {zone:z,pitch:p}}
+/* Right-click a take: build a Sampler track from exactly that part of the recording. */
+async function takeToSampler(t,c){const b=SAMPLE_BUF.get(c.rec);if(!b){toast('That take is not loaded on this device.');return}
+  const sr=b.sampleRate,a=Math.max(0,Math.floor(c.off*sr)),len=Math.min(b.length-a,Math.floor(c.len*secPerBar()*sr));if(len<sr*0.05){toast('That part of the take is too short to sample.');return}
+  const part=new AudioBuffer({length:len,numberOfChannels:b.numberOfChannels,sampleRate:sr});for(let k=0;k<b.numberOfChannels;k++)part.getChannelData(k).set(b.getChannelData(k).subarray(a,a+len));
+  const clean=cleanSample(part);if(!clean){toast('That part of the take is silent.');return}
+  const {zone,pitch}=await bufferToZone(clean,(c.name||'Take')+' sample');pushUndo();const tr=newTrack({engine:'sampler',params:{},zones:[zone]},{name:(c.name||'Take').split(' · ')[0]+' sampler',color:'#e8a0bb'});tr.zones=[zone];
+  S.tracks.push(tr);if(ctx)applyMix();markDirty();selectTrack(S.tracks.length-1);renderArrange();
+  toast('New Sampler track from the take'+(pitch?' (pitch '+noteName(zone.root)+(zone.tune?' '+(zone.tune>0?'+':'')+zone.tune+' c':'')+', so it plays in tune)':' (no clear pitch, so it sits on C4)')+'. Play it on the keyboard; edit it in the Lab.')}

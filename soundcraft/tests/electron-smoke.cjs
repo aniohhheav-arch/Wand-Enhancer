@@ -23,6 +23,14 @@ const path = require('path'), fs = require('fs'), os = require('os');
   if (!wk) { console.error('WORKLETS DID NOT LOAD'); process.exitCode = 1; }
   const rec = await win.evaluate(async () => { const ok = await orchLoad('trumpet', 'sus'); return ok && orchReady('trumpet', 'sus') ? 'loaded ' + orchArt('trumpet', 'sus').zones.length + ' zones' : 'FAILED ' + [...ORCH.failed].slice(0, 2).join(', ') });
   res.push(['recorded instruments load from the packaged app', rec]); if (!/^loaded/.test(rec)) process.exitCode = 1;
+  // Sampler: load the empty sampler, import a file through the real file input, play it, render it
+  await win.evaluate(() => { applyInstrument(selTrack(), presetById('sampler-empty')); setView('lab') }); await win.waitForTimeout(400);
+  await win.setInputFiles('#zoneFile', path.join(__dirname, 'a3-tone.wav')); await win.waitForTimeout(1500);
+  const smp = await win.evaluate(async () => { const t = selTrack(), z = t.zones[0]; const pt = curPattern(t); pt.notes = [{ p: 57, s: 0, l: 8, v: 1 }]; t.clips = [{ id: 'cs', pat: pt.id, start: 0, len: 1 }]; S.tracks.forEach(x => x.mute = x !== t);
+    const buf = await renderOffline({ startBar: 0, endBar: 1, tail: 0 }); const d = buf.getChannelData(0); let q = 0; for (const x of d) q += x * x; S.tracks.forEach(x => x.mute = false);
+    return { zones: t.zones.length, root: z && z.root, stored: z ? !!(await getSample(z.sample)) : false, rms: +Math.sqrt(q / d.length).toFixed(4) } });
+  res.push(['Sampler imports a file, detects its pitch (A3 = 57), stores it and plays', JSON.stringify(smp)]);
+  if (!(smp.zones === 1 && smp.root === 57 && smp.stored && smp.rms > 0.005)) { console.error('SAMPLER BROKEN'); process.exitCode = 1; }
   res.push(['cpu stat', String(await win.evaluate(() => window.native.cpu()))]);
   await win.click('#btnPlay'); await win.waitForTimeout(1500); res.push(['plays audio in the desktop shell', String(await win.evaluate(() => A.level))]);
   res.push(['page errors', errors.length ? errors.join(' | ') : 'none']);

@@ -157,7 +157,7 @@ function buildTrack(tr){
   if(!ctx||(tr._rt&&tr._rt.ctx===ctx))return;const E=ENG[tr.engine];
   const rt=tr._rt={ctx,live:new Set(),mod:null,in:G(1),pan:ctx.createStereoPanner(),vol:G(0),rev:G(0),dly:G(0),an:ctx.createAnalyser(),fx:[]};
   rt.an.fftSize=1024;
-  if(E.setup)rt.eng=E.setup(tr,rt.in);if(tr.engine==='orch'||tr.engine==='section')ensureTrackSamples(tr);
+  if(E.setup)rt.eng=E.setup(tr,rt.in);if(tr.engine==='orch'||tr.engine==='section'||tr.engine==='fusion')ensureTrackSamples(tr);
   rt.pan.connect(rt.vol).connect(GR.bus);rt.vol.connect(rt.rev).connect(GR.revIn);rt.vol.connect(rt.dly).connect(GR.dlyIn);rt.vol.connect(rt.an);
   rebuildTrackChain(tr);
 }

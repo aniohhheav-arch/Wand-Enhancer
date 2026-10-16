@@ -34,6 +34,8 @@ function applyInstrument(tr,pre){const E=ENG[pre.engine];if(isAudio(tr))throw ne
   tr.mod=pre.mod?sanitizeMod(JSON.parse(JSON.stringify(pre.mod))):newModState();tr.arp=Object.assign({on:false,mode:'up',rate:'1/16',oct:1,gate:0.6},pre.arp||{});tr.poly=pre.poly||16;tr.oct=pre.oct||E.oct||4;
   if(pre.engine==='sampler')tr.zones=(pre.zones||[]).map(sanitizeZone);else delete tr.zones;if(pre.engine==='fusion')tr.layerOver=pre.layerOver||[{},{},{},{}];else delete tr.layerOver;
   if(ctx){buildTrack(tr);applyMix()}if(tr.clips.some(c=>c.rec))tr.clips=tr.clips.filter(c=>!c.rec);if(tr.engine==='sampler')loadTrackSamples(tr).then(m=>{if(m.length)toast(m.length+' sample'+(m.length>1?'s are':' is')+' missing: '+m.slice(0,3).join(', '))});
+  // the track takes the instrument's name, unless you renamed the track yourself
+  if(tr.autoName!==false&&pre.name)tr.name=String(pre.name).replace(/ \((?:modeled|[A-Z][a-z]+-inspired)\)$/,'').slice(0,40);
   if(pre.id){PREF.recent=[pre.id].concat(PREF.recent.filter(x=>x!==pre.id)).slice(0,16);savePrefs()}}
 const curPattern=tr=>tr.patterns.find(p=>p.id===tr.curPat)||tr.patterns[0];
 const songEnd=()=>Math.max(4,...S.tracks.flatMap(t=>t.clips.map(c=>c.start+c.len)),S.loop.end);

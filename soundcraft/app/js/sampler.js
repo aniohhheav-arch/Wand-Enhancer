@@ -43,6 +43,7 @@ ENG.sampler={name:'Sampler',kind:KIND.sampler,family:'sampler',
     P('velAmp','Velocity → level','Global',0,1,0.7,{fmt:FMT.pct}),P('cutoff','Cutoff','Filter',40,20000,20000,{log:true,fmt:FMT.hz,live:1}),P('reso','Resonance','Filter',0.1,20,0.7,{log:true,fmt:FMT.dec,live:1}),
     ...ENV_GROUP('a','Amp',0.002,0.3,1,0.15),...OUT_GROUP()],
   on(tr,n,v,t,out,P,M){
+    if(!(tr.zones||[]).length){if(!tr._emptyTold){tr._emptyTold=1;toast('This Sampler is empty. Open the Lab (F5) and press Import samples or ● Record sample.')}return null}
     const vel=Math.round(v*127),zs=(tr.zones||[]).filter(z=>n>=z.lo&&n<=z.hi&&vel>=z.vlo&&vel<=z.vhi);if(!zs.length)return null;
     const rt=tr._rt;rt.rr=rt.rr||{};const groups={};zs.forEach(z=>(groups[z.group]=groups[z.group]||[]).push(z));
     const amp=G(0),fl=F('lowpass',P.cutoff,P.reso);M.bind('cutoff',fl.detune,Math.log2(20000/40)*1200);M.bind('reso',fl.Q,20);fl.connect(amp).connect(outStage(P,M,out));const srcs=[];
