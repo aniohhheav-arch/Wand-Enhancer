@@ -88,7 +88,9 @@ ipcMain.handle('cpu', () => app.getAppMetrics().reduce((a, m) => a + (m.cpu ? m.
 
 app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
 app.whenReady().then(() => {
-  const allowed = new Set(['midi', 'clipboard-sanitized-write', 'speaker-selection']);
+  // Chromium in Electron 33 asks for 'midiSysex' even for plain requestMIDIAccess({sysex:false});
+  // Soundcraft never sends or reads SysEx messages, but the permission must be granted for MIDI to work at all.
+  const allowed = new Set(['midi', 'midiSysex', 'clipboard-sanitized-write', 'speaker-selection']);
   session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(allowed.has(perm)));
   session.defaultSession.setPermissionCheckHandler((wc, perm) => allowed.has(perm));
   buildMenu(); createWindow(); log('started', app.getVersion(), process.platform, process.versions.electron);

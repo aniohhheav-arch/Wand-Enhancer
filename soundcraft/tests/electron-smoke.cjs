@@ -15,6 +15,9 @@ const path = require('path'), fs = require('fs'), os = require('os');
   const bk = await win.evaluate(async () => { await window.native.writeBackup('p1', 'My Song', '{"v":2}'); return window.native.backupDir() });
   const files = fs.readdirSync(bk).flatMap(d => fs.readdirSync(path.join(bk, d)));
   res.push(['backup written to disk', bk + ' → ' + files.length + ' file(s)']);
+  const midi = await win.evaluate(async () => { try { const a = await navigator.requestMIDIAccess({ sysex: false }); return 'granted (' + a.inputs.size + ' inputs)' } catch (e) { return e.name + ': ' + e.message } });
+  res.push(['MIDI permission granted (no NotAllowedError)', midi]);
+  if (/NotAllowedError|SecurityError/.test(midi)) { console.error('MIDI PERMISSION REGRESSION: ' + midi); process.exitCode = 1; }
   res.push(['cpu stat', String(await win.evaluate(() => window.native.cpu()))]);
   await win.click('#btnPlay'); await win.waitForTimeout(1500); res.push(['plays audio in the desktop shell', String(await win.evaluate(() => A.level))]);
   res.push(['page errors', errors.length ? errors.join(' | ') : 'none']);

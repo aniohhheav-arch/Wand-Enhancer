@@ -8,7 +8,8 @@ function setMidi(state,text){const c=$('#midiChip');if(!c)return;c.dataset.state
 async function initMIDI(){
   if(!navigator.requestMIDIAccess){setMidi('unsupported','MIDI not supported');return}
   setMidi('idle','Looking for MIDI…');
-  try{midiAcc=await navigator.requestMIDIAccess({sysex:false});midiAcc.onstatechange=bindInputs;bindInputs()}catch(e){midiAcc=null;setMidi('blocked','MIDI blocked here')}}
+  try{midiAcc=await navigator.requestMIDIAccess({sysex:false});midiAcc.onstatechange=bindInputs;bindInputs()}catch(e){midiAcc=null;errLog.push('MIDI: '+e.name+' '+e.message);if(e.name==='NotAllowedError'||e.name==='SecurityError')setMidi('blocked','MIDI blocked here');else{midiErr=e.name+': '+e.message;setMidi('failed','MIDI unavailable')}}}
+let midiErr='';
 function midiInputs(){const l=[];if(midiAcc)midiAcc.inputs.forEach(i=>{if(i.state==='connected')l.push(i)});return l}
 function bindInputs(){const l=[];midiAcc.inputs.forEach(i=>{i.onmidimessage=ev=>onMidi(ev,i);if(i.state==='connected')l.push(i)});if(!l.length)setMidi('none','No MIDI devices');else setMidi('ready',(l[0].name||'MIDI device')+(l.length>1?' +'+(l.length-1):''))}
 function midiTargetsForControl(){const tr=selTrack();if(!tr)return [];return tr.input&&tr.input.group?S.tracks.filter(t=>t.input&&t.input.group===tr.input.group):[tr]}
@@ -34,9 +35,10 @@ function onCC(cc,v){
 function startLearn(trId,what){learn=Object.assign({track:trId},what);renderLearnState();toast('Move a knob, fader or pedal on your MIDI controller to link it.')}
 function renderMidiPop(){
   const chip=$('#midiChip');if(!chip)return;const st=chip.dataset.state,list=midiInputs(),inViewer=!!S.dl&&!window.native;
-  $('#midiMsg').textContent=st==='ready'?'Notes, velocity, sustain, mod wheel, pitch bend, aftertouch and CCs go to the selected track (or all instruments of its ensemble). Devices appear as you plug them in.'
-    :st==='none'?'No controller found yet. Plug one in and it appears here automatically. Until then, play with your computer keyboard.'
+  $('#midiMsg').textContent=st==='ready'?'Notes, velocity, sustain, mod wheel, pitch bend, aftertouch and CCs go to the selected track (or all instruments of its ensemble). Devices appear as you plug them in. On Windows a MIDI device can only be used by one app at a time, so close other music apps or browser tabs that use it if notes do not arrive.'
+    :st==='none'?'No controller found yet. Plug one in and it appears here automatically. If it is already plugged in, another app may be using it (Windows lets only one app open a MIDI device), or its driver may be missing. Until then, play with your computer keyboard.'
     :st==='blocked'?(inViewer?'This embedded view does not allow MIDI access. Use the Soundcraft desktop app, or open the app file in Chrome or Edge.':'MIDI access was refused. Allow MIDI for Soundcraft in your system or browser settings, then press Scan again.')
+    :st==='failed'?'The system MIDI service could not start ('+midiErr+'). Check that your keyboard\'s driver is installed, unplug and replug it, then press Scan again.'
     :st==='unsupported'?'This browser has no Web MIDI support. Use the Soundcraft desktop app, or Chrome, Edge, Opera or Firefox.':'Asking the system for MIDI access…';
   $('#devList').innerHTML=list.map(i=>'<li><i class="led on" data-dev="'+esc(i.id)+'"></i>'+esc(i.name||'MIDI input')+'<small>'+esc(i.manufacturer||'')+'</small></li>').join('');
   const maps=Object.entries(S.ccMap).map(([cc,m])=>{const tr=S.tracks.find(t=>t.id===m.track);if(!tr)return '';const lbl=m.macro?'Macro '+((tr.mod.macros.find(x=>x.id===m.macro)||{}).name||'?'):(destDef(tr,m.dst)||{label:m.dst}).label;return '<li>CC '+cc+' → '+esc(tr.name)+' · '+esc(lbl)+'<button class="btn xs" data-unmap="'+cc+'">Remove</button></li>'}).join('');
