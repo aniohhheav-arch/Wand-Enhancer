@@ -28,6 +28,7 @@ public class MarvelModPlugin : BasePlugin
         // Ability buttons are driven by Patches.HudUpdatePatch (they live on the game's HUD).
         AddComponent<PracticeModeManager>();
         AddComponent<DevConsole>();
+        AddComponent<MarvelMod.UI.Index.AbilityIndex>();
         AddComponent<MarvelMod.Characters.IllusionManager>();
         AddComponent<MarvelMod.Characters.ShapeshiftManager>();
         AddComponent<MarvelMod.Characters.StatusManager>();

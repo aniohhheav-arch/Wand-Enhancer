@@ -64,6 +64,7 @@ public static class AbilityButtons
         if (_hud != hud || !AllCreated()) Create(hud);
 
         CharacterRegistry.UpdateLocal(lp);
+        if (CharacterRegistry.InLobby) Abilities.Loki.Thralls.Clear();
         if (_character != CharacterRegistry.Local)
         {
             _character = CharacterRegistry.Local;
@@ -318,7 +319,7 @@ public static class AbilityButtons
             var target = a.FindTarget(lp);
             if (target != null && a.IsReady && (outline == null || Closer(lp, target, outline))) outline = target;
 
-            bool usable = canAct && a.IsReady && (a.Targeting != TargetMode.Required || target != null);
+            bool usable = canAct && a.IsReady && a.CanUse(lp) && (a.Targeting != TargetMode.Required || target != null);
             if (usable) b.SetEnabled(); else b.SetDisabled();
         }
         SetOutline(outline);

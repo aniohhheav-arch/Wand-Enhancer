@@ -51,6 +51,11 @@ public static class DefaultAbilities
         ["puppet_master"]         = new() { Cooldown=40, Duration=0, Range=3f },
         ["kneel_before_trickster"]= new() { Cooldown=75, Duration=0, Range=3f },
 
+        // ── Mind ────────────────────────────────────────────────────────
+        ["mind_control"]          = new() { Cooldown=30, Duration=8 },
+        ["possession"]            = new() { Cooldown=60 },
+        ["sever_the_strings"]     = new() { Cooldown=10 },
+
         // ── Hidden ──────────────────────────────────────────────────────
         ["map_teleport"]          = new() { Cooldown=0 },
     };

@@ -17,6 +17,7 @@ public class LokiCharacter : CharacterDef
     public readonly List<AbilityBase> SorceryAndCombat;
     public readonly List<AbilityBase> GodOfMischief;
     public readonly List<AbilityBase> Executions;
+    public readonly List<AbilityBase> Mind;
     public readonly MapTeleport MapTeleport = new();
 
     private LokiCharacter()
@@ -53,6 +54,8 @@ public class LokiCharacter : CharacterDef
             new PuppetMaster(), new KneelBeforeTheTrickster(),
         };
 
+        Mind = new List<AbilityBase> { new MindControl(), new Possession(), new SeverTheStrings() };
+
         All = new List<AbilityBase>();
         All.AddRange(IllusionMagic);
         All.AddRange(Shapeshifting);
@@ -60,6 +63,7 @@ public class LokiCharacter : CharacterDef
         All.AddRange(SorceryAndCombat);
         All.AddRange(GodOfMischief);
         All.AddRange(Executions);
+        All.AddRange(Mind);
         All.Add(MapTeleport);
     }
 
@@ -75,6 +79,7 @@ public class LokiCharacter : CharacterDef
         new("TRICKSTER",  "mystic_blink",     TricksterMobility),
         new("SORCERY",    "green_bolt",       SorceryAndCombat),
         new("MISCHIEF",   "mind_whisper",     GodOfMischief),
+        new("MIND",       "possession",       Mind),
         new("FINISHERS",  "infinite_deception",         Executions, _ => !CharacterRegistry.InLobby),
     };
 

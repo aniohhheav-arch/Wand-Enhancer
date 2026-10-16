@@ -13,6 +13,8 @@ public enum StatusEffect
     Bound, Stunned, Shielded, ChaosContract, Invisible,
     // Thanos / finishers
     Frozen, Slowed, Haste, Puppet, Pulled, Prison, Transmuted, Chained, Blinded, Rooted,
+    /// <summary>Mind Control: the body copies another player's movement (Point = offset, Source = controller).</summary>
+    Possessed,
 }
 public enum DamageType   { Melee, Magical, Projectile }
 
@@ -40,7 +42,7 @@ public class StatusManager : MonoBehaviour
         or StatusEffect.Prison or StatusEffect.Transmuted or StatusEffect.Chained or StatusEffect.Rooted;
 
     /// <summary>Applies an effect (point = pull centre / puppet goal). Hostile effects are absorbed by Mystic Shield.</summary>
-    public bool ApplyStatus(PlayerControl target, StatusEffect effect, float duration, Vector2 point = default)
+    public bool ApplyStatus(PlayerControl target, StatusEffect effect, float duration, Vector2 point = default, byte source = byte.MaxValue)
     {
         if (!Players.IsAlive(target)) return false;
         if (IsHostile(effect) && ConsumeShield(target)) return false;
@@ -55,6 +57,7 @@ public class StatusManager : MonoBehaviour
         {
             existing.ExpiresAt = Time.time + duration;
             existing.Point = point;
+            existing.Source = source;
             if (existing.Aura != null) Object.Destroy(existing.Aura);
             existing.Aura = MakeAura(target, effect, duration);
             return true;
@@ -65,6 +68,7 @@ public class StatusManager : MonoBehaviour
             Effect = effect,
             ExpiresAt = Time.time + duration,
             Point = point,
+            Source = source,
             Aura = MakeAura(target, effect, duration),
         });
         OnBegin(target, effect);
@@ -83,6 +87,7 @@ public class StatusManager : MonoBehaviour
                 StatusEffect.Puppet        => ("SOMETHING CONTROLS YOUR BODY...", new Color(1f, 0.9f, 0.3f)),
                 StatusEffect.Blinded       => ("YOUR MEMORY FADES...", new Color(1f, 0.9f, 0.3f)),
                 StatusEffect.Pulled        => ("PULLED IN!", new Color(0.4f, 0.7f, 1f)),
+                StatusEffect.Possessed     => ("YOUR BODY MOVES ON ITS OWN...", Fx.LokiGreen),
                 _                          => ((string?)null, Color.white),
             };
             if (msg.Item1 != null) Fx.Toast(msg.Item1, msg.Item2, 1.8f, 3.4f);
@@ -114,6 +119,7 @@ public class StatusManager : MonoBehaviour
         StatusEffect.Puppet        => Fx.Aura(target.transform, Sprites.Ring, new Color(1f, 0.9f, 0.3f, 0.9f), 1.0f, duration, 90f, 0.9f),
         StatusEffect.Pulled        => Fx.Aura(target.transform, Sprites.Ring, new Color(0.3f, 0.6f, 1f, 0.8f), 0.9f, duration, -300f),
         StatusEffect.Prison        => Fx.Aura(target.transform, Sprites.Box, new Color(0.4f, 0.75f, 1f, 0.95f), 1.5f, duration, 25f, 0.2f),
+        StatusEffect.Possessed     => Fx.Aura(target.transform, Sprites.Ring, new Color(0.3f, 1f, 0.4f, 0.95f), 1.1f, duration, 260f, 0.85f),
         StatusEffect.Chained       => Fx.Aura(target.transform, Sprites.Ring, new Color(1f, 0.55f, 0.15f, 0.95f), 1.25f, duration, -120f),
         StatusEffect.Transmuted    => Fx.Aura(target.transform, Sprites.Icon("prop_crate", 300f) ?? Sprites.Box, Color.white, 1f, duration, 0f, 0.1f, false),
         _                          => null,
@@ -160,6 +166,13 @@ public class StatusManager : MonoBehaviour
         if (!_statuses.TryGetValue(target.PlayerId, out var list)) return null;
         var s = list.Find(x => x.Effect == effect && Time.time < x.ExpiresAt);
         return s?.Point;
+    }
+
+    public PlayerControl? SourceOf(PlayerControl target, StatusEffect effect)
+    {
+        if (!_statuses.TryGetValue(target.PlayerId, out var list)) return null;
+        var s = list.Find(x => x.Effect == effect && Time.time < x.ExpiresAt);
+        return s == null || s.Source == byte.MaxValue ? null : Players.ById(s.Source);
     }
 
     public void RemoveStatus(PlayerControl target, StatusEffect effect)
@@ -237,6 +250,7 @@ public class StatusManager : MonoBehaviour
         public StatusEffect Effect;
         public float ExpiresAt;
         public Vector2 Point;
+        public byte Source = byte.MaxValue;
         public GameObject? Aura;
     }
 }

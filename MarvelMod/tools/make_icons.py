@@ -590,6 +590,38 @@ def props():
     finish(img, "prop_throne", glow_col=GOLD)
 
 
+def mind_icons():
+    img = new()
+    def control(d, _):
+        crewmate(d, 512, 640, 200, GREY)
+        for x in (380, 512, 640):
+            d.line([(x, 170), (x, 470)], fill=GREEN_L, width=16)
+        horns(d, 512, 190, 90)
+    img = layer(img, control)
+    finish(img, "mind_control")
+    img = new()
+    def possess(d, _):
+        crewmate(d, 512, 560, 260, RED)
+        d.rounded_rectangle([520, 330, 720, 430], radius=50, fill=GREEN_L, outline=BLACK, width=OL)
+        d.ellipse([560, 350, 610, 410], fill=GREEN)
+        d.ellipse([640, 350, 690, 410], fill=GREEN)
+        horns(d, 512, 230, 110)
+    img = layer(img, possess)
+    finish(img, "possession", glow_col=GREEN_L)
+    img = new()
+    def sever(d, _):
+        for x in (360, 512, 664):
+            d.line([(x, 120), (x, 380)], fill=GREEN_L, width=18)
+            d.line([(x, 470), (x, 600)], fill=GREEN_L, width=18)
+        for f in (-1, 1):   # scissors
+            d.polygon([(512, 430), (512 + f * 330, 330), (512 + f * 340, 380)], fill=WHITE, outline=BLACK, width=20)
+            d.ellipse([512 + f * 120 - 70, 640, 512 + f * 120 + 70, 780], outline=BLACK, width=OL + 16)
+            d.ellipse([512 + f * 120 - 70, 640, 512 + f * 120 + 70, 780], outline=GOLD, width=OL - 4)
+            d.line([(512, 430), (512 + f * 110, 650)], fill=GOLD, width=40)
+    img = layer(img, sever)
+    finish(img, "sever_the_strings")
+
+
 if __name__ == "__main__":
     for fn in (mirror_image, phantom_squad, false_emergency, illusion_trap, hall_of_loki,
                disguise, perfect_impersonation, creature_form, identity_swap, the_other_you,
@@ -597,6 +629,6 @@ if __name__ == "__main__":
                green_bolt, binding_ribbons, mystic_shield, enchanted_dagger, asgardian_wrath,
                fake_body, mind_whisper, enchanted_witness, chaos_contract, the_grand_deception,
                switch_tab, infinite_deception, kings_last_dance, betrayal_paradox, puppet_master,
-               kneel_before_trickster, props):
+               kneel_before_trickster, props, mind_icons):
         fn()
     print("icons written to", os.path.normpath(OUT_DIR))

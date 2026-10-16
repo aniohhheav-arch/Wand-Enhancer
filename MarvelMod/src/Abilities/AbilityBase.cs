@@ -67,6 +67,9 @@ public abstract class AbilityBase
 
     private static bool PracticeModeUnlimited => ModConfig.Data.PracticeUnlimited;
 
+    /// <summary>Extra availability rule (e.g. "you have someone to sever"). Checked by the HUD and on cast.</summary>
+    public virtual bool CanUse(PlayerControl caster) => true;
+
     /// <summary>Picks the target this ability would use right now (for HUD state and casting).</summary>
     public PlayerControl? FindTarget(PlayerControl caster) =>
         Targeting is TargetMode.None or TargetMode.Menu ? null : Players.ClosestTarget(caster, Cfg.Range);
@@ -74,7 +77,7 @@ public abstract class AbilityBase
     /// <summary>Validate, then broadcast the cast to every client. Returns true on success.</summary>
     public bool TryActivate(PlayerControl? caster, PlayerControl? target = null)
     {
-        if (caster == null || !IsReady || !Players.IsAlive(caster)) return false;
+        if (caster == null || !IsReady || !Players.IsAlive(caster) || !CanUse(caster)) return false;
         if (Targeting is TargetMode.Required or TargetMode.Optional && target == null) target = FindTarget(caster);
         if (Targeting is TargetMode.Required or TargetMode.Menu && !Players.IsAlive(target)) return false;
 

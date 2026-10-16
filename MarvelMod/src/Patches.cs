@@ -14,6 +14,7 @@ public static class HudUpdatePatch
     {
         AbilityButtons.Update(__instance);
         MapTeleportInput.Update();
+        ZoomInput.Update(__instance);
     }
 }
 
@@ -37,6 +38,16 @@ public static class MovementStatusPatch
 
         Vector2 pos = pc.transform.position;
         float speed = __instance.Speed;
+        var controller = status.SourceOf(pc, StatusEffect.Possessed);
+        if (controller != null)   // Mind Control: mirror the controller's movement, keeping the same offset
+        {
+            var offset = status.PointOf(pc, StatusEffect.Possessed) ?? Vector2.zero;
+            var goal = (Vector2)controller.transform.position + offset;
+            var to = goal - pos;
+            body.velocity = to.magnitude > 0.1f ? to.normalized * Mathf.Min(speed * 1.2f, to.magnitude * 8f) : Vector2.zero;
+            return;
+        }
+
         var puppetGoal = status.PointOf(pc, StatusEffect.Puppet);
         if (puppetGoal.HasValue)   // Mind Control: the body walks on its own
         {
