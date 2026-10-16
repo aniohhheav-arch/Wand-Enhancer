@@ -58,6 +58,7 @@ public static class AbilityButtons
     private static void UpdateInner(HudManager hud)
     {
         var lp = PlayerControl.LocalPlayer;
+        CinematicDirector.Failsafe(hud);
         if (lp == null || hud.KillButton == null || _failedHud == hud) return;
 
         if (_hud != hud || !AllCreated()) Create(hud);

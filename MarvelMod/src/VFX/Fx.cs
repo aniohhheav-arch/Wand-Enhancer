@@ -228,21 +228,49 @@ public static class Fx
         return sr;
     }
 
-    /// <summary>Full-screen colour tint behind the HUD (fades in, holds, fades out). pulses > 0 makes it flash.</summary>
+    /// <summary>
+    /// A sprite glued to the world camera (between the camera and the world), re-fitted every frame so it
+    /// follows cinematic zooms. depthFraction: 0 = at the camera, 1 = at the world (smaller = drawn on top).
+    /// </summary>
+    public static SpriteRenderer? CameraOverlay(string name, float depthFraction, Color color)
+    {
+        var cam = Camera.main;
+        if (cam == null) return null;
+        var lp = PlayerControl.LocalPlayer;
+        float camZ = cam.transform.position.z;
+        float worldZ = lp != null ? lp.transform.position.z : camZ + 10f;
+        float dz = Mathf.Max(cam.nearClipPlane + 0.2f, (worldZ - camZ) * depthFraction);
+        var go = new GameObject(name) { layer = lp != null ? lp.gameObject.layer : 0 };
+        go.transform.SetParent(cam.transform, false);
+        go.transform.localPosition = new Vector3(0f, 0f, dz);
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = Sprites.Square;
+        sr.color = color;
+        sr.sortingOrder = 1000;
+        return sr;
+    }
+
+    /// <summary>Size an overlay relative to the current camera view (1,1 = whole screen).</summary>
+    public static void FitToCamera(SpriteRenderer sr, float widthFrac, float heightFrac, float yFrac = 0f)
+    {
+        var cam = Camera.main;
+        if (cam == null || sr == null) return;
+        float h = cam.orthographicSize * 2f;
+        sr.transform.localScale = new Vector3(h * cam.aspect * widthFrac, h * heightFrac, 1f);
+        var lp = sr.transform.localPosition;
+        sr.transform.localPosition = new Vector3(0f, yFrac * h * 0.5f, lp.z);
+    }
+
+    /// <summary>Full-screen colour tint over the world, under the HUD (fades in, holds, fades out).</summary>
     public static void ScreenTint(Color color, float dur, int pulses = 0)
     {
         if (!Enabled || !ModConfig.Data.VfxDistortion) return;
-        var root = ScreenLayer(0.5f, out int layer);
-        var cam = UiCamera;
-        if (root == null || cam == null) return;
-        var sr = root.gameObject.AddComponent<SpriteRenderer>();
-        sr.sprite = Sprites.Square;
-        float h = cam.orthographicSize * 2.4f;
-        root.localScale = new Vector3(h * cam.aspect, h, 1f);
+        var sr = CameraOverlay("MarvelTint", 0.6f, A(color, 0f));
+        if (sr == null) return;
         float maxA = color.a;
-        sr.color = A(color, 0f);
         Animate(sr, dur, k =>
         {
+            FitToCamera(sr, 1.3f, 1.3f);
             float env = Mathf.Min(1f, k / 0.1f) * Mathf.Min(1f, (1f - k) / 0.25f);
             if (pulses > 0) env *= Mathf.Abs(Mathf.Sin(k * Mathf.PI * pulses));
             sr.color = A(color, maxA * env);
@@ -396,32 +424,29 @@ public static class Fx
         if (ring != null) Object.Destroy(ring.gameObject);
     }
 
-    /// <summary>Cinematic black bars (local screen). Returns a handle to remove them.</summary>
+    /// <summary>Cinematic black bars on the world camera; they slide in/out and follow zoom.</summary>
     public static GameObject? Letterbox(float hold)
     {
-        var cam = UiCamera;
+        var cam = Camera.main;
         if (cam == null) return null;
         var root = new GameObject("MarvelLetterbox");
-        float h = cam.orthographicSize, w = h * cam.aspect;
+        root.transform.SetParent(cam.transform, false);
         for (int i = 0; i < 2; i++)
         {
-            var bar = ScreenSprite(Sprites.Square, Color.black, -0.6f, "MarvelBar");
+            var bar = CameraOverlay("MarvelBar", 0.35f, Color.black);
             if (bar == null) continue;
+            bar.sortingOrder = 1001;
             bar.transform.SetParent(root.transform, true);
             float sign = i == 0 ? 1f : -1f;
-            bar.transform.localScale = new Vector3(w * 2.4f, h * 0.24f, 1f);
-            var basePos = bar.transform.localPosition;
-            var target = new Vector3(cam.transform.position.x, cam.transform.position.y + sign * h * 0.9f, bar.transform.position.z);
-            var start = target + new Vector3(0f, sign * h * 0.3f, 0f);
-            bar.transform.position = start;
             Animate(bar, hold, k =>
             {
-                float inK = Mathf.Min(1f, k * hold / 0.4f);
-                float outK = Mathf.Min(1f, (1f - k) * hold / 0.4f);
-                bar.transform.position = Vector3.Lerp(start, target, Mathf.Min(inK, outK));
+                float t = k * hold;
+                float slide = Mathf.Min(1f, t / 0.4f) * Mathf.Min(1f, (hold - t) / 0.4f);   // 0 hidden .. 1 in place
+                const float barFrac = 0.13f;                                                 // of screen height
+                FitToCamera(bar, 1.4f, barFrac, sign * (1f - barFrac + barFrac * (1f - slide) * 2f));
             });
         }
-        Object.Destroy(root, hold + 0.1f);
+        Object.Destroy(root, hold + 0.2f);
         return root;
     }
 

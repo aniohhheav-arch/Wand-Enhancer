@@ -34,6 +34,11 @@ public sealed class CinematicDirector
     /// <summary>Preview mode: plays everything but nobody dies.</summary>
     public bool Preview { get; }
 
+    // remembered across instances so the failsafe can always undo a cinematic
+    private static Camera? _hiddenUiCamera;
+    private static bool _hudDeactivated;
+    private static float _savedSize;
+
     private CameraPivot? _pivot;
     private Camera? _cam;
     private float _baseSize;
@@ -60,6 +65,8 @@ public sealed class CinematicDirector
         if (hud == null || _cam == null || hud.PlayerCam == null) return;
         LocalActive = true;
         _baseSize = _cam.orthographicSize;
+        if (_savedSize <= 0f) _savedSize = _baseSize;
+        HideHud(hud, true);
         _pivot = new GameObject("MarvelCamPivot").AddComponent<CameraPivot>();
         _pivot.transform.position = victim.transform.position;
         hud.PlayerCam.SetTarget(_pivot);
@@ -187,17 +194,76 @@ public sealed class CinematicDirector
             if (Players.IsAlive(pc)) Fade(pc, 1f);
             StatusManager.Instance?.RemoveStatus(pc, StatusEffect.Rooted);
         }
-        if (_cam != null) _cam.orthographicSize = _baseSize > 0.1f ? _baseSize : _cam.orthographicSize;
+        if (_letterbox != null) Object.Destroy(_letterbox);
+        if (!Participant) return;
+        LocalActive = false;
+        if (_pivot != null) Object.Destroy(_pivot.gameObject);
+        _pivot = null;
+        RestoreLocalView();
+        // the game's own kill animation also locks the camera; restore again once it has finished
+        Reactor.Utilities.Coroutines.Start(CoRestoreLater());
+    }
+
+    private static IEnumerator CoRestoreLater()
+    {
+        for (float t = 0; t < 1.8f; t += Time.deltaTime) yield return null;
+        if (!LocalActive) RestoreLocalView();
+    }
+
+    /// <summary>Camera back on the local player, normal zoom, HUD visible.</summary>
+    private static void RestoreLocalView()
+    {
         var hud = HudManager.Instance;
         var lp = PlayerControl.LocalPlayer;
-        if (_pivot != null)
+        var cam = Camera.main;
+        if (cam != null && _savedSize > 0.1f) cam.orthographicSize = _savedSize;
+        _savedSize = 0f;
+        if (hud != null && hud.PlayerCam != null && lp != null)
         {
-            if (hud != null && hud.PlayerCam != null && lp != null) hud.PlayerCam.SetTarget(lp);
-            Object.Destroy(_pivot.gameObject);
-            _pivot = null;
+            hud.PlayerCam.Locked = false;
+            hud.PlayerCam.SetTarget(lp);
+            hud.PlayerCam.SnapToTarget();
         }
-        if (_letterbox != null) Object.Destroy(_letterbox);
-        if (Participant) LocalActive = false;
+        if (hud != null) HideHud(hud, false);
+    }
+
+    /// <summary>During a finisher only the finisher is on screen: no task bar, minimap, buttons or chat.</summary>
+    private static void HideHud(HudManager hud, bool hide)
+    {
+        if (hide)
+        {
+            var ui = hud.UICamera;
+            if (ui != null && ui != Camera.main)
+            {
+                ui.enabled = false;
+                _hiddenUiCamera = ui;
+            }
+            else
+            {
+                hud.SetHudActive(false);
+                _hudDeactivated = true;
+            }
+            return;
+        }
+        if (_hiddenUiCamera != null) _hiddenUiCamera.enabled = true;
+        _hiddenUiCamera = null;
+        if (_hudDeactivated && MeetingHud.Instance == null) hud.SetHudActive(true);
+        _hudDeactivated = false;
+    }
+
+    /// <summary>
+    /// Called every frame: if no finisher is running but its effects are still applied (camera on a
+    /// destroyed pivot, HUD hidden, zoom changed), undo them.
+    /// </summary>
+    public static void Failsafe(HudManager hud)
+    {
+        if (LocalActive) return;
+        bool hudHidden = (_hiddenUiCamera != null && !_hiddenUiCamera.enabled) || _hudDeactivated;
+        var pc = hud.PlayerCam;
+        bool lostTarget = pc != null && PlayerControl.LocalPlayer != null && MeetingHud.Instance == null
+                          && ExileController.Instance == null
+                          && (pc.Target == null || pc.Target.TryCast<CameraPivot>() != null);
+        if (hudHidden || lostTarget || _savedSize > 0.1f) RestoreLocalView();
     }
 
     /// <summary>Runs a finisher body with guaranteed End().</summary>
