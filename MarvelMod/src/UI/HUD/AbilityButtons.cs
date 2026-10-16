@@ -64,7 +64,7 @@ public static class AbilityButtons
         if (_hud != hud || !AllCreated()) Create(hud);
 
         CharacterRegistry.UpdateLocal(lp);
-        if (CharacterRegistry.InLobby) Abilities.Loki.Thralls.Clear();
+        if (CharacterRegistry.InLobby) Abilities.Loki.Employees.Clear();
         if (_character != CharacterRegistry.Local)
         {
             _character = CharacterRegistry.Local;
@@ -86,7 +86,7 @@ public static class AbilityButtons
         }
 
         EnsureTabUnlocked(lp);
-        var key = $"{_character!.Id}:{_tab}";
+        var key = $"{_character!.Id}:{_tab}:{CurrentTab()?.Name}";
         if (_shownKey != key) RefreshTab(key);
         Layout(hud);
         UpdateStates(lp);
@@ -137,8 +137,16 @@ public static class AbilityButtons
         _failedHud = null;
     }
 
-    private static List<AbilityBase> Slots() =>
-        _character == null ? new List<AbilityBase>() : _character.Tabs[_tab].Abilities;
+    /// <summary>The page on screen: an override (e.g. possessing) or the selected tab.</summary>
+    private static AbilityTab? CurrentTab()
+    {
+        if (_character == null) return null;
+        var lp = PlayerControl.LocalPlayer;
+        return (lp != null ? _character.OverrideTab(lp) : null) ?? _character.Tabs[_tab];
+    }
+
+    private static List<AbilityBase> Slots() => CurrentTab()?.Abilities ?? new List<AbilityBase>();
+    private static readonly string[] _labels = new string[AbilitySlots];
 
     private static void RefreshTab(string key)
     {
@@ -151,16 +159,17 @@ public static class AbilityButtons
             if (i < slots.Count)
             {
                 SetIcon(b, slots[i].Id);
-                b.OverrideText(slots[i].Label);
+                b.OverrideText(_labels[i] = slots[i].Label);
             }
-            else b.OverrideText("");
+            else b.OverrideText(_labels[i] = "");
         }
 
         var sw = Buttons[SwitchSlot];
         if (sw != null && _character != null)
         {
-            SetIcon(sw, _character.Tabs[_tab].IconId);
-            sw.OverrideText(_character.Tabs[_tab].Name);
+            var tab = CurrentTab()!;
+            SetIcon(sw, tab.IconId);
+            sw.OverrideText(tab.Name);
             sw.SetCoolDown(0f, 1f);
             sw.SetEnabled();
         }
@@ -226,8 +235,9 @@ public static class AbilityButtons
         }
 
         if (!_visible || _character == null) return;
-        if (Input.GetKeyDown(KeyCode.Q)) CycleTab(lp, -1);
-        if (Input.GetKeyDown(KeyCode.E)) CycleTab(lp, +1);
+        bool locked = _character.OverrideTab(lp) != null;
+        if (!locked && Input.GetKeyDown(KeyCode.Q)) CycleTab(lp, -1);
+        if (!locked && Input.GetKeyDown(KeyCode.E)) CycleTab(lp, +1);
         for (int i = 0; i < AbilitySlots; i++)
             if (Input.GetKeyDown(SlotKeys[i])) OnClick(i);
     }
@@ -314,6 +324,8 @@ public static class AbilityButtons
             if (i >= slots.Count) { b.SetCoolDown(0f, 1f); b.SetDisabled(); continue; }
 
             var a = slots[i];
+            var label = a.Label;   // some labels are live (e.g. BETRAY (2))
+            if (_labels[i] != label) b.OverrideText(_labels[i] = label);
             b.SetCoolDown(a.CooldownRemaining, Mathf.Max(0.01f, a.Cfg.Cooldown));
 
             var target = a.FindTarget(lp);
@@ -349,7 +361,7 @@ public static class AbilityButtons
 
         if (slot == SwitchSlot)
         {
-            CycleTab(lp, +1);
+            if (_character.OverrideTab(lp) == null) CycleTab(lp, +1);
             return;
         }
 

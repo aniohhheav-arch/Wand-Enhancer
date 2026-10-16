@@ -44,6 +44,9 @@ public abstract class CharacterDef
         foreach (var a in Hidden) yield return a;
     }
 
+    /// <summary>A page that temporarily replaces the normal tabs (e.g. while possessing someone).</summary>
+    public virtual AbilityTab? OverrideTab(PlayerControl lp) => null;
+
     /// <summary>Per-frame hook for the local player playing this character.</summary>
     public virtual void LocalUpdate(PlayerControl lp, HudManager hud) { }
     /// <summary>Called when the local player becomes / stops being this character.</summary>

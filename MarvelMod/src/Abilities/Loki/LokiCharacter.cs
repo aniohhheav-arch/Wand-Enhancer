@@ -18,6 +18,9 @@ public class LokiCharacter : CharacterDef
     public readonly List<AbilityBase> GodOfMischief;
     public readonly List<AbilityBase> Executions;
     public readonly List<AbilityBase> Mind;
+    /// <summary>Buttons that replace the bar while you're inside someone (see OverrideTab).</summary>
+    public readonly List<AbilityBase> Possessing;
+    private AbilityTab? _possessTab;
     public readonly MapTeleport MapTeleport = new();
 
     private LokiCharacter()
@@ -54,7 +57,8 @@ public class LokiCharacter : CharacterDef
             new PuppetMaster(), new KneelBeforeTheTrickster(),
         };
 
-        Mind = new List<AbilityBase> { new MindControl(), new Possession(), new SeverTheStrings() };
+        Mind = new List<AbilityBase> { new Possession(), new LokiContract(), new UltimateBetrayal() };
+        Possessing = new List<AbilityBase> { new PossessStop(), new PossessFrameKill(), new PossessKillHost() };
 
         All = new List<AbilityBase>();
         All.AddRange(IllusionMagic);
@@ -64,6 +68,7 @@ public class LokiCharacter : CharacterDef
         All.AddRange(GodOfMischief);
         All.AddRange(Executions);
         All.AddRange(Mind);
+        All.AddRange(Possessing);
         All.Add(MapTeleport);
     }
 
@@ -83,7 +88,17 @@ public class LokiCharacter : CharacterDef
         new("FINISHERS",  "infinite_deception",         Executions, _ => !CharacterRegistry.InLobby),
     };
 
-    public override IEnumerable<AbilityBase> Hidden => new[] { MapTeleport };
+    public override IEnumerable<AbilityBase> Hidden
+    {
+        get
+        {
+            yield return MapTeleport;
+            foreach (var a in Possessing) yield return a;
+        }
+    }
+
+    public override AbilityTab? OverrideTab(PlayerControl lp) =>
+        Possessions.IsPossessing(lp) ? _possessTab ??= new AbilityTab("POSSESSING", "possession", Possessing) : null;
 
     public AbilityBase? GetById(string id)
     {

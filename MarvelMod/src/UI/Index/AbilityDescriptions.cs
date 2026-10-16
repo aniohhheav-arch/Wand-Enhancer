@@ -44,9 +44,12 @@ public static class AbilityDescriptions
         ["puppet_master"]      = "KILL. Glowing threads lift them like a marionette; they turn into a wooden puppet you pocket.",
         ["kneel_before_trickster"] = "ULTIMATE KILL. A throne room full of kneeling Lokis folds into a tiny cube you flick away.",
         // ── Mind ──
-        ["mind_control"]   = "Opens the player menu. For a few seconds that player's body copies every step you take (they can't steer).",
-        ["possession"]     = "Opens the player menu. That crewmate secretly becomes an IMPOSTOR (they get a kill button). They aren't told you can end them.",
-        ["sever_the_strings"] = "KILL. Instantly kills every player you have possessed, wherever they are on the map.",
+        ["possession"]     = "Opens the player menu. You jump into that crewmate: you see through their eyes and move their body (your real body stays behind as a statue). While possessing, the buttons become STOP / FRAME KILL / KILL HOST. Can't possess impostors or your employees.",
+        ["loki_contract"]  = "Opens the player menu. That crewmate becomes an IMPOSTOR employee who can do whatever they like. They don't know you can end them.",
+        ["ultimate_betrayal"] = "KILL. Only works while you have employees alive (the number is shown on the button). Kills all of them, wherever they are on the map.",
+        ["possess_stop"]   = "(While possessing) Leave the body and return to your own.",
+        ["possess_frame"]  = "(While possessing) The body you control kills the nearest crewmate. It's THEIR kill, not yours.",
+        ["possess_kill"]   = "(While possessing) Kill the body you're possessing, then return to your own.",
         // ── Hidden ──
         ["map_teleport"]   = "Open the map and left-click anywhere to teleport there. No cooldown.",
     };

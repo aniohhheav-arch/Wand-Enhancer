@@ -52,9 +52,12 @@ public static class DefaultAbilities
         ["kneel_before_trickster"]= new() { Cooldown=75, Duration=0, Range=3f },
 
         // ── Mind ────────────────────────────────────────────────────────
-        ["mind_control"]          = new() { Cooldown=30, Duration=8 },
-        ["possession"]            = new() { Cooldown=60 },
-        ["sever_the_strings"]     = new() { Cooldown=10 },
+        ["possession"]            = new() { Cooldown=45, Duration=20 },
+        ["loki_contract"]         = new() { Cooldown=60 },
+        ["ultimate_betrayal"]     = new() { Cooldown=20 },
+        ["possess_stop"]          = new() { Cooldown=0 },
+        ["possess_frame"]         = new() { Cooldown=0, Range=2f },
+        ["possess_kill"]          = new() { Cooldown=0 },
 
         // ── Hidden ──────────────────────────────────────────────────────
         ["map_teleport"]          = new() { Cooldown=0 },

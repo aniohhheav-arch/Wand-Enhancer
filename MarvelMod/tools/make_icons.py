@@ -598,7 +598,7 @@ def mind_icons():
             d.line([(x, 170), (x, 470)], fill=GREEN_L, width=16)
         horns(d, 512, 190, 90)
     img = layer(img, control)
-    finish(img, "mind_control")
+    finish(img, "possess_stop")
     img = new()
     def possess(d, _):
         crewmate(d, 512, 560, 260, RED)
@@ -619,7 +619,7 @@ def mind_icons():
             d.ellipse([512 + f * 120 - 70, 640, 512 + f * 120 + 70, 780], outline=GOLD, width=OL - 4)
             d.line([(512, 430), (512 + f * 110, 650)], fill=GOLD, width=40)
     img = layer(img, sever)
-    finish(img, "sever_the_strings")
+    finish(img, "ultimate_betrayal")
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ public static class HudUpdatePatch
         AbilityButtons.Update(__instance);
         MapTeleportInput.Update();
         ZoomInput.Update(__instance);
+        Abilities.Loki.Possessions.Tick();
     }
 }
 
@@ -76,6 +77,7 @@ public static class MeetingCleanupPatch
 {
     public static void Postfix()
     {
+        Abilities.Loki.Possessions.EndAll();
         IllusionManager.Instance?.DespawnAll();
         ShapeshiftManager.Instance?.RestoreAll();
         StatusManager.Instance?.ClearAll();

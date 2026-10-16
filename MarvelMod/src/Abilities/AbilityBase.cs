@@ -70,6 +70,9 @@ public abstract class AbilityBase
     /// <summary>Extra availability rule (e.g. "you have someone to sever"). Checked by the HUD and on cast.</summary>
     public virtual bool CanUse(PlayerControl caster) => true;
 
+    /// <summary>Extra rule for the chosen target (menu picks). Show your own message when refusing.</summary>
+    public virtual bool IsValidTarget(PlayerControl caster, PlayerControl target) => true;
+
     /// <summary>Picks the target this ability would use right now (for HUD state and casting).</summary>
     public PlayerControl? FindTarget(PlayerControl caster) =>
         Targeting is TargetMode.None or TargetMode.Menu ? null : Players.ClosestTarget(caster, Cfg.Range);
@@ -80,6 +83,7 @@ public abstract class AbilityBase
         if (caster == null || !IsReady || !Players.IsAlive(caster) || !CanUse(caster)) return false;
         if (Targeting is TargetMode.Required or TargetMode.Optional && target == null) target = FindTarget(caster);
         if (Targeting is TargetMode.Required or TargetMode.Menu && !Players.IsAlive(target)) return false;
+        if (target != null && !IsValidTarget(caster, target)) return false;
 
         Vector2 point = caster.transform.position;
         Prepare(caster, ref target, ref point);
