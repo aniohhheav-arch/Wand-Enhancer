@@ -1,4 +1,3 @@
 bin/
 obj/
-GameLibs2/
-GameLibs/*.pdb
+interop/

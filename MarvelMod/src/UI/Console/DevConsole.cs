@@ -1,3 +1,4 @@
+using Reactor.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,11 @@ namespace MarvelMod.UI.Console;
 /// Live developer console.  Open with F6 (configurable).
 /// Validates all input — never executes OS commands or arbitrary code.
 /// </summary>
+[RegisterInIl2Cpp]
 public class DevConsole : MonoBehaviour
 {
+    public DevConsole(IntPtr ptr) : base(ptr) { }
+
     private bool   _open;
     private string _input       = "";
     private string _lastOutput  = "";
@@ -24,7 +28,7 @@ public class DevConsole : MonoBehaviour
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
-    private void Update()
+    public void Update()
     {
         var key = ModConfig.Data.ConsoleKey;
         bool toggle = key switch
@@ -39,7 +43,7 @@ public class DevConsole : MonoBehaviour
         if (toggle) _open = !_open;
     }
 
-    private void OnGUI()
+    public void OnGUI()
     {
         if (!_open) return;
         DrawConsole();

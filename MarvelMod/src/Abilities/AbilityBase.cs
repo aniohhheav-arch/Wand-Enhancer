@@ -30,6 +30,8 @@ public abstract class AbilityBase
     {
         if (!IsReady) return false;
         if (!Cfg.Enabled) return false;
+        // Must be in an active game session (or practice mode)
+        if (caster == null) return false;
 
         try
         {

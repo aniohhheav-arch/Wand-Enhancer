@@ -1,3 +1,5 @@
+using Reactor.Utilities.Attributes;
+using System;
 using System.Collections.Generic;
 using MarvelMod.Characters;
 using MarvelMod.Config;
@@ -9,15 +11,18 @@ namespace MarvelMod.Practice;
 /// Sandbox manager for Practice Mode.
 /// Spawns dummy crewmates, logs ability results, tracks dummy HP.
 /// </summary>
+[RegisterInIl2Cpp]
 public class PracticeModeManager : MonoBehaviour
 {
+    public PracticeModeManager(IntPtr ptr) : base(ptr) { }
+
     public static PracticeModeManager? Instance { get; private set; }
 
     private readonly List<DummyCrewmate> _dummies    = new();
     private readonly List<string>        _testLog    = new();
     public  IReadOnlyList<string>        TestLogLines => _testLog;
 
-    private void Awake() => Instance = this;
+    public void Awake() => Instance = this;
 
     // ── Dummy management ──────────────────────────────────────────────────────
 
@@ -85,8 +90,11 @@ public class PracticeModeManager : MonoBehaviour
     }
 }
 
+[RegisterInIl2Cpp]
 public class DummyCrewmate : MonoBehaviour
 {
+    public DummyCrewmate(IntPtr ptr) : base(ptr) { }
+
     public string DummyName { get; private set; } = "Dummy";
     public float  HP        { get; set; }         = 100f;
     public bool   Invincible{ get; set; }         = false;

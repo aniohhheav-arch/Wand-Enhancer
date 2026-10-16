@@ -1,3 +1,5 @@
+using Reactor.Utilities.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,13 +11,16 @@ namespace MarvelMod.Characters;
 /// IMPORTANT: Never touches PlayerControl.Data.Role, task completion, or server-side state.
 /// All changes are local cosmetic overrides only.
 /// </summary>
+[RegisterInIl2Cpp]
 public class ShapeshiftManager : MonoBehaviour
 {
+    public ShapeshiftManager(IntPtr ptr) : base(ptr) { }
+
     public static ShapeshiftManager? Instance { get; private set; }
 
     private readonly Dictionary<byte, ShapeshiftState> _active = new();
 
-    private void Awake() => Instance = this;
+    public void Awake() => Instance = this;
 
     public void Shapeshift(PlayerControl source, PlayerControl target, float duration, bool copyNameplate = false)
     {
@@ -72,7 +77,7 @@ public class ShapeshiftManager : MonoBehaviour
         sOutfit.ColorId = tOutfit.ColorId;
         if (copyNameplate && source.Data != null)
             source.Data.PlayerName = $"[~]{target.Data?.PlayerName}"; // marked fake
-        source.UpdateFromPlayerData(source.Data!, PlayerOutfitType.Default, false, true);
+        source.RawSetOutfit(source.Data!.Outfits[PlayerOutfitType.Default], PlayerOutfitType.Default);
     }
 
     private void RestoreAppearance(PlayerControl source, ShapeshiftState state)
@@ -88,10 +93,10 @@ public class ShapeshiftManager : MonoBehaviour
             source.Data.PlayerName = state.OriginalName;
         if (state.IsCreature)
             source.transform.localScale = Vector3.one;
-        source.UpdateFromPlayerData(source.Data!, PlayerOutfitType.Default, false, true);
+        source.RawSetOutfit(source.Data!.Outfits[PlayerOutfitType.Default], PlayerOutfitType.Default);
     }
 
-    private void Update()
+    public void Update()
     {
         var now = Time.realtimeSinceStartup;
         var toRestore = new List<byte>();

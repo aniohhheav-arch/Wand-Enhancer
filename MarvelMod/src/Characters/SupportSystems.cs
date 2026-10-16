@@ -1,3 +1,6 @@
+using Reactor.Utilities.Attributes;
+using System;
+using Reactor.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,11 +14,14 @@ namespace MarvelMod.Characters;
 public enum StatusEffect { Bound, Stunned, Shielded, ChaosContract, Invisible }
 public enum DamageType   { Melee, Magical, Projectile }
 
+[RegisterInIl2Cpp]
 public class StatusManager : MonoBehaviour
 {
+    public StatusManager(IntPtr ptr) : base(ptr) { }
+
     public static StatusManager? Instance { get; private set; }
     private readonly Dictionary<byte, List<ActiveStatus>> _statuses = new();
-    private void Awake() => Instance = this;
+    public void Awake() => Instance = this;
 
     public void ApplyStatus(PlayerControl target, StatusEffect effect, float duration)
     {
@@ -33,7 +39,7 @@ public class StatusManager : MonoBehaviour
         return list.Exists(s => s.Effect == effect && Time.realtimeSinceStartup < s.ExpiresAt);
     }
 
-    private void Update()
+    public void Update()
     {
         float now = Time.realtimeSinceStartup;
         foreach (var kv in _statuses)
@@ -49,10 +55,13 @@ public class StatusManager : MonoBehaviour
     private class ActiveStatus { public StatusEffect Effect; public float ExpiresAt; }
 }
 
+[RegisterInIl2Cpp]
 public class DamageSystem : MonoBehaviour
 {
+    public DamageSystem(IntPtr ptr) : base(ptr) { }
+
     public static DamageSystem? Instance { get; private set; }
-    private void Awake() => Instance = this;
+    public void Awake() => Instance = this;
 
     public void ApplyDamage(PlayerControl target, float amount, DamageType type)
     {
@@ -62,10 +71,13 @@ public class DamageSystem : MonoBehaviour
     }
 }
 
+[RegisterInIl2Cpp]
 public class InvisibilityManager : MonoBehaviour
 {
+    public InvisibilityManager(IntPtr ptr) : base(ptr) { }
+
     public static InvisibilityManager? Instance { get; private set; }
-    private void Awake() => Instance = this;
+    public void Awake() => Instance = this;
 
     public void ApplyInvisibility(PlayerControl target, float duration)
     {
@@ -75,8 +87,7 @@ public class InvisibilityManager : MonoBehaviour
             var c = renderer.color;
             renderer.color = new Color(c.r, c.g, c.b, 0.15f);
         }
-        UnityEngine.Object.FindObjectOfType<MonoBehaviour>()
-            ?.StartCoroutine(RestoreAfter(target, duration));
+        Coroutines.Start(RestoreAfter(target, duration));
     }
 
     private static System.Collections.IEnumerator RestoreAfter(PlayerControl target, float duration)
@@ -131,10 +142,13 @@ public static class MapSpawnPoints
     }
 }
 
+[RegisterInIl2Cpp]
 public class ProjectileManager : MonoBehaviour
 {
+    public ProjectileManager(IntPtr ptr) : base(ptr) { }
+
     public static ProjectileManager? Instance { get; private set; }
-    private void Awake() => Instance = this;
+    public void Awake() => Instance = this;
 
     public void FireProjectile(PlayerControl source, Vector2 dir, float range, float damage, ProjectileType type)
     {

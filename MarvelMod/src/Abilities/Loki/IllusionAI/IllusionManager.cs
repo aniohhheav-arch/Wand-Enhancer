@@ -1,3 +1,6 @@
+using Reactor.Utilities.Attributes;
+using System;
+using Random = UnityEngine.Random;
 using System.Collections.Generic;
 using MarvelMod.Config;
 using UnityEngine;
@@ -7,13 +10,16 @@ namespace MarvelMod.Characters;
 public enum IllusionBehavior { Idle, Wander, Follow, Task, Random }
 
 /// <summary>Manages all active illusion instances. Never modifies real player state.</summary>
+[RegisterInIl2Cpp]
 public class IllusionManager : MonoBehaviour
 {
+    public IllusionManager(IntPtr ptr) : base(ptr) { }
+
     public static IllusionManager? Instance { get; private set; }
 
     private readonly List<LokiIllusion> _active = new();
 
-    private void Awake() => Instance = this;
+    public void Awake() => Instance = this;
 
     public LokiIllusion SpawnIllusion(PlayerControl template, Vector3 position)
     {
@@ -43,15 +49,18 @@ public class IllusionManager : MonoBehaviour
 
     public int ActiveCount => _active.Count;
 
-    private void Update()
+    public void Update()
     {
         _active.RemoveAll(i => i == null || !i.gameObject.activeSelf);
     }
 }
 
 /// <summary>A single Loki illusion with its own AI profile.</summary>
+[RegisterInIl2Cpp]
 public class LokiIllusion : MonoBehaviour
 {
+    public LokiIllusion(IntPtr ptr) : base(ptr) { }
+
     public float Lifetime { get; set; } = 30f;
     public IllusionBehavior Behavior { get; private set; } = IllusionBehavior.Wander;
     
@@ -77,7 +86,7 @@ public class LokiIllusion : MonoBehaviour
         _behaviorTimer = 0f;
     }
 
-    private void Update()
+    public void Update()
     {
         if (Time.realtimeSinceStartup - _spawnTime > Lifetime)
         {

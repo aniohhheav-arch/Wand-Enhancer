@@ -1,3 +1,5 @@
+using Reactor.Utilities.Attributes;
+using System;
 using System.Collections.Generic;
 using MarvelMod.Abilities;
 using MarvelMod.Characters;
@@ -12,8 +14,11 @@ namespace MarvelMod.UI.HUD;
 // Switch category: Q / E  or click the tab.
 // ─────────────────────────────────────────────────────────────────────────────
 
+[RegisterInIl2Cpp]
 public class AbilityHud : MonoBehaviour
 {
+    public AbilityHud(IntPtr ptr) : base(ptr) { }
+
     public static AbilityHud? Instance { get; private set; }
 
     // ── sizing ────────────────────────────────────────────────────────────────
@@ -52,13 +57,13 @@ public class AbilityHud : MonoBehaviour
     private GUIStyle? _styleCooldown;
     private bool      _stylesBuilt;
 
-    void Awake()
+    public void Awake()
     {
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    void Update()
+    public void Update()
     {
         if (Input.GetKeyDown(KeyToggle))
             _visible = !_visible;
@@ -78,7 +83,7 @@ public class AbilityHud : MonoBehaviour
         }
     }
 
-    void OnGUI()
+    public void OnGUI()
     {
         if (!_visible) return;
         if (!ModConfig.Data.HudEnabled) return;
@@ -159,7 +164,7 @@ public class AbilityHud : MonoBehaviour
     // ── style factory (built once after first OnGUI) ─────────────────────────
     private void BuildStyles()
     {
-        if (_stylesBuilt) return;
+        if (_stylesBuilt && _stylePanel!.normal.background != null) return;
         _stylesBuilt = true;
 
         var panelTex  = MakeTex(1, 1, new Color(0.04f, 0.04f, 0.08f, 0.88f));
@@ -190,14 +195,14 @@ public class AbilityHud : MonoBehaviour
             normal   = { background = rdyTex,  textColor = new Color(0.5f,1f,0.6f) },
             hover    = { background = tabActTex, textColor = Color.white },
             fontSize = 9, alignment = TextAnchor.LowerLeft,
-            padding  = new RectOffset(4,4,2,2),
+            padding  = new RectOffset { left = 4, right = 4, top = 2, bottom = 2 },
         };
         _styleSlotCD = new GUIStyle(GUI.skin.button)
         {
             normal   = { background = cdTex,   textColor = new Color(0.5f,0.5f,0.5f) },
             hover    = { background = slotTex, textColor = new Color(0.7f,0.7f,0.7f) },
             fontSize = 9, alignment = TextAnchor.LowerLeft,
-            padding  = new RectOffset(4,4,2,2),
+            padding  = new RectOffset { left = 4, right = 4, top = 2, bottom = 2 },
         };
 
         _styleSlot = new GUIStyle(GUI.skin.label)
@@ -225,7 +230,8 @@ public class AbilityHud : MonoBehaviour
 
     private static Texture2D MakeTex(int w, int h, Color c)
     {
-        var t = new Texture2D(w, h);
+        // Without DontSave flags Unity unloads these on scene change and the buttons turn invisible.
+        var t = new Texture2D(w, h) { hideFlags = HideFlags.HideAndDontSave };
         t.SetPixel(0, 0, c);
         t.Apply();
         return t;

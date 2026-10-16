@@ -1,3 +1,4 @@
+using Reactor.Utilities;
 using System;
 using System.Collections;
 using MarvelMod.Config;
@@ -20,8 +21,7 @@ public static class CinematicPlayer
             onComplete();
             return;
         }
-        var host = UnityEngine.Object.FindObjectOfType<MonoBehaviour>();
-        host?.StartCoroutine(RunCinematic(type, caster, cfg.CinematicDur, onComplete));
+        Coroutines.Start(RunCinematic(type, caster, cfg.CinematicDur, onComplete));
     }
 
     private static IEnumerator RunCinematic(CinematicType type, PlayerControl caster, float dur, Action onComplete)

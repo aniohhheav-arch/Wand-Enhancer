@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using BepInEx;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace MarvelMod.Config;
 
@@ -10,6 +10,9 @@ public static class ModConfig
 {
     private static readonly string ConfigPath =
         Path.Combine(Paths.ConfigPath, "MarvelMod", "config.json");
+
+    // System.Text.Json: Newtonsoft.Json resolves to the game's IL2CPP copy, which cannot serialize managed types.
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     public static ConfigData Data { get; private set; } = new();
 
@@ -20,7 +23,7 @@ public static class ModConfig
             if (File.Exists(ConfigPath))
             {
                 var json = File.ReadAllText(ConfigPath);
-                Data = JsonConvert.DeserializeObject<ConfigData>(json) ?? new ConfigData();
+                Data = JsonSerializer.Deserialize<ConfigData>(json, JsonOptions) ?? new ConfigData();
             }
         }
         catch (Exception e)
@@ -34,7 +37,7 @@ public static class ModConfig
     public static void Save()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
-        File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(Data, Formatting.Indented));
+        File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Data, JsonOptions));
     }
 
     public static void Reset()

@@ -4,25 +4,35 @@
     <AssemblyName>MarvelMod</AssemblyName>
     <RootNamespace>MarvelMod</RootNamespace>
     <Nullable>enable</Nullable>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GameLibsPath Condition="'$(GameLibsPath)'==''">$(MSBuildThisFileDirectory)GameLibs</GameLibsPath>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
-  <!-- Exclude stub sub-projects from main compile -->
+  <!--
+    Real game reference assemblies (IL2CPP interop for the Steam build).
+    Do NOT replace these with hand-written stubs: a mod compiled against fake
+    UnityEngine/Among Us types fails to load in-game (TypeLoadException,
+    MissingMethodException) and none of its UI shows up.
+    Bump the version to match the Among Us build you play on.
+  -->
   <ItemGroup>
-    <Compile Remove="GameLibsStub/**" />
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.735" PrivateAssets="all" />
+    <PackageReference Include="Reactor" Version="2.3.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.679" />
-    <PackageReference Include="BepInEx.Core"          Version="6.0.0-be.679" />
-    <PackageReference Include="Reactor"               Version="2.3.0" />
-    <PackageReference Include="Newtonsoft.Json"        Version="13.0.3" />
+  <!-- Default: generate interop assemblies from the published game libs at build time. -->
+  <ItemGroup Condition="'$(InteropDir)' == ''">
+    <PackageReference Include="AmongUs.GameLibs.Steam" Version="2026.9.29" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
-  <!-- Game assemblies: single merged stub (real types from IL2CPP interop on first run) -->
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp"><HintPath>GameLibs2/Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+  <!--
+    Offline alternative: point at an existing interop folder, e.g. the one BepInEx
+    creates in your game install after the first launch:
+      dotnet build -c Release -p:InteropDir="C:\Program Files (x86)\Steam\steamapps\common\Among Us\BepInEx\interop"
+  -->
+  <ItemGroup Condition="'$(InteropDir)' != ''">
+    <Reference Include="$(InteropDir)/*.dll" Private="false" />
   </ItemGroup>
 </Project>

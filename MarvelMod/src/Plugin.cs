@@ -4,6 +4,7 @@ using HarmonyLib;
 using MarvelMod.Config;
 using MarvelMod.Practice;
 using MarvelMod.UI.Console;
+using MarvelMod.UI.HUD;
 using Reactor;
 
 namespace MarvelMod;
@@ -26,6 +27,7 @@ public class MarvelModPlugin : BasePlugin
 
         AddComponent<PracticeModeManager>();
         AddComponent<DevConsole>();
+        AddComponent<AbilityHud>();
         AddComponent<MarvelMod.Characters.IllusionManager>();
         AddComponent<MarvelMod.Characters.ShapeshiftManager>();
         AddComponent<MarvelMod.Characters.StatusManager>();

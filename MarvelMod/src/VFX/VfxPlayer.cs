@@ -1,3 +1,7 @@
+using Reactor.Utilities.Attributes;
+using System;
+using Object = UnityEngine.Object;
+using Reactor.Utilities;
 using MarvelMod.Config;
 using UnityEngine;
 
@@ -46,14 +50,14 @@ public static class VfxPlayer
         go.transform.position = pos;
         var ps = go.AddComponent<ParticleSystem>();
         var main = ps.main;
-        main.startLifetime = 0.8f * intensity;
-        main.startSpeed    = 3f * intensity;
-        main.startSize     = 0.3f * intensity;
+        main.startLifetimeMultiplier = 0.8f * intensity;
+        main.startSpeedMultiplier    = 3f * intensity;
+        main.startSizeMultiplier     = 0.3f * intensity;
         main.startColor    = GetColor(type);
         main.maxParticles  = Mathf.RoundToInt(30 * intensity);
         var emission = ps.emission;
         emission.rateOverTime = 0;
-        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)(20 * intensity)) });
+        ps.Emit(Mathf.RoundToInt(20 * intensity));
 
         if (ModConfig.Data.VfxScreenShake && type is VfxType.LokiUltimate or VfxType.LokiDaggerStorm)
             ScreenShake.Trigger(0.3f, 0.4f);
@@ -102,8 +106,11 @@ public static class ScreenShake
     }
 }
 
+[RegisterInIl2Cpp]
 public class CameraShaker : MonoBehaviour
 {
+    public CameraShaker(IntPtr ptr) : base(ptr) { }
+
     private float _mag, _dur, _elapsed;
     private Vector3 _origin;
 
@@ -113,7 +120,7 @@ public class CameraShaker : MonoBehaviour
         _origin = transform.localPosition;
     }
 
-    private void Update()
+    public void Update()
     {
         if (_elapsed >= _dur) { transform.localPosition = _origin; return; }
         _elapsed += Time.deltaTime;
@@ -128,8 +135,7 @@ public static class ScreenDistortion
     {
         // Local-client visual distortion: scale wobble
         if (target != PlayerControl.LocalPlayer) return;
-        var mono = Object.FindObjectOfType<MonoBehaviour>();
-        mono?.StartCoroutine(Wobble(target, duration));
+        Coroutines.Start(Wobble(target, duration));
     }
 
     public static void ShowGhostPlayer(PlayerControl viewer, PlayerControl witnessed, Vector3 pos, float duration)
@@ -167,6 +173,6 @@ public static class HudMessageBroadcaster
         // Display via Among Us HUD notification system
         var hud = HudManager.Instance;
         if (hud == null) return;
-        hud.Notifier?.AddItem(msg);
+        hud.Notifier?.AddDisconnectMessage(msg);
     }
 }
