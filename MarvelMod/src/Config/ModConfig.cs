@@ -14,6 +14,8 @@ public static class ModConfig
     // System.Text.Json: Newtonsoft.Json resolves to the game's IL2CPP copy, which cannot serialize managed types.
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
+    private const int CurrentConfigVersion = 2;
+
     public static ConfigData Data { get; private set; } = new();
 
     public static void Load()
@@ -30,6 +32,14 @@ public static class ModConfig
         {
             BepInEx.Logging.Logger.CreateLogSource("MarvelMod").LogWarning($"Config load failed: {e.Message}");
             Data = new ConfigData();
+        }
+        if (Data.ConfigVersion < CurrentConfigVersion)
+        {
+            // ability tuning changed (ranges are now in world units) — drop old values
+            Data.Abilities.Clear();
+            Data.ConfigVersion = CurrentConfigVersion;
+            EnsureDefaults();
+            Save();
         }
         EnsureDefaults();
     }
@@ -72,6 +82,7 @@ public static class ModConfig
 
 public class ConfigData
 {
+    public int     ConfigVersion    { get; set; } = 0;
     public string  ActiveCharacter  { get; set; } = "loki";
     public bool    VfxEnabled       { get; set; } = true;
     public int     VfxIntensity     { get; set; } = 100;
@@ -89,7 +100,7 @@ public class ConfigData
     // Loki illusion settings
     public int     IllusionCount    { get; set; } = 3;
     public string  IllusionBehavior { get; set; } = "wander";
-    public float   IllusionSpeed    { get; set; } = 1.5f;
+    public float   IllusionSpeed    { get; set; } = 2.2f;
     public float   IllusionLifetime { get; set; } = 30f;
     public bool    IllusionNameplates{ get; set; } = true;
     public bool    IllusionIndependentAI{ get; set; } = true;

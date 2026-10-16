@@ -17,6 +17,7 @@ public class PracticeModeManager : MonoBehaviour
     public PracticeModeManager(IntPtr ptr) : base(ptr) { }
 
     public static PracticeModeManager? Instance { get; private set; }
+    private static readonly BepInEx.Logging.ManualLogSource Log = BepInEx.Logging.Logger.CreateLogSource("MarvelMod.Practice");
 
     private readonly List<DummyCrewmate> _dummies    = new();
     private readonly List<string>        _testLog    = new();
@@ -31,7 +32,7 @@ public class PracticeModeManager : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             var go = new GameObject($"Dummy_{_dummies.Count}");
-            go.transform.position = MapSpawnPoints.GetRandom(1)[0] + Vector3.right * i;
+            go.transform.position = (PlayerControl.LocalPlayer != null ? PlayerControl.LocalPlayer.transform.position : Vector3.zero) + Vector3.right * (i + 1);
             var dummy = go.AddComponent<DummyCrewmate>();
             dummy.Init($"Dummy {_dummies.Count + 1}");
             _dummies.Add(dummy);
@@ -72,7 +73,7 @@ public class PracticeModeManager : MonoBehaviour
         var entry = $"[{System.DateTime.Now:HH:mm:ss}] {msg}";
         _testLog.Add(entry);
         if (_testLog.Count > 200) _testLog.RemoveAt(0);
-        BepInEx.Logging.Logger.CreateLogSource("MarvelMod.Practice").LogInfo(msg);
+        if (ModConfig.Data.DebugMode) Log.LogInfo(msg);
     }
 
     public void ResetLog() => _testLog.Clear();

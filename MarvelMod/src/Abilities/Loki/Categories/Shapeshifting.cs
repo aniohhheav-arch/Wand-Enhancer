@@ -1,88 +1,96 @@
 using MarvelMod.Characters;
 using MarvelMod.VFX;
-using UnityEngine;
 
 namespace MarvelMod.Abilities.Loki;
 
 // ── B: Shapeshifting ──────────────────────────────────────────────────────────
 
+/// <summary>Take the target's look (keep your own name).</summary>
 public class Disguise : AbilityBase
 {
     public override string Id       => "disguise";
     public override string Name     => "Disguise";
     public override string Category => "Shapeshifting";
+    public override TargetMode Targeting => TargetMode.Required;
 
-    protected override void OnActivate(PlayerControl? caster, PlayerControl? target)
+    protected override void OnCast(CastContext ctx)
     {
-        if (caster == null || target == null) return;
-        ShapeshiftManager.Instance.Shapeshift(caster, target, Cfg.Duration);
-        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, caster.transform.position);
+        if (ctx.Target == null) return;
+        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, ctx.CasterPos);
+        ShapeshiftManager.Instance!.Shapeshift(ctx.Caster, ctx.Target, ctx.Cfg.Duration);
     }
 }
 
+/// <summary>Take the target's look AND name.</summary>
 public class PerfectImpersonation : AbilityBase
 {
     public override string Id       => "perfect_impersonation";
     public override string Name     => "Perfect Impersonation";
     public override string Category => "Shapeshifting";
+    public override string Label    => "IMPERSONATE";
+    public override TargetMode Targeting => TargetMode.Required;
 
-    protected override void OnActivate(PlayerControl? caster, PlayerControl? target)
+    protected override void OnCast(CastContext ctx)
     {
-        if (caster == null || target == null) return;
-        // Copies appearance AND nameplate (local cosmetic only — never rewrites server role)
-        ShapeshiftManager.Instance.Shapeshift(caster, target, Cfg.Duration, copyNameplate: true);
-        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, caster.transform.position);
+        if (ctx.Target == null) return;
+        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, ctx.CasterPos);
+        ShapeshiftManager.Instance!.Shapeshift(ctx.Caster, ctx.Target, ctx.Cfg.Duration, copyNameplate: true);
     }
 }
 
+/// <summary>Shrink into a tiny creature — harder to spot.</summary>
 public class CreatureForm : AbilityBase
 {
     public override string Id       => "creature_form";
     public override string Name     => "Creature Form";
     public override string Category => "Shapeshifting";
+    public override string Label    => "CREATURE";
 
-    protected override void OnActivate(PlayerControl? caster, PlayerControl? target)
+    protected override void OnCast(CastContext ctx)
     {
-        if (caster == null) return;
-        ShapeshiftManager.Instance.ApplyCreatureForm(caster, Cfg.Duration);
-        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, caster.transform.position);
+        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, ctx.CasterPos);
+        ShapeshiftManager.Instance!.ApplyCreatureForm(ctx.Caster, ctx.Cfg.Duration);
     }
 }
 
+/// <summary>You and the target swap looks and names.</summary>
 public class IdentitySwap : AbilityBase
 {
     public override string Id       => "identity_swap";
     public override string Name     => "Identity Swap";
     public override string Category => "Shapeshifting";
+    public override string Label    => "SWAP LOOKS";
+    public override TargetMode Targeting => TargetMode.Required;
 
-    protected override void OnActivate(PlayerControl? caster, PlayerControl? target)
+    protected override void OnCast(CastContext ctx)
     {
-        if (caster == null || target == null) return;
-        // Swaps cosmetic appearance of two players locally — does NOT touch roles or tasks
-        ShapeshiftManager.Instance.SwapAppearances(caster, target, Cfg.Duration);
-        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, caster.transform.position);
-        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, target.transform.position);
+        if (ctx.Target == null) return;
+        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, ctx.CasterPos);
+        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, ctx.Target.transform.position);
+        ShapeshiftManager.Instance!.SwapAppearances(ctx.Caster, ctx.Target, ctx.Cfg.Duration);
     }
 }
 
+/// <summary>Ultimate: become the target while a fake copy of them walks elsewhere.</summary>
 public class TheOtherYou : AbilityBase
 {
     public override string Id       => "the_other_you";
     public override string Name     => "The Other You";
     public override string Category => "Shapeshifting";
+    public override bool IsUltimate => true;
+    public override TargetMode Targeting => TargetMode.Required;
 
-    protected override void OnActivate(PlayerControl? caster, PlayerControl? target)
+    protected override void OnCast(CastContext ctx)
     {
-        if (caster == null || target == null) return;
-        CinematicPlayer.PlayUltimate(CinematicType.TheOtherYou, caster, () =>
+        var target = ctx.Target;
+        if (target == null) return;
+        CinematicPlayer.PlayUltimate(CinematicType.TheOtherYou, ctx.Caster, () =>
         {
-            // Loki takes target's appearance
-            ShapeshiftManager.Instance.Shapeshift(caster, target, Cfg.Duration, copyNameplate: true);
-            // Spawn a convincing illusion of the target elsewhere on the map
-            var pos = MapSpawnPoints.GetRandom(1)[0];
-            var ill = IllusionManager.Instance.SpawnIllusion(target, pos);
+            ShapeshiftManager.Instance!.Shapeshift(ctx.Caster, target, ctx.Cfg.Duration, copyNameplate: true);
+            var spot = MapSpawnPoints.GetRandom(1, ctx.Rng, ctx.CasterPos)[0];
+            var ill = IllusionManager.Instance!.SpawnIllusion(target, spot);
             ill.SetBehavior(IllusionBehavior.Wander);
-            ill.Lifetime = Cfg.Duration;
+            ill.Lifetime = ctx.Cfg.Duration;
         });
     }
 }

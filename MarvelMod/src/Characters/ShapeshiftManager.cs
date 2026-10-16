@@ -1,15 +1,14 @@
-using Reactor.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using MarvelMod.VFX;
+using Reactor.Utilities.Attributes;
 using UnityEngine;
 
 namespace MarvelMod.Characters;
 
 /// <summary>
-/// Manages cosmetic shapeshifting for Loki.
-/// IMPORTANT: Never touches PlayerControl.Data.Role, task completion, or server-side state.
-/// All changes are local cosmetic overrides only.
+/// Appearance changes for Loki, using the game's own Shapeshifted outfit slot — the player's
+/// real (Default) outfit is never modified. Runs on every client, so everyone sees it.
 /// </summary>
 [RegisterInIl2Cpp]
 public class ShapeshiftManager : MonoBehaviour
@@ -22,104 +21,87 @@ public class ShapeshiftManager : MonoBehaviour
 
     public void Awake() => Instance = this;
 
+    /// <summary>source takes target's look. copyNameplate also takes the name.</summary>
     public void Shapeshift(PlayerControl source, PlayerControl target, float duration, bool copyNameplate = false)
     {
-        if (_active.TryGetValue(source.PlayerId, out var old))
-            RestoreAppearance(source, old);
+        if (source.Data == null || target.Data == null) return;
+        var state = GetOrCreate(source);
+        state.RestoreAt = Time.time + duration;
+        state.Outfit = true;
 
-        var state = new ShapeshiftState
-        {
-            PlayerId       = source.PlayerId,
-            OriginalHat    = source.Data?.Outfits[PlayerOutfitType.Default]?.HatId ?? "",
-            OriginalSkin   = source.Data?.Outfits[PlayerOutfitType.Default]?.SkinId ?? "",
-            OriginalColor  = source.Data?.Outfits[PlayerOutfitType.Default]?.ColorId ?? 0,
-            OriginalName   = source.Data?.PlayerName ?? "",
-            RestoreAt      = Time.realtimeSinceStartup + duration,
-            CopyNameplate  = copyNameplate,
-        };
-
-        // Apply target's cosmetics locally
-        ApplyCosmeticsLocally(source, target, copyNameplate);
-        _active[source.PlayerId] = state;
+        source.RawSetOutfit(target.Data.DefaultOutfit, PlayerOutfitType.Shapeshifted);
+        if (!copyNameplate)
+            source.cosmetics.SetName(source.Data.DefaultOutfit.PlayerName);
     }
 
+    /// <summary>Shrinks Loki into a small creature.</summary>
     public void ApplyCreatureForm(PlayerControl source, float duration)
     {
-        var state = new ShapeshiftState
+        var state = GetOrCreate(source);
+        state.RestoreAt = Time.time + duration;
+        if (!state.Creature)
         {
-            PlayerId      = source.PlayerId,
-            OriginalHat   = source.Data?.Outfits[PlayerOutfitType.Default]?.HatId ?? "",
-            OriginalSkin  = source.Data?.Outfits[PlayerOutfitType.Default]?.SkinId ?? "",
-            OriginalColor = source.Data?.Outfits[PlayerOutfitType.Default]?.ColorId ?? 0,
-            OriginalName  = source.Data?.PlayerName ?? "",
-            RestoreAt     = Time.realtimeSinceStartup + duration,
-            IsCreature    = true,
-        };
-        // Scale down to simulate creature
-        source.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-        _active[source.PlayerId] = state;
+            state.Creature = true;
+            state.OriginalScale = source.cosmetics.transform.localScale;
+            source.cosmetics.transform.localScale = state.OriginalScale * 0.55f;
+        }
     }
 
+    /// <summary>Two players swap looks (both directions use their untouched Default outfits).</summary>
     public void SwapAppearances(PlayerControl a, PlayerControl b, float duration)
     {
-        Shapeshift(a, b, duration);
-        Shapeshift(b, a, duration);
+        Shapeshift(a, b, duration, copyNameplate: true);
+        Shapeshift(b, a, duration, copyNameplate: true);
     }
 
-    private void ApplyCosmeticsLocally(PlayerControl source, PlayerControl target, bool copyNameplate)
+    private ShapeshiftState GetOrCreate(PlayerControl pc)
     {
-        var tOutfit = target.Data?.Outfits[PlayerOutfitType.Default];
-        if (tOutfit == null) return;
-        var sOutfit = source.Data?.Outfits[PlayerOutfitType.Default];
-        if (sOutfit == null) return;
-        sOutfit.HatId  = tOutfit.HatId;
-        sOutfit.SkinId = tOutfit.SkinId;
-        sOutfit.ColorId = tOutfit.ColorId;
-        if (copyNameplate && source.Data != null)
-            source.Data.PlayerName = $"[~]{target.Data?.PlayerName}"; // marked fake
-        source.RawSetOutfit(source.Data!.Outfits[PlayerOutfitType.Default], PlayerOutfitType.Default);
+        if (!_active.TryGetValue(pc.PlayerId, out var state))
+            _active[pc.PlayerId] = state = new ShapeshiftState { PlayerId = pc.PlayerId };
+        return state;
     }
 
-    private void RestoreAppearance(PlayerControl source, ShapeshiftState state)
+    private static void Restore(PlayerControl pc, ShapeshiftState state)
     {
-        var outfit = source.Data?.Outfits[PlayerOutfitType.Default];
-        if (outfit != null)
+        if (state.Outfit && pc.Data != null)
+            pc.RawSetOutfit(pc.Data.DefaultOutfit, PlayerOutfitType.Default);
+        if (state.Creature && pc.cosmetics != null)
+            pc.cosmetics.transform.localScale = state.OriginalScale;
+        VfxPlayer.PlayLocal(VfxType.LokiShapeshift, pc.transform.position);
+    }
+
+    public void RestoreAll()
+    {
+        foreach (var kv in _active)
         {
-            outfit.HatId   = state.OriginalHat;
-            outfit.SkinId  = state.OriginalSkin;
-            outfit.ColorId = state.OriginalColor;
+            var pc = Players.ById(kv.Key);
+            if (pc != null) Restore(pc, kv.Value);
         }
-        if (state.CopyNameplate && source.Data != null)
-            source.Data.PlayerName = state.OriginalName;
-        if (state.IsCreature)
-            source.transform.localScale = Vector3.one;
-        source.RawSetOutfit(source.Data!.Outfits[PlayerOutfitType.Default], PlayerOutfitType.Default);
+        _active.Clear();
     }
 
     public void Update()
     {
-        var now = Time.realtimeSinceStartup;
-        var toRestore = new List<byte>();
+        if (_active.Count == 0) return;
+        var now = Time.time;
+        var done = new List<byte>();
         foreach (var kv in _active)
-            if (now >= kv.Value.RestoreAt) toRestore.Add(kv.Key);
+            if (now >= kv.Value.RestoreAt) done.Add(kv.Key);
 
-        foreach (var id in toRestore)
+        foreach (var id in done)
         {
-            var pc = PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(p => p.PlayerId == id);
-            if (pc != null) RestoreAppearance(pc, _active[id]);
+            var pc = Players.ById(id);
+            if (pc != null) Restore(pc, _active[id]);
             _active.Remove(id);
         }
     }
 
     private class ShapeshiftState
     {
-        public byte   PlayerId;
-        public string OriginalHat   = "";
-        public string OriginalSkin  = "";
-        public int    OriginalColor;
-        public string OriginalName  = "";
-        public float  RestoreAt;
-        public bool   CopyNameplate;
-        public bool   IsCreature;
+        public byte    PlayerId;
+        public float   RestoreAt;
+        public bool    Outfit;
+        public bool    Creature;
+        public Vector3 OriginalScale = Vector3.one;
     }
 }
