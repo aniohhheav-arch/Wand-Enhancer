@@ -116,6 +116,7 @@ public class DevConsole : MonoBehaviour
         "meeting"    => CmdMeeting(p),
         "finisher"   => CmdFinisher(p),
         "snap"       => CmdSnap(p),
+        "portal"     => CmdPortal(p),
         _            => throw new ConsoleException($"Unknown command '{p[0]}'. Type 'help' for commands."),
     };
 
@@ -125,7 +126,7 @@ public class DevConsole : MonoBehaviour
     {
         if (p.Length > 1) return GetDetailedHelp(p[1]);
         return
-            "Commands: help, clear, status, config, character, ability, meeting, finisher, snap, illusion, practice, vfx, cinematic, debug\n" +
+            "Commands: help, clear, status, config, character, ability, meeting, finisher, snap, portal, illusion, practice, vfx, cinematic, debug\n" +
             "Use 'help <command>' for details.";
     }
 
@@ -135,10 +136,11 @@ public class DevConsole : MonoBehaviour
         "illusion"  => "illusion spawn <n> | behavior <idle|wander|follow|task|random> | despawn_all | movement_speed <v> | lifetime <s> | nameplates <on|off>",
         "practice"  => "practice reset | dummies <n> | spawn_dummy | clear_dummies | invincible <on|off> | unlimited <on|off>",
         "vfx"       => "vfx enabled <on|off> | intensity <0-100> | particles <on|off> | screen_shake <on|off> | quality <low|medium|high|ultra>",
-        "character" => "character loki | thanos | none | info | abilities",
+        "character" => "character loki | thanos | strange | none | info | abilities",
         "meeting"   => "meeting ability cooldown|uses_per_meeting|duration <id> <value> | meeting ability enabled|practice_only <id> <on|off> | meeting ability phase <id> <discussion|voting|both> | meeting list | meeting reset",
         "finisher"  => "finisher list | preview <id> (on the closest player, nobody dies) | replay <id> | duration <id> <s> | mode <full|short|skip> | body <on|off>",
         "snap"      => "snap mode <visual|practice_kill|match_kill_half|match_stun>",
+        "portal"    => "portal status | create | create_pair | close <id> | close_all | max_pairs <n> | lifetime <s> | size <v> | teleport_cooldown <s>",
         "config"    => "config list | save | reload | reset",
         "debug"     => "debug on | off | abilities | targets | cooldowns | performance | errors",
         _           => $"No help for '{cmd}'.",
@@ -285,6 +287,36 @@ public class DevConsole : MonoBehaviour
             default:
                 throw new ConsoleException("Usage: " + GetDetailedHelp("finisher"));
         }
+    }
+
+    private string CmdPortal(string[] p)
+    {
+        if (p.Length < 2) throw new ConsoleException("Usage: " + GetDetailedHelp("portal"));
+        var lp = PlayerControl.LocalPlayer;
+        switch (p[1].ToLowerInvariant())
+        {
+            case "status": return PortalEngine.Status();
+            case "close_all": PortalEngine.CloseAll(); return "All portals closed.";
+            case "close":
+                return PortalEngine.CloseById(ParseInt(p, 2)) ? $"Portal #{p[2]} (and its link) closed." : throw new ConsoleException($"No portal #{p[2]}. Use 'portal status'.");
+            case "create":
+                if (lp == null) throw new ConsoleException("Not in a game.");
+                var one = PortalEngine.OpenPortal(lp, lp.transform.position, ModConfig.Data.PortalLifetime, linkToPending: true);
+                return $"Portal #{one.Id} opened" + (one.Link != null ? $" and linked to #{one.Link.Id}." : " (waiting for a link: walk away and 'portal create' again).");
+            case "create_pair":
+                if (lp == null) throw new ConsoleException("Not in a game.");
+                Vector2 here = lp.transform.position;
+                var there = Players.SafeDestination(here, UI.HUD.AbilityButtons.LastMoveDirection, 3f);
+                var (a, b) = PortalEngine.OpenPair(lp, here + UI.HUD.AbilityButtons.LastMoveDirection * -0.8f, there, ModConfig.Data.PortalLifetime);
+                return $"Linked pair #{a.Id} <-> #{b.Id} (local preview).";
+            case "max_pairs": ModConfig.Data.PortalMaxPairs = Math.Max(1, ParseInt(p, 2)); break;
+            case "lifetime": ModConfig.Data.PortalLifetime = Math.Clamp(ParseFloat(p, 2), 2f, 600f); break;
+            case "size": ModConfig.Data.PortalSize = Math.Clamp(ParseFloat(p, 2), 0.5f, 3f); break;
+            case "teleport_cooldown": ModConfig.Data.PortalTeleportCooldown = Math.Clamp(ParseFloat(p, 2), 0.3f, 10f); break;
+            default: throw new ConsoleException("Usage: " + GetDetailedHelp("portal"));
+        }
+        ModConfig.Save();
+        return $"portal {p[1]} = {p[2]} (saved).";
     }
 
     private string CmdSnap(string[] p)

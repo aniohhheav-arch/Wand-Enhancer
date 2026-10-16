@@ -208,13 +208,15 @@ public class SpaceRift : ThanosAbility
     public override string Id => "space_rift";
     public override string Name => "Space Rift";
     public override string Label => "RIFT";
+    public override int MapPoints => 2;
 
-    protected override void OnCast(CastContext ctx)
+    protected override void Prepare(PlayerControl caster, ref PlayerControl? target, ref Vector2 point)
     {
-        var a = ctx.CasterPos;
-        var b = (Vector2)MapSpawnPoints.GetRandom(1, ctx.Rng, a)[0];
-        Coroutines.Start(Portals.Run(a, b, C, ctx.Cfg.Duration));
+        point = PickedPoints.Count > 0 ? PickedPoints[0] : (Vector2)caster.transform.position;
+        SecondPoint = PickedPoints.Count > 1 ? PickedPoints[1] : point + Vector2.right * 3f;
     }
+
+    protected override void OnCast(CastContext ctx) => Coroutines.Start(Portals.Run(ctx.Point, ctx.Point2, C, ctx.Cfg.Duration));
 }
 
 public static class Portals

@@ -54,8 +54,6 @@ public class ThanosCharacter : CharacterDef
 
     private readonly bool[] _owned = new bool[6];
     private float _nextUnlock;
-    private readonly List<(float t, Vector2 p)> _history = new();
-    private float _lastSample;
 
     private GameObject? _gauntlet;
     private readonly SpriteRenderer?[] _gems = new SpriteRenderer?[6];
@@ -122,7 +120,6 @@ public class ThanosCharacter : CharacterDef
             while (Count < start) _owned[Random.Range(0, 6)] = true;
         }
         _nextUnlock = Time.time + ModConfig.Data.StoneUnlockSeconds;
-        _history.Clear();
     }
 
     public override void OnLocalUnassigned()
@@ -154,32 +151,12 @@ public class ThanosCharacter : CharacterDef
     }
 
     /// <summary>Where the local Thanos was `secondsAgo` seconds ago (Rewind / Temporal Echo).</summary>
-    public Vector2 PositionAgo(float secondsAgo, Vector2 fallback)
-    {
-        float t = Time.time - secondsAgo;
-        for (int i = 0; i < _history.Count; i++)
-            if (_history[i].t >= t) return _history[i].p;
-        return _history.Count > 0 ? _history[0].p : fallback;
-    }
+    public Vector2 PositionAgo(float secondsAgo, Vector2 fallback) => PositionHistory.Ago(secondsAgo, fallback);
 
-    public List<Vector2> PathSince(float secondsAgo)
-    {
-        float t = Time.time - secondsAgo;
-        var path = new List<Vector2>();
-        foreach (var h in _history) if (h.t >= t) path.Add(h.p);
-        return path;
-    }
+    public List<Vector2> PathSince(float secondsAgo) => PositionHistory.Since(secondsAgo);
 
     public override void LocalUpdate(PlayerControl lp, HudManager hud)
     {
-        // position history (10 s)
-        if (Time.time - _lastSample > 0.1f)
-        {
-            _lastSample = Time.time;
-            _history.Add((Time.time, lp.transform.position));
-            while (_history.Count > 0 && Time.time - _history[0].t > 10f) _history.RemoveAt(0);
-        }
-
         // stones over time in real games
         if (!CharacterRegistry.IsFreeplay && !CharacterRegistry.InLobby && !HasAll && MeetingHud.Instance == null
             && Time.time >= _nextUnlock)

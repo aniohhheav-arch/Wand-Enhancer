@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using MarvelMod.Characters;
 using MarvelMod.Config;
@@ -27,6 +28,8 @@ public sealed class CastContext
     public Vector2 Point { get; }
     /// <summary>Same sequence on every client, so random spawn points match.</summary>
     public System.Random Rng { get; }
+    /// <summary>Second chosen point (two-point map picks, e.g. Space Rift).</summary>
+    public Vector2 Point2 { get; init; }
     public AbilityConfig Cfg { get; }
 
     public CastContext(PlayerControl caster, PlayerControl? target, Vector2 point, int seed, AbilityConfig cfg)
@@ -57,6 +60,12 @@ public abstract class AbilityBase
     public virtual bool IsUltimate => false;
     /// <summary>No cast flash or sound for anyone (stealth abilities).</summary>
     public virtual bool Silent => false;
+    /// <summary>&gt; 0: clicking the button opens the map and you pick this many points on it first.</summary>
+    public virtual int MapPoints => 0;
+    /// <summary>Points picked on the map (set right before TryActivate).</summary>
+    public List<Vector2> PickedPoints { get; } = new();
+    /// <summary>Set in Prepare to send a second point.</summary>
+    protected Vector2 SecondPoint;
     /// <summary>Colour of the cast flash everyone sees on the caster.</summary>
     public virtual Color CastColor => new(0.3f, 1f, 0.45f, 1f);
 
@@ -90,10 +99,11 @@ public abstract class AbilityBase
         if (target != null && !IsValidTarget(caster, target)) return false;
 
         Vector2 point = caster.transform.position;
+        SecondPoint = Vector2.zero;
         Prepare(caster, ref target, ref point);
 
         LokiRpc.RpcCast(caster, Id, target != null ? target.PlayerId : LokiRpc.NoTarget,
-            point.x, point.y, UnityEngine.Random.Range(int.MinValue, int.MaxValue));
+            point.x, point.y, SecondPoint.x, SecondPoint.y, UnityEngine.Random.Range(int.MinValue, int.MaxValue));
 
         if (!PracticeModeUnlimited)
             _lastUsed = Time.realtimeSinceStartup;

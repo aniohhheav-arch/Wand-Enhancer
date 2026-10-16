@@ -109,6 +109,12 @@ public class ConfigData
     /// <summary>Stones Thanos starts with in a match (1-6); one more every StoneUnlockSeconds and per kill.</summary>
     public int     ThanosStartStones { get; set; } = 2;
     public float   StoneUnlockSeconds { get; set; } = 60f;
+    /// <summary>Crewmates: how many become Doctor Strange each match (0 = off). Chosen by the host.</summary>
+    public int     StrangeCount     { get; set; } = 1;
+    public int     PortalMaxPairs   { get; set; } = 2;
+    public float   PortalLifetime   { get; set; } = 25f;
+    public float   PortalSize       { get; set; } = 1.1f;
+    public float   PortalTeleportCooldown { get; set; } = 1.2f;
     public bool    DebugMode        { get; set; } = false;
     public string  ConsoleKey       { get; set; } = "F6";
     // Loki illusion settings

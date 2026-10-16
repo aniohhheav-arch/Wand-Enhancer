@@ -19,7 +19,7 @@ public static class LokiRpc
     /// Movement is applied only by whichever client owns the moved player.
     /// </summary>
     [MethodRpc((uint)RpcIds.Cast, LocalHandling = RpcLocalHandling.Before)]
-    public static void RpcCast(PlayerControl caster, string abilityId, byte targetId, float x, float y, int seed)
+    public static void RpcCast(PlayerControl caster, string abilityId, byte targetId, float x, float y, float x2, float y2, int seed)
     {
         var ability = CharacterRegistry.Ability(abilityId);
         if (ability == null || caster == null) return;
@@ -31,6 +31,6 @@ public static class LokiRpc
             VFX.Fx.Aura(caster.transform, Assets.Sprites.Glow, new Color(c.r, c.g, c.b, 0.6f), 1.5f, 0.45f, pulse: false);
             VFX.Fx.Sparkles(caster.transform.position, VFX.Fx.LokiGold, 5, 0.9f, 0.4f);
         }
-        ability.Execute(new Abilities.CastContext(caster, target, new Vector2(x, y), seed, ability.Cfg));
+        ability.Execute(new Abilities.CastContext(caster, target, new Vector2(x, y), seed, ability.Cfg) { Point2 = new Vector2(x2, y2) });
     }
 }

@@ -33,6 +33,8 @@ public abstract class CharacterDef
     public abstract string Id { get; }
     public abstract string DisplayName { get; }
     public abstract Color Color { get; }
+    /// <summary>Crewmate roles are handed out by the host; impostor characters are rolled by each impostor.</summary>
+    public virtual bool IsCrewmateRole => false;
     public abstract IReadOnlyList<AbilityTab> Tabs { get; }
     /// <summary>Abilities without a button (map teleport, internal events).</summary>
     public virtual IEnumerable<AbilityBase> Hidden => Array.Empty<AbilityBase>();
@@ -68,6 +70,39 @@ public static class CharacterRegistry
     private static readonly List<CharacterDef> _all = new();
     private static CharacterDef? _local;
     private static bool _rolledThisGame;
+    private static bool _hostAssigned;
+    private static readonly Dictionary<byte, string> Assigned = new();
+
+    /// <summary>Crewmate role handed out by the host (synced by a cast).</summary>
+    public static void Assign(byte playerId, string characterId)
+    {
+        Assigned[playerId] = characterId;
+        var def = ById(characterId);
+        if (def != null && playerId == PlayerControl.LocalPlayer?.PlayerId)
+            VFX.Fx.Toast($"YOU ARE {def.DisplayName.ToUpperInvariant()}", def.Color, 3.5f, 5f, 1.6f);
+    }
+
+    /// <summary>Host only, once per match: choose StrangeCount crewmates to be Doctor Strange.</summary>
+    private static void HostAssignCrewRoles(PlayerControl lp)
+    {
+        if (_hostAssigned || AmongUsClient.Instance == null || !AmongUsClient.Instance.AmHost) return;
+        var hud = HudManager.Instance;
+        if (hud == null || hud.IsIntroDisplayed) return;
+        var crew = new List<PlayerControl>();
+        foreach (var pc in Players.All())
+        {
+            if (pc.Data == null || pc.Data.Role == null) return;   // roles not set yet
+            if (!pc.Data.Role.IsImpostor && Players.IsAlive(pc)) crew.Add(pc);
+        }
+        _hostAssigned = true;
+        int n = Mathf.Clamp(Config.ModConfig.Data.StrangeCount, 0, crew.Count);
+        for (int i = 0; i < n; i++)
+        {
+            int idx = UnityEngine.Random.Range(0, crew.Count);
+            Networking.LokiRpc.RpcCast(lp, "assign_strange", crew[idx].PlayerId, 0f, 0f, 0f, 0f, 0);
+            crew.RemoveAt(idx);
+        }
+    }
 
     public static IReadOnlyList<CharacterDef> All => _all;
 
@@ -111,24 +146,30 @@ public static class CharacterRegistry
         if (IsFreeplay || InLobby)
         {
             _rolledThisGame = false;
+            _hostAssigned = false;
+            Assigned.Clear();
             want = ById(ModConfig.Data.ActiveCharacter);
         }
         else if (ShipStatus.Instance == null)
         {
             _rolledThisGame = false;
+            _hostAssigned = false;
+            Assigned.Clear();
             want = null;
         }
         else
         {
+            HostAssignCrewRoles(lp);
             bool impostor = lp.Data != null && lp.Data.Role != null && lp.Data.Role.IsImpostor;
-            if (!impostor) want = null;
+            if (!impostor) want = Assigned.TryGetValue(lp.PlayerId, out var crewRole) ? ById(crewRole) : null;
             else
             {
                 if (!_rolledThisGame || _local == null)
                 {
                     _rolledThisGame = true;
                     var forced = ById(ModConfig.Data.ImpostorCharacter);
-                    want = forced ?? _all[UnityEngine.Random.Range(0, _all.Count)];
+                    var evil = _all.FindAll(c => !c.IsCrewmateRole);
+                    want = forced != null && !forced.IsCrewmateRole ? forced : evil.Count > 0 ? evil[UnityEngine.Random.Range(0, evil.Count)] : null;
                     if (want != null)
                         VFX.Fx.Toast($"YOU ARE {want.DisplayName.ToUpperInvariant()}", want.Color, 3.5f, 5f, 1.6f);
                 }

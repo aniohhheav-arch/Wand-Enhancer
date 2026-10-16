@@ -377,6 +377,17 @@ public static class AbilityButtons
         var ability = slots[slot];
         if (!ability.IsReady) return;
 
+        if (ability.MapPoints > 0)
+        {
+            MapTeleportInput.BeginPick(ability.MapPoints, pts =>
+            {
+                ability.PickedPoints.Clear();
+                ability.PickedPoints.AddRange(pts);
+                ability.TryActivate(PlayerControl.LocalPlayer, null);
+            });
+            return;
+        }
+
         if (ability.Targeting == TargetMode.Menu)
         {
             TargetMenu.Open(picked => ability.TryActivate(PlayerControl.LocalPlayer, picked));
