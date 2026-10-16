@@ -24,7 +24,7 @@ public static class MapTeleportInput
         var dest = new Vector2(local.x * flip, local.y) * ship.MapScale;
         if (dest.magnitude > 80f) return;   // clicked outside the map image
 
-        map.Close();
+        // the map stays open so you can keep hopping around
         var teleport = LokiCharacter.Instance.MapTeleport;
         teleport.PendingDestination = dest;
         teleport.TryActivate(lp, null);

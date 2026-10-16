@@ -24,9 +24,9 @@ public static class MovementStatusPatch
     public static void Postfix(PlayerPhysics __instance)
     {
         var status = StatusManager.Instance;
-        if (status == null || !__instance.AmOwner) return;
+        if (status == null) return;
         var pc = __instance.myPlayer;
-        if (pc == null || __instance.body == null) return;
+        if (pc == null || __instance.body == null || !Players.Controls(pc)) return;
 
         if (status.HasStatus(pc, StatusEffect.Bound) || status.HasStatus(pc, StatusEffect.Stunned))
             __instance.body.velocity = Vector2.zero;

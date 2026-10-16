@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using Reactor.Utilities;
 using System.Collections.Generic;
 using MarvelMod.VFX;
 using Reactor.Utilities.Attributes;
@@ -18,7 +16,6 @@ public class ShapeshiftManager : MonoBehaviour
     public ShapeshiftManager(IntPtr ptr) : base(ptr) { }
 
     public static ShapeshiftManager? Instance { get; private set; }
-    private static readonly BepInEx.Logging.ManualLogSource Log = BepInEx.Logging.Logger.CreateLogSource("MarvelMod.Shapeshift");
 
     private readonly Dictionary<byte, ShapeshiftState> _active = new();
 
@@ -34,33 +31,14 @@ public class ShapeshiftManager : MonoBehaviour
 
         PlayShapeshift(source, target);
         if (!copyNameplate)
-            Coroutines.Start(CoKeepOwnName(source, 1.6f));
+            source.cosmetics.SetName(source.Data.DefaultOutfit.PlayerName);
     }
 
-    /// <summary>The game's real shapeshift animation (poof + morph); falls back to an instant swap.</summary>
+    /// <summary>Instant outfit change (the Shapeshifter morph animation is intentionally not used).</summary>
     private static void PlayShapeshift(PlayerControl source, PlayerControl target)
     {
-        try
-        {
-            source.Shapeshift(target, true);
-        }
-        catch (Exception e)
-        {
-            Log.LogWarning($"Animated shapeshift failed, using instant swap: {e.Message}");
-            if (target == source) source.RawSetOutfit(source.Data.DefaultOutfit, PlayerOutfitType.Default);
-            else source.RawSetOutfit(target.Data.DefaultOutfit, PlayerOutfitType.Shapeshifted);
-        }
-    }
-
-    /// <summary>Disguise copies the look but keeps your name (re-applied after the morph finishes).</summary>
-    private static IEnumerator CoKeepOwnName(PlayerControl pc, float duration)
-    {
-        for (float t = 0; t < duration; t += Time.deltaTime)
-        {
-            if (pc == null || pc.Data == null) yield break;
-            pc.cosmetics.SetName(pc.Data.DefaultOutfit.PlayerName);
-            yield return null;
-        }
+        if (target == source) source.RawSetOutfit(source.Data.DefaultOutfit, PlayerOutfitType.Default);
+        else source.RawSetOutfit(target.Data.DefaultOutfit, PlayerOutfitType.Shapeshifted);
     }
 
     /// <summary>Shrinks Loki into a small creature.</summary>
@@ -94,8 +72,7 @@ public class ShapeshiftManager : MonoBehaviour
     {
         if (state.Outfit && pc.Data != null)
         {
-            if (MeetingHud.Instance != null) pc.RawSetOutfit(pc.Data.DefaultOutfit, PlayerOutfitType.Default);
-            else PlayShapeshift(pc, pc);   // shapeshifting into yourself = animated revert
+            PlayShapeshift(pc, pc);
         }
         if (state.Creature && pc.cosmetics != null)
             pc.cosmetics.transform.localScale = state.OriginalScale;

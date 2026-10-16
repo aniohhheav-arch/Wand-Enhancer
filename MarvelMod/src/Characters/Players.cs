@@ -69,16 +69,28 @@ public static class Players
         return origin + dir * dist;
     }
 
-    /// <summary>Moves a player; only the owning client sends the movement, so call this on every client.</summary>
+    /// <summary>
+    /// True on the one client that should move this player: its owner, or the host for
+    /// freeplay/bot dummies (which nobody "owns" in the usual sense).
+    /// </summary>
+    public static bool Controls(PlayerControl pc) =>
+        pc != null && (pc.AmOwner || ((pc.isDummy || pc.notRealPlayer) && AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost));
+
+    /// <summary>Moves a player; only the controlling client sends the movement, so call this on every client.</summary>
     public static void Teleport(PlayerControl pc, Vector2 dest)
     {
-        if (pc == null || !pc.AmOwner) return;
-        pc.NetTransform.RpcSnapTo(dest);
+        if (!Controls(pc)) return;
+        if (pc.AmOwner) pc.NetTransform.RpcSnapTo(dest);
+        else
+        {
+            pc.NetTransform.SnapTo(dest);   // dummy: move locally...
+            pc.NetTransform.RpcSnapTo(dest); // ...and tell everyone else
+        }
     }
 
     public static void Knockback(PlayerControl target, Vector2 from, float dist)
     {
-        if (target == null || !target.AmOwner) return;
+        if (target == null || !Controls(target)) return;
         var p = Pos(target);
         var dir = p - from;
         if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;

@@ -53,7 +53,7 @@ public class StatusManager : MonoBehaviour
             Aura = MakeAura(target, effect, duration),
         });
 
-        if (target.AmOwner)
+        if (target == PlayerControl.LocalPlayer)
         {
             switch (effect)
             {
@@ -72,7 +72,7 @@ public class StatusManager : MonoBehaviour
         RemoveStatus(target, StatusEffect.Shielded);
         Fx.Burst(target.transform.position, Fx.LokiLight, 2.2f, 0.5f);
         Fx.Sparkles(target.transform.position, Color.white, 12, 1.4f);
-        if (target.AmOwner) Fx.Toast("SHIELD BLOCKED IT!", Fx.LokiLight, 1.5f, 3.5f);
+        if (target == PlayerControl.LocalPlayer) Fx.Toast("SHIELD BLOCKED IT!", Fx.LokiLight, 1.5f, 3.5f);
         return true;
     }
 
@@ -142,7 +142,7 @@ public class DamageSystem : MonoBehaviour
             return;   // shield absorbed it
         Fx.Burst(target.transform.position, new Color(1f, 1f, 1f, 1f), 1f, 0.2f);
         Players.Knockback(target, from, type == DamageType.Melee ? 0.8f : 1.4f);
-        if (target.AmOwner) Fx.Shake(0.25f, 0.35f);
+        if (target == PlayerControl.LocalPlayer) Fx.Shake(0.25f, 0.35f);
         Practice.PracticeModeManager.Instance?.RecordDummyHit(target, amount);
     }
 }
@@ -160,7 +160,7 @@ public class InvisibilityManager : MonoBehaviour
     public void ApplyInvisibility(PlayerControl target, float duration)
     {
         _until[target.PlayerId] = Time.time + duration;
-        if (target.AmOwner) target.cosmetics.SetPhantomRoleAlpha(0.3f);
+        if (target == PlayerControl.LocalPlayer) target.cosmetics.SetPhantomRoleAlpha(0.3f);
         else target.Visible = false;
     }
 
@@ -168,7 +168,7 @@ public class InvisibilityManager : MonoBehaviour
 
     private static void Restore(PlayerControl pc)
     {
-        if (pc.AmOwner) pc.cosmetics.SetPhantomRoleAlpha(1f);
+        if (pc == PlayerControl.LocalPlayer) pc.cosmetics.SetPhantomRoleAlpha(1f);
         else if (Players.IsAlive(pc) && !pc.inVent) pc.Visible = true;
         Fx.Smoke(pc.transform.position, Fx.LokiDark, 8, 0.8f);
     }

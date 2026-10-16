@@ -114,7 +114,7 @@ public class SerpentStrike : AbilityBase
     {
         Fx.Burst(target.transform.position, Fx.LokiGreen, 1.2f, 0.25f);
         Fx.BloodSplatter(target.transform.position, 0.4f);
-        if (target.AmOwner)
+        if (target == PlayerControl.LocalPlayer)
         {
             Fx.Toast("POISONED BY LOKI'S SERPENT!", Fx.LokiGreen, 2f, 3.5f);
             Fx.ScreenTint(new Color(0.2f, 0.9f, 0.2f, 0.35f), ctx.Cfg.Duration, pulses: 3);
