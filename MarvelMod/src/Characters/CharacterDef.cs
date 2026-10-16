@@ -82,6 +82,22 @@ public static class CharacterRegistry
             VFX.Fx.Toast($"YOU ARE {def.DisplayName.ToUpperInvariant()}", def.Color, 3.5f, 5f, 1.6f);
     }
 
+    /// <summary>Any player's character on this client: crewmate roles and announced impostor rolls, or our own.</summary>
+    public static CharacterDef? Of(PlayerControl? pc)
+    {
+        if (pc == null) return null;
+        if (pc == PlayerControl.LocalPlayer) return _local;
+        if (Assigned.TryGetValue(pc.PlayerId, out var id)) return ById(id);
+        return null;
+    }
+
+    /// <summary>Records another player's rolled character without the "YOU ARE" toast (announce cast).</summary>
+    public static void Note(byte playerId, string characterId)
+    {
+        if (playerId == PlayerControl.LocalPlayer?.PlayerId) return;
+        Assigned[playerId] = characterId;
+    }
+
     /// <summary>Host only, once per match: choose StrangeCount crewmates to be Doctor Strange.</summary>
     private static void HostAssignCrewRoles(PlayerControl lp)
     {
@@ -171,7 +187,11 @@ public static class CharacterRegistry
                     var evil = _all.FindAll(c => !c.IsCrewmateRole);
                     want = forced != null && !forced.IsCrewmateRole ? forced : evil.Count > 0 ? evil[UnityEngine.Random.Range(0, evil.Count)] : null;
                     if (want != null)
+                    {
                         VFX.Fx.Toast($"YOU ARE {want.DisplayName.ToUpperInvariant()}", want.Color, 3.5f, 5f, 1.6f);
+                        // tell everyone which character this impostor is (team-ups need to find partners)
+                        Networking.LokiRpc.RpcCast(lp, "announce_character", Networking.LokiRpc.NoTarget, _all.IndexOf(want), 0f, 0f, 0f, 0);
+                    }
                 }
                 else want = _local;
             }

@@ -521,6 +521,18 @@ public static partial class Fx
             case "Time":
             case "Time Stone": ClockRings(p, c); break;
             case "Mind":    PulseRings(p, c); break;
+            case "Chaos Magic":
+            case "Wanda Finishers":
+                for (int i = 0; i < 4; i++) { float a = i * Mathf.PI / 2f + 0.3f; Tendril(p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 1.1f, p, c, 0.4f, 7); }
+                break;
+            case "Thunder":
+            case "Thor Finishers":
+                for (int i = 0; i < 3; i++) { float a = Random.Range(0f, Mathf.PI * 2f); Lightning(p, p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 1f, c, 0.18f, 1, 0.2f); }
+                break;
+            case "Team-Up":
+                ShockRing(p, new Color(0.92f, 0.1f, 0.22f), 1.8f, 0.4f);
+                ShockRing(p, new Color(0.65f, 0.85f, 1f), 1.2f, 0.4f);
+                break;
             case "Infinity": foreach (var s in Characters.Stones.Six) PulseRings(p, Characters.Stones.Color(s), 1); break;
             default:
                 Aura(caster, Sprites.Glow, new Color(c.r, c.g, c.b, 0.6f), 1.5f, 0.45f, pulse: false);

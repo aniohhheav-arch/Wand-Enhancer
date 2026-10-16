@@ -38,6 +38,12 @@ public static class SoundBook
         ["Mirror Dimension"] = new(new[] { SfxKind.Glass, SfxKind.Warp, SfxKind.Shimmer, SfxKind.Glass, SfxKind.Gong }, SfxKind.Shimmer, 1.2f),
         ["Time Stone"]       = new(new[] { SfxKind.Tick, SfxKind.Warp, SfxKind.Chime, SfxKind.Tick, SfxKind.Bell }, SfxKind.Tick, 0.9f),
         ["Astral"]           = new(new[] { SfxKind.Hum, SfxKind.Shimmer, SfxKind.Heartbeat, SfxKind.Whoosh, SfxKind.Choir }, SfxKind.Shimmer, 1.3f),
+        // Scarlet Witch / Thor / team-ups
+        ["Chaos Magic"]      = new(new[] { SfxKind.Sizzle, SfxKind.Reverse, SfxKind.Glass, SfxKind.Heartbeat, SfxKind.Stab }, SfxKind.Reverse, 1.1f),
+        ["Wanda Finishers"]  = new(new[] { SfxKind.Reverse, SfxKind.Choir, SfxKind.Creak, SfxKind.Glass, SfxKind.Stab }, SfxKind.Hum, 0.9f),
+        ["Thunder"]          = new(new[] { SfxKind.Clang, SfxKind.Crackle, SfxKind.Thud, SfxKind.Whoosh, SfxKind.Thunder }, SfxKind.Sizzle, 1f),
+        ["Thor Finishers"]   = new(new[] { SfxKind.Clang, SfxKind.Gong, SfxKind.Crackle, SfxKind.Rumble, SfxKind.Thunder }, SfxKind.Rumble, 0.85f),
+        ["Team-Up"]          = new(new[] { SfxKind.Thunder, SfxKind.Glass, SfxKind.Stab }, SfxKind.Reverse, 0.9f),
     };
 
     private static readonly Palette Fallback = new(new[] { SfxKind.Chime, SfxKind.Whoosh, SfxKind.Zap, SfxKind.Hum, SfxKind.Gong }, SfxKind.Shimmer, 1f);

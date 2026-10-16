@@ -121,6 +121,12 @@ public class DevConsole : MonoBehaviour
         "arena"      => CmdArena(p),
         "cast"       => CmdCast(p),
         "tune"       => CmdTune(p),
+        "wanda"      => CmdHero(p, "wanda"),
+        "thor"       => CmdHero(p, "thor"),
+        "loki"       => CmdHero(p, "loki"),
+        "thanos"     => CmdHero(p, "thanos"),
+        "strange"    => CmdHero(p, "strange"),
+        "combo"      => CmdCombo(p),
         _            => throw new ConsoleException($"Unknown command '{p[0]}'. Type 'help' for commands."),
     };
 
@@ -130,7 +136,7 @@ public class DevConsole : MonoBehaviour
     {
         if (p.Length > 1) return GetDetailedHelp(p[1]);
         return
-            "Commands: help, clear, status, config, character, ability, cast, tune, meeting, finisher, snap, portal, illusion, practice, vfx, sfx, arena, cinematic, debug\n" +
+            "Commands: help, clear, status, config, character, ability, cast, tune, wanda, thor, loki, thanos, strange, combo, meeting, finisher, snap, portal, illusion, practice, vfx, sfx, arena, cinematic, debug\n" +
             "Use 'help <command>' for details.";
     }
 
@@ -138,12 +144,15 @@ public class DevConsole : MonoBehaviour
     {
         "ability"   => "ability cooldown <id> <s> | duration <id> <s> | casttime | range | damage | radius | enabled <id> <on|off> | reset <id> | reset_all",
         "illusion"  => "illusion spawn <n> | behavior <idle|wander|follow|task|random> | despawn_all | movement_speed <v> | lifetime <s> | nameplates <on|off>",
-        "practice"  => "practice reset | dummies <n> | spawn_dummy | clear_dummies | invincible <on|off> | unlimited <on|off>",
+        "practice"  => "practice reset | dummies <n> | spawn_dummy | clear_dummies | invincible <on|off> | unlimited <on|off> | cooldowns <on|off>",
         "vfx"       => "vfx enabled <on|off> | intensity <0-200> | particles <on|off> | screen_shake <on|off> | shake <0-300 %> | camera <on|off> | speed <0.4-2.5> | distortion <on|off> | quality <low|medium|high|ultra> (preset) | test <heavy|magic|electric|glitch|cosmic|comedy|eerie|time|chaos|lightning|sigil|charge>",
         "sfx"       => "sfx enabled <on|off> | volume <0-100> | cinematic <0-100> | test <kind or cue> | list | stop",
         "arena"     => "arena reset  (removes leftover effects, restores players, camera, statuses, portals, pocket dimensions; stops sounds)",
         "cast"      => "cast <ability_id>  (practice/freeplay: fire any ability as yourself, on the closest player if it needs a target)",
         "tune"      => "tune cooldowns <percent> | tune reset",
+        "wanda" or "thor" or "loki" or "thanos" or "strange"
+                    => $"{cmd} <cooldown|duration|range|radius|power|damage|casttime|cinematic> <ability_id> <value> | {cmd} reset <ability_id> | {cmd} list   (power = area/strength radius)",
+        "combo"     => "combo list | combo <chaosstorm|reality_thunderclap|end_of_reality> test  (solo preview in freeplay)",
         "character" => "character loki | thanos | strange | none | info | abilities",
         "meeting"   => "meeting ability cooldown|uses_per_meeting|duration <id> <value> | meeting ability enabled|practice_only <id> <on|off> | meeting ability phase <id> <discussion|voting|both> | meeting list | meeting reset",
         "finisher"  => "finisher list | preview <id> (on the closest player, nobody dies) | replay <id> | duration <id> <s> | mode <full|short|skip> | body <on|off>",
@@ -188,7 +197,7 @@ public class DevConsole : MonoBehaviour
 
     private string CmdCharacter(string[] p)
     {
-        if (p.Length < 2) throw new ConsoleException("Usage: character <loki|thanos|none|info|abilities>");
+        if (p.Length < 2) throw new ConsoleException("Usage: character <" + string.Join("|", CharacterRegistry.All.Select(c => c.Id)) + "|none|info|abilities>");
         var arg = p[1].ToLowerInvariant();
         switch (arg)
         {
@@ -203,7 +212,7 @@ public class DevConsole : MonoBehaviour
                 CharacterRegistry.Choose("none");
                 return "Freeplay character cleared.";
             default:
-                if (CharacterRegistry.ById(arg) == null) throw new ConsoleException($"Unknown character '{p[1]}'. Options: loki, thanos, none.");
+                if (CharacterRegistry.ById(arg) == null) throw new ConsoleException($"Unknown character '{p[1]}'. Options: {string.Join(", ", CharacterRegistry.All.Select(c => c.Id))}, none.");
                 CharacterRegistry.Choose(arg);
                 return $"Freeplay character set to {arg} (used in freeplay and the lobby).";
         }
@@ -259,7 +268,7 @@ public class DevConsole : MonoBehaviour
     private string CmdFinisher(string[] p)
     {
         if (p.Length < 2) throw new ConsoleException("Usage: " + GetDetailedHelp("finisher"));
-        var finishers = LokiCharacter.Instance.Executions.OfType<Abilities.Loki.FinisherAbility>().ToList();
+        var finishers = CharacterRegistry.AllAbilities().OfType<Abilities.Loki.FinisherAbility>().Distinct().ToList();
         switch (p[1].ToLowerInvariant())
         {
             case "list":
@@ -452,6 +461,10 @@ public class DevConsole : MonoBehaviour
                 ModConfig.Data.PracticeUnlimited = ParseBool(p, 2);
                 ModConfig.Save();
                 return $"Unlimited abilities: {ModConfig.Data.PracticeUnlimited}.";
+            case "cooldowns":   // "practice cooldowns off" = no cooldowns
+                ModConfig.Data.PracticeUnlimited = !ParseBool(p, 2);
+                ModConfig.Save();
+                return $"Cooldowns {(ModConfig.Data.PracticeUnlimited ? "OFF" : "ON")}.";
             default:
                 throw new ConsoleException($"Unknown practice subcommand '{p[1]}'.");
         }
@@ -562,6 +575,60 @@ public class DevConsole : MonoBehaviour
             default:
                 throw new ConsoleException($"Unknown debug subcommand '{p[1]}'.");
         }
+    }
+
+    /// <summary>Per-character tuning: "wanda cooldown chaos_bolt 5", "thor power thunderclap 12".</summary>
+    private string CmdHero(string[] p, string heroId)
+    {
+        var hero = CharacterRegistry.ById(heroId) ?? throw new ConsoleException($"Character '{heroId}' is not loaded.");
+        if (p.Length < 2) throw new ConsoleException("Usage: " + GetDetailedHelp(heroId));
+        var sub = p[1].ToLowerInvariant();
+        if (sub == "list")
+            return string.Join("\n", hero.AllAbilities().Where(a => a.Category != "Hidden").Select(a =>
+                $"  [{a.Id}] {a.Name} - CD {a.Cfg.Cooldown}s, dur {a.Cfg.Duration}s, range {a.Cfg.Range}, radius {a.Cfg.Radius}, dmg {a.Cfg.Damage}"));
+        if (p.Length < 3) throw new ConsoleException("Usage: " + GetDetailedHelp(heroId));
+        var id = p[2].ToLowerInvariant();
+        if (!hero.AllAbilities().Any(a => a.Id == id))
+            throw new ConsoleException($"{hero.DisplayName} has no ability '{id}'. Type '{heroId} list'.");
+        if (sub == "reset")
+        {
+            ModConfig.SetAbility(id, DefaultAbilities.Get(id));
+            return $"[{id}] reset to defaults.";
+        }
+        var cfg = ModConfig.GetAbility(id);
+        float v = ParseFloat(p, 3);
+        if (v < 0f) throw new ConsoleException("Values can't be negative.");
+        switch (sub)
+        {
+            case "cooldown":  cfg.Cooldown = v; break;
+            case "duration":  cfg.Duration = v; break;
+            case "range":     cfg.Range = v; break;
+            case "radius":
+            case "power":     cfg.Radius = v; break;
+            case "damage":    cfg.Damage = v; break;
+            case "casttime":  cfg.CastTime = v; break;
+            case "cinematic": cfg.CinematicDur = v; break;
+            default: throw new ConsoleException($"Unknown setting '{p[1]}'. Try cooldown, duration, range, radius/power, damage, casttime, cinematic.");
+        }
+        ModConfig.SetAbility(id, cfg);
+        return $"[{id}] {sub} = {v} (saved, applies to the next cast).";
+    }
+
+    private string CmdCombo(string[] p)
+    {
+        var combos = new Abilities.AbilityBase[] { Abilities.Combo.Combos.Chaosstorm, Abilities.Combo.Combos.Thunderclap, Abilities.Combo.Combos.EndOfReality };
+        if (p.Length < 2 || p[1].ToLowerInvariant() == "list")
+            return string.Join("\n", combos.Select(c => $"  [{c.Id}] {c.Name} - CD {c.Cfg.Cooldown}s, partner range {c.Cfg.Range}"));
+        var combo = combos.FirstOrDefault(c => c.Id == p[1].ToLowerInvariant()) ?? throw new ConsoleException($"Unknown combo '{p[1]}'. Type 'combo list'.");
+        if (p.Length < 3 || p[2].ToLowerInvariant() != "test") throw new ConsoleException($"Usage: combo {combo.Id} test");
+        if (!CharacterRegistry.IsFreeplay && !CharacterRegistry.InLobby) throw new ConsoleException("combo test only works in freeplay / the lobby.");
+        var lp = PlayerControl.LocalPlayer ?? throw new ConsoleException("No local player.");
+        var who = CharacterRegistry.Local?.Id;
+        if (who != "wanda" && who != "thor")
+            throw new ConsoleException("Play as Scarlet Witch or Thor first ('character wanda' or 'character thor').");
+        combo.ResetCooldown();
+        _open = false; IsOpen = false;
+        return combo.TryActivate(lp) ? $"Testing {combo.Name} (solo preview with a stand-in partner)." : $"{combo.Name} could not start.";
     }
 
     private string CmdSfx(string[] p)

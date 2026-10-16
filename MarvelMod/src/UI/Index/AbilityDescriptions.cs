@@ -132,6 +132,32 @@ public static class AbilityDescriptions
         ["crimson_bands_finisher"] = "KILL FINISHER. A crimson circle, bands and runes; the seal closes into golden sparks.",
         ["temporal_fracture"]= "KILL FINISHER. Time stops; three echoes of the victim converge into light and collapse.",
         ["sorcerer_supreme"] = "ULTIMATE KILL FINISHER. A cosmic chamber, a hundred portals, every construct merges into a golden sigil.",
+        // ── Scarlet Witch ──
+        ["chaos_bolt"]       = "A wobbling hex-orb that curves and homes in on the closest player (or flies where you walk). Hit = stunned + knocked back.",
+        ["telekinetic_grip"] = "Needs a target. Lift them helplessly into the air, then hurl them away (throw distance = Radius).",
+        ["crimson_barrier"]  = "A red hex dome around you that blocks the next hostile ability.",
+        ["hex_of_deception"] = "Everyone near you sees a fake world on their own screen: red darkness, phantom crewmates that follow them and glitch away. Visual only.",
+        ["reality_rewrite"]  = "ULTIMATE. The area becomes a chaos dimension: debris floats, reality cracks, everyone inside is slowed and their controls are inverted.",
+        ["crimson_execution"]= "KILL FINISHER. Scarlet energy wraps and lifts the target, a giant sigil forms, a burst of red light.",
+        ["house_of_m"]       = "KILL FINISHER. The world warps into the House of M with a court of Wandas, then the illusion collapses onto the victim.",
+        ["puppet_of_chaos"]  = "KILL FINISHER. Red threads hook the victim and Wanda makes them dance, then cuts the strings in a burst.",
+        ["reality_fracture"] = "KILL FINISHER. Reality cracks like glass, alternate versions of the victim flicker in the cracks, everything converges.",
+        ["no_more"]          = "ULTIMATE KILL FINISHER. \"No more.\" Time freezes, red runes cover the screen, the world folds in and detonates.",
+        // ── Thor ──
+        ["mjolnir_throw"]    = "Throw Mjolnir at the closest player (or ahead). Heavy hit + lightning, then it flies back to your hand.",
+        ["lightning_strike"] = "A warning ring flickers on the closest player (or ahead), then a bolt hits everyone in the area.",
+        ["thunderclap"]      = "Leap and slam: a thunder wave stuns everyone nearby and throws them back (push = Radius).",
+        ["stormflight"]      = "Fly in the direction you're walking, leaving a lightning trail. Stops at walls.",
+        ["god_of_thunder"]   = "ULTIMATE. The sky goes dark, bolts rain around you, then a colossal strike and shockwave. Set Damage > 0 to make the core lethal.",
+        ["the_worthy"]       = "KILL FINISHER. Mjolnir flies into your hand, charges with lightning, and comes down in one huge strike.",
+        ["bifrost_arrival"]  = "KILL FINISHER. A rainbow Bifrost beam slams down, Thor arrives in it and launches through the victim.",
+        ["stormbreaker"]     = "KILL FINISHER. Stormbreaker answers the call, a storm gathers over the victim, one swing of blue-white lightning.",
+        ["wrath_of_asgard"]  = "KILL FINISHER. Thunder rolls, strikes land in a tightening circle, the last one hits the victim.",
+        ["king_of_thunder"]  = "ULTIMATE KILL FINISHER. Thor rises inside rings of lightning, calls a gigantic column, then drops in a shockwave.",
+        // ── Team-ups ──
+        ["chaosstorm"]       = "TEAM-UP. Wanda's red field + Thor's lightning: anyone inside keeps getting slowed and zapped. Needs your partner nearby in matches; freeplay uses a stand-in.",
+        ["reality_thunderclap"] = "TEAM-UP. Thor strikes Wanda's barrier and it explodes outward as a huge red and blue wave that throws everyone back.",
+        ["end_of_reality"]   = "TEAM-UP ULTIMATE. Fractures spread, lightning and chaos converge into a rift, and the whole map gets stunned and slowed. No kills.",
         // ── Hidden ──
         ["map_teleport"]   = "Open the map and left-click anywhere to teleport there. No cooldown.",
     };
@@ -146,6 +172,7 @@ public static class AbilityDescriptions
         "Mouse wheel: scroll down to zoom out, up to zoom back in. While zoomed out: right-click to teleport there",
         "F1: this index    H: hide buttons    F4: cooldowns on/off",
         "F3 (freeplay/lobby): switch character    F6: dev console",
+        "Scarlet Witch / Thor: the TEAM-UP page needs the other one alive nearby in a match. In freeplay a stand-in appears so you can preview it solo.",
         "Thanos: you start a match with 2 stones; you get one more every 60 s and one per kill. Locked pages unlock as you collect them.",
         "Green outline on a player = who a targeted ability will hit",
     };

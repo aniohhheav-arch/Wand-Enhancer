@@ -25,6 +25,8 @@ public class MarvelModPlugin : BasePlugin
         MarvelMod.Characters.CharacterRegistry.Register(MarvelMod.Characters.LokiCharacter.Instance);
         MarvelMod.Characters.CharacterRegistry.Register(MarvelMod.Characters.ThanosCharacter.Instance);
         MarvelMod.Characters.CharacterRegistry.Register(MarvelMod.Characters.StrangeCharacter.Instance);
+        MarvelMod.Characters.CharacterRegistry.Register(MarvelMod.Characters.WandaCharacter.Instance);
+        MarvelMod.Characters.CharacterRegistry.Register(MarvelMod.Characters.ThorCharacter.Instance);
         Harmony.PatchAll();
 
         // Ability buttons are driven by Patches.HudUpdatePatch (they live on the game's HUD).

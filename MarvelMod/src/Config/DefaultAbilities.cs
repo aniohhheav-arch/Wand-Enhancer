@@ -145,8 +145,41 @@ public static class DefaultAbilities
         ["sorcerer_supreme"]      = new() { Cooldown=90, Duration=0, Range=3f },
         ["assign_strange"]        = new() { Cooldown=0 },
 
+        // ── Scarlet Witch ───────────────────────────────────────────────
+        // Duration = stun / hold time, Radius = Telekinetic Grip throw distance.
+        ["chaos_bolt"]            = new() { Cooldown=8,  Duration=1.5f, Range=6 },
+        ["telekinetic_grip"]      = new() { Cooldown=18, Duration=1.6f, Range=3.5f, Radius=3 },
+        ["crimson_barrier"]       = new() { Cooldown=25, Duration=8 },
+        ["hex_of_deception"]      = new() { Cooldown=30, Duration=7, Range=6 },
+        ["reality_rewrite"]       = new() { Cooldown=80, Duration=8, Range=5, CinematicDur=2.5f },
+        ["crimson_execution"]     = new() { Cooldown=60, Duration=0, Range=3f },
+        ["house_of_m"]            = new() { Cooldown=60, Duration=0, Range=3f },
+        ["puppet_of_chaos"]       = new() { Cooldown=60, Duration=0, Range=3f },
+        ["reality_fracture"]      = new() { Cooldown=60, Duration=0, Range=3f },
+        ["no_more"]               = new() { Cooldown=90, Duration=0, Range=3f },
+
+        // ── Thor ────────────────────────────────────────────────────────
+        // CastTime = Lightning Strike warning; Radius = strike area / Thunderclap push distance.
+        ["mjolnir_throw"]         = new() { Cooldown=8,  Duration=1.5f, Range=6 },
+        ["lightning_strike"]      = new() { Cooldown=12, Duration=2, Range=7, Radius=1.2f, CastTime=0.8f },
+        ["thunderclap"]           = new() { Cooldown=16, Duration=1.2f, Range=3.5f, Radius=2 },
+        ["stormflight"]           = new() { Cooldown=10, Range=6 },
+        ["god_of_thunder"]        = new() { Cooldown=90, Duration=4, Range=6, Radius=2, Damage=0, CinematicDur=2.5f },
+        ["the_worthy"]            = new() { Cooldown=60, Duration=0, Range=3f },
+        ["bifrost_arrival"]       = new() { Cooldown=60, Duration=0, Range=3f },
+        ["stormbreaker"]          = new() { Cooldown=60, Duration=0, Range=3f },
+        ["wrath_of_asgard"]       = new() { Cooldown=60, Duration=0, Range=3f },
+        ["king_of_thunder"]       = new() { Cooldown=90, Duration=0, Range=3f },
+
+        // ── Team-ups (Wanda + Thor) ─────────────────────────────────────
+        // Range = how close the partner must be (matches); Radius = area.
+        ["chaosstorm"]            = new() { Cooldown=45, Duration=6, Range=6, Radius=3.5f },
+        ["reality_thunderclap"]   = new() { Cooldown=40, Duration=1.5f, Range=6, Radius=5 },
+        ["end_of_reality"]        = new() { Cooldown=150, Duration=3, Range=8, CinematicDur=3f },
+
         // ── Hidden ──────────────────────────────────────────────────────
         ["map_teleport"]          = new() { Cooldown=0 },
+        ["announce_character"]    = new() { Cooldown=0 },
     };
 
     public static AbilityConfig Get(string id) =>
