@@ -44,12 +44,12 @@ public static class DefaultAbilities
         ["chaos_contract"]        = new() { Cooldown=35, Duration=8,  Range=3.5f },
         ["the_grand_deception"]   = new() { Cooldown=90, Duration=12, Range=4, MaxTargets=6, CinematicDur=2.5f },
 
-        // ── Executions (real kills) ─────────────────────────────────────
-        ["backstab"]              = new() { Cooldown=25, Range=1.8f },
-        ["scepter_blast"]         = new() { Cooldown=35, Range=4 },
-        ["serpent_strike"]        = new() { Cooldown=30, Duration=3, Range=2.5f },
-        ["illusion_ambush"]       = new() { Cooldown=40, Range=3.5f },
-        ["royal_execution"]       = new() { Cooldown=60, Range=3, CinematicDur=1.5f },
+        // ── Cinematic finishers (real kills). Duration 0 = default length (8-13 s) ──
+        ["infinite_deception"]    = new() { Cooldown=35, Duration=0, Range=2.5f },
+        ["kings_last_dance"]      = new() { Cooldown=35, Duration=0, Range=2.5f },
+        ["betrayal_paradox"]      = new() { Cooldown=40, Duration=0, Range=2.5f },
+        ["puppet_master"]         = new() { Cooldown=40, Duration=0, Range=3f },
+        ["kneel_before_trickster"]= new() { Cooldown=75, Duration=0, Range=3f },
 
         // ── Hidden ──────────────────────────────────────────────────────
         ["map_teleport"]          = new() { Cooldown=0 },

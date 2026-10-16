@@ -28,10 +28,34 @@ public static class MovementStatusPatch
         var pc = __instance.myPlayer;
         if (pc == null || __instance.body == null || !Players.Controls(pc)) return;
 
-        if (status.HasStatus(pc, StatusEffect.Bound) || status.HasStatus(pc, StatusEffect.Stunned))
-            __instance.body.velocity = Vector2.zero;
-        else if (status.HasStatus(pc, StatusEffect.ChaosContract))
-            __instance.body.velocity = -__instance.body.velocity;
+        var body = __instance.body;
+        if (status.IsRooted(pc))
+        {
+            body.velocity = Vector2.zero;
+            return;
+        }
+
+        Vector2 pos = pc.transform.position;
+        float speed = __instance.Speed;
+        var puppetGoal = status.PointOf(pc, StatusEffect.Puppet);
+        if (puppetGoal.HasValue)   // Mind Control: the body walks on its own
+        {
+            var to = puppetGoal.Value - pos;
+            body.velocity = to.magnitude > 0.2f ? to.normalized * speed : Vector2.zero;
+            return;
+        }
+
+        var v = body.velocity;
+        if (status.HasStatus(pc, StatusEffect.ChaosContract)) v = -v;
+        if (status.HasStatus(pc, StatusEffect.Slowed)) v *= 0.45f;
+        if (status.HasStatus(pc, StatusEffect.Haste)) v *= 1.6f;
+        var pull = status.PointOf(pc, StatusEffect.Pulled);
+        if (pull.HasValue)   // Gravity Well
+        {
+            var to = pull.Value - pos;
+            if (to.magnitude > 0.3f) v += to.normalized * speed * 0.9f;
+        }
+        body.velocity = v;
     }
 }
 
@@ -45,6 +69,5 @@ public static class MeetingCleanupPatch
         ShapeshiftManager.Instance?.RestoreAll();
         StatusManager.Instance?.ClearAll();
         InvisibilityManager.Instance?.RestoreAll();
-        VFX.Fx.ClearStains();
     }
 }

@@ -184,7 +184,7 @@ public static class AbilityButtons
         if (MeetingHud.Instance != null || ExileController.Instance != null || hud.IsIntroDisplayed) return false;
         if (MapBehaviour.Instance != null && MapBehaviour.Instance.IsOpen) return false;
         if (hud.Chat != null && hud.Chat.IsOpenOrOpening) return false;
-        if (TargetMenu.IsOpen || Minigame.Instance != null) return false;
+        if (TargetMenu.IsOpen || Minigame.Instance != null || CinematicDirector.LocalActive) return false;
         return CharacterRegistry.InLobby
             || (hud.UseButton != null && hud.UseButton.gameObject.activeInHierarchy)
             || (hud.ReportButton != null && hud.ReportButton.gameObject.activeInHierarchy);

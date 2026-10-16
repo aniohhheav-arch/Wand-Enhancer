@@ -56,6 +56,42 @@ public static class Sprites
         return Mathf.Clamp01(a + core);
     });
 
+    /// <summary>Square outline (Spatial Prison cube).</summary>
+    public static Sprite Box => Generated("box", 128, (x, y) =>
+    {
+        float d = Mathf.Max(Mathf.Abs(x), Mathf.Abs(y));
+        return Mathf.Clamp01(1f - Mathf.Abs(d - 0.85f) / 0.08f) + Mathf.Clamp01(0.85f - d) * 0.15f;
+    });
+
+    /// <summary>Rune circle: double ring with tick marks (finisher rune seals).</summary>
+    public static Sprite Runes => Generated("runes", 256, (x, y) =>
+    {
+        float r = Mathf.Sqrt(x * x + y * y);
+        float a = Mathf.Atan2(y, x);
+        float outer = Mathf.Clamp01(1f - Mathf.Abs(r - 0.92f) / 0.025f);
+        float inner = Mathf.Clamp01(1f - Mathf.Abs(r - 0.62f) / 0.02f);
+        float band = r > 0.66f && r < 0.88f ? 1f : 0f;
+        float glyph = band * (Mathf.Sin(a * 24f) > 0.55f ? 1f : 0f) * (Mathf.Sin(r * 60f) > -0.2f ? 1f : 0f);
+        return Mathf.Clamp01(outer + inner + glyph * 0.9f);
+    });
+
+    /// <summary>Glass shard / illusion fragment (triangle).</summary>
+    public static Sprite Shard => Generated("shard", 64, (x, y) =>
+    {
+        // triangle with vertices (0,1), (-0.8,-0.7), (0.8,-0.7)
+        float e1 = (y + 0.7f);
+        float e2 = 1f - y - Mathf.Abs(x) * 1.0625f * 1.6f;
+        return e1 > 0f && e2 > 0f ? Mathf.Clamp01(Mathf.Min(e1, e2) * 8f) : 0f;
+    });
+
+    /// <summary>Soft horizontal bar (beams, threads, slashes): scale x for length, y for width.</summary>
+    public static Sprite Bar => Generated("bar", 64, (x, y) =>
+    {
+        float a = Mathf.Clamp01(1f - Mathf.Abs(y));
+        float end = Mathf.Clamp01((1f - Mathf.Abs(x)) * 6f);
+        return a * a * end;
+    });
+
     /// <summary>Solid white square (for full-screen tints).</summary>
     public static Sprite Square => Generated("square", 4, (_, _) => 1f);
 

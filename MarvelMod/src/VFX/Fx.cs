@@ -197,13 +197,14 @@ public static class Fx
     private static Transform? ScreenLayer(float depthFromButtons, out int layer)
     {
         layer = 0;
-        var cam = Camera.main;
         var hud = HudManager.Instance;
-        if (cam == null || hud == null) return null;
+        if (hud == null) return null;
+        var cam = UiCamera;
+        if (cam == null) return null;
         layer = hud.gameObject.layer;
-        float buttonsZ = hud.UseButton != null ? hud.UseButton.transform.position.z : cam.transform.position.z + 1f;
+        float buttonsZ = hud.UseButton != null ? hud.UseButton.transform.position.z : cam.transform.position.z + 5f;
         float z = buttonsZ + depthFromButtons;
-        if (PlayerControl.LocalPlayer != null)   // never go behind the world
+        if (cam == Camera.main && PlayerControl.LocalPlayer != null)   // shared camera: never go behind the world
             z = Mathf.Min(z, PlayerControl.LocalPlayer.transform.position.z - 1f);
         var go = new GameObject("MarvelScreenFx") { layer = layer };
         go.transform.SetParent(cam.transform, false);
@@ -211,12 +212,28 @@ public static class Fx
         return go.transform;
     }
 
+    /// <summary>The camera that draws the HUD (separate from the world camera in current builds).</summary>
+    public static Camera? UiCamera =>
+        HudManager.Instance != null && HudManager.Instance.UICamera != null ? HudManager.Instance.UICamera : Camera.main;
+
+    /// <summary>A screen-space sprite (letterbox bars, overlays). depth &lt; 0 = in front of the HUD buttons.</summary>
+    public static SpriteRenderer? ScreenSprite(Sprite sprite, Color color, float depthFromButtons, string name = "MarvelScreenSprite")
+    {
+        var root = ScreenLayer(depthFromButtons, out _);
+        if (root == null) return null;
+        root.name = name;
+        var sr = root.gameObject.AddComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.color = color;
+        return sr;
+    }
+
     /// <summary>Full-screen colour tint behind the HUD (fades in, holds, fades out). pulses > 0 makes it flash.</summary>
     public static void ScreenTint(Color color, float dur, int pulses = 0)
     {
         if (!Enabled || !ModConfig.Data.VfxDistortion) return;
         var root = ScreenLayer(0.5f, out int layer);
-        var cam = Camera.main;
+        var cam = UiCamera;
         if (root == null || cam == null) return;
         var sr = root.gameObject.AddComponent<SpriteRenderer>();
         sr.sprite = Sprites.Square;
@@ -270,63 +287,186 @@ public static class Fx
         if (root != null) Object.Destroy(root);
     }
 
-    // ── gore ─────────────────────────────────────────────────────────────────
+    // ── shapes ───────────────────────────────────────────────────────────────
 
-    private static readonly System.Collections.Generic.List<GameObject> Stains = new();
-    public static readonly Color Blood     = new(0.62f, 0.02f, 0.04f, 1f);
-    public static readonly Color BloodDark = new(0.35f, 0.00f, 0.02f, 1f);
-
-    /// <summary>Blood spray: droplets fly in an arc and leave stains on the floor (cleared at meetings).</summary>
-    public static void BloodSplatter(Vector2 pos, float power = 1f, Vector2? direction = null)
+    /// <summary>A straight energy beam from A to B (glow + white core) that fades.</summary>
+    public static void Beam(Vector2 from, Vector2 to, Color color, float width = 0.5f, float dur = 0.5f)
     {
         if (!Enabled) return;
-        int count = Mathf.RoundToInt(18 * power * Intensity);
-        for (int i = 0; i < count; i++)
+        var mid = (from + to) * 0.5f;
+        var dir = to - from;
+        float len = dir.magnitude;
+        float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        foreach (var (c, w) in new[] { (A(color, 0.85f), width), (A(Color.white, 0.95f), width * 0.35f) })
         {
-            Vector2 dir;
-            if (direction.HasValue)
+            var sr = MakeSprite(Sprites.Bar, mid, c, 1f, "MarvelBeam");
+            sr.transform.rotation = Quaternion.Euler(0, 0, ang);
+            sr.transform.localScale = new Vector3(len / 1f, w, 1f);
+            float baseA = c.a;
+            Animate(sr, dur, k =>
             {
-                float spread = Random.Range(-0.7f, 0.7f);
-                var d = direction.Value.normalized;
-                dir = new Vector2(d.x * Mathf.Cos(spread) - d.y * Mathf.Sin(spread), d.x * Mathf.Sin(spread) + d.y * Mathf.Cos(spread));
-            }
-            else dir = Random.insideUnitCircle.normalized;
-
-            float dist = Random.Range(0.3f, 1.6f) * power;
-            float arc = Random.Range(0.3f, 0.9f);
-            float size = Random.Range(0.12f, 0.3f);
-            float life = Random.Range(0.35f, 0.6f);
-            var c = Color.Lerp(Blood, BloodDark, Random.value);
-            var start = pos + new Vector2(0f, 0.2f);
-            var land = pos + dir * dist + new Vector2(0f, -0.25f);
-            var drop = MakeSprite(Sprites.Glow, start, c, size);
-            float landSize = size * Random.Range(1.2f, 2.2f);
-            Animate(drop, life, k =>
-            {
-                var p = Vector2.Lerp(start, land, k) + new Vector2(0f, Mathf.Sin(k * Mathf.PI) * arc);
-                drop.transform.position = new Vector3(p.x, p.y, p.y / 1000f - 0.5f);
-                if (k > 0.97f) Stain(land, c, landSize);
+                sr.transform.localScale = new Vector3(len, w * (1f + 0.15f * Mathf.Sin(k * 40f)) * (1f - k * 0.6f), 1f);
+                sr.color = A(c, baseA * (1f - k * k));
             });
         }
-        // central spurt
-        Burst(pos, Blood, 1.3f * power, 0.3f);
-        Stain(pos + new Vector2(0f, -0.3f), BloodDark, 1.1f * power);
     }
 
-    private static void Stain(Vector2 pos, Color c, float size)
+    /// <summary>Jagged crack lines spreading from a point, then fading.</summary>
+    public static void Cracks(Vector2 center, Color color, int count = 7, float radius = 1.6f, float dur = 1.2f, int seed = 0)
     {
-        var sr = MakeSprite(Sprites.Glow, pos, A(c, 0.85f), size, "MarvelBloodStain");
-        sr.transform.position = new Vector3(pos.x, pos.y, pos.y / 1000f + 0.4f);   // on the floor, behind players
-        sr.transform.localScale = new Vector3(size * 1.4f, size * 0.8f, 1f);
-        Stains.Add(sr.gameObject);
-        Object.Destroy(sr.gameObject, 45f);
+        if (!Enabled) return;
+        var rng = new System.Random(seed);
+        for (int i = 0; i < count; i++)
+        {
+            float ang = (float)(i * Mathf.PI * 2 / count + rng.NextDouble() * 0.5);
+            var p = center;
+            int segs = 3;
+            for (int sgi = 0; sgi < segs; sgi++)
+            {
+                float segLen = radius / segs * (0.7f + (float)rng.NextDouble() * 0.6f);
+                ang += (float)(rng.NextDouble() - 0.5) * 0.9f;
+                var q = p + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * segLen;
+                var sr = MakeSprite(Sprites.Bar, (p + q) * 0.5f, A(color, 0f), 1f, "MarvelCrack");
+                sr.transform.rotation = Quaternion.Euler(0, 0, ang * Mathf.Rad2Deg);
+                sr.transform.localScale = new Vector3(segLen, 0.08f, 1f);
+                float delay = sgi * 0.08f;
+                Animate(sr, dur + delay, k =>
+                {
+                    float t = k * (dur + delay);
+                    float a = t < delay ? 0f : Mathf.Min(1f, (t - delay) / 0.06f) * (1f - Mathf.Max(0f, k - 0.7f) / 0.3f);
+                    sr.color = A(color, a);
+                });
+                p = q;
+            }
+        }
     }
 
-    public static void ClearStains()
+    /// <summary>A ring that sweeps outward; onReach is called once for each living player it passes.</summary>
+    public static void Wave(Vector2 center, Color color, float maxRadius, float dur, Action<PlayerControl>? onReach = null)
+        => Coroutines.Start(CoWave(center, color, maxRadius, dur, onReach));
+
+    private static IEnumerator CoWave(Vector2 center, Color color, float maxRadius, float dur, Action<PlayerControl>? onReach)
     {
-        foreach (var s in Stains)
-            if (s != null) Object.Destroy(s);
-        Stains.Clear();
+        var ring = MakeSprite(Sprites.Ring, center, A(color, 0.9f), 0.1f, "MarvelWave");
+        var hit = new System.Collections.Generic.HashSet<byte>();
+        for (float t = 0; t < dur; t += Time.deltaTime)
+        {
+            if (ring == null) yield break;
+            float r = maxRadius * (t / dur);
+            ring.transform.localScale = Vector3.one * r * 2f / 0.82f;
+            ring.color = A(color, 0.9f * (1f - t / dur * 0.6f));
+            if (onReach != null)
+                foreach (var pc in Characters.Players.All())
+                {
+                    if (!Characters.Players.IsAlive(pc) || hit.Contains(pc.PlayerId)) continue;
+                    if (Vector2.Distance(center, pc.transform.position) <= r)
+                    {
+                        hit.Add(pc.PlayerId);
+                        try { onReach(pc); } catch (Exception) { /* keep the wave going */ }
+                    }
+                }
+            yield return null;
+        }
+        if (ring != null) Object.Destroy(ring.gameObject);
+    }
+
+    /// <summary>Glowing marker drawn above walls/shadows on the local screen (Soul Sight).</summary>
+    public static void ScreenMarker(Transform follow, Color color, float dur)
+        => Coroutines.Start(CoMarker(follow, color, dur));
+
+    private static IEnumerator CoMarker(Transform follow, Color color, float dur)
+    {
+        var sr = ScreenSprite(Sprites.Glow, A(color, 0.85f), 0.3f, "MarvelSoulMarker");
+        var ring = ScreenSprite(Sprites.Ring, A(color, 1f), 0.29f, "MarvelSoulRing");
+        if (sr == null || ring == null) yield break;
+        sr.transform.SetParent(null, true);
+        ring.transform.SetParent(null, true);
+        for (float t = 0; t < dur; t += Time.deltaTime)
+        {
+            if (follow == null || sr == null || ring == null) break;
+            var p = follow.position;
+            sr.transform.position = new Vector3(p.x, p.y, sr.transform.position.z);
+            ring.transform.position = new Vector3(p.x, p.y, ring.transform.position.z);
+            float pulse = 0.9f + 0.2f * Mathf.Sin(Time.time * 5f);
+            sr.transform.localScale = Vector3.one * 1.1f * pulse;
+            ring.transform.localScale = Vector3.one * 0.9f * pulse;
+            yield return null;
+        }
+        if (sr != null) Object.Destroy(sr.gameObject);
+        if (ring != null) Object.Destroy(ring.gameObject);
+    }
+
+    /// <summary>Cinematic black bars (local screen). Returns a handle to remove them.</summary>
+    public static GameObject? Letterbox(float hold)
+    {
+        var cam = UiCamera;
+        if (cam == null) return null;
+        var root = new GameObject("MarvelLetterbox");
+        float h = cam.orthographicSize, w = h * cam.aspect;
+        for (int i = 0; i < 2; i++)
+        {
+            var bar = ScreenSprite(Sprites.Square, Color.black, -0.6f, "MarvelBar");
+            if (bar == null) continue;
+            bar.transform.SetParent(root.transform, true);
+            float sign = i == 0 ? 1f : -1f;
+            bar.transform.localScale = new Vector3(w * 2.4f, h * 0.24f, 1f);
+            var basePos = bar.transform.localPosition;
+            var target = new Vector3(cam.transform.position.x, cam.transform.position.y + sign * h * 0.9f, bar.transform.position.z);
+            var start = target + new Vector3(0f, sign * h * 0.3f, 0f);
+            bar.transform.position = start;
+            Animate(bar, hold, k =>
+            {
+                float inK = Mathf.Min(1f, k * hold / 0.4f);
+                float outK = Mathf.Min(1f, (1f - k) * hold / 0.4f);
+                bar.transform.position = Vector3.Lerp(start, target, Mathf.Min(inK, outK));
+            });
+        }
+        Object.Destroy(root, hold + 0.1f);
+        return root;
+    }
+
+    /// <summary>A body breaking into glowing fragments that drift outward and fade.</summary>
+    public static void Fragments(Vector2 pos, Color color, int count = 40, float spread = 1.6f, float dur = 1.4f, bool reverse = false)
+    {
+        if (!Enabled) return;
+        for (int i = 0; i < count; i++)
+        {
+            var start = pos + new Vector2(Random.Range(-0.3f, 0.3f), Random.Range(-0.4f, 0.5f));
+            var end = start + Random.insideUnitCircle * spread + new Vector2(0f, Random.Range(0.2f, 0.9f));
+            if (reverse) (start, end) = (end, start);
+            float size = Random.Range(0.08f, 0.2f);
+            float spin = Random.Range(-540f, 540f);
+            var c = Color.Lerp(color, Color.white, Random.Range(0f, 0.4f));
+            var sr = MakeSprite(Sprites.Shard, start, c, size, "MarvelFragment");
+            float life = dur * Random.Range(0.7f, 1f);
+            Animate(sr, life, k =>
+            {
+                var p = Vector2.Lerp(start, end, reverse ? k * k : EaseOut(k));
+                sr.transform.position = new Vector3(p.x, p.y, p.y / 1000f - 0.55f);
+                sr.transform.Rotate(0, 0, spin * Time.deltaTime);
+                sr.color = A(c, reverse ? Mathf.Min(1f, k * 3f) : 1f - k * k);
+            });
+        }
+    }
+
+    /// <summary>Short text floating above a world position (victim reactions: "?", "!").</summary>
+    public static void WorldText(Transform follow, string text, Color color, float dur = 1.2f, float size = 3f)
+    {
+        var hud = HudManager.Instance;
+        if (hud == null || hud.KillButton == null || follow == null) return;
+        var tmp = UnityHelpers.CloneStripped(hud.KillButton.buttonLabelText, follow);
+        if (tmp == null) return;
+        tmp.gameObject.layer = follow.gameObject.layer;
+        tmp.name = "MarvelWorldText";
+        tmp.transform.localPosition = new Vector3(0f, 0.85f, -0.5f);
+        tmp.enableAutoSizing = false;
+        tmp.enableWordWrapping = false;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontSize = size;
+        tmp.rectTransform.sizeDelta = new Vector2(6f, 1f);
+        tmp.text = text;
+        tmp.color = color;
+        Coroutines.Start(CoToast(tmp, tmp.gameObject, color, dur));
     }
 
     /// <summary>Quick "punch" scale on a HUD button when it's used.</summary>

@@ -49,8 +49,8 @@ public class LokiCharacter : CharacterDef
 
         Executions = new List<AbilityBase>
         {
-            new Backstab(), new ScepterBlast(), new SerpentStrike(),
-            new IllusionAmbush(), new RoyalExecution(),
+            new InfiniteDeception(), new KingsLastDance(), new BetrayalParadox(),
+            new PuppetMaster(), new KneelBeforeTheTrickster(),
         };
 
         All = new List<AbilityBase>();
@@ -75,7 +75,7 @@ public class LokiCharacter : CharacterDef
         new("TRICKSTER",  "mystic_blink",     TricksterMobility),
         new("SORCERY",    "green_bolt",       SorceryAndCombat),
         new("MISCHIEF",   "mind_whisper",     GodOfMischief),
-        new("EXECUTE",    "backstab",         Executions, _ => !CharacterRegistry.InLobby),
+        new("FINISHERS",  "infinite_deception",         Executions, _ => !CharacterRegistry.InLobby),
     };
 
     public override IEnumerable<AbilityBase> Hidden => new[] { MapTeleport };

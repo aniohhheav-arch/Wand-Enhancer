@@ -98,6 +98,17 @@ public class ConfigData
     public bool    PracticeInvincible{ get; set; } = false;
     public int     PracticeDummies  { get; set; } = 3;
     public bool    HudEnabled        { get; set; } = true;
+    /// <summary>Finishers: full, short (half length) or skip (instant).</summary>
+    public string  FinisherMode     { get; set; } = "full";
+    /// <summary>Finishers dissolve the victim; true leaves a reportable body instead.</summary>
+    public bool    FinisherLeavesBody { get; set; } = false;
+    public bool    SfxEnabled       { get; set; } = true;
+    public float   SfxVolume        { get; set; } = 0.6f;
+    /// <summary>The Snap outcome: visual, practice_kill, match_kill_half or match_stun.</summary>
+    public string  SnapMode         { get; set; } = "visual";
+    /// <summary>Stones Thanos starts with in a match (1-6); one more every StoneUnlockSeconds and per kill.</summary>
+    public int     ThanosStartStones { get; set; } = 2;
+    public float   StoneUnlockSeconds { get; set; } = 60f;
     public bool    DebugMode        { get; set; } = false;
     public string  ConsoleKey       { get; set; } = "F6";
     // Loki illusion settings

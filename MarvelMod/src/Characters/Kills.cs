@@ -18,14 +18,14 @@ public static class Kills
         Players.IsAlive(killer) && Players.IsAlive(target) && killer != target
         && MeetingHud.Instance == null && LobbyBehaviour.Instance == null;
 
-    /// <summary>Kills target with gore. Mystic Shield absorbs it. Returns true if the target died.</summary>
-    public static bool Kill(PlayerControl killer, PlayerControl target, float gore = 1.5f, Vector2? sprayDir = null)
+    /// <summary>
+    /// Kills target. Mystic Shield absorbs it (unless checkShield is false because the caller
+    /// already checked). leaveBody=false removes the corpse (finishers that "dissolve" the victim).
+    /// </summary>
+    public static bool Kill(PlayerControl killer, PlayerControl target, bool leaveBody = true, bool checkShield = true)
     {
         if (!CanKill(killer, target)) return false;
-        if (StatusManager.Instance != null && StatusManager.Instance.ConsumeShield(target)) return false;
-
-        Fx.BloodSplatter(target.transform.position, gore, sprayDir);
-        Fx.Shake(0.35f, 0.6f);
+        if (checkShield && StatusManager.Instance != null && StatusManager.Instance.ConsumeShield(target)) return false;
         try
         {
             killer.MurderPlayer(target, MurderResultFlags.Succeeded | MurderResultFlags.DecisionByHost);
@@ -35,28 +35,52 @@ public static class Kills
             Log.LogWarning($"MurderPlayer failed, using fallback death: {e.Message}");
             if (Players.IsAlive(target)) target.Die(DeathReason.Kill, false);
         }
+        if (!leaveBody && !Config.ModConfig.Data.FinisherLeavesBody) RemoveBody(target.PlayerId);
         return true;
+    }
+
+    private static void RemoveBody(byte playerId)
+    {
+        foreach (var body in UnityEngine.Object.FindObjectsOfType<DeadBody>())
+            if (body != null && body.ParentId == playerId) UnityEngine.Object.Destroy(body.gameObject);
     }
 
     /// <summary>Runs a finisher sequence on every client (wrapped so a missing player can't throw).</summary>
     public static void Finisher(IEnumerator sequence) => Coroutines.Start(Safe(sequence));
 
+    /// <summary>
+    /// Runs a sequence that may yield nested IEnumerators (sub-steps) itself, so it doesn't depend on
+    /// the IL2CPP coroutine bridge supporting nesting. On error everything is disposed (finally blocks run).
+    /// </summary>
     private static IEnumerator Safe(IEnumerator inner)
     {
-        while (true)
+        var stack = new System.Collections.Generic.Stack<IEnumerator>();
+        stack.Push(inner);
+        while (stack.Count > 0)
         {
-            object? current;
+            var top = stack.Peek();
+            bool next;
             try
             {
-                if (!inner.MoveNext()) yield break;
-                current = inner.Current;
+                next = top.MoveNext();
             }
             catch (Exception e)
             {
-                Log.LogWarning($"Finisher aborted: {e.Message}");
+                Log.LogWarning($"Finisher aborted: {e}");
+                while (stack.Count > 0) (stack.Pop() as IDisposable)?.Dispose();
                 yield break;
             }
-            yield return current;
+            if (!next)
+            {
+                (stack.Pop() as IDisposable)?.Dispose();
+                continue;
+            }
+            if (top.Current is IEnumerator sub)
+            {
+                stack.Push(sub);
+                continue;
+            }
+            yield return top.Current;
         }
     }
 

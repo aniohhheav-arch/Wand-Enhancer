@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 
 namespace MarvelMod.Characters;
 
-public enum IllusionBehavior { Idle, Wander, Follow, Task, Random }
+public enum IllusionBehavior { Idle, Wander, Follow, Task, Random, MoveTo, Path, Controlled }
 
 /// <summary>Spawns and tracks illusions. Illusions are visual copies only — never real players.</summary>
 [RegisterInIl2Cpp]
@@ -121,6 +121,14 @@ public class LokiIllusion : MonoBehaviour
     private float _spawnTime;
     private float _behaviorTimer;
     private bool _popped;
+    private Vector2 _moveGoal;
+    private float _moveSpeed;
+    private List<Vector2>? _path;
+    private float _pathStart, _pathDuration;
+
+    /// <summary>Illusions used in cinematics don't burst when touched.</summary>
+    public bool Untouchable { get; set; }
+    public PoolablePlayer? Model => _model;
 
     public void Init(PlayerControl template, PoolablePlayer? model, float lifetime)
     {
@@ -140,6 +148,48 @@ public class LokiIllusion : MonoBehaviour
         _behaviorTimer = 0f;
     }
 
+    /// <summary>Walk to a point at a given speed, then idle.</summary>
+    public void MoveTo(Vector2 goal, float speed)
+    {
+        Behavior = IllusionBehavior.MoveTo;
+        _moveGoal = goal;
+        _moveSpeed = speed;
+    }
+
+    /// <summary>Replay a recorded path over duration seconds (Temporal Echo).</summary>
+    public void PlayPath(List<Vector2> path, float duration)
+    {
+        if (path.Count == 0) return;
+        Behavior = IllusionBehavior.Path;
+        _path = path;
+        _pathStart = Time.time;
+        _pathDuration = Mathf.Max(0.1f, duration);
+    }
+
+    /// <summary>Tint every sprite of the model (alpha for ghosts / spectral copies).</summary>
+    public void SetTint(Color c)
+    {
+        if (_model == null) return;
+        foreach (var sr in _model.GetComponentsInChildren<SpriteRenderer>(true)) sr.color = c;
+    }
+
+    /// <summary>Squash down as if kneeling (true) or stand back up.</summary>
+    public void Kneel(bool kneel)
+    {
+        if (_model == null) return;
+        var s = _model.transform.localScale;
+        _model.transform.localScale = new Vector3(s.x, Mathf.Abs(s.x) * (kneel ? 0.68f : 1f), s.z);
+    }
+
+    public void SetSize(float factor) => transform.localScale = Vector3.one * factor;
+
+    public void Face(bool left)
+    {
+        if (_model == null || _flipped == left) return;
+        _flipped = left;
+        _model.SetFlipX(left);
+    }
+
     public void Update()
     {
         if (_popped) return;
@@ -157,6 +207,9 @@ public class LokiIllusion : MonoBehaviour
             case IllusionBehavior.Task:   DoWander(Behavior == IllusionBehavior.Task ? speed * 0.6f : speed); break;
             case IllusionBehavior.Follow: DoFollow(speed); break;
             case IllusionBehavior.Random: DoRandom(speed); break;
+            case IllusionBehavior.MoveTo: MoveTowards(_moveGoal, _moveSpeed); break;
+            case IllusionBehavior.Path:   DoPath(); break;
+            case IllusionBehavior.Controlled: DoControlled(); break;
         }
         Vector2 after = transform.position;
         Animate(after - before);
@@ -167,6 +220,33 @@ public class LokiIllusion : MonoBehaviour
     {
         var p = Vector2.MoveTowards(transform.position, target, speed * Time.deltaTime);
         transform.position = new Vector3(p.x, p.y, p.y / 1000f);
+    }
+
+    private void DoPath()
+    {
+        if (_path == null) return;
+        float k = Mathf.Clamp01((Time.time - _pathStart) / _pathDuration);
+        float f = k * (_path.Count - 1);
+        int i = Mathf.Min((int)f, _path.Count - 1);
+        int j = Mathf.Min(i + 1, _path.Count - 1);
+        var p = Vector2.Lerp(_path[i], _path[j], f - i);
+        transform.position = new Vector3(p.x, p.y, p.y / 1000f);
+        if (k >= 1f) Behavior = IllusionBehavior.Idle;
+    }
+
+    /// <summary>Spirit Projection: moved with WASD / arrow keys, passes through walls.</summary>
+    private void DoControlled()
+    {
+        var dir = Vector2.zero;
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) dir.y += 1;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) dir.y -= 1;
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) dir.x -= 1;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) dir.x += 1;
+        if (dir.sqrMagnitude > 0f)
+        {
+            var p = (Vector2)transform.position + dir.normalized * 4f * Time.deltaTime;
+            transform.position = new Vector3(p.x, p.y, p.y / 1000f);
+        }
     }
 
     private void DoWander(float speed)
@@ -233,7 +313,7 @@ public class LokiIllusion : MonoBehaviour
     /// <summary>Illusions burst when a real player (other than Loki) walks into them.</summary>
     private void CheckTouched()
     {
-        if (Time.time - _spawnTime < 1f) return;
+        if (Untouchable || Time.time - _spawnTime < 1f) return;
         Vector2 here = transform.position;
         foreach (var pc in Players.All())
         {

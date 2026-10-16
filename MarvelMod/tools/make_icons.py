@@ -498,76 +498,96 @@ def switch_tab():
     finish(img, "switch_tab")
 
 
-BLOOD = (170, 10, 20, 255)
 BLUE = (80, 170, 255, 255)
 BLUE_L = (190, 230, 255, 255)
+WOOD = (176, 120, 70, 255)
+WOOD_D = (110, 70, 35, 255)
 
 
-def blood_drops(d, pts):
-    for (x, y, r) in pts:
-        d.ellipse([x - r, y - r, x + r, y + r], fill=BLOOD, outline=BLACK, width=max(8, int(r * 0.3)))
-        d.polygon([(x - r * 0.75, y - r * 0.4), (x, y - r * 2.1), (x + r * 0.75, y - r * 0.4)], fill=BLOOD)
+def mirror_frame(d, cx, cy, w, h, glass=BLUE_L):
+    d.ellipse([cx - w, cy - h, cx + w, cy + h], fill=GOLD, outline=BLACK, width=OL)
+    d.ellipse([cx - w * 0.82, cy - h * 0.85, cx + w * 0.82, cy + h * 0.85], fill=glass, outline=BLACK, width=OL // 2)
+    d.line([(cx - w * 0.4, cy - h * 0.5), (cx - w * 0.1, cy - h * 0.7)], fill=WHITE, width=24)
 
 
-def backstab():
-    img = new()
-    img = layer(img, lambda d, _: crewmate(d, 420, 560, 260, GREY, flip=True))
-    img = layer(img, lambda d, _: dagger(d, 660, 430, 640, math.radians(-40), blade=GREEN_L, glow_col=WHITE))
-    img = layer(img, lambda d, _: blood_drops(d, [(560, 600, 44), (640, 760, 34), (480, 820, 28)]))
-    finish(img, "backstab", glow_col=RED)
+def puppet(d, cx, cy, s):
+    crewmate(d, cx, cy, s, WOOD, shade=WOOD_D, visor=(220, 190, 140, 255))
+    for x in (cx - 0.4 * s, cx + 0.4 * s):
+        d.line([(x, cy - 0.9 * s), (x, cy - 1.9 * s)], fill=GREEN_L, width=12)
+    d.rounded_rectangle([cx - 0.75 * s, cy - 2.05 * s, cx + 0.75 * s, cy - 1.85 * s], radius=10, fill=WOOD_D, outline=BLACK, width=16)
 
 
-def scepter_blast():
-    img = new()
-    def fn(d, _):
-        d.line([(250, 860), (600, 380)], fill=BLACK, width=110)
-        d.line([(250, 860), (600, 380)], fill=GOLD, width=66)
-        d.polygon([(600, 380), (520, 250), (640, 130), (760, 250), (680, 380)], fill=GOLD, outline=BLACK, width=OL)
-        d.ellipse([560, 200, 720, 360], fill=BLUE, outline=BLACK, width=OL)
-        d.ellipse([600, 230, 660, 290], fill=BLUE_L)
-        for i in range(5):
-            a = math.radians(-60 + i * 25)
-            d.line([(640 + 180 * math.cos(a), 280 + 180 * math.sin(a)), (640 + 330 * math.cos(a), 280 + 330 * math.sin(a))], fill=BLUE_L, width=26)
-    img = layer(img, fn)
-    finish(img, "scepter_blast", glow_col=BLUE)
+def throne(d, cx, cy, s):
+    d.rounded_rectangle([cx - 0.6 * s, cy - 1.2 * s, cx + 0.6 * s, cy + 0.2 * s], radius=0.2 * s, fill=GOLD, outline=BLACK, width=OL)
+    d.rounded_rectangle([cx - 0.42 * s, cy - 1.0 * s, cx + 0.42 * s, cy + 0.1 * s], radius=0.15 * s, fill=GREEN_D)
+    d.rectangle([cx - 0.75 * s, cy + 0.1 * s, cx + 0.75 * s, cy + 0.45 * s], fill=GOLD, outline=BLACK, width=OL)
+    for f in (-1, 1):
+        d.rectangle([cx + f * 0.65 * s - 0.08 * s, cy + 0.4 * s, cx + f * 0.65 * s + 0.08 * s, cy + 0.9 * s], fill=GOLD_D, outline=BLACK, width=OL // 2)
+        d.polygon([(cx + f * 0.5 * s, cy - 1.15 * s), (cx + f * 0.85 * s, cy - 1.75 * s), (cx + f * 0.7 * s, cy - 1.05 * s)], fill=GOLD, outline=BLACK, width=OL // 2)
 
 
-def serpent_strike():
+def infinite_deception():
     img = new()
     def fn(d, _):
-        d.ellipse([170, 300, 830, 760], fill=GREEN, outline=BLACK, width=OL + 6)       # head
-        d.chord([210, 520, 790, 900], 0, 180, fill=GREEN_D, outline=BLACK, width=OL)   # jaw
-        d.chord([250, 560, 750, 760], 0, 180, fill=RED_D)                              # mouth
-        for x in (350, 650):                                                           # fangs
-            d.polygon([(x - 45, 580), (x + 45, 580), (x, 780)], fill=WHITE, outline=BLACK, width=18)
-        for x in (330, 690):                                                           # eyes
-            d.ellipse([x - 70, 380, x + 70, 480], fill=GOLD_L, outline=BLACK, width=18)
-            d.ellipse([x - 14, 390, x + 14, 470], fill=BLACK)
-        blood_drops(d, [(650, 870, 34)])
+        for i in range(6):
+            a = i * math.pi / 3 - math.pi / 2
+            crewmate(d, 512 + 330 * math.cos(a), 540 + 300 * math.sin(a), 110, GREEN_L if i else GREEN, flip=math.cos(a) > 0)
+        d.ellipse([400, 440, 624, 640], outline=GREEN, width=30)
+        star(d, 512, 540, 70, GOLD_L, outline=BLACK, ow=14)
     img = layer(img, fn)
-    finish(img, "serpent_strike", glow_col=GREEN_L)
+    finish(img, "infinite_deception")
 
 
-def illusion_ambush():
+def kings_last_dance():
     img = new()
-    img = layer(img, lambda d, _: [crewmate(d, x, y, 140, GREEN_L, flip=f) for x, y, f in ((230, 360, False), (800, 360, True), (512, 830, False))], 170)
-    img = layer(img, lambda d, _: crewmate(d, 512, 470, 170, GREY))
-    img = layer(img, lambda d, _: [dagger(d, x, y, 300, a, blade=GREEN_L, ow=20) for x, y, a in ((360, 420, math.radians(70)), (670, 420, math.radians(-70)), (512, 700, 0))])
-    img = layer(img, lambda d, _: blood_drops(d, [(512, 470, 40)]))
-    finish(img, "illusion_ambush", glow_col=RED)
+    img = layer(img, lambda d, _: dagger(d, 430, 520, 640, math.radians(-35), blade=GREEN_L, glow_col=WHITE))
+    img = layer(img, lambda d, _: dagger(d, 600, 520, 640, math.radians(35), blade=GREEN_L, glow_col=WHITE))
+    img = layer(img, lambda d, _: sparkles(d, [(512, 160, 90), (200, 820, 60), (830, 820, 60)]))
+    finish(img, "kings_last_dance", glow_col=GOLD)
 
 
-def royal_execution():
+def betrayal_paradox():
+    img = new()
+    def fn(d, _):
+        mirror_frame(d, 620, 500, 300, 400)
+        crewmate(d, 650, 560, 170, RED, flip=True)
+        for (x0, y0, x1, y1) in ((620, 500, 760, 330), (620, 500, 470, 380), (620, 500, 700, 760), (620, 500, 420, 640)):
+            d.line([(x0, y0), (x1, y1)], fill=GREEN, width=20)
+        crewmate(d, 270, 600, 190, RED)
+    img = layer(img, fn)
+    finish(img, "betrayal_paradox")
+
+
+def puppet_master():
+    img = new()
+    img = layer(img, lambda d, _: puppet(d, 512, 660, 190))
+    img = layer(img, lambda d, _: sparkles(d, [(200, 300, 70), (830, 300, 70)]))
+    finish(img, "puppet_master")
+
+
+def kneel_before_trickster():
     img = ult_backdrop(new())
-    def fn(d, _):
-        # crown
-        d.polygon([(250, 520), (250, 300), (380, 420), (512, 240), (644, 420), (774, 300), (774, 520)], fill=GOLD, outline=BLACK, width=OL)
-        d.rectangle([250, 500, 774, 600], fill=GOLD, outline=BLACK, width=OL)
-        for x in (360, 512, 664):
-            d.ellipse([x - 36, 515, x + 36, 585], fill=GREEN, outline=BLACK, width=14)
-        blood_drops(d, [(360, 760, 50), (560, 820, 40), (700, 720, 34)])
-    img = layer(img, fn)
-    finish(img, "royal_execution", glow_col=RED, ult=True)
+    img = layer(img, lambda d, _: [crewmate(d, x, 800, 90, GREEN_L, flip=x > 512) for x in (180, 330, 694, 844)], 200)
+    img = layer(img, lambda d, _: throne(d, 512, 560, 300))
+    img = layer(img, lambda d, _: horns(d, 512, 330, 110))
+    finish(img, "kneel_before_trickster", glow_col=GOLD, ult=True)
+
+
+def props():
+    img = new()
+    def crate(d, _):
+        d.rectangle([212, 262, 812, 862], fill=WOOD, outline=BLACK, width=OL + 6)
+        d.rectangle([262, 312, 762, 812], outline=WOOD_D, width=26)
+        d.line([(262, 312), (762, 812)], fill=WOOD_D, width=40)
+        d.line([(762, 312), (262, 812)], fill=WOOD_D, width=40)
+    img = layer(img, crate)
+    finish(img, "prop_crate", glow_col=(255, 80, 80, 255))
+    img = layer(new(), lambda d, _: mirror_frame(d, 512, 512, 300, 430))
+    finish(img, "prop_mirror", glow_col=GREEN)
+    img = layer(new(), lambda d, _: puppet(d, 512, 700, 210))
+    finish(img, "prop_puppet", glow_col=GREEN)
+    img = layer(new(), lambda d, _: throne(d, 512, 600, 380))
+    finish(img, "prop_throne", glow_col=GOLD)
 
 
 if __name__ == "__main__":
@@ -576,6 +596,7 @@ if __name__ == "__main__":
                mystic_blink, swap_trick, decoy_escape, shadow_step, master_of_misdirection,
                green_bolt, binding_ribbons, mystic_shield, enchanted_dagger, asgardian_wrath,
                fake_body, mind_whisper, enchanted_witness, chaos_contract, the_grand_deception,
-               switch_tab, backstab, scepter_blast, serpent_strike, illusion_ambush, royal_execution):
+               switch_tab, infinite_deception, kings_last_dance, betrayal_paradox, puppet_master,
+               kneel_before_trickster, props):
         fn()
     print("icons written to", os.path.normpath(OUT_DIR))
