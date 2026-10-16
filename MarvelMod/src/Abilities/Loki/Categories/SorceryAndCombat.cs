@@ -44,9 +44,12 @@ public class GreenBolt : AbilityBase
     {
         var target = ctx.Target;
         var origin = ctx.CasterPos;
+        // a spinning green dagger of light with a gold trail
         VfxPlayer.PlayLocal(VfxType.LokiCast, origin);
+        Sfx.Play(SfxKind.Whoosh, 1.5f * Sfx.Vary(), origin, 0.45f);
         Fx.Projectile(origin, ctx.Point, Fx.LokiGreen, 12f, () =>
         {
+            Fx.Release(ctx.Point, Fx.LokiGreen, ImpactStyle.Magic, 0.6f);
             if (target != null)
                 DamageSystem.Instance?.ApplyDamage(target, origin, ctx.Cfg.Damage, DamageType.Projectile, ctx.Cfg.Duration);
         });
@@ -69,6 +72,7 @@ public class BindingRibbons : AbilityBase
         Fx.Projectile(ctx.CasterPos, Players.Pos(target), Fx.LokiGold, 14f, () =>
         {
             VfxPlayer.PlayLocal(VfxType.LokiRibbons, target.transform.position);
+            Fx.Aura(target.transform, Sprites.Ring, new Color(1f, 0.8f, 0.2f, 0.7f), 1f, ctx.Cfg.Duration, 140f);
             StatusManager.Instance?.ApplyStatus(target, StatusEffect.Bound, ctx.Cfg.Duration);
         });
     }
@@ -85,6 +89,7 @@ public class MysticShield : AbilityBase
     protected override void OnCast(CastContext ctx)
     {
         VfxPlayer.PlayLocal(VfxType.LokiShield, ctx.CasterPos);
+        Fx.Aura(ctx.Caster.transform, Sprites.Ring, new Color(0.6f, 1f, 0.65f, 0.45f), 1.5f, ctx.Cfg.Duration, -40f);
         StatusManager.Instance?.ApplyStatus(ctx.Caster, StatusEffect.Shielded, ctx.Cfg.Duration);
     }
 }
@@ -128,10 +133,13 @@ public class AsgardianWrath : AbilityBase
 
     protected override void OnCast(CastContext ctx)
     {
+        // during the wind-up a crown of daggers assembles above Loki
+        Fx.Sigil((Vector2)ctx.Caster.transform.position + new Vector2(0f, 1.2f), Fx.LokiGold, 1.6f, ctx.Cfg.CinematicDur);
         CinematicPlayer.PlayUltimate(CinematicType.AsgardianWrath, ctx.Caster, () =>
         {
             Vector2 center = ctx.Caster.transform.position;
             Fx.Burst(center, Fx.LokiGreen, ctx.Cfg.Range * 2f, 0.6f);
+            Fx.Streaks(center, Fx.LokiGold, 16, ctx.Cfg.Range);
             // ring of daggers flying outward
             for (int i = 0; i < 12; i++)
             {
@@ -141,6 +149,9 @@ public class AsgardianWrath : AbilityBase
             }
             foreach (var p in Players.InRadius(center, ctx.Cfg.Range, ctx.Cfg.MaxTargets, ctx.Caster))
             {
+                // a second wave rains straight down on each victim
+                Vector2 tp = p.transform.position;
+                for (int d = 0; d < 3; d++) Fx.Projectile(tp + new Vector2(Random.Range(-0.4f, 0.4f), 3f), tp, Fx.LokiLight, 18f + d * 3f, null);
                 VfxPlayer.PlayLocal(VfxType.LokiDaggerStorm, p.transform.position);
                 DamageSystem.Instance?.ApplyDamage(p, center, ctx.Cfg.Damage, DamageType.Magical, ctx.Cfg.Duration);
             }

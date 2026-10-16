@@ -45,6 +45,9 @@ public class SwapTrick : AbilityBase
         Vector2 targetPos = Players.Pos(target);
         VfxPlayer.PlayLocal(VfxType.LokiTeleport, casterPos);
         VfxPlayer.PlayLocal(VfxType.LokiTeleport, targetPos);
+        Fx.Tendril(casterPos, targetPos, Fx.LokiGold, 0.35f);
+        Fx.WorldText(target.transform, "HUH?", Color.white, 1.2f, 3f);
+        Sfx.Play(SfxKind.Boing, 1.3f, targetPos, 0.4f);
         Players.Teleport(ctx.Caster, targetPos);   // runs on the caster's client
         Players.Teleport(target, casterPos);       // runs on the target's client
     }
@@ -66,6 +69,7 @@ public class DecoyEscape : AbilityBase
 
         var dest = MapSpawnPoints.GetRandom(1, ctx.Rng, ctx.CasterPos)[0];
         VfxPlayer.PlayLocal(VfxType.LokiSmoke, ctx.CasterPos);
+        Fx.Comic(ctx.CasterPos + new Vector2(0f, 1f), "POOF!", Fx.LokiLight, 1f);
         VfxPlayer.PlayLocal(VfxType.LokiTeleport, dest);
         Players.Teleport(ctx.Caster, dest);
     }
@@ -81,7 +85,9 @@ public class ShadowStep : AbilityBase
 
     protected override void OnCast(CastContext ctx)
     {
+        // a shimmer runs down the body as he fades out
         VfxPlayer.PlayLocal(VfxType.LokiSmoke, ctx.CasterPos);
+        Fx.Rising(ctx.CasterPos, Fx.LokiLight, 8, 0.6f, 0.9f);
         InvisibilityManager.Instance!.ApplyInvisibility(ctx.Caster, ctx.Cfg.Duration);
     }
 }
@@ -107,6 +113,7 @@ public class MasterOfMisdirection : AbilityBase
                 ill.SetBehavior(IllusionBehavior.Idle);
                 ill.Lifetime = ctx.Cfg.Duration;
                 VfxPlayer.PlayLocal(VfxType.LokiTeleport, positions[i]);
+                Fx.Comic((Vector2)positions[i] + new Vector2(0f, 0.9f), "OR AM I?", Fx.LokiGold, 0.8f);
             }
             var last = positions[positions.Count - 1];
             VfxPlayer.PlayLocal(VfxType.LokiSmoke, ctx.Caster.transform.position);

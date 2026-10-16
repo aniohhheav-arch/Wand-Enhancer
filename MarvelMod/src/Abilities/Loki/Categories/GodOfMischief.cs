@@ -1,4 +1,5 @@
 using MarvelMod.Characters;
+using MarvelMod.Assets;
 using MarvelMod.VFX;
 using UnityEngine;
 
@@ -47,6 +48,7 @@ public class MindWhisper : AbilityBase
         string line = Lines[ctx.Rng.Next(Lines.Length)];
         VfxPlayer.PlayLocal(VfxType.LokiMagic, target.transform.position);
         if (!ctx.LocalIs(target)) return;
+        Sfx.Play(SfxKind.Reverse, 1.4f, null, 0.5f);   // only the target hears the whisper
         Fx.Toast($"<i>\"{line}\"</i>", Fx.LokiLight, ctx.Cfg.Duration, 4f, 1.2f);
         Fx.ScreenTint(new Color(0.1f, 0.6f, 0.2f, 0.2f), 1.2f);
     }
@@ -95,7 +97,11 @@ public class ChaosContract : AbilityBase
         if (target == null) return;
         Fx.Projectile(ctx.CasterPos, Players.Pos(target), Fx.ChaosPurple, 12f, () =>
         {
+            // a purple contract scroll signs itself over their head; their controls flip
             Fx.Sparkles(target.transform.position, Fx.ChaosPurple, 12, 1.2f);
+            Fx.Aura(target.transform, Sprites.Runes, new Color(0.65f, 0.35f, 1f, 0.6f), 0.5f, ctx.Cfg.Duration, -300f, 0.75f);
+            Fx.WorldText(target.transform, "?!", Fx.ChaosPurple, 1.2f, 3.2f);
+            Sfx.Play(SfxKind.Boing, 0.9f, target.transform.position, 0.4f);
             StatusManager.Instance?.ApplyStatus(target, StatusEffect.ChaosContract, ctx.Cfg.Duration);
         });
     }
@@ -115,6 +121,8 @@ public class TheGrandDeception : AbilityBase
         CinematicPlayer.PlayUltimate(CinematicType.TheGrandDeception, ctx.Caster, () =>
         {
             VfxPlayer.PlayGlobal(VfxType.LokiMapGreen, ctx.Cfg.Duration);
+            Fx.Release(ctx.Caster.transform.position, Fx.LokiGreen, ImpactStyle.Glitch, 2f, cinematic: true);
+            Sfx.Play(SfxKind.Choir, 1.2f, ctx.Caster.transform.position, 0.4f, cinematic: true);
 
             // fake crewmates wearing other players' looks
             var templates = new System.Collections.Generic.List<PlayerControl>();

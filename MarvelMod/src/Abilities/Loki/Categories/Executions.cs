@@ -77,6 +77,16 @@ public abstract class FinisherAbility : AbilityBase
     }
 
     protected static Vector2 Pos(PlayerControl pc) => pc.transform.position;
+
+    /// <summary>A ripple of pops that reads as a tiny round of applause.</summary>
+    protected static IEnumerator Applause(Vector2 at, int claps = 9)
+    {
+        for (int i = 0; i < claps; i++)
+        {
+            Sfx.Play(SfxKind.Pop, Random.Range(0.8f, 1.6f), at, 0.35f);
+            yield return new WaitForSeconds(Random.Range(0.05f, 0.11f));
+        }
+    }
 }
 
 /// <summary>1. Six Lokis close in; only one is real. The victim dissolves into illusion fragments.</summary>
@@ -147,11 +157,13 @@ public class InfiniteDeception : FinisherAbility
         d.Zoom(0.45f, 0.8f);
         for (float a = 1f; a >= 0f; a -= 0.25f) { d.Fade(victim, a); yield return d.Wait(0.12f); }
         Fx.Fragments(vp, Fx.LokiGreen, 70, 1.8f, 1.2f * d.TimeScale);
+        Fx.Release(vp, Fx.LokiGreen, ImpactStyle.Glitch, 1.4f, cinematic: true);
         d.Finish();
         yield return d.Wait(1.3f);
 
         var hand = Pos(loki) + new Vector2(0.35f, 0.15f);
         Fx.Fragments(hand, Fx.LokiGreen, 40, 1.6f, 0.9f * d.TimeScale, reverse: true);
+        Sfx.Play(SfxKind.Reverse, 1.3f, hand, 0.6f, cinematic: true);
         d.Pan(hand, 0.8f);
         yield return d.Wait(0.9f);
         Fx.Burst(hand, Fx.LokiLight, 0.6f, 0.2f);
@@ -189,6 +201,8 @@ public class KingsLastDance : FinisherAbility
             Fx.Burst(Pos(loki), Fx.LokiGreen, 0.8f, 0.2f);
             Players.Teleport(loki, Players.SafeDestination(vp, dodge, 0.9f));
             Sfx.Play(SfxKind.Slash, 1f + i * 0.2f, vp);
+            Sfx.Play(SfxKind.Clang, 1.6f + i * 0.15f, vp, 0.35f);
+            Fx.Streaks(vp + dodge * 0.4f, Color.white, 4, 0.7f);
             Slash(vp + dodge * 0.4f, i * 60f);
             yield return d.Wait(0.45f);
         }
@@ -230,6 +244,7 @@ public class KingsLastDance : FinisherAbility
         yield return d.Wait(0.6f);
         if (victim.cosmetics != null) victim.cosmetics.SetOutline(false, new Il2CppSystem.Nullable<Color>(Fx.LokiGreen));
         Fx.Sparkles(vp, Fx.LokiGold, 40, 1.8f, 1f);
+        Fx.Release(vp, Fx.LokiGold, ImpactStyle.Magic, 1.3f, cinematic: true);
         Sfx.Play(SfxKind.Bell, 1f, vp);
         d.Fade(victim, 0f);
         d.Finish();
@@ -237,6 +252,7 @@ public class KingsLastDance : FinisherAbility
         StatusManager.SetHidden(loki, false);
         CinematicDirector.Pose(loki, -0.08f, 25f);
         Fx.WorldText(loki.transform, "*smug bow*", Fx.LokiGold, 1f * d.TimeScale, 2.4f);
+        Reactor.Utilities.Coroutines.Start(Applause(Pos(loki)));
         yield return d.Wait(0.7f);
         CinematicDirector.Pose(loki, 0f, 0f);
     }
@@ -279,7 +295,8 @@ public class BetrayalParadox : FinisherAbility
         d.Pan((Pos(loki) + Pos(victim)) * 0.5f, 0.3f);
 
         Fx.Cracks(Pos(loki) + new Vector2(0f, 0.2f), Fx.LokiGreen, 9, 0.9f, 1.4f * d.TimeScale, ctx.Rng.Next());
-        Sfx.Play(SfxKind.Slash, 2f, vp);
+        Sfx.Play(SfxKind.Glass, 0.9f, vp, 0.7f);
+        Sfx.Play(SfxKind.Creak, 1.6f, vp, 0.4f);
         yield return d.Wait(1f);
 
         Fx.Fragments(Pos(loki), new Color(0.75f, 0.95f, 1f), 50, 1.2f, 1f * d.TimeScale);
@@ -310,7 +327,8 @@ public class BetrayalParadox : FinisherAbility
         yield return d.Wait(0.4f);
         if (mirror != null) Object.Destroy(mirror.gameObject);
         Fx.Fragments(mirrorPos, new Color(0.7f, 0.9f, 1f), 60, 1.5f, 1.1f * d.TimeScale);
-        Sfx.Play(SfxKind.Slash, 2.6f, vp);
+        Fx.Release(mirrorPos, new Color(0.7f, 0.9f, 1f), ImpactStyle.Glitch, 1.3f, cinematic: true);
+        Sfx.Play(SfxKind.Glass, 0.6f, vp);
         var echo = Clone(loki, mirrorPos + new Vector2(0.5f, 0f), 1.2f * d.TimeScale);
         echo.SetTint(new Color(0.6f, 1f, 0.7f, 0.4f));
         Fx.WorldText(echo.transform, "hehehe", Fx.LokiLight, 1f * d.TimeScale, 2.2f);
@@ -375,6 +393,8 @@ public class PuppetMaster : FinisherAbility
         yield return d.Wait(1.2f);
 
         Fx.Smoke(vp, Fx.LokiGreen, 12, 0.9f);
+        Fx.Release(vp, Fx.LokiGreen, ImpactStyle.Comedy, 1f);
+        Fx.Comic(vp + new Vector2(0f, 1f), "*CLACK*", Fx.LokiGold, 1.1f);
         d.Fade(victim, 0f);
         var puppet = Prop("prop_puppet", vp + new Vector2(0f, 0.3f), 0.45f);
         d.Finish();
@@ -391,6 +411,7 @@ public class PuppetMaster : FinisherAbility
         d.Pan(coat, 0.6f);
         yield return d.Wait(0.9f);
         Sfx.Play(SfxKind.Bell, 1f, coat);
+        Sfx.Play(SfxKind.Boing, 1.5f, coat, 0.4f);
         var peek = Prop("prop_puppet", coat + new Vector2(0.15f, 0.2f), 0.18f);
         Fx.Animate(peek, 1f * d.TimeScale, k =>
         {
@@ -509,6 +530,9 @@ public class KneelBeforeTheTrickster : FinisherAbility
         Sfx.Play(SfxKind.Snap, 1f, vp);
         Fx.Burst(c1, Fx.LokiGreen, 3f, 0.6f);
         Fx.Sparkles(c1, Fx.LokiLight, 50, 3f, 1.2f);
+        Fx.Release(c1, Fx.LokiGold, ImpactStyle.Magic, 2.5f, cinematic: true);
+        Fx.Flash(new Color(0.6f, 1f, 0.6f, 0.5f), 0.25f);
+        Sfx.Play(SfxKind.Stab, 0.8f, c1, 0.7f, cinematic: true);
         yield return d.Wait(0.6f);
     }
 }
