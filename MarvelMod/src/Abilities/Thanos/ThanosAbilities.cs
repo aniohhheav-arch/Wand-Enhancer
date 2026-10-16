@@ -21,8 +21,7 @@ public abstract class ThanosAbility : AbilityBase
 
     protected override void BeforeCast(CastContext ctx)
     {
-        var (kind, pitch) = Stones.Sound(Stone);
-        Sfx.Play(kind, pitch, ctx.CasterPos, 0.7f);
+        // activation sound + motif come from SoundBook / Fx.Motif (unique per ability)
         if (ctx.LocalIs(ctx.Caster)) ThanosCharacter.Instance.Pulse(Stone);
     }
 
@@ -161,10 +160,11 @@ public class Planetbreaker : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         var caster = ctx.Caster;
-        CinematicDirector.Pose(caster, 0.4f, 0f);   // float into the air
+        // float into the air (restored by CharacterVisuals even if the wind-up is interrupted)
+        CharacterVisuals.Set(caster, "planetbreaker", lift: 0.4f, maxSeconds: ctx.Cfg.CinematicDur + 1.5f);
         CinematicPlayer.Play("PLANETBREAKER", C, caster, ctx.Cfg.CinematicDur, () =>
         {
-            CinematicDirector.Pose(caster, 0f, 0f);
+            CharacterVisuals.Clear(caster, "planetbreaker");
             Vector2 c = caster.transform.position;
             Fx.Burst(c, C, ctx.Cfg.Range * 2f, 0.8f);
             Fx.Wave(c, C, ctx.Cfg.Range, 0.6f);
@@ -924,10 +924,10 @@ public class TitansJudgment : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         var caster = ctx.Caster;
-        CinematicDirector.Pose(caster, 0.5f, 0f);
+        CharacterVisuals.Set(caster, "judgment", lift: 0.5f, maxSeconds: ctx.Cfg.CinematicDur + 1.5f);
         CinematicPlayer.Play("TITAN'S JUDGMENT", C, caster, ctx.Cfg.CinematicDur, () =>
         {
-            CinematicDirector.Pose(caster, 0f, 0f);
+            CharacterVisuals.Clear(caster, "judgment");
             Vector2 from = caster.transform.position;
             var dir = (ctx.Point - ctx.CasterPos).normalized;
             var to = from + dir * ctx.Cfg.Range;

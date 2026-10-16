@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace MarvelMod.VFX;
 
-public enum SfxKind { Zap, Boom, Whoosh, Chime, Hum, Snap, Slash, Splat, Choir, Bell, Creak, Swell }
+public enum SfxKind { Zap, Boom, Whoosh, Chime, Hum, Snap, Slash, Splat, Choir, Bell, Creak, Swell,
+    Crackle, Rumble, Shimmer, Glass, Warp, Tick, Gong, Heartbeat, Rise, Thud }
 
 /// <summary>
 /// Procedurally synthesised sound effects (no audio files needed). Each stone / effect picks a
@@ -25,11 +26,21 @@ public static class Sfx
         _source.spatialBlend = 0f;
     }
 
+    // ── limiter: stops stacked effects from becoming loud or chaotic ──
+    private static readonly List<float> _activeUntil = new();
+    private static readonly Dictionary<string, float> _lastPlayed = new();
+    private const int MaxVoices = 10;
+
     /// <summary>Plays a sound; quieter the further `at` is from the local player.</summary>
-    public static void Play(SfxKind kind, float pitch = 1f, Vector2? at = null, float volume = 1f)
+    public static void Play(SfxKind kind, float pitch = 1f, Vector2? at = null, float volume = 1f, bool cinematic = false)
     {
         if (_source == null || !ModConfig.Data.SfxEnabled) return;
-        float vol = volume * Mathf.Clamp01(ModConfig.Data.SfxVolume);
+        float vol = volume * Mathf.Clamp01(ModConfig.Data.SfxVolume) * (cinematic ? Mathf.Clamp01(ModConfig.Data.CinematicVolume) : 1f);
+        string key = $"{kind}:{pitch:F2}";
+        if (_lastPlayed.TryGetValue(key, out var last) && Time.time - last < 0.06f) return;   // the same sound twice in one frame burst
+        _activeUntil.RemoveAll(t => t < Time.time);
+        if (_activeUntil.Count >= MaxVoices) return;
+        vol /= Mathf.Sqrt(1f + _activeUntil.Count * 0.35f);                                       // duck when busy
         if (at.HasValue && PlayerControl.LocalPlayer != null)
         {
             float d = Vector2.Distance(PlayerControl.LocalPlayer.transform.position, at.Value);
@@ -37,7 +48,10 @@ public static class Sfx
         }
         if (vol <= 0.01f) return;
         var clip = Get(kind, Mathf.Round(pitch * 20f) / 20f);
-        if (clip != null) _source.PlayOneShot(clip, vol);
+        if (clip == null) return;
+        _source.PlayOneShot(clip, vol);
+        _lastPlayed[key] = Time.time;
+        _activeUntil.Add(Time.time + clip.length);
     }
 
     private static AudioClip? Get(SfxKind kind, float pitch)
@@ -57,6 +71,16 @@ public static class Sfx
             SfxKind.Bell   => Bell(pitch),
             SfxKind.Creak  => Creak(pitch),
             SfxKind.Swell  => Swell(pitch),
+            SfxKind.Crackle => Crackle(pitch),
+            SfxKind.Rumble => Rumble(pitch),
+            SfxKind.Shimmer => Shimmer(pitch),
+            SfxKind.Glass  => Glass(pitch),
+            SfxKind.Warp   => Warp(pitch),
+            SfxKind.Tick   => Tick(pitch),
+            SfxKind.Gong   => Gong(pitch),
+            SfxKind.Heartbeat => Heartbeat(pitch),
+            SfxKind.Rise   => Rise(pitch),
+            SfxKind.Thud   => Thud(pitch),
             _              => Splat(),
         };
         var clip = AudioClip.Create(key, data.Length, 1, Rate, false);
@@ -233,6 +257,147 @@ public static class Sfx
             float f = 110f * p * (1f + k * 0.5f);
             b[i] = (Mathf.Sin(2 * Mathf.PI * f * t) + 0.7f * Mathf.Sin(2 * Mathf.PI * f * 1.5f * t)
                     + 0.5f * Mathf.Sin(2 * Mathf.PI * f * 2f * t)) * 0.3f * env;
+        }
+        return b;
+    }
+
+    /// <summary>Electric crackle: sparse random spikes with a buzzing tone.</summary>
+    private static float[] Crackle(float p)
+    {
+        var b = Buf(0.6f);
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            float spike = Noise.NextDouble() < 0.02 ? Rnd() : 0f;
+            float buzz = Mathf.Sign(Mathf.Sin(2 * Mathf.PI * 120f * p * i / Rate)) * 0.08f;
+            b[i] = (spike * 0.9f + buzz) * (1f - t);
+        }
+        return b;
+    }
+
+    private static float[] Rumble(float p)
+    {
+        var b = Buf(1.4f);
+        float lp = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            lp += (Rnd() - lp) * 0.01f * p;
+            b[i] = lp * 4f * Mathf.Sin(t * Mathf.PI);
+        }
+        return b;
+    }
+
+    /// <summary>High sparkling arpeggio.</summary>
+    private static float[] Shimmer(float p)
+    {
+        var b = Buf(0.9f);
+        float[] notes = { 1320f, 1760f, 1980f, 2640f };
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            int n = Mathf.Min(notes.Length - 1, (int)(t / 0.12f));
+            float local = t - n * 0.12f;
+            b[i] = Mathf.Sin(2 * Mathf.PI * notes[n] * p * t) * Mathf.Exp(-local * 9f) * 0.35f * (1f - t / 0.9f);
+        }
+        return b;
+    }
+
+    /// <summary>Shattering glass: bright inharmonic pings over noise.</summary>
+    private static float[] Glass(float p)
+    {
+        var b = Buf(0.8f);
+        float[] f = { 2300f, 3170f, 4120f, 5300f };
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float v = Rnd() * 0.3f * Mathf.Exp(-t * 25f);
+            for (int k = 0; k < f.Length; k++) v += Mathf.Sin(2 * Mathf.PI * f[k] * p * t + k) * 0.12f * Mathf.Exp(-t * (6f + k * 2f));
+            b[i] = v;
+        }
+        return b;
+    }
+
+    /// <summary>Pitch-bending warble (space / reality warping).</summary>
+    private static float[] Warp(float p)
+    {
+        var b = Buf(0.9f);
+        double phase = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            float f = (300f + 220f * Mathf.Sin(t * 18f) * (1f - t)) * p;
+            phase += 2 * Math.PI * f / Rate;
+            b[i] = (float)Math.Sin(phase) * 0.35f * Mathf.Sin(t * Mathf.PI);
+        }
+        return b;
+    }
+
+    /// <summary>Clock ticks.</summary>
+    private static float[] Tick(float p)
+    {
+        var b = Buf(1f);
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float local = t % 0.25f;
+            b[i] = Mathf.Sin(2 * Mathf.PI * 2200f * p * t) * Mathf.Exp(-local * 140f) * 0.5f;
+        }
+        return b;
+    }
+
+    private static float[] Gong(float p)
+    {
+        var b = Buf(3f);
+        float f = 110f * p;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float shimmer = 1f + 0.003f * Mathf.Sin(t * 5f);
+            b[i] = (Mathf.Sin(2 * Mathf.PI * f * t) * 0.5f + Mathf.Sin(2 * Mathf.PI * f * 2.4f * shimmer * t) * 0.3f
+                    + Mathf.Sin(2 * Mathf.PI * f * 3.9f * t) * 0.15f) * Mathf.Exp(-t * 1.1f);
+        }
+        return b;
+    }
+
+    private static float[] Heartbeat(float p)
+    {
+        var b = Buf(1.2f);
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float a = Mathf.Exp(-((t - 0.1f) * (t - 0.1f)) * 900f) + 0.7f * Mathf.Exp(-((t - 0.32f) * (t - 0.32f)) * 900f);
+            b[i] = Mathf.Sin(2 * Mathf.PI * 55f * p * t) * a * 0.9f;
+        }
+        return b;
+    }
+
+    /// <summary>Charging riser: rising noise + tone.</summary>
+    private static float[] Rise(float p)
+    {
+        var b = Buf(1f);
+        double phase = 0;
+        float lp = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            phase += 2 * Math.PI * Mathf.Lerp(150f, 900f, t * t) * p / Rate;
+            lp += (Rnd() - lp) * Mathf.Lerp(0.02f, 0.3f, t);
+            b[i] = ((float)Math.Sin(phase) * 0.3f + lp * 0.4f) * t;
+        }
+        return b;
+    }
+
+    /// <summary>Heavy body impact.</summary>
+    private static float[] Thud(float p)
+    {
+        var b = Buf(0.5f);
+        double phase = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            phase += 2 * Math.PI * Mathf.Lerp(120f, 45f, t) * p / Rate;
+            b[i] = ((float)Math.Sin(phase) + Rnd() * 0.3f * Mathf.Exp(-t * 30f)) * Mathf.Exp(-t * 6f) * 0.9f;
         }
         return b;
     }

@@ -25,11 +25,10 @@ public static class LokiRpc
         if (ability == null || caster == null) return;
         var target = targetId == NoTarget ? null : Players.ById(targetId);
         // everyone sees a quick cast flash on the caster
-        if (ability.Category != "Hidden" && !ability.Silent)
+        if (ability.Category != "Hidden" && !ability.Silent && ability.Category != "Meeting")
         {
-            var c = ability.CastColor;
-            VFX.Fx.Aura(caster.transform, Assets.Sprites.Glow, new Color(c.r, c.g, c.b, 0.6f), 1.5f, 0.45f, pulse: false);
-            VFX.Fx.Sparkles(caster.transform.position, VFX.Fx.LokiGold, 5, 0.9f, 0.4f);
+            VFX.Fx.Motif(ability.Category, caster.transform, ability.CastColor);
+            VFX.SoundBook.PlayActivation(ability, caster.transform.position);
         }
         ability.Execute(new Abilities.CastContext(caster, target, new Vector2(x, y), seed, ability.Cfg) { Point2 = new Vector2(x2, y2) });
     }

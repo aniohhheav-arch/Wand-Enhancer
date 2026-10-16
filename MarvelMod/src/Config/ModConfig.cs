@@ -104,6 +104,8 @@ public class ConfigData
     public bool    FinisherLeavesBody { get; set; } = false;
     public bool    SfxEnabled       { get; set; } = true;
     public float   SfxVolume        { get; set; } = 0.6f;
+    /// <summary>Extra volume factor for ultimates / finishers / cinematics.</summary>
+    public float   CinematicVolume  { get; set; } = 1f;
     /// <summary>The Snap outcome: visual, practice_kill, match_kill_half or match_stun.</summary>
     public string  SnapMode         { get; set; } = "visual";
     /// <summary>Stones Thanos starts with in a match (1-6); one more every StoneUnlockSeconds and per kill.</summary>

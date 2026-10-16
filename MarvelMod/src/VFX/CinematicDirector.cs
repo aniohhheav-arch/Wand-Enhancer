@@ -153,26 +153,19 @@ public sealed class CinematicDirector
         if (pc.cosmetics != null) pc.cosmetics.SetFlipX(!pc.cosmetics.FlipX);
     }
 
-    /// <summary>Offsets / tilts the visible body (lifting, marionette poses). Reset with Pose(pc, 0, 0).</summary>
+    /// <summary>Lift / tilt the visible body (lifting, marionette poses). Pose(pc, 0, 0) restores it exactly.</summary>
     public static void Pose(PlayerControl pc, float lift, float tilt)
     {
-        if (pc == null || pc.cosmetics == null) return;
-        var t = pc.cosmetics.transform;
-        t.localPosition = new Vector3(t.localPosition.x, BaseY(pc) + lift, t.localPosition.z);
-        t.localRotation = Quaternion.Euler(0, 0, tilt);
-    }
-
-    private static readonly System.Collections.Generic.Dictionary<byte, float> _baseY = new();
-    private static float BaseY(PlayerControl pc)
-    {
-        if (!_baseY.TryGetValue(pc.PlayerId, out var y))
-            _baseY[pc.PlayerId] = y = pc.cosmetics.transform.localPosition.y;
-        return y;
+        if (pc == null) return;
+        if (Mathf.Abs(lift) < 0.0001f && Mathf.Abs(tilt) < 0.0001f) CharacterVisuals.Clear(pc, "pose");
+        else CharacterVisuals.Set(pc, "pose", lift, tilt, maxSeconds: 20f);
     }
 
     public void Fade(PlayerControl pc, float alpha)
     {
-        if (pc != null && pc.cosmetics != null) pc.cosmetics.SetPhantomRoleAlpha(alpha);
+        if (pc == null) return;
+        if (alpha >= 0.999f) CharacterVisuals.Clear(pc, "fade");
+        else CharacterVisuals.Set(pc, "fade", alpha: alpha, maxSeconds: 20f);
     }
 
     /// <summary>Kills the victim (unless previewing). Body removal follows config.</summary>
@@ -191,7 +184,7 @@ public sealed class CinematicDirector
         {
             if (pc == null) continue;
             Pose(pc, 0f, 0f);
-            if (Players.IsAlive(pc)) Fade(pc, 1f);
+            Fade(pc, 1f);
             StatusManager.Instance?.RemoveStatus(pc, StatusEffect.Rooted);
         }
         if (_letterbox != null) Object.Destroy(_letterbox);

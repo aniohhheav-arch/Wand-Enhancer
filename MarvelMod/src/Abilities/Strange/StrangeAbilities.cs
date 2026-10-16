@@ -32,7 +32,6 @@ public abstract class StrangeAbility : AbilityBase
             circle.transform.Rotate(0, 0, 160f * Time.deltaTime);
             circle.color = new Color(Gold.r, Gold.g, Gold.b, 0.9f * (1f - k));
         });
-        Sfx.Play(SfxKind.Chime, 1.1f, ctx.CasterPos, 0.5f);
     }
 
     protected static void Hit(CastContext ctx, PlayerControl pc, Vector2 from, float stun) =>

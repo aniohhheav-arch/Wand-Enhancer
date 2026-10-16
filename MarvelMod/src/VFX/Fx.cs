@@ -24,6 +24,15 @@ public static class Fx
     public static readonly Color AlarmRed   = new(1.00f, 0.15f, 0.15f, 1f);
 
     private static float Intensity => Mathf.Clamp(ModConfig.Data.VfxIntensity / 100f, 0.2f, 2f);
+
+    /// <summary>VfxQuality: low / medium / high / ultra scales particle counts (not sizes).</summary>
+    private static float Quality => ModConfig.Data.VfxQuality switch
+    {
+        "low" => 0.35f,
+        "medium" => 0.65f,
+        "ultra" => 1.4f,
+        _ => 1f,
+    };
     private static bool Enabled => ModConfig.Data.VfxEnabled;
 
     private static int WorldLayer =>
@@ -86,7 +95,7 @@ public static class Fx
     public static void Sparkles(Vector2 pos, Color color, int count = 10, float radius = 1.3f, float dur = 0.7f)
     {
         if (!Enabled || !ModConfig.Data.VfxParticles) return;
-        count = Mathf.Max(1, Mathf.RoundToInt(count * Intensity));
+        count = Mathf.Max(1, Mathf.RoundToInt(count * Intensity * Quality));
         for (int i = 0; i < count; i++)
         {
             float ang = Random.Range(0f, Mathf.PI * 2f);
@@ -112,7 +121,7 @@ public static class Fx
     public static void Smoke(Vector2 pos, Color color, int count = 8, float dur = 0.9f)
     {
         if (!Enabled || !ModConfig.Data.VfxParticles) return;
-        count = Mathf.Max(1, Mathf.RoundToInt(count * Intensity));
+        count = Mathf.Max(1, Mathf.RoundToInt(count * Intensity * Quality));
         for (int i = 0; i < count; i++)
         {
             var start = pos + Random.insideUnitCircle * 0.35f;
@@ -150,7 +159,7 @@ public static class Fx
             core.transform.position = new Vector3(p.x, p.y, z - 0.01f);
             core.transform.Rotate(0, 0, 720f * Time.deltaTime);
             trail += Time.deltaTime;
-            if (trail > 0.03f && Enabled)
+            if (trail > 0.03f / Quality && Enabled)
             {
                 trail = 0f;
                 var bit = MakeSprite(Sprites.Glow, p, A(color, 0.6f), 0.45f);
@@ -454,6 +463,7 @@ public static class Fx
     public static void Fragments(Vector2 pos, Color color, int count = 40, float spread = 1.6f, float dur = 1.4f, bool reverse = false)
     {
         if (!Enabled) return;
+        count = Mathf.Max(4, Mathf.RoundToInt(count * Quality));
         for (int i = 0; i < count; i++)
         {
             var start = pos + new Vector2(Random.Range(-0.3f, 0.3f), Random.Range(-0.4f, 0.5f));
@@ -492,6 +502,119 @@ public static class Fx
         tmp.text = text;
         tmp.color = color;
         Coroutines.Start(CoToast(tmp, tmp.gameObject, color, dur));
+    }
+
+    // ── activation motifs: each ability family has its own shape and motion ──
+
+    /// <summary>Plays the activation motif for an ability's family on the caster.</summary>
+    public static void Motif(string category, Transform caster, Color c)
+    {
+        if (!Enabled || caster == null) return;
+        Vector2 p = caster.position;
+        switch (category)
+        {
+            case "Power":   Shockring(p, c); break;
+            case "Space":   Implode(p, c); break;
+            case "Reality": GlitchBars(p, c); break;
+            case "Soul":    Wisps(p, c); break;
+            case "Time":
+            case "Time Stone": ClockRings(p, c); break;
+            case "Mind":    PulseRings(p, c); break;
+            case "Infinity": foreach (var s in Characters.Stones.Six) PulseRings(p, Characters.Stones.Color(s), 1); break;
+            default:
+                Aura(caster, Sprites.Glow, new Color(c.r, c.g, c.b, 0.6f), 1.5f, 0.45f, pulse: false);
+                Sparkles(p, LokiGold, 5, 0.9f, 0.4f);
+                break;
+        }
+    }
+
+    /// <summary>Power: a thick ring slammed outward plus small cracks.</summary>
+    private static void Shockring(Vector2 p, Color c)
+    {
+        var r = MakeSprite(Sprites.Ring, p, c, 0.2f, "Shockring");
+        Animate(r, 0.35f, k => { r.transform.localScale = new Vector3(1.6f, 0.9f, 1f) * Mathf.Lerp(0.2f, 2.2f, EaseOut(k)); r.color = A(c, 1f - k); });
+        Cracks(p + new Vector2(0f, -0.3f), c, 5, 0.6f, 0.5f, Random.Range(0, 9999));
+    }
+
+    /// <summary>Space: rings collapse inward into a point.</summary>
+    private static void Implode(Vector2 p, Color c)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            var r = MakeSprite(Sprites.Ring, p, A(c, 0f), 2f, "Implode");
+            float delay = i * 0.08f;
+            Animate(r, 0.45f + delay, k =>
+            {
+                float t = Mathf.Clamp01((k * (0.45f + delay) - delay) / 0.45f);
+                r.transform.localScale = Vector3.one * Mathf.Lerp(2.2f, 0.1f, t);
+                r.transform.Rotate(0, 0, 500f * Time.deltaTime);
+                r.color = A(c, t > 0f ? 1f - t * 0.5f : 0f);
+            });
+        }
+    }
+
+    /// <summary>Reality: jittering horizontal glitch bars.</summary>
+    private static void GlitchBars(Vector2 p, Color c)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            var b = MakeSprite(Sprites.Square, p, A(c, 0.7f), 1f, "Glitch");
+            float y = (i - 2.5f) * 0.18f;
+            Animate(b, 0.4f, k =>
+            {
+                var q = p + new Vector2(Random.Range(-0.4f, 0.4f), y);
+                b.transform.position = new Vector3(q.x, q.y, q.y / 1000f - 0.6f);
+                b.transform.localScale = new Vector3(Random.Range(0.4f, 1.6f), 0.06f, 1f);
+                b.color = A(i % 2 == 0 ? c : Color.white, 0.7f * (1f - k));
+            });
+        }
+    }
+
+    /// <summary>Soul: wisps that rise and sway.</summary>
+    private static void Wisps(Vector2 p, Color c)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            var w = MakeSprite(Sprites.Glow, p, A(c, 0.8f), 0.3f, "Wisp");
+            float phase = Random.Range(0f, 6f), dx = Random.Range(-0.6f, 0.6f);
+            Animate(w, 0.9f, k =>
+            {
+                var q = p + new Vector2(dx + Mathf.Sin(k * 9f + phase) * 0.15f, k * 1.4f);
+                w.transform.position = new Vector3(q.x, q.y, q.y / 1000f - 0.6f);
+                w.color = A(c, 0.8f * (1f - k));
+            });
+        }
+    }
+
+    /// <summary>Time: two rune rings turning in opposite directions, then reversing.</summary>
+    private static void ClockRings(Vector2 p, Color c)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            var r = MakeSprite(Sprites.Runes, p, A(c, 0.85f), 1f + i * 0.5f, "Clock");
+            float dir = i == 0 ? 1f : -1f;
+            Animate(r, 0.6f, k =>
+            {
+                r.transform.Rotate(0, 0, dir * (k < 0.6f ? 400f : -900f) * Time.deltaTime);
+                r.color = A(c, 0.85f * (1f - k));
+            });
+        }
+    }
+
+    /// <summary>Mind: thin rings pulsing outward one after another.</summary>
+    private static void PulseRings(Vector2 p, Color c, int count = 3)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            var r = MakeSprite(Sprites.Ring, p, A(c, 0f), 0.2f, "Pulse");
+            float delay = i * 0.12f;
+            Animate(r, 0.5f + delay, k =>
+            {
+                float t = Mathf.Clamp01((k * (0.5f + delay) - delay) / 0.5f);
+                r.transform.localScale = Vector3.one * Mathf.Lerp(0.3f, 1.8f, t);
+                r.color = A(c, t > 0f ? 1f - t : 0f);
+            });
+        }
     }
 
     /// <summary>Quick "punch" scale on a HUD button when it's used.</summary>

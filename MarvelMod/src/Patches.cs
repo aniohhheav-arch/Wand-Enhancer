@@ -19,6 +19,7 @@ public static class HudUpdatePatch
         Dimensions.Tick();
         PositionHistory.Tick();
         PortalEngine.Tick();
+        CharacterVisuals.Tick();
     }
 }
 
@@ -94,6 +95,7 @@ public static class MeetingCleanupPatch
         Abilities.Meeting.MeetingAbility.NewMeeting();
         UI.MeetingPanel.Clear();
         Abilities.Loki.Possessions.EndAll();
+        CharacterVisuals.RestoreAll();
         IllusionManager.Instance?.DespawnAll();
         ShapeshiftManager.Instance?.RestoreAll();
         StatusManager.Instance?.ClearAll();

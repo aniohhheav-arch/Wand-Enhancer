@@ -46,12 +46,8 @@ public class ShapeshiftManager : MonoBehaviour
     {
         var state = GetOrCreate(source);
         state.RestoreAt = Time.time + duration;
-        if (!state.Creature)
-        {
-            state.Creature = true;
-            state.OriginalScale = source.cosmetics.transform.localScale;
-            source.cosmetics.transform.localScale = state.OriginalScale * 0.55f;
-        }
+        state.Creature = true;
+        CharacterVisuals.Set(source, "creature", scale: 0.55f, maxSeconds: duration + 1f);
     }
 
     /// <summary>Two players swap looks (both directions use their untouched Default outfits).</summary>
@@ -74,8 +70,7 @@ public class ShapeshiftManager : MonoBehaviour
         {
             PlayShapeshift(pc, pc);
         }
-        if (state.Creature && pc.cosmetics != null)
-            pc.cosmetics.transform.localScale = state.OriginalScale;
+        if (state.Creature) CharacterVisuals.Clear(pc, "creature");
         VfxPlayer.PlayLocal(VfxType.LokiShapeshift, pc.transform.position);
     }
 
