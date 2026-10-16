@@ -32,30 +32,39 @@ public static class CinematicPlayer
         Coroutines.Start(RunGeneric(title, color, caster, dur, onComplete));
     }
 
+    /// <summary>
+    /// Staged ultimate wind-up everyone can read: title + arena darkens, energy streams into the
+    /// caster with a rising crescendo, the build shakes harder, a beat of silence, then the release.
+    /// </summary>
     private static IEnumerator RunGeneric(string title, Color color, PlayerControl caster, float dur, Action onComplete)
     {
         bool mine = caster.AmOwner;
         if (mine) caster.moveable = false;
-        Fx.Toast(title, color, dur + 0.8f, 6f, 1.8f);
-        Fx.Shake(dur, 0.25f);
-        Fx.ScreenTint(new Color(color.r, color.g, color.b, 0.3f), dur + 0.4f);
-        Sfx.Play(SfxKind.Swell, 1f, caster.transform.position, 0.7f);
-        float spark = 0f;
-        for (float t = 0; t < dur; t += Time.deltaTime)
+        try
         {
-            if (caster == null) yield break;
-            spark += Time.deltaTime;
-            if (spark > 0.2f)
+            Fx.Toast(title, color, dur + 0.8f, 6f, 1.8f);
+            Fx.Darken(0.35f, dur + 0.6f);
+            Fx.ScreenTint(new Color(color.r, color.g, color.b, 0.18f), dur + 0.4f);
+            Sfx.Play(SfxKind.Swell, 1f, caster.transform.position, 0.7f, cinematic: true);
+            Sfx.Play(SfxKind.Heartbeat, 0.8f, caster.transform.position, 0.5f, cinematic: true);
+            Fx.Shake(dur * 0.5f, 0.12f);
+            var charge = Fx.Charge(caster.transform, color, dur * 0.8f, 26, SfxKind.Rise);
+            float shook = 0f, t = 0f;
+            while (charge.MoveNext())
             {
-                spark = 0f;
-                Fx.Sparkles(caster.transform.position, color, 4, 1.4f, 0.5f);
+                if (caster == null) yield break;
+                t += Time.deltaTime;
+                if (t > dur * 0.45f && shook == 0f) { shook = 1f; Fx.Shake(dur * 0.4f, 0.3f); Sfx.Play(SfxKind.Rumble, 0.8f, caster.transform.position, 0.6f, cinematic: true); }
+                yield return charge.Current;
             }
-            yield return null;
+            if (caster == null) yield break;
+            yield return new WaitForSeconds(0.12f);   // the beat of silence before the hit
+            if (caster == null) yield break;
+            Fx.Flare(caster.transform.position, Color.white, 2.5f, 0.3f);
+            Fx.Flash(new Color(1f, 1f, 1f, 0.4f), 0.2f);
+            Sfx.Play(SfxKind.Stab, 0.9f, caster.transform.position, 0.8f, cinematic: true);
+            onComplete();
         }
-        if (caster == null) yield break;
-        Fx.Burst(caster.transform.position, color, 3.5f, 0.7f);
-        Fx.Shake(0.4f, 0.4f);
-        try { onComplete(); }
         finally { if (mine && caster != null) caster.moveable = true; }
     }
 

@@ -25,6 +25,20 @@ public abstract class ThanosAbility : AbilityBase
         if (ctx.LocalIs(ctx.Caster)) ThanosCharacter.Instance.Pulse(Stone);
     }
 
+    /// <summary>Ultimate: the stone's energy travels into the gauntlet, then the staged wind-up, then `climax`.</summary>
+    protected void Ultimate(CastContext ctx, string title, System.Action climax)
+    {
+        var caster = ctx.Caster;
+        Coroutines.Start(CoUltimate(caster, title, ctx.Cfg.CinematicDur, climax));
+    }
+
+    private IEnumerator CoUltimate(PlayerControl caster, string title, float dur, System.Action climax)
+    {
+        yield return Fx.StoneToGauntlet(caster.transform, C, 0.5f);
+        if (caster == null || !Players.IsAlive(caster) || MeetingHud.Instance != null) yield break;
+        CinematicPlayer.Play(title, C, caster, dur, climax);
+    }
+
     /// <summary>Power Overload makes everything stun 50 % longer.</summary>
     protected static float Boost(CastContext ctx) =>
         StatusManager.Instance != null && StatusManager.Instance.HasStatus(ctx.Caster, StatusEffect.Haste) ? 1.5f : 1f;
@@ -78,10 +92,13 @@ public class PowerBlast : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         var target = ctx.Target; var from = ctx.CasterPos;
-        Fx.Projectile(from, ctx.Point, C, 14f, () =>
+        // fast jab: muzzle flare at the fist, a heavy purple slug, a crunchy floor impact
+        Fx.Flare(from + new Vector2(0.35f, 0f), C, 0.8f, 0.15f);
+        Sfx.Play(SfxKind.Whoosh, 0.8f, from, 0.5f);
+        Fx.Projectile(from, ctx.Point, C, 16f, () =>
         {
-            Fx.Cracks(ctx.Point, C, 6, 0.8f, 0.6f, ctx.Rng.Next());
-            Sfx.Play(SfxKind.Boom, 1.3f, ctx.Point, 0.6f);
+            Fx.Release(ctx.Point, C, ImpactStyle.Heavy, 0.8f);
+            Fx.Aftermath(ctx.Point, C, Residue.Smoke, 0.6f);
             if (target != null) Hit(ctx, target, from, ctx.Cfg.Duration);
         });
     }
@@ -106,13 +123,9 @@ public class CosmicBeam : ThanosAbility
     {
         var caster = ctx.Caster;
         // charge: purple energy gathers into the gauntlet
-        var charge = Fx.Aura(caster.transform, Sprites.Glow, new Color(C.r, C.g, C.b, 0.8f), 0.4f, 0.8f, 0f, 0f, false);
-        Sfx.Play(SfxKind.Rise, 0.8f, ctx.CasterPos, 0.6f);
-        for (float t = 0; t < 0.6f; t += Time.deltaTime)
-        {
-            if (charge != null) charge.transform.localScale = Vector3.one * (0.4f + t * 2.6f);
-            yield return null;
-        }
+        yield return Fx.StoneToGauntlet(caster.transform, C, 0.3f);
+        yield return Fx.Charge(caster.transform, C, 0.45f, 10, SfxKind.Rise);
+        if (caster == null) { ToggleEnded(caster); yield break; }
         Vector2 dir = (ctx.Point - ctx.CasterPos).normalized;
         if (dir.sqrMagnitude < 0.01f) dir = Vector2.right;
         float hitTimer = 0f, drawTimer = 0f, hum = 0f;
@@ -139,7 +152,12 @@ public class CosmicBeam : ThanosAbility
             }
             yield return null;
         }
-        if (caster != null) { Fx.Burst(caster.transform.position, C, 1.2f, 0.3f); Sfx.Play(SfxKind.Thud, 0.8f, caster.transform.position, 0.5f); }
+        if (caster != null)
+        {
+            Fx.Burst(caster.transform.position, C, 1.2f, 0.3f);
+            Fx.Aftermath(caster.transform.position, C, Residue.Embers, 0.8f);
+            Sfx.Play(SfxKind.Thud, 0.8f, caster.transform.position, 0.5f);
+        }
         ToggleEnded(caster);
     }
 }
@@ -151,12 +169,28 @@ public class Shockwave : ThanosAbility
     public override string Name => "Shockwave";
     public override string Label => "SLAM";
 
-    protected override void OnCast(CastContext ctx)
+    protected override void OnCast(CastContext ctx) => Coroutines.Start(Run(ctx));
+
+    /// <summary>Hop up, hang for a beat, then slam the gauntlet into the floor.</summary>
+    private IEnumerator Run(CastContext ctx)
     {
-        var c = ctx.CasterPos;
+        var caster = ctx.Caster;
+        StatusManager.Instance?.ApplyStatus(caster, StatusEffect.Rooted, 0.5f);
+        Sfx.Play(SfxKind.Whoosh, 0.7f, ctx.CasterPos, 0.5f);
+        for (float t = 0; t < 0.3f; t += Time.deltaTime)
+        {
+            if (caster == null) yield break;
+            float k = t / 0.3f;
+            CharacterVisuals.Set(caster, "slam", lift: Mathf.Sin(k * Mathf.PI * 0.5f) * 0.45f, maxSeconds: 1f);
+            yield return null;
+        }
+        yield return new WaitForSeconds(0.08f);
+        if (caster == null) yield break;
+        CharacterVisuals.Clear(caster, "slam");
+        var c = (Vector2)caster.transform.position;
+        Fx.Release(c, C, ImpactStyle.Heavy, 1.6f);
         Fx.Wave(c, C, ctx.Cfg.Range, 0.45f);
-        Fx.Cracks(c, C, 10, ctx.Cfg.Range * 0.6f, 0.9f, ctx.Rng.Next());
-        Fx.Shake(0.4f, 0.6f);
+        Fx.Aftermath(c, C, Residue.Debris, 1.2f);
         foreach (var pc in Others(ctx, c, ctx.Cfg.Range)) Hit(ctx, pc, c, ctx.Cfg.Duration);
     }
 }
@@ -170,14 +204,63 @@ public class PowerOverload : ThanosAbility
 
     protected override void OnCast(CastContext ctx)
     {
-        Fx.Burst(ctx.CasterPos, C, 2f, 0.4f);
         StatusManager.Instance?.ApplyStatus(ctx.Caster, StatusEffect.Haste, ctx.Cfg.Duration);
+        Coroutines.Start(Run(ctx));
         if (ctx.LocalIs(ctx.Caster)) Fx.Toast("POWER OVERLOAD: FASTER, STRONGER", C, 2f, 3.5f);
+    }
+
+    /// <summary>Flex, purple lightning bursts off him, then crackles around him while it lasts.</summary>
+    private IEnumerator Run(CastContext ctx)
+    {
+        var caster = ctx.Caster;
+        CharacterVisuals.Set(caster, "overload", scale: 1.12f, maxSeconds: ctx.Cfg.Duration + 0.5f);
+        Fx.Release(ctx.CasterPos, C, ImpactStyle.Electric, 1.2f);
+        Sfx.Play(SfxKind.Stab, 1.1f, ctx.CasterPos, 0.6f);
+        float arc = 0f;
+        for (float t = 0; t < ctx.Cfg.Duration; t += Time.deltaTime)
+        {
+            if (caster == null || !Players.IsAlive(caster) || MeetingHud.Instance != null) break;
+            arc -= Time.deltaTime;
+            if (arc <= 0f)
+            {
+                arc = 0.35f;
+                Vector2 p = caster.transform.position;
+                float a = Random.Range(0f, Mathf.PI * 2f);
+                Fx.Lightning(p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 0.2f, p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 0.9f, C, 0.15f, 1, 0.15f);
+                Fx.Rising(p, C, 2, 0.6f, 0.6f);
+            }
+            yield return null;
+        }
+        if (caster != null) CharacterVisuals.Clear(caster, "overload");
     }
 }
 
 public class Planetbreaker : ThanosAbility
 {
+    /// <summary>A sphere of purple energy that grows above Thanos, compresses, and is slammed down.</summary>
+    private IEnumerator Moon(PlayerControl caster, float dur)
+    {
+        var orb = Fx.MakeSprite(Sprites.Glow, caster.transform.position, new Color(C.r, C.g, C.b, 0f), 0.2f, "PlanetMoon");
+        var ring = Fx.MakeSprite(Sprites.Ring, caster.transform.position, new Color(1f, 1f, 1f, 0f), 0.2f, "PlanetMoonRing");
+        for (float t = 0; t < dur; t += Time.deltaTime)
+        {
+            if (caster == null || orb == null || ring == null) break;
+            float k = t / dur;
+            float size = k < 0.8f ? Mathf.Lerp(0.2f, 2.6f, k / 0.8f) : Mathf.Lerp(2.6f, 1.2f, (k - 0.8f) / 0.2f);   // grow, then compress
+            var p = (Vector2)caster.transform.position + new Vector2(0f, 1.6f + 0.1f * Mathf.Sin(t * 6f));
+            orb.transform.position = new Vector3(p.x, p.y, p.y / 1000f - 0.7f);
+            ring.transform.position = orb.transform.position + new Vector3(0, 0, -0.01f);
+            orb.transform.localScale = Vector3.one * size;
+            ring.transform.localScale = Vector3.one * size * 1.1f;
+            ring.transform.Rotate(0, 0, 200f * Time.deltaTime);
+            orb.color = new Color(C.r, C.g, C.b, Mathf.Min(0.95f, k * 2f));
+            ring.color = new Color(1f, 1f, 1f, Mathf.Min(0.6f, k));
+            yield return null;
+        }
+        if (orb != null) Object.Destroy(orb.gameObject);
+        if (ring != null) Object.Destroy(ring.gameObject);
+    }
+
     public override Stone Stone => Stone.Power;
     public override string Id => "planetbreaker";
     public override string Name => "Planetbreaker";
@@ -187,16 +270,21 @@ public class Planetbreaker : ThanosAbility
     {
         var caster = ctx.Caster;
         // float into the air (restored by CharacterVisuals even if the wind-up is interrupted)
-        CharacterVisuals.Set(caster, "planetbreaker", lift: 0.4f, maxSeconds: ctx.Cfg.CinematicDur + 1.5f);
-        CinematicPlayer.Play("PLANETBREAKER", C, caster, ctx.Cfg.CinematicDur, () =>
+        CharacterVisuals.Set(caster, "planetbreaker", lift: 0.4f, maxSeconds: ctx.Cfg.CinematicDur + 2f);
+        // the floor comes apart and floats up around him while a purple "moon" condenses overhead
+        Fx.Levitate(ctx.CasterPos, C, ctx.Cfg.Range * 0.6f, ctx.Cfg.CinematicDur + 0.8f, 14);
+        Coroutines.Start(Moon(caster, ctx.Cfg.CinematicDur + 0.6f));
+        Ultimate(ctx, "PLANETBREAKER", () =>
         {
             CharacterVisuals.Clear(caster, "planetbreaker");
             Vector2 c = caster.transform.position;
-            Fx.Burst(c, C, ctx.Cfg.Range * 2f, 0.8f);
+            Fx.Release(c, C, ImpactStyle.Heavy, 2.5f, cinematic: true);
             Fx.Wave(c, C, ctx.Cfg.Range, 0.6f);
-            Fx.Cracks(c, C, 16, ctx.Cfg.Range, 1.5f, ctx.Rng.Next());
+            Fx.Cracks(c, C, 16, ctx.Cfg.Range, 2.2f, ctx.Rng.Next());
+            Fx.ShockRing(c, Color.white, ctx.Cfg.Range * 2.2f, 0.9f, squash: 0.55f);
+            Fx.Aftermath(c, C, Residue.Debris, 2f);
+            Fx.Aftermath(c, C, Residue.Embers, 1.5f);
             Fx.Shake(0.8f, 1.2f);
-            Sfx.Play(SfxKind.Boom, 0.6f, c);
             foreach (var pc in Others(ctx, c, ctx.Cfg.Range))
             {
                 if (ctx.Cfg.Damage > 0f && Vector2.Distance(c, Players.Pos(pc)) <= ctx.Cfg.Radius) Kills.Kill(caster, pc);
@@ -220,9 +308,12 @@ public class SpaceBlink : ThanosAbility
 
     protected override void OnCast(CastContext ctx)
     {
-        Fx.Burst(ctx.CasterPos, C, 1.4f, 0.3f);
-        Fx.Burst(ctx.Point, C, 1.4f, 0.3f);
-        Fx.Beam(ctx.CasterPos, ctx.Point, C, 0.15f, 0.3f);
+        // folds space: implodes where he stood, a thin space-tear streak, pops out the other end
+        Fx.Release(ctx.CasterPos, C, ImpactStyle.Cosmic, 0.6f);
+        Fx.Beam(ctx.CasterPos, ctx.Point, Color.Lerp(C, Color.white, 0.5f), 0.08f, 0.25f);
+        Fx.ShockRing(ctx.Point, C, 1.8f, 0.3f);
+        Fx.Sparkles(ctx.Point, C, 8, 1f, 0.4f);
+        Sfx.Play(SfxKind.Pop, 0.8f, ctx.Point, 0.6f);
         Players.Teleport(ctx.Caster, ctx.Point);
     }
 }
@@ -242,7 +333,11 @@ public class SpaceRift : ThanosAbility
         SecondPoint = PickedPoints.Count > 1 ? PickedPoints[1] : point + Vector2.right * 3f;
     }
 
-    protected override void OnCast(CastContext ctx) => Coroutines.Start(Portals.Run(ctx.Point, ctx.Point2, C, ctx.Cfg.Duration));
+    protected override void OnCast(CastContext ctx)
+    {
+        foreach (var p in new[] { ctx.Point, ctx.Point2 }) Fx.Release(p, C, ImpactStyle.Cosmic, 0.8f);
+        Coroutines.Start(Portals.Run(ctx.Point, ctx.Point2, C, ctx.Cfg.Duration));
+    }
 }
 
 public static class Portals
@@ -312,6 +407,25 @@ public class GravityWell : ThanosAbility
         });
         foreach (var pc in Others(ctx, p, ctx.Cfg.Range))
             StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Pulled, ctx.Cfg.Duration, p);
+        Coroutines.Start(Swirl(p, ctx.Cfg.Duration, ctx.Cfg.Range));
+    }
+
+    /// <summary>Debris spirals into the singularity, a low drone pulses, then it collapses with a pop.</summary>
+    private IEnumerator Swirl(Vector2 p, float dur, float range)
+    {
+        var anchor = new GameObject("GravityAnchor");
+        anchor.transform.position = p;
+        float mote = 0f, drone = 0f;
+        for (float t = 0; t < dur; t += Time.deltaTime)
+        {
+            if (MeetingHud.Instance != null) break;
+            mote -= Time.deltaTime; drone -= Time.deltaTime;
+            if (mote <= 0f) { mote = 0.06f; Fx.Debris(p + Random.insideUnitCircle.normalized * range * 0.8f, new Color(0.4f, 0.4f, 0.5f), 1, 0.2f); }
+            if (drone <= 0f) { drone = 0.9f; Sfx.Play(SfxKind.Rumble, 1.2f, p, 0.35f); }
+            yield return null;
+        }
+        Object.Destroy(anchor);
+        Fx.Release(p, C, ImpactStyle.Cosmic, 1f);
     }
 }
 
@@ -326,8 +440,22 @@ public class SpatialPrison : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         if (ctx.Target == null) return;
-        Fx.Beam(ctx.CasterPos, ctx.Target.transform.position, C, 0.2f, 0.4f);
-        StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Prison, ctx.Cfg.Duration * Boost(ctx));
+        // space folds into a glowing cube around them: rings snap inward, then a box seals shut
+        Vector2 p = ctx.Target.transform.position;
+        Fx.Beam(ctx.CasterPos, p, C, 0.2f, 0.4f);
+        Fx.Release(p, C, ImpactStyle.Cosmic, 0.7f);
+        var box = Fx.MakeSprite(Sprites.Box, p, new Color(C.r, C.g, C.b, 0f), 3f, "PrisonBox");
+        float dur = ctx.Cfg.Duration * Boost(ctx);
+        var target = ctx.Target;
+        Fx.Animate(box, dur, k =>
+        {
+            if (target != null) box.transform.position = target.transform.position + new Vector3(0, 0, -0.05f);
+            float seal = Mathf.Clamp01(k * dur / 0.25f);
+            box.transform.localScale = Vector3.one * Mathf.Lerp(3f, 1.25f, seal);
+            box.color = new Color(C.r, C.g, C.b, 0.75f * seal * (k > 0.9f ? (1f - k) * 10f : 1f));
+        });
+        Sfx.Play(SfxKind.Glass, 0.7f, p, 0.5f);
+        StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Prison, dur);
     }
 }
 
@@ -345,11 +473,52 @@ public class CosmicExile : ThanosAbility
         var target = ctx.Target;
         if (target == null) return;
         int seed = ctx.Rng.Next();
-        CinematicPlayer.Play("COSMIC EXILE", C, ctx.Caster, ctx.Cfg.CinematicDur, () =>
+        // a rift tears open behind the target during the wind-up; at the climax they're sucked through it
+        Coroutines.Start(Rift(target, ctx.Cfg.CinematicDur + 1f));
+        Ultimate(ctx, "COSMIC EXILE", () =>
         {
-            Dimensions.Scenery(Dimensions.Cosmic, C, ctx.Cfg.Duration + 1f, seed);
-            Dimensions.Send(target, Dimensions.Cosmic, Vector2.zero, ctx.Cfg.Duration, new Color(0.15f, 0.25f, 0.9f), "EXILED TO THE COSMOS");
+            if (target == null) return;
+            Coroutines.Start(Suck(ctx, target, seed));
         });
+    }
+
+    private IEnumerator Rift(PlayerControl target, float dur)
+    {
+        var tear = Fx.MakeSprite(Sprites.Glow, target.transform.position, new Color(0.02f, 0.02f, 0.08f, 0f), 0.2f, "ExileRift");
+        var rim = Fx.MakeSprite(Sprites.Ring, target.transform.position, new Color(C.r, C.g, C.b, 0f), 0.2f, "ExileRim");
+        for (float t = 0; t < dur; t += Time.deltaTime)
+        {
+            if (target == null || tear == null || rim == null) break;
+            float k = Mathf.Clamp01(t / (dur * 0.8f));
+            var p = target.transform.position + new Vector3(0.5f, 0.3f, 0.02f);
+            tear.transform.position = p; rim.transform.position = p - new Vector3(0, 0, 0.01f);
+            tear.transform.localScale = new Vector3(0.6f, 1.8f, 1f) * k;
+            rim.transform.localScale = new Vector3(0.7f, 2f, 1f) * k;
+            rim.transform.Rotate(0, 0, 300f * Time.deltaTime);
+            tear.color = new Color(0.02f, 0.02f, 0.08f, 0.95f * k);
+            rim.color = new Color(C.r, C.g, C.b, 0.9f * k);
+            if (Random.value < 0.15f) Fx.Debris((Vector2)target.transform.position + Random.insideUnitCircle * 1.5f, Color.gray, 1, 0.1f);
+            yield return null;
+        }
+        if (tear != null) Object.Destroy(tear.gameObject);
+        if (rim != null) Object.Destroy(rim.gameObject);
+    }
+
+    private IEnumerator Suck(CastContext ctx, PlayerControl target, int seed)
+    {
+        Sfx.Play(SfxKind.Warp, 0.6f, target.transform.position, 0.8f, cinematic: true);
+        for (float t = 0; t < 0.45f; t += Time.deltaTime)
+        {
+            if (target == null) yield break;
+            float k = t / 0.45f;
+            CharacterVisuals.Set(target, "exile", tilt: k * 540f, scale: Mathf.Lerp(1f, 0.15f, k * k), maxSeconds: 2f);
+            yield return null;
+        }
+        if (target == null) yield break;
+        CharacterVisuals.Clear(target, "exile");
+        Fx.Release(target.transform.position, C, ImpactStyle.Cosmic, 1.4f, cinematic: true);
+        Dimensions.Scenery(Dimensions.Cosmic, C, ctx.Cfg.Duration + 1f, seed);
+        Dimensions.Send(target, Dimensions.Cosmic, Vector2.zero, ctx.Cfg.Duration, new Color(0.15f, 0.25f, 0.9f), "EXILED TO THE COSMOS");
     }
 }
 
@@ -365,9 +534,12 @@ public class RealityWarp : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         var c = ctx.CasterPos;
+        // red aether ripples out in uneven, stuttering rings; everyone caught glitches
         for (int i = 0; i < 3; i++) Fx.Wave(c, new Color(C.r, C.g, C.b, 0.7f - i * 0.2f), ctx.Cfg.Range, 0.6f + i * 0.25f);
+        Fx.Release(c, C, ImpactStyle.Glitch, 1.2f);
         foreach (var pc in Others(ctx, c, ctx.Cfg.Range))
         {
+            Fx.Release(pc.transform.position, C, ImpactStyle.Glitch, 0.5f);
             StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Slowed, ctx.Cfg.Duration);
             if (ctx.LocalIs(pc))
             {
@@ -389,7 +561,11 @@ public class Transmutation : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         if (ctx.Target == null) return;
-        Fx.Smoke(ctx.Target.transform.position, C, 10, 0.7f);
+        // POOF: cartoon puff and a spring noise, and they're a crate now
+        Vector2 p = ctx.Target.transform.position;
+        Fx.Smoke(p, C, 10, 0.7f);
+        Fx.Release(p, C, ImpactStyle.Comedy, 1f);
+        Fx.Comic(p + new Vector2(0f, 0.9f), "POOF!", Color.white, 1.2f);
         StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Transmuted, ctx.Cfg.Duration);
     }
 }
@@ -409,11 +585,16 @@ public class RealityShatter : ThanosAbility
     private IEnumerator Run(CastContext ctx)
     {
         var p = ctx.Point;
+        // telegraph: cracks creep out with glass creaks, then the whole patch of reality breaks
         Fx.Cracks(p, C, 9, ctx.Cfg.Radius, 1.3f, ctx.Rng.Next());
-        for (float t = 0; t < 1f; t += Time.deltaTime) yield return null;
-        Fx.Burst(p, C, ctx.Cfg.Radius * 2f, 0.4f);
+        for (int i = 0; i < 3; i++)
+        {
+            Sfx.Play(SfxKind.Creak, 1.2f + i * 0.2f, p, 0.4f);
+            for (float t = 0; t < 0.33f; t += Time.deltaTime) yield return null;
+        }
+        Fx.Release(p, C, ImpactStyle.Glitch, ctx.Cfg.Radius);
         Fx.Fragments(p, C, 40, ctx.Cfg.Radius, 0.8f);
-        Sfx.Play(SfxKind.Slash, 2f, p);
+        Sfx.Play(SfxKind.Glass, 0.8f, p);
         foreach (var pc in Others(ctx, p, ctx.Cfg.Radius)) Hit(ctx, pc, p, ctx.Cfg.Duration);
     }
 }
@@ -428,6 +609,7 @@ public class FalseWorld : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         Fx.Wave(ctx.CasterPos, C, ctx.Cfg.Range, 0.7f);
+        Fx.Release(ctx.CasterPos, C, ImpactStyle.Glitch, 0.9f);
         var me = PlayerControl.LocalPlayer;
         if (me == null || me == ctx.Caster || !Players.IsAlive(me)) return;
         if (Vector2.Distance(Players.Pos(me), ctx.CasterPos) > ctx.Cfg.Range) return;
@@ -460,11 +642,15 @@ public class RealityCollapse : ThanosAbility
     {
         var caster = ctx.Caster;
         int seed = ctx.Rng.Next();
-        CinematicPlayer.Play("REALITY COLLAPSE", C, caster, ctx.Cfg.CinematicDur, () =>
+        Ultimate(ctx, "REALITY COLLAPSE", () =>
         {
             Vector2 c = caster.transform.position;
+            // the world turns red and breaks like a screen: shards, glitch storms, a slow wave of wrongness
             Fx.Cracks(c, C, 20, 6f, 2f, seed);
-            Sfx.Play(SfxKind.Slash, 1.6f, c);
+            Fx.Release(c, C, ImpactStyle.Glitch, 2.5f, cinematic: true);
+            Fx.Darken(0.3f, 3f, new Color(0.25f, 0f, 0.02f));
+            for (int i = 0; i < 6; i++) Fx.Release(c + Random.insideUnitCircle * ctx.Cfg.Range * 0.7f, C, ImpactStyle.Glitch, 0.8f);
+            Sfx.Play(SfxKind.Reverse, 0.7f, c, 0.8f, cinematic: true);
             Fx.Wave(c, C, ctx.Cfg.Range, 3f, pc =>
             {
                 if (pc == caster) return;
@@ -486,7 +672,9 @@ public class SoulSight : ThanosAbility
 
     protected override void OnCast(CastContext ctx)
     {
+        Fx.Release(ctx.CasterPos, C, ImpactStyle.Eerie, 0.7f);
         if (!ctx.LocalIs(ctx.Caster)) return;
+        Sfx.Play(SfxKind.Heartbeat, 1f, null, 0.6f);
         foreach (var pc in Players.All())
             if (pc != ctx.Caster && Players.IsAlive(pc)) Fx.ScreenMarker(pc.transform, C, ctx.Cfg.Duration);
         Fx.ScreenTint(new Color(1f, 0.5f, 0.1f, 0.15f), ctx.Cfg.Duration);
@@ -505,8 +693,12 @@ public class SoulDrain : ThanosAbility
     {
         var target = ctx.Target;
         if (target == null) return;
+        // orange soul threads pulled out of the target into the gauntlet, with a slowing heartbeat
+        Coroutines.Start(Fx.Bind(ctx.Caster.transform, target.transform, C, 1.2f, 2));
         for (int i = 0; i < 4; i++)
             Fx.Projectile(Players.Pos(target) + Random.insideUnitCircle * 0.3f, ctx.CasterPos, C, 6f + i, null);
+        Sfx.Play(SfxKind.Heartbeat, 0.8f, Players.Pos(target), 0.6f);
+        Fx.Aftermath(Players.Pos(target), C, Residue.Embers, 0.5f);
         StatusManager.Instance?.ApplyStatus(target, StatusEffect.Slowed, ctx.Cfg.Duration);
         if (!ctx.LocalIs(ctx.Caster)) return;
         foreach (var tab in ThanosCharacter.Instance.Tabs)
@@ -528,6 +720,8 @@ public class SpiritProjection : ThanosAbility
     {
         StatusManager.Instance?.ApplyStatus(ctx.Caster, StatusEffect.Rooted, ctx.Cfg.Duration);
         Fx.Aura(ctx.Caster.transform, Sprites.Glow, new Color(C.r, C.g, C.b, 0.5f), 1.4f, ctx.Cfg.Duration);
+        Fx.Rising(ctx.CasterPos, C, 10, 0.8f, 1.4f);
+        Sfx.Play(SfxKind.Choir, 1.3f, ctx.CasterPos, 0.3f);
         if (ctx.LocalIs(ctx.Caster)) Coroutines.Start(Run(ctx));
     }
 
@@ -563,8 +757,12 @@ public class SoulChains : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         if (ctx.Target == null) return;
-        Fx.Beam(ctx.CasterPos, ctx.Target.transform.position, C, 0.18f, 0.5f);
-        StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Chained, ctx.Cfg.Duration * Boost(ctx));
+        // ghostly chains: threads stay wrapped around the target the whole time, clanking
+        float dur = ctx.Cfg.Duration * Boost(ctx);
+        Coroutines.Start(Fx.Bind(ctx.Caster.transform, ctx.Target.transform, C, Mathf.Min(dur, 1.5f), 3));
+        Fx.Aura(ctx.Target.transform, Sprites.Runes, new Color(C.r, C.g, C.b, 0.6f), 1.1f, dur, 90f);
+        Sfx.Play(SfxKind.Clang, 1.4f, ctx.Target.transform.position, 0.5f);
+        StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Chained, dur);
     }
 }
 
@@ -580,8 +778,11 @@ public class SoulWorld : ThanosAbility
     {
         var caster = ctx.Caster;
         int seed = ctx.Rng.Next();
-        CinematicPlayer.Play("SOUL WORLD", C, caster, ctx.Cfg.CinematicDur, () =>
+        Fx.Rising(ctx.CasterPos, C, 20, ctx.Cfg.Range, ctx.Cfg.CinematicDur + 1f);
+        Ultimate(ctx, "SOUL WORLD", () =>
         {
+            Fx.Release(caster.transform.position, C, ImpactStyle.Eerie, 2.2f, cinematic: true);
+            Fx.Flash(new Color(1f, 0.6f, 0.2f, 0.6f), 0.4f);
             Dimensions.Scenery(Dimensions.Soul, C, ctx.Cfg.Duration + 1f, seed);
             var who = Others(ctx, caster.transform.position, ctx.Cfg.Range);
             who.Add(caster);
@@ -609,8 +810,10 @@ public class TimeFreeze : ThanosAbility
         var c = ctx.CasterPos;
         var clock = Fx.MakeSprite(Sprites.Runes, c, new Color(C.r, C.g, C.b, 0.7f), ctx.Cfg.Range * 2f);
         Fx.Animate(clock, 1f, k => { clock.transform.Rotate(0, 0, -120f * Time.deltaTime); clock.color = new Color(C.r, C.g, C.b, 0.7f * (1f - k)); });
+        Fx.Release(c, C, ImpactStyle.Time, 1.2f);
         foreach (var pc in Others(ctx, c, ctx.Cfg.Range))
         {
+            Fx.Aftermath(pc.transform.position, C, Residue.Frost, 0.7f);
             StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Frozen, ctx.Cfg.Duration * Boost(ctx));
             if (ctx.LocalIs(pc)) Fx.ScreenTint(new Color(0.5f, 1f, 0.6f, 0.3f), ctx.Cfg.Duration);
         }
@@ -629,9 +832,14 @@ public class Rewind : ThanosAbility
 
     protected override void OnCast(CastContext ctx)
     {
-        Fx.Beam(ctx.CasterPos, ctx.Point, C, 0.2f, 0.5f);
-        Fx.Burst(ctx.CasterPos, C, 1.2f, 0.3f);
-        Fx.Burst(ctx.Point, C, 1.6f, 0.4f);
+        // afterimages stream backwards along the line while the clock runs in reverse
+        for (int i = 1; i <= 5; i++)
+        {
+            var q = Vector2.Lerp(ctx.CasterPos, ctx.Point, i / 6f);
+            Fx.Flare(q, new Color(C.r, C.g, C.b, 0.6f), 0.7f, 0.2f + i * 0.06f);
+        }
+        Fx.Release(ctx.Point, C, ImpactStyle.Time, 0.9f);
+        Sfx.Play(SfxKind.Reverse, 1.2f, ctx.CasterPos, 0.5f);
         var clock = Fx.MakeSprite(Sprites.Runes, ctx.Point, C, 1.4f);
         Fx.Animate(clock, 0.8f, k => { clock.transform.Rotate(0, 0, 600f * Time.deltaTime); clock.color = new Color(C.r, C.g, C.b, 1f - k); });
         Players.Teleport(ctx.Caster, ctx.Point);
@@ -653,6 +861,7 @@ public class TemporalEcho : ThanosAbility
     {
         var path = ctx.LocalIs(ctx.Caster) ? ThanosCharacter.Instance.PathSince(4f) : new List<Vector2> { ctx.Point, ctx.CasterPos };
         if (path.Count < 2) path = new List<Vector2> { ctx.Point, ctx.CasterPos };
+        Fx.Release(path[0], C, ImpactStyle.Time, 0.6f);
         var echo = IllusionManager.Instance!.SpawnIllusion(ctx.Caster, path[0]);
         echo.SetTint(new Color(0.5f, 1f, 0.6f, 0.6f));
         echo.Untouchable = true;
@@ -677,8 +886,12 @@ public class AgeManipulation : ThanosAbility
             float dir = i % 2 == 0 ? 1f : -1f;
             Fx.Animate(ring, ctx.Cfg.Duration, k => ring.transform.Rotate(0, 0, dir * 60f * Time.deltaTime));
         }
+        Sfx.Play(SfxKind.Creak, 0.6f, c, 0.5f);
         foreach (var pc in Others(ctx, c, ctx.Cfg.Range))
         {
+            // they age: sand pours off them and they hunch over (temporary, restored by CharacterVisuals)
+            Fx.Rising(pc.transform.position, new Color(0.8f, 0.7f, 0.45f), 8, 0.6f, ctx.Cfg.Duration * 0.5f);
+            CharacterVisuals.Set(pc, "aged", tilt: 8f, scale: 0.9f, maxSeconds: ctx.Cfg.Duration);
             StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Slowed, ctx.Cfg.Duration);
             if (ctx.LocalIs(pc)) Fx.ScreenTint(new Color(0.6f, 0.45f, 0.2f, 0.35f), ctx.Cfg.Duration);
         }
@@ -698,7 +911,12 @@ public class EternalLoop : ThanosAbility
     {
         var target = ctx.Target;
         if (target == null) return;
-        CinematicPlayer.Play("ETERNAL LOOP", C, ctx.Caster, ctx.Cfg.CinematicDur, () => Coroutines.Start(Run(ctx, target)));
+        Ultimate(ctx, "ETERNAL LOOP", () =>
+        {
+            if (target == null) return;
+            Fx.Sigil(target.transform.position, C, 2f, ctx.Cfg.Duration * 0.25f);
+            Coroutines.Start(Run(ctx, target));
+        });
     }
 
     private IEnumerator Run(CastContext ctx, PlayerControl target)
@@ -716,8 +934,7 @@ public class EternalLoop : ThanosAbility
             echo.SetTint(new Color(0.5f, 1f, 0.6f, 0.45f));
             echo.Untouchable = true;
             echo.Lifetime = 1.2f;
-            Fx.Burst(anchor, C, 1.2f, 0.3f);
-            Sfx.Play(SfxKind.Chime, 1.2f, anchor, 0.5f);
+            Fx.Release(anchor, C, ImpactStyle.Time, 0.7f);
             Players.Teleport(target, anchor);
         }
     }
@@ -736,8 +953,13 @@ public class ThanosMindControl : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         if (ctx.Target == null) return;
-        Fx.Beam(ctx.CasterPos, ctx.Target.transform.position, C, 0.15f, 0.6f);
-        StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Puppet, ctx.Cfg.Duration, ctx.CasterPos);
+        // a golden thread to the forehead, a hypnotic spiral over their head, a goofy "@_@"
+        var t = ctx.Target;
+        Fx.Tendril(ctx.CasterPos, t.transform.position, C, 0.6f, 12);
+        Fx.Aura(t.transform, Sprites.Runes, new Color(C.r, C.g, C.b, 0.7f), 0.5f, ctx.Cfg.Duration, 360f, 0.75f);
+        Fx.WorldText(t.transform, "@_@", C, 1.4f, 3f);
+        Sfx.Play(SfxKind.Shimmer, 0.7f, t.transform.position, 0.6f);
+        StatusManager.Instance?.ApplyStatus(t, StatusEffect.Puppet, ctx.Cfg.Duration, ctx.CasterPos);
     }
 }
 
@@ -752,8 +974,10 @@ public class PsychicPulse : ThanosAbility
     {
         var c = ctx.CasterPos;
         for (int i = 0; i < 3; i++) Fx.Wave(c, C, ctx.Cfg.Range, 0.4f + i * 0.2f);
+        Fx.Release(c, C, ImpactStyle.Magic, 1.2f);
         foreach (var pc in Others(ctx, c, ctx.Cfg.Range))
         {
+            Fx.WorldText(pc.transform, "?!", C, 1f, 3f);
             StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Stunned, 0.8f);
             StatusManager.Instance?.ApplyStatus(pc, StatusEffect.ChaosContract, ctx.Cfg.Duration);
         }
@@ -771,7 +995,10 @@ public class MemoryErasure : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         if (ctx.Target == null) return;
+        // their memory gets wiped like a whiteboard: glitch, sparkles, a blank "..."
         Fx.Sparkles(ctx.Target.transform.position, C, 12, 1f);
+        Fx.Release(ctx.Target.transform.position, C, ImpactStyle.Glitch, 0.6f);
+        Fx.WorldText(ctx.Target.transform, "...?", Color.white, 1.8f, 3f);
         StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Blinded, ctx.Cfg.Duration);
         if (ctx.LocalIs(ctx.Target)) Fx.ScreenTint(new Color(1f, 0.9f, 0.4f, 0.3f), ctx.Cfg.Duration);
     }
@@ -788,7 +1015,10 @@ public class IllusionArmy : ThanosAbility
     {
         for (int i = 0; i < Mathf.Clamp(ctx.Cfg.MaxTargets, 1, 8); i++)
         {
-            var ill = IllusionManager.Instance!.SpawnIllusion(ctx.Caster, MapSpawnPoints.NearbyOpenPoint(ctx.CasterPos, ctx.Rng, 0.8f, 2.5f));
+            var spot = MapSpawnPoints.NearbyOpenPoint(ctx.CasterPos, ctx.Rng, 0.8f, 2.5f);
+            Fx.Tendril(ctx.CasterPos, spot, C, 0.35f, 6);
+            Fx.ShockRing(spot, C, 1.2f, 0.3f);
+            var ill = IllusionManager.Instance!.SpawnIllusion(ctx.Caster, spot);
             ill.SetBehavior(IllusionBehavior.Wander);
             ill.Lifetime = ctx.Cfg.Duration;
         }
@@ -806,9 +1036,11 @@ public class AbsoluteDomination : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         var caster = ctx.Caster;
-        CinematicPlayer.Play("ABSOLUTE DOMINATION", C, caster, ctx.Cfg.CinematicDur, () =>
+        Ultimate(ctx, "ABSOLUTE DOMINATION", () =>
         {
             Fx.ScreenTint(new Color(1f, 0.85f, 0.2f, 0.25f), ctx.Cfg.Duration);
+            Fx.Release(caster.transform.position, C, ImpactStyle.Magic, 2.4f, cinematic: true);
+            Sfx.Play(SfxKind.Choir, 0.8f, caster.transform.position, 0.6f, cinematic: true);
             var looks = new List<PlayerControl>();
             foreach (var pc in Players.All()) if (Players.IsAlive(pc)) looks.Add(pc);
             foreach (var spot in MapSpawnPoints.GetRandom(ctx.Cfg.MaxTargets, ctx.Rng, caster.transform.position))
@@ -842,11 +1074,15 @@ public class InfinitySurge : ThanosAbility
     private IEnumerator Run(CastContext ctx)
     {
         var c = ctx.CasterPos;
+        // each stone fires its own ring with its own rising note, then everything detonates together
+        int i = 0;
         foreach (var s in Stones.Six)
         {
             Fx.Wave(c, Stones.Color(s), ctx.Cfg.Range, 0.7f);
+            Sfx.Play(SfxKind.Chime, 0.8f + i++ * 0.1f, c, 0.5f);
             for (float t = 0; t < 0.08f; t += Time.deltaTime) yield return null;
         }
+        Fx.Release(c, Color.white, ImpactStyle.Cosmic, 1.6f);
         Fx.Shake(0.5f, 0.7f);
         foreach (var pc in Others(ctx, c, ctx.Cfg.Range)) Hit(ctx, pc, c, ctx.Cfg.Duration);
     }
@@ -897,6 +1133,7 @@ public class TheSnap : ThanosAbility
             }
         }
         Fx.ScreenTint(new Color(0f, 0f, 0f, 0.6f), 3.2f);
+        Sfx.Play(SfxKind.Choir, 0.7f, null, 0.5f, cinematic: true);
         yield return Kills.Wait(0.5f);
         for (int i = 0; i < gems.Count; i++)
         {
@@ -924,10 +1161,12 @@ public class TheSnap : ThanosAbility
         var chosen = others.GetRange(0, (others.Count + 1) / 2);
 
         bool lethal = mode == 2 || (mode == 1 && CharacterRegistry.IsFreeplay);
+        Sfx.Play(SfxKind.Reverse, 0.6f, null, 0.6f, cinematic: true);
         foreach (var pc in chosen)
         {
             if (mode == 3) { StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Stunned, 4f); continue; }
             Fx.Fragments(pc.transform.position, new Color(0.45f, 0.35f, 0.25f), 50, 1.4f, 1.6f);   // turning to dust
+            Fx.Rising(pc.transform.position, new Color(0.5f, 0.4f, 0.3f), 10, 0.8f, 2f);
             if (lethal) Kills.Kill(ctx.Caster, pc, leaveBody: false);
         }
         if (ctx.LocalIs(ctx.Caster))
@@ -937,6 +1176,17 @@ public class TheSnap : ThanosAbility
 
 public class TitansJudgment : ThanosAbility
 {
+    /// <summary>Every stone sends its energy into the gauntlet, one after another.</summary>
+    private static IEnumerator SixStones(PlayerControl caster)
+    {
+        foreach (var s in Stones.Six)
+        {
+            if (caster == null) yield break;
+            Coroutines.Start(Fx.StoneToGauntlet(caster.transform, Stones.Color(s), 0.45f));
+            yield return new WaitForSeconds(0.18f);
+        }
+    }
+
     public override Stone Stone => Stone.Infinity;
     public override string Id => "titans_judgment";
     public override string Name => "Titan's Judgment";
@@ -950,18 +1200,22 @@ public class TitansJudgment : ThanosAbility
     protected override void OnCast(CastContext ctx)
     {
         var caster = ctx.Caster;
-        CharacterVisuals.Set(caster, "judgment", lift: 0.5f, maxSeconds: ctx.Cfg.CinematicDur + 1.5f);
-        CinematicPlayer.Play("TITAN'S JUDGMENT", C, caster, ctx.Cfg.CinematicDur, () =>
+        CharacterVisuals.Set(caster, "judgment", lift: 0.5f, maxSeconds: ctx.Cfg.CinematicDur + 3f);
+        Coroutines.Start(SixStones(caster));
+        CinematicPlayer.Play("TITAN'S JUDGMENT", C, caster, ctx.Cfg.CinematicDur + 0.4f, () =>
         {
             CharacterVisuals.Clear(caster, "judgment");
             Vector2 from = caster.transform.position;
             var dir = (ctx.Point - ctx.CasterPos).normalized;
             var to = from + dir * ctx.Cfg.Range;
             var side = new Vector2(-dir.y, dir.x);
+            // six braided beams with lightning crawling along them, detonating at the far end
             for (int i = 0; i < 6; i++)
                 Fx.Beam(from + side * (i - 2.5f) * 0.12f, to + side * (i - 2.5f) * 0.12f, Stones.Color(Stones.Six[i]), 0.35f, 1.2f);
+            for (int i = 0; i < 3; i++) Fx.Lightning(from, to, Stones.Color(Stones.Six[i * 2]), 0.6f, 2, 0.4f);
+            Fx.Release(to, Color.white, ImpactStyle.Cosmic, 2f, cinematic: true);
+            Fx.Release(from, C, ImpactStyle.Heavy, 1.2f);
             Fx.Shake(0.9f, 1f);
-            Sfx.Play(SfxKind.Boom, 0.5f, from);
             foreach (var pc in OnLine(ctx, from, to, 0.8f))
             {
                 if (ctx.Cfg.Damage > 0f) Kills.Kill(caster, pc);
