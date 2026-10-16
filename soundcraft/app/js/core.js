@@ -138,11 +138,11 @@ function buildGraph(){
 function rebuildMasterChain(){
   if(!ctx)return;try{GR.masterIn.disconnect()}catch(e){}(GR.masterFx||[]).forEach(x=>{try{x.output.disconnect()}catch(e){}});
   GR.masterFx=S.masterFx.map(f=>{if(!f._inst||f._inst.ctx!==ctx)f._inst=makeFx(f);return f._inst});
-  let node=GR.masterIn;S.masterFx.forEach(f=>{if(f.on){node.connect(f._inst.input);node=f._inst.output}});node.connect(GR.master);
+  let node=GR.masterIn;S.masterFx.forEach(f=>{if(f.on&&!renderNoMaster){node.connect(f._inst.input);node=f._inst.output}});node.connect(GR.master);
 }
 function buildTrack(tr){
   if(!ctx||(tr._rt&&tr._rt.ctx===ctx))return;const E=ENG[tr.engine];
-  const rt=tr._rt={ctx,live:new Set(),in:G(1),pan:ctx.createStereoPanner(),vol:G(0),rev:G(0),dly:G(0),an:ctx.createAnalyser(),fx:[]};
+  const rt=tr._rt={ctx,live:new Set(),mod:null,in:G(1),pan:ctx.createStereoPanner(),vol:G(0),rev:G(0),dly:G(0),an:ctx.createAnalyser(),fx:[]};
   rt.an.fftSize=1024;
   if(E.setup)rt.eng=E.setup(tr,rt.in);
   rt.pan.connect(rt.vol).connect(GR.bus);rt.vol.connect(rt.rev).connect(GR.revIn);rt.vol.connect(rt.dly).connect(GR.dlyIn);rt.vol.connect(rt.an);
@@ -152,21 +152,27 @@ function rebuildTrackChain(tr){
   const rt=tr._rt;if(!rt)return;try{rt.in.disconnect()}catch(e){}rt.fx.forEach(x=>{try{x.output.disconnect()}catch(e){}});
   rt.fx=tr.fx.map(f=>{if(!f._inst||f._inst.ctx!==ctx)f._inst=makeFx(f);return f._inst});
   let node=rt.in;tr.fx.forEach(f=>{if(f.on){node.connect(f._inst.input);node=f._inst.output}});node.connect(rt.pan);
+  buildTrackMod(tr);
 }
-function disposeTrack(tr){const rt=tr._rt;if(!rt)return;try{rt.live.forEach(h=>h.off(ctx.currentTime))}catch(e){}if(rt.eng&&rt.eng.dispose)rt.eng.dispose();
+function disposeTrack(tr){const rt=tr._rt;if(!rt)return;teardownTrackMod(tr);try{rt.live.forEach(h=>h.off(ctx.currentTime))}catch(e){}if(rt.eng&&rt.eng.dispose)rt.eng.dispose();
   try{rt.in.disconnect();rt.vol.disconnect();rt.pan.disconnect()}catch(e){}tr.fx.forEach(f=>{if(f._inst){f._inst.dispose&&f._inst.dispose();f._inst=null}});tr._rt=null}
-const audible=tr=>{const solo=S.tracks.some(t=>t.solo);return !tr.mute&&(!solo||tr.solo)};
+const audible=tr=>{if(renderOnly)return renderOnly.has(tr.id);const solo=S.tracks.some(t=>t.solo);return !tr.mute&&(!solo||tr.solo)};
 function applyMix(){if(!ctx)return;const now=ctx.currentTime;
   S.tracks.forEach(tr=>{buildTrack(tr);const rt=tr._rt;rt.vol.gain.setTargetAtTime(audible(tr)?tr.vol*tr.vol:0,now,0.015);rt.pan.pan.setTargetAtTime(tr.pan,now,0.015);rt.rev.gain.setTargetAtTime(tr.rev,now,0.015);rt.dly.gain.setTargetAtTime(tr.dly,now,0.015)});
   if(GR.revRet){GR.revRet.gain.setTargetAtTime(S.returns.rev.mute?0:S.returns.rev.vol,now,0.015);GR.dlyRet.gain.setTargetAtTime(S.returns.dly.mute?0:S.returns.dly.vol,now,0.015);GR.master.gain.setTargetAtTime(S.master,now,0.015)}}
 function trackOut(tr){const rt=tr._rt;return rt.eng&&rt.eng.input?rt.eng.input:rt.in}
 function trigger(tr,n,v,t){
   if(!ctx)return null;buildTrack(tr);const rt=tr._rt,E=ENG[tr.engine];
-  if(!E.mono&&rt.live.size>=tr.poly){const oldest=rt.live.values().next().value;if(oldest)oldest.off(t)}
-  const h=E.on(tr,n,v,t,trackOut(tr),paramsOf(tr))||{off(){}};const off=h.off;h.n=n;h.off=t2=>{rt.live.delete(h);off.call(h,t2)};rt.live.add(h);return h}
+  const monoMode=!E.mono&&tr.params.mode&&tr.params.mode!=='poly';let prev=null;
+  if(monoMode){const hs=[...rt.live];if(hs.length){prev=hs[hs.length-1].n;hs.forEach(h=>h.off(t))}}
+  else if(!E.mono&&rt.live.size>=tr.poly){const oldest=rt.live.values().next().value;if(oldest)oldest.off(t)}
+  const M=voiceCtx(tr,n,v,t),P=noteParams(tr,n,v,t);M.P=P;M.prev=prev;M.legato=prev!=null&&tr.params.mode==='legato';
+  const out=voiceStrip(tr,M,trackOut(tr));
+  let h;try{h=E.on(tr,n,v,t,out,P,M)||{off(){}}}catch(e){errLog.push('engine '+tr.engine+': '+e.message);h={off(){}}}
+  h.n=n;attachVoice(tr,M,h);const off=h.off;h.off=t2=>{rt.live.delete(h);off.call(h,t2)};rt.live.add(h);return h}
 function paramsOf(tr){return tr.params}
-function setBend(tr,semi){tr._bend=semi;if(tr._rt)tr._rt.live.forEach(h=>(h.oscs||[]).forEach(o=>o.detune.setTargetAtTime(o._d+semi*100,ctx.currentTime,0.01)))}
-function setMod(tr,m){tr._mod=m;refreshLive(tr)}
+function setBend(tr,semi){tr._bend=semi;setLiveSource(tr,'bend',semi/(tr.bendRange||2));if(tr._rt)tr._rt.live.forEach(h=>(h.oscs||[]).forEach(o=>o.detune.setTargetAtTime(o._d+semi*100,ctx.currentTime,0.01)))}
+function setMod(tr,m){tr._mod=m;tr._mw=m;setLiveSource(tr,'mw',m);refreshLive(tr)}
 function refreshLive(tr){if(!tr._rt)return;const m=tr._mod!=null?tr._mod:null;tr._rt.live.forEach(h=>h.setMod&&h.setMod(m));if(tr._rt.eng&&tr._rt.eng.update)tr._rt.eng.update(tr.params)}
 function liveVoices(){return S.tracks.reduce((a,t)=>a+(t._rt?t._rt.live.size:0),0)}
 
@@ -174,7 +180,7 @@ function liveVoices(){return S.tracks.reduce((a,t)=>a+(t._rt?t._rt.live.size:0),
 let engineGen=0;
 function createContext(){
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
-  const opts={latencyHint:P.latency||'interactive'};if(P.sampleRate&&P.sampleRate!=='auto')opts.sampleRate=+P.sampleRate;
+  const opts={latencyHint:PREF.latency||'interactive'};if(PREF.sampleRate&&PREF.sampleRate!=='auto')opts.sampleRate=+PREF.sampleRate;
   try{return new AC(opts)}catch(e){errLog.push('AudioContext: '+e.message);return new AC()}
 }
 function ensureAudio(){
@@ -182,7 +188,7 @@ function ensureAudio(){
   if(ctx){if(ctx.state==='suspended')ctx.resume();return ctx}
   ctx=createContext();if(!ctx){toast('This browser has no Web Audio support, so Soundcraft cannot make sound here.');return null}
   engineGen++;loadWorklets(ctx);buildGraph();GR.ambOut=G(0);GR.ambOut.connect(ctx.destination);startAmbience();
-  if(P.sinkId&&ctx.setSinkId)ctx.setSinkId(P.sinkId).catch(e=>{errLog.push('setSinkId: '+e.message);toast('The chosen audio output is not available, so the default output is used.')});
+  if(PREF.sinkId&&ctx.setSinkId)ctx.setSinkId(PREF.sinkId).catch(e=>{errLog.push('setSinkId: '+e.message);toast('The chosen audio output is not available, so the default output is used.')});
   ctx.onstatechange=()=>{updateWake();if(ctx&&ctx.state==='interrupted')toast('Audio was interrupted by the system.')};
   if('onsinkchange' in ctx)ctx.onsinkchange=()=>toast('Audio output changed.');
   updateWake();return ctx;
@@ -209,7 +215,7 @@ function analyse(now){
     const win=w=>{let t=0,c=0;for(const[ts,v]of A.msHist)if(now-ts<=w){t+=v;c++}return c?t/c:0};
     const toL=m=>m>1e-12?-0.691+10*Math.log10(m):-Infinity;A.lufsM=toL(win(400));A.lufsS=toL(win(3000));
     if(S.playing&&A.lufsM>-70){A.iSum+=win(400);A.iN++;A.lufsI=toL(A.iSum/A.iN)}}
-  const thr=0.05+(1-P.sens)*0.2;A.kick=0;if(A.bass-A.bassAvg>thr&&now-A.lastKick>140&&A.bass>0.35){A.kick=1;A.lastKick=now}A.bassAvg=A.bassAvg*0.9+A.bass*0.1;
+  const thr=0.05+(1-PREF.sens)*0.2;A.kick=0;if(A.bass-A.bassAvg>thr&&now-A.lastKick>140&&A.bass>0.35){A.kick=1;A.lastKick=now}A.bassAvg=A.bassAvg*0.9+A.bass*0.1;
 }
 function resetIntegrated(){A.iSum=0;A.iN=0;A.lufsI=-Infinity}
 function trackLevel(tr){const rt=tr._rt;if(!rt||OFF)return 0;rt.an.getFloatTimeDomainData(mbuf);let m=0;for(let i=0;i<mbuf.length;i++){const v=Math.abs(mbuf[i]);if(v>m)m=v}return m}
@@ -218,8 +224,8 @@ function trackLevel(tr){const rt=tr._rt;if(!rt||OFF)return 0;rt.an.getFloatTimeD
 let ambNodes=[];
 function startAmbience(){
   if(!ctx||OFF||!GR.ambOut)return;ambNodes.forEach(n=>{try{n.stop()}catch(e){}});ambNodes=[];
-  GR.ambOut.gain.setTargetAtTime(P.amb?P.ambVol*0.5:0,ctx.currentTime,0.3);if(!P.amb)return;
-  const w=P.weather,src=N(ctx.currentTime);ambNodes.push(src);
+  GR.ambOut.gain.setTargetAtTime(PREF.amb?PREF.ambVol*0.5:0,ctx.currentTime,0.3);if(!PREF.amb)return;
+  const w=PREF.weather,src=N(ctx.currentTime);ambNodes.push(src);
   if(w==='rain'||w==='storm'){const g=G(w==='storm'?0.5:0.35);src.connect(F('highpass',400)).connect(F('lowpass',w==='storm'?2600:1800)).connect(g).connect(GR.ambOut)}
   else if(w==='snow'||w==='night'){const bp=F('bandpass',380,0.7),g=G(0.25),l=O('sine',0.07,ctx.currentTime,Z),lg=G(220);l.connect(lg).connect(bp.frequency);ambNodes.push(l);src.connect(bp).connect(g).connect(GR.ambOut)}
   else{const g=G(0.08);src.connect(F('bandpass',4200,2)).connect(g).connect(GR.ambOut)}

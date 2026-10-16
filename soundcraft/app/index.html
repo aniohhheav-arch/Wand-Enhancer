@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'">
+<title>Soundcraft</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="v-studio">
+<div class="app" id="app">
+  <nav class="nav">
+    <div class="brand"><i class="brand-dot" id="beatDot"></i><b>Soundcraft</b></div>
+    <div class="tabs" role="tablist" aria-label="Workspace">
+      <button role="tab" data-view="studio" aria-selected="true" title="Studio (F1)">Studio</button>
+      <button role="tab" data-view="arrange" aria-selected="false" title="Arrange (F2)">Arrange</button>
+      <button role="tab" data-view="mix" aria-selected="false" title="Mix (F3)">Mix</button>
+      <button role="tab" data-view="sounds" aria-selected="false" title="Sounds (F4)">Sounds</button>
+      <button role="tab" data-view="lab" aria-selected="false" title="Patch Lab (F5)">Lab</button>
+    </div>
+    <div class="proj"><input id="projTitle" type="text" aria-label="Project title" maxlength="60"><span class="save-state" id="saveState">Saved</span></div>
+    <div class="nav-right">
+      <span class="stat" id="statVoices" title="Voices playing right now">0 voices</span>
+      <span class="stat" id="statCpu" title="Process CPU (desktop app only)"></span>
+      <button class="btn" id="btnLibrary">Cassettes</button>
+      <button class="btn" id="btnSnapshots">Snapshots</button>
+      <button class="btn" id="btnSettings">Settings</button>
+      <button class="btn" id="btnHelp">Help</button>
+    </div>
+  </nav>
+
+  <header class="transport" id="transport">
+    <div class="tgroup">
+      <button class="tbtn play" id="btnPlay" aria-pressed="false" aria-label="Play" title="Play (Space)"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></button>
+      <button class="tbtn" id="btnStop" aria-label="Stop" title="Stop. Press again to silence every note."><svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg></button>
+      <button class="tbtn rec" id="btnRec" aria-pressed="false" aria-label="Record" title="Record into the selected track (R)"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg></button>
+    </div>
+    <div class="lcd">
+      <div class="lcd-pos" id="lcdPos">1.1.1</div>
+      <label class="lcd-cell"><span>BPM</span><input id="bpm" type="number" min="40" max="240" step="1" value="112"></label>
+      <div class="lcd-cell" title="Soundcraft currently works in 4/4 only"><span>Time</span><b>4/4</b></div>
+    </div>
+    <div class="tgroup">
+      <button class="btn" id="btnLoop" aria-pressed="true" title="Loop the region set in the timeline ruler (L)">Loop</button>
+      <button class="btn" id="btnMetro" aria-pressed="false" title="Metronome">Click</button>
+      <label class="tf">Quantize <select id="quant"><option value="0">Off</option><option value="0.5">1/32</option><option value="1">1/16</option><option value="2">1/8</option><option value="4">1/4</option></select></label>
+      <label class="tf">Swing <input id="swing" type="range" min="0" max="0.5" step="0.01"></label>
+      <label class="tf">Master <input id="masterVol" type="range" min="0" max="1" step="0.01"></label>
+    </div>
+    <div class="tgroup" style="margin-left:auto">
+      <button class="midi-chip" id="midiChip" data-state="idle" aria-haspopup="true" aria-expanded="false"><i class="led" id="midiLed"></i><span id="midiText">MIDI</span></button>
+      <button class="btn primary" id="btnExport">Export</button>
+    </div>
+    <div class="pop" id="midiPop" hidden>
+      <h3>MIDI input</h3>
+      <p id="midiMsg">Looking for devices…</p>
+      <ul class="dev-list" id="devList"></ul>
+      <div class="row-actions"><label class="tf">Channel <select id="midiCh"></select></label><button class="btn" id="btnRescan">Scan again</button><button class="btn" id="btnGetApp" hidden>Download app file</button></div>
+      <h3>CC links</h3>
+      <ul class="dev-list" id="ccMaps"></ul>
+    </div>
+  </header>
+
+  <div class="wake" id="wake">Click anywhere or press a key to wake the audio engine, then press Play.</div>
+
+  <!-- STUDIO -->
+  <section class="view studio pane" id="vStudio">
+    <div class="room-wrap"><canvas id="room" width="256" height="144" aria-label="Pixel-art bedroom studio. Walk with WASD or the arrow keys and press E to use the nearest object."></canvas><div class="room-label" id="roomLabel" hidden></div></div>
+    <div class="studio-bar">
+      <span>Playing <b id="studioTrack">—</b></span>
+      <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · <kbd>E</kbd> use · click anything to walk to it</span>
+      <span class="spacer"></span>
+      <button class="btn" data-goto="lab">Open the Patch Lab</button>
+      <button class="btn primary" data-goto="arrange">Open the DAW</button>
+    </div>
+  </section>
+
+  <!-- ARRANGE -->
+  <section class="view arr pane" id="vArrange" style="flex-direction:column">
+    <div class="toolbar">
+      <button class="btn" id="btnAddTrack">+ Track</button>
+      <button class="btn" id="btnDupTrack">Duplicate track</button>
+      <span class="sep"></span>
+      <label class="tf">Snap <select id="clipSnap"><option value="1">Bar</option><option value="0.25">Beat</option></select></label>
+      <button class="btn" id="zoomOut" aria-label="Zoom out">−</button><button class="btn" id="zoomIn" aria-label="Zoom in">+</button>
+      <span class="sep"></span>
+      <button class="btn" id="btnMarker">+ Section marker</button>
+      <button class="btn" id="btnSplitClip" title="Split the selected clip at the play cursor">Split</button>
+      <button class="btn" id="btnDupClip" title="Duplicate the selected clip (Ctrl+D)">Duplicate clip</button>
+      <button class="btn" id="btnUniqueClip" title="Give the selected clip its own copy of the pattern">Make unique</button>
+      <button class="btn danger" id="btnDelClip">Delete clip</button>
+      <span class="spacer"></span>
+      <span class="hint">Click an empty lane to add a clip · drag to move · drag the end to resize · drag the ruler to set the loop · click the ruler to place the cursor</span>
+    </div>
+    <div class="arr-body" id="arrBody">
+      <div class="arr-heads" id="arrHeads"><div class="arr-heads-inner" id="arrHeadsInner"></div></div>
+      <div class="arr-scroll" id="arrScroll"><canvas id="tl"></canvas></div>
+    </div>
+    <div class="splitter" id="splitter" role="separator" aria-orientation="horizontal" aria-label="Resize timeline" tabindex="0"></div>
+    <div class="dock">
+      <div class="dock-tabs" role="tablist"><button data-dock="roll" aria-selected="true">Piano roll</button><button data-dock="inst" aria-selected="false">Instrument</button><span class="spacer"></span></div>
+      <div id="dockRoll" class="pane" style="border-radius:0 var(--r) var(--r) var(--r)">
+        <div class="toolbar" id="rollBar">
+          <b id="rollTitle" style="font-family:var(--f-display);font-weight:500"></b>
+          <label class="tf">Pattern <select id="patSel"></select></label>
+          <button class="btn xs" id="patNew">New</button><button class="btn xs" id="patDup">Duplicate</button>
+          <input id="patName" type="text" aria-label="Pattern name" style="width:90px">
+          <label class="tf">Length <select id="patLen"><option value="1">1 bar</option><option value="2">2 bars</option><option value="4">4 bars</option><option value="8">8 bars</option><option value="16">16 bars</option></select></label>
+          <span class="sep"></span>
+          <label class="tf">Grid <select id="grid"><option value="0.5">1/32</option><option value="1" selected>1/16</option><option value="2">1/8</option><option value="4">1/4</option></select></label>
+          <label class="tf">Draw <select id="chordTool"><option value="single">Single note</option><option value="triad">Triad</option><option value="seventh">7th chord</option><option value="power">Power chord</option><option value="octave">Octave</option></select></label>
+          <label class="tf">Scale <select id="scaleRoot"></select><select id="scaleType"></select></label>
+          <label class="tf"><input type="checkbox" id="scaleSnap"> Snap to scale</label>
+          <span class="sep"></span>
+          <button class="btn xs" id="btnQuantize" title="Quantize selected notes (or all) to the grid">Quantize</button>
+          <button class="btn xs" id="btnHumanize" title="Add small random timing and velocity changes">Humanize</button>
+          <button class="btn xs" id="btnBreak" hidden>Insert break pattern</button>
+          <label class="tf">Lane <select id="laneMode"><option value="v">Velocity</option><option value="pr">Probability</option></select></label>
+          <span class="spacer"></span>
+          <button class="btn xs" id="btnUndo" title="Undo (Ctrl+Z)">Undo</button><button class="btn xs" id="btnRedo" title="Redo (Ctrl+Shift+Z)">Redo</button><button class="btn xs danger" id="btnClear">Clear pattern</button>
+        </div>
+        <div class="hint" style="padding:4px 10px">Drag on empty grid to draw · drag a note to move · drag its right edge to resize · Shift-drag to select a region · double-click or right-click to delete · Delete removes the selection · Ctrl+D duplicates it · arrows nudge it</div>
+        <div class="roll-wrap" id="rollWrap"><canvas id="roll"></canvas><div class="playhead" id="playhead" hidden></div></div>
+        <div class="lane-wrap"><canvas id="lane" aria-label="Note velocity or probability lane"></canvas></div>
+      </div>
+      <div id="dockInst" class="inst-dock pane" hidden style="border-radius:0 var(--r) var(--r) var(--r)">
+        <div class="inst-card" id="instCard">
+          <div class="inst-head"><div style="flex:1;min-width:200px"><div class="inst-tag" id="instTag"></div><h3 id="instName"></h3></div>
+            <div class="row-actions"><button class="btn" data-goto="sounds">Browse sounds</button><button class="btn primary" data-goto="lab">Edit in Lab</button></div></div>
+          <p class="inst-desc" id="instDesc"></p>
+          <div><div class="hint">Performance macros</div><div class="perf" id="perfMacros"></div></div>
+          <div class="knobs" id="simpleKnobs"></div>
+        </div>
+        <div class="scope-card"><canvas id="scope"></canvas>
+          <div class="ctl-strip"><span>Mod<span class="bar"><i id="modBar"></i></span></span><span>Bend<span class="bar bend"><i id="bendBar"></i></span></span><span>Pressure<span class="bar"><i id="atBar"></i></span></span><span>Sustain<i class="led" id="susLed"></i></span><span>Clip<i class="led" id="clipLed"></i></span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MIX -->
+  <section class="view mix" id="vMix" style="flex-direction:column">
+    <div class="pane"><div class="pane-head"><h2>Mixer</h2><span class="hint">Instrument → inserts → pan → fader → master. Reverb and delay sends are post-fader and come back on their return strips.</span><span class="spacer"></span>
+      <label class="tf">Effect chains <select id="chainSel"></select></label><button class="btn" id="chainLoad">Load on selected strip</button><button class="btn" id="chainSave">Save strip's chain</button></div>
+      <div class="strips" id="strips"></div></div>
+    <div class="mix-lower">
+      <div class="pane fx-editor" id="fxEditor"></div>
+      <div class="pane master-meters">
+        <h2 style="margin:0;font-family:var(--f-display);font-size:16px;font-weight:500">Master meters</h2>
+        <dl class="mm-grid"><dt>Peak L / R</dt><dd id="mPeak">—</dd><dt>Momentary</dt><dd id="mLufsM">—</dd><dt>Short-term</dt><dd id="mLufsS">—</dd><dt>Integrated</dt><dd id="mLufsI">—</dd><dt>Clipping</dt><dd><i class="led" id="mClip"></i></dd></dl>
+        <p class="hint" style="margin:0">Loudness is K-weighted and averaged in the browser. It is approximate and ungated, so use it for comparison rather than delivery specs. Presets never guarantee a mastered result.</p>
+        <div class="row-actions"><button class="btn" id="lufsReset">Reset integrated</button></div>
+        <h2 style="margin:6px 0 0;font-family:var(--f-display);font-size:16px;font-weight:500">Reference track</h2>
+        <div class="row-actions"><button class="btn" id="refLoad">Load reference…</button><input type="file" id="refFile" accept="audio/*" hidden><button class="btn" id="refAB" aria-pressed="false" disabled>Hear reference</button><label class="tf"><input type="checkbox" id="refMatch" checked> Match loudness</label></div>
+        <p class="hint" id="refInfo" style="margin:0">Load any audio file to compare against your mix. It plays on its own output and is never mixed into your project or exports.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOUNDS -->
+  <section class="view sounds" id="vSounds">
+    <aside class="pane cat-list" id="catList"></aside>
+    <div class="pane" style="min-width:0">
+      <div class="pane-head"><h2 id="soundsTitle">Sounds</h2><input type="search" id="soundSearch" placeholder="Search names, tags, descriptions" aria-label="Search sounds" style="flex:1;max-width:320px">
+        <button class="btn" id="favOnly" aria-pressed="false">★ Favorites</button><button class="btn" id="recentOnly" aria-pressed="false">Recent</button><span class="spacer"></span>
+        <button class="btn" id="contentImport">Import…</button><input type="file" id="contentFile" accept=".json,application/json" hidden></div>
+      <div class="toolbar"><span class="hint">Genre</span><div class="chips" id="genreChips"></div><span class="hint">Mood</span><div class="chips" id="moodChips"></div></div>
+      <div class="cards" id="cards"></div>
+    </div>
+  </section>
+
+  <!-- LAB -->
+  <section class="view lab" id="vLab">
+    <div class="lab-main">
+      <div class="inst-card" id="labHead"></div>
+      <div class="pane" id="labSpecial" hidden></div>
+      <div class="modules" id="modules"></div>
+    </div>
+    <aside class="side">
+      <section id="selCtl"><h3><span>Selected control</span></h3><div class="assign" id="assign"><span class="hint">Click any knob to see what modulates it. Right-click a knob for more actions.</span></div></section>
+      <section><h3><span>Modulation sources</span><button class="btn xs" id="modOverview">Overview</button></h3>
+        <div class="hint">Drag a source onto any knob to modulate it.</div>
+        <div class="srcs" id="srcList"></div>
+        <div class="row-actions"><select id="srcAddType"><option value="lfo">LFO</option><option value="env">Envelope (ADSR)</option><option value="mseg">Multi-stage envelope</option><option value="step">Step modulator</option><option value="sh">Sample &amp; hold</option><option value="follow">Envelope follower</option></select><button class="btn" id="srcAdd">Add source</button></div>
+        <div id="srcEdit"></div></section>
+      <section><h3><span>Routes</span><select id="routeFilter" aria-label="Filter routes"><option value="">All</option></select></h3><div id="routeList" style="display:flex;flex-direction:column;gap:6px"></div></section>
+      <section><h3><span>Macros</span><button class="btn xs" id="macroAdd">+ Macro</button></h3><div id="macroList" style="display:flex;flex-direction:column;gap:8px"></div></section>
+      <section><h3><span>Modulation patches</span></h3><div class="row-actions"><select id="mpSel"></select><button class="btn" id="mpApply">Apply</button><button class="btn" id="mpSave">Save current</button></div></section>
+      <section><h3><span>History</span><button class="btn xs" id="labRevertStart">Restore start</button></h3><ul class="hist" id="labHist"></ul></section>
+    </aside>
+  </section>
+
+  <section class="keys-sec pane" id="keysSec">
+    <div class="keys-head"><span>Octave <b id="octV">C4</b></span><span>Velocity <b id="velV">80</b></span><span id="ensInfo" class="hint"></span>
+      <span class="kbd"><kbd>A</kbd>–<kbd>'</kbd> play · <kbd>Z</kbd><kbd>X</kbd> octave · <kbd>C</kbd><kbd>V</kbd> velocity · <kbd>Space</kbd> play · <kbd>R</kbd> record · <kbd>F1</kbd>–<kbd>F5</kbd> workspaces</span></div>
+    <div class="keyboard" id="keyboard"></div>
+  </section>
+</div>
+
+<!-- dialogs -->
+<div class="modal" id="libModal" hidden role="dialog" aria-modal="true" aria-labelledby="libTitle"><div class="modal-card">
+  <div class="modal-head"><h2 id="libTitle">Cassette library</h2><input type="search" id="libSearch" placeholder="Search titles" aria-label="Search projects"><span class="spacer"></span>
+    <select id="libTpl" aria-label="Start from"><option value="">Blank project</option></select><button class="btn primary" id="libNew">New cassette</button><button class="btn" data-close>Close</button></div>
+  <div class="modal-body">
+    <div class="row-actions"><button class="btn" id="libImport">Import project…</button><input type="file" id="libFile" accept=".json,application/json" hidden>
+      <button class="btn" id="libExport">Export current project</button><label class="tf"><input type="checkbox" id="libExportSamples"> Include my imported samples</label><span class="spacer"></span>
+      <button class="btn" id="midiImport">Import MIDI file…</button><input type="file" id="midiFile" accept=".mid,.midi,audio/midi" hidden><button class="btn" id="midiExport">Export MIDI file</button></div>
+    <div class="tapes" id="tapes"></div></div></div></div>
+<div class="modal" id="snapModal" hidden role="dialog" aria-modal="true" aria-labelledby="snapTitle"><div class="modal-card narrow">
+  <div class="modal-head"><h2 id="snapTitle">Snapshots</h2><span class="spacer"></span><button class="btn" data-close>Close</button></div>
+  <div class="modal-body"><p class="hint" style="margin:0">A snapshot saves the whole project as it is now. Restoring one first takes an automatic safety snapshot, so nothing is lost.</p>
+    <div class="row-actions"><input type="text" id="snapName" placeholder="Name, e.g. Before the drop" style="flex:1"><button class="btn primary" id="snapTake">Take snapshot</button></div><textarea id="snapDesc" rows="2" placeholder="Optional description"></textarea>
+    <ul class="list" id="snapList"></ul><h4 style="margin:0">Automatic backups</h4><ul class="list" id="backupList"></ul><div id="snapCompare"></div></div></div></div>
+<div class="modal" id="exportModal" hidden role="dialog" aria-modal="true" aria-labelledby="expTitle"><div class="modal-card narrow">
+  <div class="modal-head"><h2 id="expTitle">Export audio</h2><span class="spacer"></span><button class="btn" data-close>Close</button></div>
+  <div class="modal-body settings">
+    <label for="expRange">Range</label><select id="expRange"><option value="song">Whole song</option><option value="loop">Loop region</option></select>
+    <label for="expWhat">Files</label><select id="expWhat"><option value="mix">Stereo mix</option><option value="both">Mix and track stems</option><option value="stems">Track stems only</option></select>
+    <label for="expRate">Sample rate</label><select id="expRate"><option>44100</option><option>48000</option><option>96000</option></select>
+    <label for="expBits">Bit depth</label><select id="expBits"><option value="16">16-bit</option><option value="24">24-bit</option><option value="32">32-bit float</option></select>
+    <label for="expTail">Release tail</label><select id="expTail"><option value="0">None</option><option value="2.5" selected>2.5 s</option><option value="6">6 s</option></select>
+    <p class="hint" style="grid-column:1/-1;margin:0">Format: WAV. MP3 is not offered because no encoder ships with Soundcraft yet. Stems include each track's own effects and its share of the reverb and delay returns, without master inserts. Notes with a probability below 100% are rolled once for the render.</p>
+    <div style="grid-column:1/-1" class="progress"><i id="expProg"></i></div><p id="expStatus" class="hint" style="grid-column:1/-1;margin:0"></p>
+    <div style="grid-column:1/-1" class="row-actions"><span class="spacer"></span><button class="btn primary" id="expGo">Render</button></div></div></div></div>
+<div class="modal" id="setModal" hidden role="dialog" aria-modal="true" aria-labelledby="setTitle"><div class="modal-card narrow">
+  <div class="modal-head"><h2 id="setTitle">Settings</h2><span class="spacer"></span><button class="btn" data-close>Close</button></div>
+  <div class="modal-body settings" id="setBody"></div></div></div>
+<div class="modal" id="helpModal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle"><div class="modal-card narrow">
+  <div class="modal-head"><h2 id="helpTitle">Help</h2><input type="search" id="helpSearch" placeholder="Search the guide" aria-label="Search help" style="flex:1"><button class="btn" id="tourStart">Start the tour</button><button class="btn" data-close>Close</button></div>
+  <div class="modal-body doc" id="helpBody"></div></div></div>
+<div class="modal" id="missingModal" hidden role="alertdialog" aria-modal="true" aria-labelledby="missTitle"><div class="modal-card narrow">
+  <div class="modal-head"><h2 id="missTitle">Missing content</h2><span class="spacer"></span><button class="btn" data-close>OK</button></div>
+  <div class="modal-body"><p class="hint" style="margin:0">Soundcraft never swaps in a different sound for something it cannot find. These parts stay silent until the content is available:</p><ul class="list" id="missingList"></ul></div></div></div>
+<div class="modal" id="ovModal" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle"><div class="modal-card">
+  <div class="modal-head"><h2 id="ovTitle">Modulation overview</h2><input type="search" id="ovSearch" placeholder="Filter by source, destination or track" style="flex:1"><span class="spacer"></span><button class="btn" data-close>Close</button></div>
+  <div class="modal-body"><svg class="graph" id="ovGraph"></svg><ul class="list" id="ovList"></ul></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/core.js"></script>
+<script src="js/params.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/engines.js"></script>
+<script src="js/engines2.js"></script>
+<script src="js/sampler.js"></script>
+<script src="js/mod.js"></script>
+<script src="js/library.js"></script>
+<script src="js/project.js"></script>
+<script src="js/sequencer.js"></script>
+<script src="js/midi.js"></script>
+<script src="js/ui-common.js"></script>
+<script src="js/ui-arrange.js"></script>
+<script src="js/ui-roll.js"></script>
+<script src="js/ui-mix.js"></script>
+<script src="js/ui-sounds.js"></script>
+<script src="js/ui-lab.js"></script>
+<script src="js/ui-dialogs.js"></script>
+<script src="js/studio.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

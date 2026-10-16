@@ -1,0 +1,63 @@
+{
+  "name": "soundcraft",
+  "productName": "Soundcraft",
+  "version": "0.3.0",
+  "description": "A cozy pixel-art music studio and DAW.",
+  "main": "electron/main.js",
+  "private": true,
+  "author": "Soundcraft",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests/e2e.cjs",
+    "dist:win": "electron-builder --win nsis portable --x64",
+    "dist:dir": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "25.1.8",
+    "playwright": "1.56.1"
+  },
+  "build": {
+    "appId": "com.soundcraft.app",
+    "productName": "Soundcraft",
+    "copyright": "Soundcraft",
+    "files": [
+      "electron/**",
+      "app/**",
+      "build/icon.png",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "artifactName": "Soundcraft-Setup-${version}.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "Soundcraft-${version}-portable.exe"
+    },
+    "linux": {
+      "target": [
+        "dir"
+      ]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aniohhheav-arch/Wand-Enhancer.git",
+    "directory": "soundcraft"
+  }
+}

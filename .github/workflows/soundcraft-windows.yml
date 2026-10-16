@@ -1,0 +1,59 @@
+name: Soundcraft desktop build
+
+on:
+  push:
+    paths:
+      - 'soundcraft/**'
+      - '.github/workflows/soundcraft-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: soundcraft
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: soundcraft/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Acceptance tests (real audio rendering in Chromium)
+        run: node tests/e2e.cjs ${{ runner.temp }}/shots
+      - name: Desktop shell smoke test
+        run: xvfb-run -a node tests/electron-smoke.cjs ${{ runner.temp }}/shots
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: soundcraft-test-screenshots
+          path: ${{ runner.temp }}/shots
+
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: soundcraft
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: soundcraft/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Build installer and portable exe (unsigned)
+        run: npx electron-builder --win nsis portable --x64 --publish never
+      - uses: actions/upload-artifact@v6
+        with:
+          name: soundcraft-windows
+          path: |
+            soundcraft/dist/Soundcraft-Setup-*.exe
+            soundcraft/dist/Soundcraft-*-portable.exe
+          if-no-files-found: error

@@ -27,7 +27,7 @@ function sanitizeParams(params,obj){
   const o={},bad=[];obj=obj||{};
   params.forEach(p=>{let v=obj[p.k];
     if(v===undefined){o[p.k]=p.def;return}
-    if(p.type==='choice'){if(!p.choices.some(c=>c[0]===v)){bad.push(p.k);v=p.def}}
+    if(p.type==='choice'){if(p.open&&typeof v==='string'&&v.length<120){/* references to other content are kept even if not installed, so they can be reported */}else if(!p.choices.some(c=>c[0]===v)){bad.push(p.k);v=p.def}}
     else if(p.type==='bool')v=!!v;
     else{v=+v;if(!isFinite(v)){bad.push(p.k);v=p.def}v=clamp(v,p.min,p.max);if(p.int)v=Math.round(v)}
     o[p.k]=v});
@@ -52,5 +52,6 @@ const TRACK_PARAMS=[
 const VOICE_PARAMS=[
   P('level','Voice level','Voice',0,1,1,{fmt:FMT.pct,live:'voice'}),
   P('vpan','Voice pan','Voice',-1,1,0,{fmt:FMT.pan,live:'voice'}),
-  P('vcut','Voice filter','Voice',40,20000,20000,{log:true,fmt:FMT.hz,live:'voice'})
+  P('vcut','Voice filter','Voice',40,20000,20000,{log:true,fmt:FMT.hz,live:'voice'}),
+  P('vpitch','Voice pitch','Voice',-12,12,0,{fmt:FMT.st,live:'voice'})
 ];

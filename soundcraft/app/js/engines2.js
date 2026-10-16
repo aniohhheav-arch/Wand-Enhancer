@@ -165,13 +165,13 @@ ENG.organic={name:'Organic Modal',kind:KIND.phys,family:'experimental',
       if(P.motion>0.01){const l=O('sine',0.3+P.motion,t,Z),lgg=G(P.motion*0.15);l.connect(lgg).connect(lg.gain);ext.push(l)}}
     else{const ns=N(t,0.01),eg=G(0);ns.connect(F('lowpass',1000+P.bright*12000,0.5)).connect(eg).connect(exc);hitEnv(eg,t,v,0.006);
       if(P.mode==='bowl'&&P.motion>0.01){const ns2=N(t),bg=G(P.motion*0.02);ns2.connect(bg).connect(exc);ext.push(ns2)}}
-    modes.forEach(([m,a])=>{const fm=f*m;if(fm>18000)return;const q=clamp(Math.PI*fm*(P.mode==='breeze'?0.05+P.decay*0.02:P.decay/(1+m*0.15)),2,800),b=F('bandpass',fm,q),g=G(a*Math.sqrt(q)*0.35);exc.connect(b).connect(g).connect(amp)});
+    modes.forEach(([m,a])=>{const fm=f*m;if(fm>18000)return;const q=clamp(Math.PI*fm*(P.mode==='breeze'?0.05+P.decay*0.02:P.decay/(1+m*0.15)),2,800),b=F('bandpass',fm,q),g=G(P.mode==='breeze'?a*Math.sqrt(q)*0.35:a*q*0.06);exc.connect(b).connect(g).connect(amp)});
     if(P.mode==='breeze')return voice(amp,ext,0.8);
     if(!OFF)setTimeout(()=>{try{amp.disconnect()}catch(e){}},(t-ctx.currentTime+P.decay*2+1)*1000);return {oscs,off(){}}}};
 
 /* ───────── Fusion Lab (layer rack) ───────── */
 const LAYERS=4;
-const layerParams=i=>[B('L'+i+'on','Layer '+(i+1)+' on','Layer '+(i+1),i<2),C('L'+i+'src','Layer '+(i+1)+' source','Layer '+(i+1),[['none','None']],'none'),
+const layerParams=i=>[B('L'+i+'on','Layer '+(i+1)+' on','Layer '+(i+1),i<2),C('L'+i+'src','Layer '+(i+1)+' source','Layer '+(i+1),[['none','None']],'none',{open:true}),
   P('L'+i+'level','Layer '+(i+1)+' level','Layer '+(i+1),0,1,0.7,{fmt:FMT.pct,live:1}),P('L'+i+'pan','Layer '+(i+1)+' pan','Layer '+(i+1),-1,1,0,{fmt:FMT.pan,live:1}),
   P('L'+i+'tune','Layer '+(i+1)+' transpose','Layer '+(i+1),-24,24,0,{int:true,fmt:FMT.st}),P('L'+i+'fine','Layer '+(i+1)+' fine','Layer '+(i+1),-50,50,0,{fmt:FMT.ct}),
   P('L'+i+'cut','Layer '+(i+1)+' filter','Layer '+(i+1),60,20000,20000,{log:true,fmt:FMT.hz,live:1}),P('L'+i+'atk','Layer '+(i+1)+' fade-in','Layer '+(i+1),0,4,0,{fmt:FMT.s}),

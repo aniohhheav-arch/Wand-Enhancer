@@ -97,7 +97,7 @@ const FX={
       const apply=p=>{last=p;f1.type=f2.type=p.type;at(f1.frequency,p.cutoff);at(f2.frequency,p.cutoff);at(f1.Q,p.q);at(f2.Q,p.slope===24?Math.max(0.5,p.q*0.7):p.q);at(l.frequency,lfoRate(p));at(lg.gain,p.depth*1200);if(p.slope!==slope)wire(p.slope)};
       const inst={input,output:out,dispose(){l.stop()},tempo(){apply(last)},response:[f1],aps:{cutoff:{ap:f1.detune,perNorm:centsSpan(FX.filter.params[1])},q:{ap:f1.Q,perNorm:24.9},depth:{ap:lg.gain,perNorm:4800}},set:apply};
       // keep the second stage following the first for modulation
-      const d2=G(1);inst.aps.cutoff.extra=[f2.detune];FX_LIVE.add(inst);return inst}},
+      inst.aps.cutoff.extra=[f2.detune];FX_LIVE.add(inst);return inst}},
   width:{name:'Stereo width',cat:'Utility',desc:'Mid/side width from mono (0%) to extra wide (200%).',
     params:[P('width','Width','Image',0,2,1.3,{fmt:FMT.pct}),P('out','Output','Image',-12,6,0,{fmt:FMT.db})],
     build(p){const input=G(1);input.channelCount=2;input.channelCountMode='explicit';input.channelInterpretation='speakers';const sp=ctx.createChannelSplitter(2),m=ctx.createChannelMerger(2),out=G(1);

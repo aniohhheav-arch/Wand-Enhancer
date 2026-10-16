@@ -1,76 +1,122 @@
 # Soundcraft
 
-A cozy pixel-art music studio that is also a working DAW. Everything ships as one self-contained file, `index.html`. It runs in any modern desktop browser and needs no build step or server.
+A cozy pixel-art music studio with a real DAW inside. It runs as a Windows desktop app (Electron) and in a browser, from the same code in `app/`.
 
-This is the **first vertical slice** of the Soundcraft brief. It covers the core of phases 1–4: a real audio engine, a reliable editing workflow, the cozy visual identity, and music-reactive visuals. Later phases are listed under "Not built yet". They are deliberately not faked in the UI.
+Version 0.3.0. Status below is checked against `tests/e2e.cjs` (acceptance tests that render and measure real audio) and `tests/electron-smoke.cjs` (desktop shell).
 
-## Run it
+## Get the Windows app
 
-Open `soundcraft/index.html` in Chrome or Edge. Click once to wake the audio engine, then press **Space** to play the demo cassette.
+- **From CI.** Every push that touches `soundcraft/` runs the GitHub Actions workflow *Soundcraft desktop build*. Open the run, then download the `soundcraft-windows` artifact. It contains:
+  - `Soundcraft-Setup-0.3.0.exe`, a per-user installer that lets you choose the folder
+  - `Soundcraft-0.3.0-portable.exe`, which runs without installing
+- **Build it yourself on Windows:** `cd soundcraft && npm ci && npm run dist:win`.
+- **Unsigned.** The builds are not code-signed, so Windows SmartScreen will warn the first time ("More info → Run anyway"). Signing needs a certificate that you buy and keep out of the repository.
+- **Run from source** on any OS: `npm ci && npm start`.
 
-Web MIDI needs a real browser tab (Chrome, Edge, Opera or Firefox). Embedded previews usually block it.
+Your projects, presets and imported samples live in the app's user-data folder (`%APPDATA%\Soundcraft`). They survive updates and uninstalls. Timestamped project backups go to `%APPDATA%\Soundcraft\Backups`, logs to `…\Logs`, and exports default to `Documents\Soundcraft`.
+
+### Release checklist (not done yet)
+
+1. Test both executables on a clean Windows 10/11 machine: install, first launch, MIDI keyboard, export, update over an older version, uninstall.
+2. Code-sign with your certificate (`CSC_LINK` / `CSC_KEY_PASSWORD` secrets in CI). Never commit keys.
+3. Steam: create the app in Steamworks, upload `dist/win-unpacked` as the depot, and add Steamworks integration if you want achievements or DLC. None of that exists yet.
+4. Write the privacy note. Soundcraft makes no network requests at runtime; fonts are bundled.
 
 ## What works (verified)
 
-Each item below is covered by `tests/e2e.cjs`, which drives the real page in headless Chromium.
-
-| Area | Status |
+| Area | What you get |
 | --- | --- |
-| **Audio engine** | Web Audio graph per track: instrument → pan → fader → master bus, plus post-fader reverb and delay sends, a glue compressor and a limiter. A look-ahead scheduler (25 ms tick, 120 ms horizon) runs on the audio clock, separate from rendering. |
-| **Instruments (8, all synthesized)** | Nebula Pad (supersaw), Glass Keys (FM electric piano), Acid Line (mono bass with glide), Growl (tempo-synced wobble bass), Vox Choir (formant voices), Circuit Kit (12-pad analog-style drums), 8-Bit (pulse chiptune), Prism Bells (additive). Each has three macro knobs plus pan, reverb and delay. |
-| **Transport** | Play, stop (a second press silences every note), record, BPM 50–220, loop length 1/2/4/8 bars, metronome, swing, quantize. |
-| **Piano roll / drum grid** | Draw by dragging, move (time and pitch), resize, delete (click or right-click), velocity (scroll on a note). Key preview, octave labels, named drum rows. |
-| **Recording** | Overdub from MIDI, the computer keyboard or the on-screen keys into the selected track, with optional quantize. |
-| **MIDI hardware** | Auto-detects devices, including hot-plug. Handles note on/off with velocity, sustain (CC64), mod wheel (CC1), pitch bend, all-notes-off, channel filter and MIDI learn for every knob. |
-| **Mixer** | Per-track volume, mute, solo, pan and sends. Real per-track level meters, master volume, and a clip indicator measured before the limiter. |
-| **Export** | Offline render of one loop pass plus a 2.5 s tail to a 16-bit stereo 44.1 kHz WAV. Inside the claude.ai viewer it is zipped, because that viewer does not allow `.wav` downloads. |
-| **Projects ("cassettes")** | Create, open, rename, duplicate, recolor, delete (with confirmation), search, and import/export as `.soundcraft.json`. Autosave (debounced, plus on page hide), a schema version with a migration hook, and a clear error for bad files. A failed load never overwrites a stored project. |
-| **Undo / redo** | Note edits, clears and recordings: Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y. |
-| **Studio (pixel bedroom)** | Walk with WASD or the arrow keys, or click anything to walk to it. Press E to use the nearest object. Computer opens the DAW. Keyboard opens the instrument. Groovebox opens the drum track. Record player plays or stops. Lamp toggles. Window cycles the weather. The cassette shelf opens the library and shows your real tapes' colors. |
-| **Music-reactive room** | All driven by the live analyser, never random. The lamp pulses with bass energy. Speaker cones move with bass. A desk figurine hops on detected kicks. Note sprites float up with mid-range energy. Sparkles follow the highs. A haze follows the real reverb return level. The monitor shows the real output waveform. |
-| **Cat** | Wanders between favorite spots (couch, window sill, desk, speakers, rug, shelf). Sleeps when it's quiet, prefers the speakers during playback, and bobs its head on detected kicks with adjustable sensitivity. Pet it for hearts and a purr. Five coats. |
-| **Settings** | Six weathers, lamp, ambience sound and volume, reduced motion (also follows the OS setting), cat coat and reaction sensitivity. All persisted. |
-| **Ambience routing** | Rain, wind or room-tone ambience and the cat's purr play on their own output. They never reach the master bus, the meters, the visuals or exported audio. |
+| Sound engines (24) | Analog/subtractive, Wavetable (morphable 4-frame tables), FM, Tonewheel Organ (drawbars and a real rotary speaker model), Modeled Piano (additive, stretched partials), Brass Model, Bowed Strings, Woodwind Model, Plucked String (Karplus-Strong in an AudioWorklet), Drum Machine (8 kits × 12 editable pads), Granular Cloud, Tape & Vinyl, Reverse Swell, Cinematic Impact, Glitch Stutter, Organic Modal, Fusion Lab (4-layer rack), Sampler, plus Nebula Pad, Acid Line, Growl Bass, Vox Choir, 8-Bit and Prism Bells from earlier versions. Every one renders audio in the tests. |
+| Library | 101 factory presets across keys, brass, strings, woodwinds, synths, bass & guitars, drums, experimental and Fusion. A preset is a saved configuration of one engine and is never counted as an instrument. |
+| Fusion Lab | Up to 4 layers from any compatible preset. Each layer has level, pan, filter, transpose, fine tune, fade-in, drive, key range, velocity range with crossfade, solo, duplicate and reorder, plus per-layer sound overrides. Covers key splits, stacks and velocity switching. |
+| Sampler | Import WAV/MP3/OGG/FLAC; files are stored in IndexedDB and deduplicated by content hash. Zones have key and velocity ranges, root, start/end, loop points, reverse, tune, level, pan and round-robin groups. Edit points on the waveform; replace missing samples. |
+| Modulation | Sources: LFOs (sine, triangle, saw, square, random, custom, free or tempo-synced, optional restart per note), ADSR and multi-stage envelopes, step modulators, sample & hold, envelope followers on other tracks, velocity, key tracking, note random, mod wheel, pitch bend, channel and poly aftertouch, any MIDI CC, and macros. Routes have amount, polarity, bipolar option, curve, min/max range, smoothing, on/off, name and color. Destinations come from the parameter registry; each is marked **live** (audio-rate) or **note start**. Every instrument also gets per-voice level, pan, filter and pitch. Routing is drag and drop, with knob rings, an overview graph and refusal of feedback loops between tracks. |
+| Macros | Any number per instrument, each mapping to many controls with its own min/max, reverse and curve. MIDI-learnable, usable as modulation sources, and shown as big knobs in the instrument view. |
+| Patch Lab | All engine controls grouped into modules with real visualizations (envelope shapes, filter response from a real BiquadFilter, oscillator and wavetable shapes). Save as a new preset; overwrite only your own presets; revert; export; A/B compare; history with restore and "restore start"; randomize a single control, a module, the modulation, a layer, or a new patch in a category. Factory presets never change. |
+| Arrangement | Clip timeline with patterns per track. Add, move and resize clips (bar or beat snap), duplicate, split, make unique, delete. Loop region, play cursor, section markers (rename, loop section, move, delete). Track rename, color, reorder, duplicate and delete with confirmation. Resizable timeline/editor split. |
+| Piano roll | Draw, move, resize; marquee and Shift selection; duplicate, nudge, delete; chord drawing (triad, 7th, power, octave) that follows the scale; scale highlighting and snap; 1/32 to 1/4 grid; velocity and probability lanes; quantize; humanize; patterns (new, duplicate, rename, length); a break-pattern helper on drum tracks. |
+| Playback and recording | Look-ahead scheduler on the audio clock (the tests check timing drift stays below 1 µs), swing, metronome, stateless arpeggiator (up, down, up/down, random, chord) that behaves the same live and in export, note probability. Overdub recording into the clip under the playhead or a new clip. |
+| MIDI | Device hot-plug, channel filter, notes with velocity, sustain, mod wheel, pitch bend with per-track range, channel and poly aftertouch, CC as a modulation source, and MIDI learn for any control or macro. MIDI file import and export (SMF type 1). |
+| Ensembles | Several instruments played from one keyboard, split by key range, velocity range, MIDI channel or transpose. 6 factory ensembles; save your own. |
+| Effects (17) | Parametric EQ (with response curve), Filter (12/24 dB, synced LFO), Compressor (gain reduction readout), Limiter, Gate, Transient shaper, Saturation (soft, hard, fold), Bitcrusher, Chorus, Flanger, Phaser, Tremolo, Auto-pan, Stereo width, Delay (synced, ping-pong), Reverb (rebuilds its room), Dream machine. Reverb, delay, filter and Dream machine have XY "toys" bound to the real controls. All render in the tests. |
+| Mixer | Strips for each track, the reverb and delay returns, and master. Inserts can be added, bypassed, reordered and removed; sends, pan, faders, peak meters with clip hold, mute/solo. Effect-chain presets (7 factory). Master meters: L/R peak, momentary, short-term and integrated loudness (approximate, ungated K-weighted). Reference-track A/B with optional loudness match, on its own output. |
+| Presets everywhere | Instrument presets, effect chains, track presets, ensembles, project templates (5 factory) and modulation patches. All are searchable with favorites, recents, genre and mood filters, previews, duplicate detection, import/export, missing-content badges and compatibility checks. |
+| Projects | Cassette library, autosave, the last 5 autosaves kept as backups (plus timestamped files on disk in the desktop app), named snapshots with compare and restore (restoring first takes a safety snapshot), whole-project undo/redo, crash detection on the next launch, project files that can embed your own samples, and migration of v1 projects. |
+| Export | Faster-than-real-time render to WAV at 44.1, 48 or 96 kHz in 16-bit, 24-bit or 32-bit float. Whole song or loop region; stereo mix and/or per-track stems. Progress is shown, the saved path is reported, and silent files are flagged. |
+| Desktop app | Native save dialogs (never overwrites existing files when exporting several), on-disk backups, logs, a CPU readout, a crash dialog with reload, a single instance, offline fonts, context isolation and sandbox, and only the MIDI permission granted. |
+| Studio | The pixel bedroom from earlier versions. The lamp, speakers, figurine, cat, sparkles and haze react to the real audio analysis. Objects open the DAW, the Patch Lab, the drum pads and the cassette library. |
+| Settings | Themes (match system, night, day), interface size, reduced motion, studio weather and ambience (kept off the master bus), cat coat and sensitivity, audio output device (where the system allows), latency mode, sample rate with engine restart, storage usage, and a copyable/saveable diagnostics report. |
+| Help | Searchable guide and an optional five-step tour. |
+
+## Partly done
+
+- **CPU display.** The desktop app shows process CPU. Browsers do not expose audio-thread load, so the browser shows JS memory instead. Voice count is shown everywhere.
+- **Buffer size.** Only the latency mode (interactive, balanced, playback) can be chosen. Web Audio picks the actual buffer and does not report it. Latency has not been measured on real hardware.
+- **Loudness metering** is approximate and ungated, and labelled as such.
+- **Pitch bend.** Works on every engine except Plucked String, whose delay-line model has a fixed pitch.
+- **Modulation scope.** Live (audio-rate) destinations are the parameters that map to real AudioParams. Others, such as unison count or waveform choice, change when a note starts. The UI marks which is which.
+- **Arpeggiator.** MIDI file export writes the held notes, not the arpeggiated result.
 
 ## Not built yet
 
-These parts of the brief do not exist in this slice. Nothing in the UI pretends they do.
+- Audio tracks, microphone/interface recording, comping, time-stretch, slicing, resampling, freezing and bouncing.
+- Automation lanes.
+- Tempo and time-signature changes (4/4 at one tempo only).
+- Track groups and buses, and sidechain routing.
+- MP3 export (no encoder is bundled).
+- Plugin hosting (VST3/AU). An Electron/Web Audio app cannot host native plugins.
+- Recorded multisample instruments. Every built-in sound is synthesized or physically modeled. Sampled pianos, brass and strings need properly licensed recordings, which this project does not have yet.
+- Customizable keyboard shortcuts.
+- Game layer beyond the studio room: world map and locations, quests and Notes currency, Songworld Generator, garden, rhythm arcade, venues and live performance mode, cat cosmetics shop, content shop, developer console.
+- Steamworks integration and code signing (see the release checklist).
 
-- **Arrangement timeline with clips.** Each track is currently one looping pattern of up to 8 bars. There are no clips, markers, sections, automation lanes, track groups or time signatures other than 4/4.
-- **Audio tracks.** No microphone or audio-interface recording, sampler, WAV import, sample library or Sound Playground.
-- **MIDI file import/export.**
-- **Step sequencer view.** Drums are programmed in the drum grid. Per-step probability, pattern chaining and duplication are not built.
-- **Insert effects, effect toys and Sound Fusion.**
-- **Other workspaces:** Sounds, Visuals (full-screen visualizers and video export), Journal, World Map and every world beyond the bedroom, Songworld Generator, Listening Café, venues and live gigs.
-- **Progression:** quests, Notes currency, skill tree, rhythm arcade, loot, garden. A `quest()` hook is called from real events (export) and does nothing yet.
-- **Happy Accident Generator, Song Variants, Focus Mode.**
-- **Desktop and Steam:** no native app, installer, Steamworks, DLC or content shop. There is also no developer console. It must not be added to a browser build behind a key combination; it needs a developer-enabled build or an authenticated developer session.
-- **Plugins:** browser audio cannot host VST3/AU plugins. All instruments are built in.
+## Architecture
 
-## Suggested next steps
+```
+app/        web app (also packaged into the exe)
+  js/core.js        audio context, master graph, worklets (Karplus-Strong, gate, crusher, transient), analysis
+  js/params.js      parameter registry shared by knobs, modulation, macros, presets and randomize
+  js/effects.js     effect rack
+  js/engines*.js    sound engines and drum kits
+  js/sampler.js     IndexedDB sample store and the Sampler engine
+  js/mod.js         modulation sources, routes, macros, live AudioParam wiring
+  js/library.js     factory content and the preset file format
+  js/project.js     project model, persistence, snapshots, undo
+  js/sequencer.js   scheduler, arpeggiator, recording, offline render, WAV/zip, MIDI files
+  js/ui-*.js        workspaces and dialogs; studio.js pixel room; main.js boot and shortcuts
+electron/   desktop shell (main process, preload bridge)
+tests/      acceptance tests (browser) and desktop shell smoke test
+tools/      artifact-page.py builds the hosted web version
+```
 
-1. Replace the single loop with a clip-based arrangement model: clips reference patterns, plus markers. Migrate schema v1 projects by wrapping each track's notes in one clip.
-2. Move project storage from `localStorage` to IndexedDB before adding audio. Store audio blobs separately from project JSON.
-3. Add MIDI file import/export and audio tracks, with recording through `getUserMedia` and an AudioWorklet recorder.
-4. Then build the Visuals workspace and the Songworld Generator on the existing analysis data (`A.bass`, `A.mid`, `A.high`, `A.kick`, `A.rev`) and the project's MIDI notes.
-5. For Steam, wrap the same engine in Electron or Tauri. Only then add Steamworks, the content manager and a developer build flag.
+Web Audio processes audio on its own rendering thread. The JavaScript main thread only schedules notes 120 ms ahead and draws the UI, and game animation never touches scheduling.
+
+## Preset file format
+
+Every exported preset, ensemble, track preset, effect chain, template or modulation patch is one JSON file:
+
+```json
+{ "format": "soundcraft", "formatVersion": 1, "type": "instrument | ensemble | track | fxchain | template | modpatch",
+  "name": "…", "author": "…", "created": "ISO date", "app": "Soundcraft 0.3.0",
+  "data": { … }, "samples": { "smp_<hash>": { "name": "…", "b64": "…" } } }
+```
+
+On import, Soundcraft checks:
+
+- **Version:** a newer `formatVersion` is refused with an explanation.
+- **Engines and effects:** unknown ones are refused or listed.
+- **Values:** every parameter value is clamped to its registry range.
+- **Modulation:** sources are rebuilt from known types only.
+- **Dependencies:** missing samples or presets are reported, and their parts stay silent.
+
+Nothing in a file is ever executed. Exports only embed samples you imported yourself.
+
+Project files use the same envelope with `"type": "project"` and are imported from the Cassettes library.
 
 ## Tests
 
 ```sh
-npm i -D playwright      # or point PLAYWRIGHT_MODULE at an existing install
-node soundcraft/tests/e2e.cjs [screenshot-dir]
+cd soundcraft && npm ci && npx playwright install chromium
+node tests/e2e.cjs [screenshot-dir]                 # acceptance tests, renders and measures audio
+xvfb-run -a node tests/electron-smoke.cjs [dir]     # desktop shell (Linux; use a display on other OSes)
 ```
-
-The suite checks:
-
-- creating a project
-- drawing, moving, undoing and redoing notes
-- that live keys and the sequencer produce real audio output
-- that mute zeroes track signal
-- that WAV export contains real audio
-- that a project survives a reload
-- that the studio visuals read real analysis data
-- that the step clock stays exact while the studio animates
-- studio click-to-walk, petting the cat, lamp persistence, and rejection of invalid projects
-- no horizontal scroll at phone width, and no page errors
