@@ -3,7 +3,7 @@
    Everything that touches an AudioContext reads the global `ctx`, so offline rendering can
    swap in an OfflineAudioContext and rebuild the same graph. Per-track runtime nodes live in
    `tr._rt` and global graph nodes in `GR`, both of which are excluded from saved projects. */
-const APP_VERSION='0.4.0';
+const APP_VERSION='0.4.1';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
