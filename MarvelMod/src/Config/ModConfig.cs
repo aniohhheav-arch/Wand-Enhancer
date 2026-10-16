@@ -80,6 +80,7 @@ public class ConfigData
     public bool    PracticeUnlimited{ get; set; } = false;
     public bool    PracticeInvincible{ get; set; } = false;
     public int     PracticeDummies  { get; set; } = 3;
+    public bool    HudEnabled        { get; set; } = true;
     public bool    DebugMode        { get; set; } = false;
     public string  ConsoleKey       { get; set; } = "F6";
     // Loki illusion settings
