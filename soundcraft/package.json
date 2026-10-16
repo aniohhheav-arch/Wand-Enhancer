@@ -1,7 +1,7 @@
 {
   "name": "soundcraft",
   "productName": "Soundcraft",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A cozy pixel-art music studio and DAW.",
   "main": "electron/main.js",
   "private": true,
@@ -26,7 +26,8 @@
       "electron/**",
       "app/**",
       "build/icon.png",
-      "package.json"
+      "package.json",
+      "!app/js/_*"
     ],
     "directories": {
       "output": "dist",
@@ -53,7 +54,15 @@
       "target": [
         "dir"
       ]
-    }
+    },
+    "fileAssociations": [
+      {
+        "ext": "soundcraft",
+        "name": "Soundcraft Session",
+        "description": "Soundcraft session",
+        "role": "Editor"
+      }
+    ]
   },
   "repository": {
     "type": "git",

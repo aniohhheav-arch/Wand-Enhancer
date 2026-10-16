@@ -24,9 +24,10 @@
     <div class="nav-right">
       <span class="stat" id="statVoices" title="Voices playing right now">0 voices</span>
       <span class="stat" id="statCpu" title="Process CPU (desktop app only)"></span>
+      <button class="btn" id="btnHistory" title="Recent sessions and every change you made (Ctrl+H)">History</button>
       <button class="btn" id="btnLibrary">Cassettes</button>
       <button class="btn" id="btnSnapshots">Snapshots</button>
-      <button class="btn" id="btnSettings">Settings</button>
+      <button class="btn" id="btnSettings" title="Settings (Ctrl+,)">⚙ Settings</button>
       <button class="btn" id="btnHelp">Help</button>
     </div>
   </nav>
@@ -56,6 +57,7 @@
     <div class="pop" id="midiPop" hidden>
       <h3>MIDI input</h3>
       <p id="midiMsg">Looking for devices…</p>
+      <p id="midiLat" class="hint" hidden></p>
       <ul class="dev-list" id="devList"></ul>
       <div class="row-actions"><label class="tf">Channel <select id="midiCh"></select></label><button class="btn" id="btnRescan">Scan again</button><button class="btn" id="btnGetApp" hidden>Download app file</button></div>
       <h3>CC links</h3>
@@ -81,6 +83,7 @@
   <section class="view arr pane" id="vArrange" style="flex-direction:column">
     <div class="toolbar">
       <button class="btn" id="btnAddTrack">+ Track</button>
+      <button class="btn" id="btnAddMic" title="Add a track that records your microphone or audio interface">+ Mic track</button>
       <button class="btn" id="btnDupTrack">Duplicate track</button>
       <span class="sep"></span>
       <label class="tf">Snap <select id="clipSnap"><option value="1">Bar</option><option value="0.25">Beat</option></select></label>
@@ -125,6 +128,7 @@
         <div class="roll-wrap" id="rollWrap"><canvas id="roll"></canvas><div class="playhead" id="playhead" hidden></div></div>
         <div class="lane-wrap"><canvas id="lane" aria-label="Note velocity or probability lane"></canvas></div>
       </div>
+      <div id="dockAudio" class="pane audio-dock" hidden style="border-radius:0 var(--r) var(--r) var(--r)"></div>
       <div id="dockInst" class="inst-dock pane" hidden style="border-radius:0 var(--r) var(--r) var(--r)">
         <div class="inst-card" id="instCard">
           <div class="inst-head"><div style="flex:1;min-width:200px"><div class="inst-tag" id="instTag"></div><h3 id="instName"></h3></div>
@@ -203,8 +207,8 @@
   <div class="modal-head"><h2 id="libTitle">Cassette library</h2><input type="search" id="libSearch" placeholder="Search titles" aria-label="Search projects"><span class="spacer"></span>
     <select id="libTpl" aria-label="Start from"><option value="">Blank project</option></select><button class="btn primary" id="libNew">New cassette</button><button class="btn" data-close>Close</button></div>
   <div class="modal-body">
-    <div class="row-actions"><button class="btn" id="libImport">Import project…</button><input type="file" id="libFile" accept=".json,application/json" hidden>
-      <button class="btn" id="libExport">Export current project</button><label class="tf"><input type="checkbox" id="libExportSamples"> Include my imported samples</label><span class="spacer"></span>
+    <div class="row-actions"><button class="btn" id="libImport">Open session file…</button>
+      <button class="btn" id="libExport">Save session file…</button><span class="spacer"></span>
       <button class="btn" id="midiImport">Import MIDI file…</button><input type="file" id="midiFile" accept=".mid,.midi,audio/midi" hidden><button class="btn" id="midiExport">Export MIDI file</button></div>
     <div class="tapes" id="tapes"></div></div></div></div>
 <div class="modal" id="snapModal" hidden role="dialog" aria-modal="true" aria-labelledby="snapTitle"><div class="modal-card narrow">
@@ -223,7 +227,16 @@
     <p class="hint" style="grid-column:1/-1;margin:0">Format: WAV. MP3 is not offered because no encoder ships with Soundcraft yet. Stems include each track's own effects and its share of the reverb and delay returns, without master inserts. Notes with a probability below 100% are rolled once for the render.</p>
     <div style="grid-column:1/-1" class="progress"><i id="expProg"></i></div><p id="expStatus" class="hint" style="grid-column:1/-1;margin:0"></p>
     <div style="grid-column:1/-1" class="row-actions"><span class="spacer"></span><button class="btn primary" id="expGo">Render</button></div></div></div></div>
-<div class="modal" id="setModal" hidden role="dialog" aria-modal="true" aria-labelledby="setTitle"><div class="modal-card narrow">
+<div class="modal" id="histModal" hidden role="dialog" aria-modal="true" aria-labelledby="histTitle"><div class="modal-card">
+  <div class="modal-head"><h2 id="histTitle">History</h2><span class="spacer"></span><button class="btn" id="histOpen">Open session file…</button><button class="btn" id="histSave">Save session as…</button><button class="btn" data-close>Close</button></div>
+  <div class="modal-body hist">
+    <section><h3>Continue a session</h3><ul class="list hist-sessions" id="histSessions"></ul>
+      <div id="histFiles" hidden><h3>Recent session files</h3><ul class="list" id="histFileList"></ul></div>
+      <p class="hint">Everything autosaves on this device. A <b>.soundcraft</b> session file holds the whole session (tracks, recordings, samples, snapshots and undo history) so you can move it to another computer or keep a copy. Double-click one to open it in Soundcraft.</p></section>
+    <section><h3><span id="histTitle2">Changes</span></h3><ul class="list hist-steps" id="histSteps"></ul><p class="hint" id="histEmpty">No changes yet. Every edit you make appears here, and stays after you close Soundcraft.</p>
+      <div class="row-actions"><button class="btn" id="histClear">Clear history</button></div></section>
+  </div><input type="file" id="sessFile" accept=".soundcraft,.json,application/json" hidden></div></div>
+<div class="modal" id="setModal" hidden role="dialog" aria-modal="true" aria-labelledby="setTitle"><div class="modal-card" style="width:min(820px,100%)">
   <div class="modal-head"><h2 id="setTitle">Settings</h2><span class="spacer"></span><button class="btn" data-close>Close</button></div>
   <div class="modal-body settings" id="setBody"></div></div></div>
 <div class="modal" id="helpModal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle"><div class="modal-card narrow">
@@ -243,6 +256,9 @@
 <script src="js/engines.js"></script>
 <script src="js/engines2.js"></script>
 <script src="js/sampler.js"></script>
+<script src="js/sample-lib.js"></script>
+<script src="js/orchestra.js"></script>
+<script src="js/audio-track.js"></script>
 <script src="js/mod.js"></script>
 <script src="js/library.js"></script>
 <script src="js/project.js"></script>
@@ -255,6 +271,7 @@
 <script src="js/ui-sounds.js"></script>
 <script src="js/ui-lab.js"></script>
 <script src="js/ui-dialogs.js"></script>
+<script src="js/sessions.js"></script>
 <script src="js/studio.js"></script>
 <script src="js/main.js"></script>
 </body>

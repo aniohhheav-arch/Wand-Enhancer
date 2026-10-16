@@ -20,46 +20,53 @@ fp('keys-ep','Electric Piano','fm','keys',{},{tags:['ep','fm'],genre:['pop','rnb
 fp('keys-tine','Tine Keys (Rhodes-inspired)','fm','keys',{ratio:1,index:1.4,indexSus:0.2,indexDecay:2,tine:0.6,tineRatio:14,decay:3.5,trem:0.5,tremRate:3.8},{tags:['ep','tine'],genre:['jazz','neo-soul','lofi'],mood:['warm','mellow'],desc:'Round tine tone that barks when you dig in.',oct:4,
   mod:modOf([lfoS('s1',{name:'Drift',rate:0.15})],[rt_('s1','v:vpan',0.35)],[mac('m1','Bark',0.4,[['eng:index',0.05,0.45],['eng:velBright',0.3,0.9]])])});
 fp('keys-reed','Reed Keys (Wurlitzer-inspired)','fm','keys',{ratio:1,index:3.5,indexSus:0.4,indexDecay:0.8,tine:0.2,tineRatio:3.5,decay:2,trem:0.25,velBright:0.9},{tags:['ep','reed'],genre:['soul','indie'],mood:['gritty'],desc:'Reedy, nasal electric piano that growls at high velocity.',oct:4});
-fp('keys-organ','Tonewheel Organ (Hammond-inspired)','organ','keys',{},{tags:['organ'],genre:['gospel','rock','jazz'],mood:['warm'],desc:"888 drawbars with a slow rotary. Mod wheel up switches to fast.",oct:4});
-fp('keys-jazzorgan','Jazz Organ','organ','keys',{db0:8,db1:8,db2:8,db3:8,perc:'3rd',percDecay:0.3,click:0.5,leslie:'slow'},{tags:['organ'],genre:['jazz'],mood:['cool'],desc:'Four drawbars with third-harmonic percussion and key click.',oct:4});
-fp('keys-gospel','Full Gospel Organ','organ','keys',{db0:8,db1:8,db2:8,db3:8,db4:8,db5:8,db6:8,db7:8,db8:8,leslie:'fast',drive:0.45},{tags:['organ'],genre:['gospel','rock'],mood:['big'],desc:'Every drawbar out, fast rotor and drive.',oct:4});
+fp('keys-organ','Tonewheel Organ (Hammond-inspired)','organ','keys',{db0:8,db1:8,db2:8,db3:0,db4:0,db5:0,db6:0,db7:0,db8:0,vib:'C3',leslie:'slow',drive:0.18,click:0.35,tone:0.6,swell:0.85},{tags:['organ'],genre:['rock','soul','pop'],mood:['warm'],desc:"The classic 888 foundation with chorus C3 and a slow rotor. Mod wheel up switches the rotor to fast.",oct:4});
+fp('keys-jazzorgan','Jazz Organ','organ','keys',{db0:8,db1:8,db2:8,db3:0,db4:0,db5:0,db6:0,db7:0,db8:0,perc:'3rd',percDecay:0.25,percVol:'normal',click:0.65,vib:'off',leslie:'off',drive:0.05,tone:0.45,swell:0.72,leak:0.25,hornBal:0.45},{tags:['organ'],genre:['jazz'],mood:['cool'],desc:'Bebop registration: 888 with third-harmonic percussion that only speaks on detached notes, a stopped rotor, no scanner and a warm, clean amp. Comp lightly; mod wheel spins the rotor for leads.',oct:4});
+fp('keys-gospel','Full Gospel Organ','organ','keys',{db0:8,db1:8,db2:8,db3:8,db4:8,db5:0,db6:0,db7:0,db8:8,vib:'C3',leslie:'fast',drive:0.5,tone:0.75,click:0.5,swell:0.7,hornBal:0.6},{tags:['organ'],genre:['gospel','rock'],mood:['big'],desc:'Shout registration 88 888 000 8 through a hot tube preamp and a fast rotor. The Swell macro (or aftertouch, or CC11) is the expression pedal: ride it for swells and builds.',oct:4,mod:modOf([],[rt_('at','eng:swell',0.35),rt_('cc11','eng:swell',0.6)],[mac('m1','Swell',0.7,[['eng:swell',0.25,1],['eng:drive',0.3,0.65]])])});
 fp('keys-clav','Clavinet-style Keys','pluck','keys',{bright:1,pick:0.05,damp:0.1,sustain:0.6,offDamp:0.03,tone:6000,drive:0.25,body:0},{tags:['clav','funk'],genre:['funk'],mood:['bouncy'],desc:'Bright, short struck string for funky comping.',oct:4});
-fp('keys-celesta','Celesta','fm','keys',{ratio:4,index:1,indexSus:0,indexDecay:0.4,tine:0.3,tineRatio:7,decay:1.4,trem:0,release:0.4},{tags:['mallet','bell'],genre:['film','classical'],mood:['magical'],desc:'Soft metal bars with a gentle bell overtone.',oct:5});
-fp('keys-musicbox','Music Box','fm','keys',{ratio:5,index:1.6,indexSus:0,indexDecay:0.25,tine:0.1,tineRatio:14,decay:0.9,sustain:0,trem:0,release:0.6},{tags:['bell','toy'],genre:['film','lullaby'],mood:['nostalgic'],desc:'Tiny plucked comb tines.',oct:6});
+fp('keys-celesta','Celesta','celesta','keys',{},{tags:['mallet','bell'],genre:['film','classical'],mood:['magical'],desc:'Felt hammers on steel bars with wooden resonators: round in the low register, glassy at the top, damped on release.',oct:5});
+fp('keys-musicbox','Music Box','musicbox','keys',{},{tags:['bell','toy'],genre:['film','lullaby'],mood:['nostalgic'],desc:'Steel comb tines plucked by pins: bright mechanical attack, long ring, a little wooden case and the damper buzz on repeated notes.',oct:6});
 fp('keys-prism','Prism Bells','prism','keys',{},{tags:['bell'],genre:['ambient'],mood:['shimmering'],desc:'Inharmonic bells with sparkles.',oct:5});
+fp('keys-glock','Glockenspiel','orch','keys',{inst:'glock',art:'hit',release:1.5},{tags:['mallet','recorded'],genre:['film','pop'],mood:['sparkly'],desc:'Recorded glockenspiel steel bars.',oct:5});
+fp('keys-xylo','Xylophone','orch','keys',{inst:'xylo',art:'hit',release:0.6},{tags:['mallet','recorded'],genre:['film','orchestral'],mood:['playful'],desc:'Recorded xylophone: dry, woody and bright.',oct:5});
+fp('keys-marimba','Marimba','orch','keys',{inst:'marimba',art:'hit',release:1},{tags:['mallet','recorded'],genre:['film','world','pop'],mood:['warm'],desc:'Recorded marimba with resonators.',oct:4});
 /* Brass */
 const brass=(id,name,params,o)=>fp(id,name,'brass','brass',params,Object.assign({tags:['brass'],genre:['orchestral','film'],mood:[]},o));
-brass('brass-trumpet','Solo Trumpet',{formant:1400,bright:0.7},{desc:'Bright solo trumpet with lip rise and delayed vibrato.',oct:4,mood:['heroic'],mod:modOf([],[rt_('vel','eng:bright',0.35,{bip:true})])});
-brass('brass-mutedtp','Muted Trumpet',{formant:1500,bright:0.6,mute:0.85,vibrato:0.15},{desc:'Harmon-style mute: nasal and intimate.',oct:4,genre:['jazz'],mood:['cool']});
-brass('brass-trombone','Trombone',{formant:600,bright:0.5,growl:0.35,attack:0.06},{desc:'Round low brass with a little growl.',oct:3});
-brass('brass-horn','French Horn',{formant:450,bright:0.3,attack:0.08,vibrato:0.15,growl:0.1},{desc:'Dark, distant and noble.',oct:3,mood:['noble']});
-brass('brass-tuba','Tuba',{formant:300,bright:0.25,growl:0.2,attack:0.07},{desc:'Big low foundation.',oct:2});
-brass('brass-lead','Solo Brass Lead',{formant:1300,bright:0.85,growl:0.5,vibrato:0.4},{desc:'Edgy lead brass for melodies.',oct:4,genre:['funk','pop']});
-brass('brass-section','Brass Section',{section:5,spread:10,formant:1000,bright:0.6},{desc:'Five players, staggered and detuned.',oct:4,tags:['brass','ensemble']});
-brass('brass-cinematic','Cinematic Brass',{section:6,bright:0.4,attack:0.6,formant:500,release:0.8,growl:0.2},{desc:'Slow, dark swells for trailers.',oct:3,mood:['epic'],mod:modOf([],[rt_('mw','eng:bright',0.6)])});
-brass('brass-funk','Funk Brass',{section:3,bright:0.9,stab:0.7,attack:0.01,formant:1300},{desc:'Punchy short hits.',oct:4,genre:['funk','soul'],mood:['punchy']});
-brass('brass-jazz','Jazz Brass',{section:3,bright:0.45,vibrato:0.45,growl:0.15,formant:900},{desc:'Mellow section with expressive vibrato.',oct:4,genre:['jazz']});
-brass('brass-stabs','Brass Stabs',{section:4,stab:0.85,bright:0.8,attack:0.008,formant:1200},{desc:'Very short stabs.',oct:4,genre:['funk','house']});
-brass('brass-swell','Brass Swell',{section:4,attack:1.2,bright:0.55,release:0.6},{desc:'Notes swell in slowly.',oct:3,mood:['epic']});
-brass('brass-fanfare','Fanfare',{section:4,bright:0.9,attack:0.02,formant:1400,growl:0.3},{desc:'Bright, ceremonial section.',oct:4,mood:['triumphant']});
+fp('brass-trumpet','Trumpet','orch','brass',{inst:'trumpet',art:'sus',dyn:'vel',release:0.25},{tags:['brass','recorded'],genre:['orchestral','film','pop'],mood:['heroic'],desc:'Recorded solo trumpet: bright, focused and forward, with soft and loud takes. Set Dynamics to Mod wheel to swell held notes between them.',oct:4});
+fp('brass-mutedtp','Muted Trumpet','orch','brass',{inst:'trumpet',art:'mute',release:0.2},{tags:['brass','recorded','mute'],genre:['jazz','film'],mood:['cool'],desc:'Recorded trumpet with a straight mute: thin, buzzy and intimate.',oct:4});
+fp('brass-trombone','Trombone','orch','brass',{inst:'trombone',art:'sus',mode:'slide',glide:0.14,release:0.3},{tags:['brass','recorded'],genre:['orchestral','jazz','film'],mood:['warm'],desc:'Recorded tenor trombone with a broad midrange. Playing is set to Slide: overlapping notes glide like a real slide; separate notes start cleanly.',oct:3});
+fp('brass-horn','French Horn','orch','brass',{inst:'horn',art:'sus',mode:'legato',release:0.45,dyn:'mw'},{tags:['brass','recorded'],genre:['orchestral','film'],mood:['noble'],desc:'Recorded French horn: round, warm and blended. Legato connects overlapping notes; the mod wheel moves held notes between soft and loud recordings.',oct:3});
+fp('brass-tuba','Tuba','orch','brass',{inst:'tuba',art:'sus',release:0.3},{tags:['brass','recorded'],genre:['orchestral','film'],mood:['deep'],desc:'Recorded tuba: a weighty fundamental from a real low-brass player, not a pitched-down trumpet.',oct:2});
+brass('brass-lead','Synth Brass Lead (modeled)',{formant:1300,bright:0.85,growl:0.5,vibrato:0.4},{desc:'Edgy lead brass for melodies.',oct:4,genre:['funk','pop']});
+fp('brass-section','Brass Section','section','brass',{band:'brass',art:'sus',loose:0.5,width:0.7},{tags:['brass','ensemble','recorded'],genre:['orchestral','film'],mood:['big'],desc:'Four different recorded instruments (trumpet, horn, trombone, tuba). Chords are voiced across them by register and each player enters at its own moment; single notes are doubled in unison.',oct:4});
+fp('brass-cinematic','Cinematic Brass','section','brass',{band:'brass',art:'sus',dyn:'mw',attack:0.35,release:0.9,loose:0.7,width:0.8,tone:-0.3},{tags:['brass','ensemble','recorded'],genre:['film','trailer'],mood:['epic'],desc:'Recorded brass section for swells: the mod wheel crossfades every player from soft to loud recordings. Ride it while holding chords.',oct:3});
+fp('brass-funk','Funk Brass','section','brass',{band:'brass',art:'stac',unison:'double',loose:0.25,release:0.15,tone:0.3},{tags:['brass','ensemble','recorded'],genre:['funk','soul'],mood:['punchy'],desc:'Recorded short brass notes with real round robins, so repeated hits never sound identical.',oct:4});
+fp('brass-jazz','Jazz Brass','section','brass',{band:'brass',art:'mute',loose:0.6,release:0.3},{tags:['brass','ensemble','recorded'],genre:['jazz'],mood:['mellow'],desc:'Section with a muted trumpet on top and open horn, trombone and tuba underneath.',oct:4});
+fp('brass-stabs','Brass Stabs','section','brass',{band:'brass',art:'stac',loose:0.15,release:0.08,tone:0.4},{tags:['brass','ensemble','recorded'],genre:['funk','house'],mood:['punchy'],desc:'Tight recorded staccato section for stabs.',oct:4});
+fp('brass-swell','Brass Swell','section','brass',{band:'brass',art:'sus',attack:1.2,release:0.7,loose:0.6},{tags:['brass','ensemble','recorded'],genre:['film'],mood:['epic'],desc:'Recorded section with a slow entry on every note.',oct:3});
+fp('brass-fanfare','Fanfare','section','brass',{band:'brass',art:'sus',dyn:'vel',loose:0.35,width:0.8,tone:0.35},{tags:['brass','ensemble','recorded'],genre:['orchestral','film'],mood:['triumphant'],desc:'Bright recorded section; play hard for the loud takes.',oct:4});
 /* Strings */
 const str=(id,name,params,o)=>fp(id,name,'strings','strings',params,Object.assign({tags:['strings'],genre:['orchestral','film'],mood:[]},o));
-str('str-violin','Violin',{bodyScale:1.2,bright:0.6,vibrato:0.45},{desc:'Solo violin.',oct:5});
-str('str-viola','Viola',{bodyScale:1,bright:0.5,vibrato:0.4},{desc:'Solo viola.',oct:4});
-str('str-cello','Cello',{bodyScale:0.6,bright:0.45,vibrato:0.4},{desc:'Solo cello.',oct:3});
-str('str-bass','Double Bass',{bodyScale:0.4,bright:0.35,vibrato:0.2},{desc:'Bowed double bass.',oct:2});
-str('str-ensemble','String Ensemble',{section:8,spread:12,attack:0.35},{desc:'Eight-player section.',oct:4,tags:['strings','ensemble']});
-str('str-pizz','Pizzicato Strings',{artic:'pizz',section:6},{desc:'Plucked section.',oct:4});
-str('str-short','Short Strings',{artic:'short',section:8},{desc:'Spiccato-style short notes.',oct:4});
-str('str-sustain','Sustained Strings',{attack:0.9,section:8,release:1.2},{desc:'Long, slow strings.',oct:4,mood:['lush']});
+fp('str-violin','Solo Violin','orch','strings',{inst:'violin',art:'sus',mode:'legato',release:0.4,dyn:'vel'},{tags:['strings','recorded'],genre:['orchestral','film'],mood:['expressive'],desc:'Recorded solo violin with vibrato. Legato connects overlapping notes into one bow.',oct:5});
+fp('str-viola','Viola Section','orch','strings',{inst:'violas',art:'sus',release:0.5},{tags:['strings','recorded','ensemble'],genre:['orchestral','film'],mood:['warm'],desc:'Recorded viola section: the warm middle of the orchestra. (No solo viola recordings are included yet.)',oct:4});
+fp('str-cello','Cello Section','orch','strings',{inst:'cellos',art:'sus',release:0.6},{tags:['strings','recorded','ensemble'],genre:['orchestral','film'],mood:['rich'],desc:'Recorded cello section: rich low-mid sustain with vibrato. (No solo cello recordings are included yet.)',oct:3});
+fp('str-bass','Double Bass','orch','strings',{inst:'bass',art:'sus',release:0.4},{tags:['strings','recorded'],genre:['orchestral','film'],mood:['deep'],desc:'Recorded solo double bass, bowed with vibrato.',oct:2});
+fp('str-ensemble','String Ensemble','section','strings',{band:'strings',art:'sus',attack:0.12,release:0.7,loose:0.5,width:0.8},{tags:['strings','ensemble','recorded'],genre:['orchestral','film'],mood:['lush'],desc:'Recorded violins, violas, cellos and basses. Chords are voiced across the sections by register, each section with its own seat and entry.',oct:4});
+fp('str-pizz','Pizzicato Strings','section','strings',{band:'strings',art:'pizz',loose:0.4,release:0.4},{tags:['strings','ensemble','recorded'],genre:['orchestral','film'],mood:['playful'],desc:'Recorded pizzicato from every section, with round robins.',oct:4});
+fp('str-short','Short Strings','section','strings',{band:'strings',art:'stac',loose:0.3,release:0.2},{tags:['strings','ensemble','recorded'],genre:['orchestral','film'],mood:['driving'],desc:'Recorded spiccato sections for ostinatos.',oct:4});
+fp('str-sustain','Sustained Strings','section','strings',{band:'strings',art:'sus',dyn:'mw',attack:0.6,release:1.2,loose:0.6,width:0.85},{tags:['strings','ensemble','recorded'],genre:['orchestral','film','ambient'],mood:['lush'],desc:'Slow recorded string pads; the mod wheel crossfades soft and loud bowing.',oct:4});
 str('str-cinematic','Cinematic String Texture',{section:8,attack:2,bright:0.3,bow:0.55,release:2},{desc:'Dark bowed texture with breathing brightness.',oct:3,mood:['tense'],mod:modOf([lfoS('s1',{name:'Breathe',rate:0.12})],[rt_('s1','eng:bright',0.25)])});
+fp('str-violins','Violin Section','orch','strings',{inst:'violins',art:'sus',release:0.5},{tags:['strings','recorded','ensemble'],genre:['orchestral','film'],mood:['soaring'],desc:'Recorded violin section with vibrato.',oct:5});
+fp('str-violin-pizz','Violin Pizzicato','orch','strings',{inst:'violin',art:'pizz',release:0.3},{tags:['strings','recorded'],genre:['orchestral'],mood:['playful'],desc:'Recorded solo violin, plucked, with round robins.',oct:5});
+fp('str-cello-short','Short Cellos','orch','strings',{inst:'cellos',art:'stac',release:0.15},{tags:['strings','recorded'],genre:['film'],mood:['driving'],desc:'Recorded spiccato cellos for ostinatos.',oct:3});
+fp('ww-section','Woodwind Section','section','woodwinds',{band:'winds',art:'sus',loose:0.5,width:0.7},{tags:['woodwind','ensemble','recorded'],genre:['orchestral','film'],mood:['pastoral'],desc:'Recorded flute, oboe, clarinet and bassoon voiced across a chord.',oct:4});
 /* Woodwinds */
 const ww=(id,name,params,o)=>fp(id,name,'wind','woodwinds',params,Object.assign({tags:['woodwind'],genre:['orchestral','film'],mood:[]},o));
-ww('ww-flute','Flute',{tone:'flute',breath:0.35},{desc:'Airy concert flute.',oct:5});
-ww('ww-piccolo','Piccolo',{tone:'flute',breath:0.3,bright:0.7},{desc:'Bright high flute.',oct:6});
-ww('ww-clarinet','Clarinet',{tone:'clarinet',breath:0.2},{desc:'Hollow, woody clarinet.',oct:4});
-ww('ww-oboe','Oboe',{tone:'oboe',formant:1100,breath:0.15},{desc:'Nasal double reed.',oct:4});
-ww('ww-bassoon','Bassoon',{tone:'bassoon',formant:500,breath:0.15},{desc:'Low double reed.',oct:3});
+fp('ww-flute','Flute','orch','woodwinds',{inst:'flute',art:'sus',mode:'legato',release:0.3},{tags:['woodwind','recorded'],genre:['orchestral','film'],mood:['airy'],desc:'Recorded concert flute with vibrato.',oct:5});
+ww('ww-piccolo','Piccolo (modeled)',{tone:'flute',breath:0.3,bright:0.7},{desc:'Modeled high flute (no piccolo recordings are included yet).',oct:6});
+fp('ww-clarinet','Clarinet','orch','woodwinds',{inst:'clarinet',art:'sus',mode:'legato',release:0.3},{tags:['woodwind','recorded'],genre:['orchestral','film','jazz'],mood:['warm'],desc:'Recorded clarinet: hollow low register, sweet upper register.',oct:4});
+fp('ww-oboe','Oboe','orch','woodwinds',{inst:'oboe',art:'sus',mode:'legato',release:0.25},{tags:['woodwind','recorded'],genre:['orchestral','film'],mood:['plaintive'],desc:'Recorded oboe: a focused, reedy double reed.',oct:4});
+fp('ww-bassoon','Bassoon','orch','woodwinds',{inst:'bassoon',art:'sus',mode:'legato',release:0.3},{tags:['woodwind','recorded'],genre:['orchestral','film'],mood:['dry'],desc:'Recorded bassoon.',oct:3});
 ww('ww-breathy','Breathy Flute',{tone:'flute',breath:0.7,attack:0.15,chiff:0.1,vibrato:0.45},{desc:'Soft, breath-heavy expressive flute.',oct:5,mood:['intimate']});
 /* Synths */
 const syn=(id,name,engine,params,o)=>fp(id,name,engine,'synths',params,Object.assign({tags:['synth'],genre:['electronic'],mood:[]},o));
@@ -82,7 +89,7 @@ syn('syn-fmbell','FM Bell','fm',{ratio:3.5,index:3,indexDecay:2,tine:0,decay:4,t
 /* Bass & guitars */
 const bg=(id,name,engine,params,o)=>fp(id,name,engine,'bass',params,Object.assign({tags:[],genre:[],mood:[]},o));
 bg('bass-electric','Electric Bass','pluck',{bright:0.35,pick:0.25,sustain:4,damp:0.3,tone:2500},{tags:['bass'],desc:'Finger-style electric bass.',oct:2});
-bg('bass-upright','Upright Bass','pluck',{bright:0.25,body:0.7,sustain:1.5,damp:0.4,tone:1500},{tags:['bass'],genre:['jazz'],desc:'Woody upright pluck.',oct:2});
+fp('bass-upright','Upright Bass','orch','bass',{inst:'bass',art:'pizz',release:0.25},{tags:['bass','recorded'],genre:['jazz'],mood:['woody'],desc:'Recorded double bass plucked pizzicato, with round robins.',oct:2});
 bg('bass-synth','Synth Bass','va',{wave2:'square',sub:0.5,cutoff:600,fenv:0.5,fD:0.3,fS:0.2,mode:'mono',glide:0.03},{tags:['bass','synth'],desc:'Mono analog bass.',oct:2});
 bg('bass-sub','Sub Bass','va',{wave1:'sine',mix2:0,cutoff:400,mode:'mono'},{tags:['bass','sub'],desc:'Clean sine sub.',oct:2});
 bg('bass-acid','Acid Line','acid',{},{tags:['bass','303'],genre:['acid','techno'],desc:'Resonant mono bass with slide.',oct:2});
@@ -92,7 +99,7 @@ bg('gtr-clean','Clean Electric Guitar','pluck',{bright:0.7,pick:0.18,sustain:5,t
 bg('gtr-funk','Muted Funk Guitar','pluck',{mute:0.85,bright:0.9,drive:0.1,offDamp:0.03},{tags:['guitar'],genre:['funk'],desc:'Palm-muted chicken scratch.',oct:3});
 bg('gtr-acoustic','Acoustic Guitar','pluck',{bright:0.8,body:0.8,sustain:6,damp:0.2},{tags:['guitar'],genre:['folk'],desc:'Steel-string with body resonance.',oct:3});
 bg('gtr-plucked','Plucked Strings','pluck',{pick:0.08,bright:0.9,sustain:3,damp:0.15,body:0.4},{tags:['plucked'],desc:'Bright koto-like pluck.',oct:4});
-bg('gtr-harp','Harp','pluck',{pick:0.1,bright:0.5,sustain:8,body:0.4,offDamp:1.4},{tags:['harp'],genre:['orchestral'],desc:'Ringing harp strings.',oct:4});
+fp('gtr-harp','Concert Harp','orch','strings',{inst:'harp',art:'pluck',release:1.2},{tags:['harp','recorded'],genre:['orchestral','film'],mood:['dreamy'],desc:'Recorded concert harp strings ringing out naturally.',oct:4});
 bg('gtr-kalimba','Kalimba','fm',{ratio:7,index:0.8,indexSus:0,indexDecay:0.05,tine:0,decay:1.2,sustain:0,trem:0,release:0.5},{tags:['kalimba','tine'],desc:'Thumb-piano plink.',oct:5});
 /* Drums */
 Object.keys(KITS).forEach(k=>fp('drums-'+k,KITS[k].name,'kit','drums',{kit:k},{tags:['drums'],genre:{circuit:['hiphop','trap'],electro:['house','techno'],acoustic:['rock','pop'],boombap:['hiphop','lofi'],brushes:['jazz'],break:['dnb','breaks'],hand:['latin','world'],orch:['orchestral','film']}[k],mood:[],desc:'Synthesized '+KITS[k].name.toLowerCase()+' kit.',oct:3,crush:k==='boombap'?0.25:0}));

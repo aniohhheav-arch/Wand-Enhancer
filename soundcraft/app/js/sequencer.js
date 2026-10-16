@@ -1,7 +1,7 @@
 'use strict';
 /* Song scheduler, arpeggiator, recording, offline rendering and MIDI files.
    Positions are global sixteenth-note steps (16 per bar, 4/4 only). */
-const LOOK=0.12;let timer=0,nextT=0,step=0,stepLog=[],pendingOffs=[],stopAtStep=null;
+const LOOK=0.12;let segStep=0,timer=0,nextT=0,step=0,stepLog=[],pendingOffs=[],stopAtStep=null;
 const stepDur=()=>60/S.bpm/4;
 const evCmp=(a,b)=>Math.abs(a.t-b.t)<1e-4?(a.on?1:0)-(b.on?1:0):a.t-b.t;
 function clipAt(tr,k){let best=null;for(const c of tr.clips){if(k>=c.start*16&&k<(c.start+c.len)*16&&(!best||c.start>=best.start))best=c}return best}
@@ -13,8 +13,8 @@ function arpNotesAt(notes,arp,tau){const held=notes.filter(n=>n.s<=tau+1e-6&&tau
   const dur=r*arp.gate;if(arp.mode==='chord')return seq.map(p=>({p,l:dur,v:vel}));
   let p;if(arp.mode==='down')p=seq[seq.length-1-idx%seq.length];else if(arp.mode==='updown'){const pp=seq.length>1?seq.concat(seq.slice(1,-1).reverse()):seq;p=pp[idx%pp.length]}
   else if(arp.mode==='random'){const x=Math.sin((Math.round(tau*1000)+idx)*12.9898)*43758.5453;p=seq[Math.floor((x-Math.floor(x))*seq.length)]}else p=seq[idx%seq.length];return [{p,l:dur,v:vel}]}
-function stepEvents(k,T,sd,out,startStep){
-  for(const tr of S.tracks){if(!audible(tr))continue;const c=clipAt(tr,k);if(!c)continue;const pat=tr.patterns.find(p=>p.id===c.pat);if(!pat)continue;
+function stepEvents(k,T,sd,out,startStep,endStep){
+  for(const tr of S.tracks){if(!audible(tr))continue;if(isAudio(tr)){audioClipEvents(tr,k,T,sd,out,startStep==null?k:startStep,endStep);continue}const c=clipAt(tr,k);if(!c)continue;const pat=tr.patterns.find(p=>p.id===c.pat);if(!pat)continue;
     const L=Math.round(pat.len*16),ps=((k-Math.round(c.start*16))%L+L)%L,sw=k%2===1?S.swing*sd*0.66:0;
     if(tr.arp&&tr.arp.on){const r=divBeats(tr.arp.rate)*4;for(let m=Math.ceil(ps/r-1e-9);m*r<ps+1-1e-9;m++){const tau=m*r;arpNotesAt(pat.notes,tr.arp,tau).forEach(a=>out.push({t:T+(tau-ps)*sd+(Math.abs(tau%2-1)<1e-6?sw:0),on:true,tr,nt:{p:a.p,v:a.v},dur:a.l*sd}))}continue}
     for(const nt of pat.notes){if(nt.s>=L||Math.floor(nt.s)!==ps)continue;if(nt.pr!=null&&nt.pr<1&&Math.random()>nt.pr)continue;out.push({t:T+(nt.s-ps)*sd+sw,on:true,tr,nt,dur:nt.l*sd})}}}
@@ -22,22 +22,23 @@ function runEvents(ev,horizon,onDeferred,visual){
   ev.sort(evCmp);
   while(ev.length){const e=ev.shift();
     if(e.click){clickSound(e.t,e.acc);continue}
+    if(e.audio){playAudioClip(e);continue}
     if(e.on){const h=trigger(e.tr,e.nt.p,e.nt.v,e.t);if(visual)flashNote(e.tr,e.nt.p,e.t,e.dur);if(!h)continue;const off={t:e.t+e.dur,h};
       if(off.t<horizon){let i=ev.findIndex(x=>evCmp(off,x)<0);if(i<0)i=ev.length;ev.splice(i,0,off)}else onDeferred(off)}
     else e.h.off(e.t)}}
 function clickSound(t,acc){const o=O('square',acc?1760:1180,t,Z),g=G(0);g.gain.setValueAtTime(acc?0.22:0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.04);o.connect(F('bandpass',acc?1760:1180,4)).connect(g).connect(GR.bus);o.stop(t+0.06)}
-function play(){if(rendering||!ensureAudio()||S.playing)return;S.playing=true;step=Math.round((S.loop.on?S.loop.start:S.cursor)*16);nextT=ctx.currentTime+0.08;stepLog=[];stopAtStep=null;resetIntegrated();
-  S.tracks.forEach(t=>{if(t._rt)buildTrackMod(t,nextT)});timer=setInterval(tick,25);tick();renderTransport()}
-function stop(){if(!S.playing){if(ctx)panic();return}S.playing=false;clearInterval(timer);S.rec=false;flushOffs();renderTransport()}
+function play(){if(rendering||!ensureAudio()||S.playing)return;S.playing=true;step=Math.round((S.loop.on?S.loop.start:S.cursor)*16);nextT=ctx.currentTime+0.08;stepLog=[];segStep=step;stopAtStep=null;resetIntegrated();
+  S.tracks.forEach(t=>{if(t._rt)buildTrackMod(t,nextT)});timer=setInterval(tick,25);tick();renderTransport();audioRecSync()}
+function stop(){if(!S.playing){if(ctx)panic();return}S.playing=false;clearInterval(timer);S.rec=false;flushOffs();stopAudioClips();audioRecSync();renderTransport()}
 function flushOffs(){const now=ctx?ctx.currentTime:0;pendingOffs.forEach(o=>o.h.off(now));pendingOffs=[]}
-function panic(){flushOffs();S.tracks.forEach(tr=>{if(tr._rt)[...tr._rt.live].forEach(h=>h.off(ctx.currentTime));tr._arpHeld=null});held.clear();sustained.length=0;keyCounts.clear();$$('.key.on').forEach(k=>k.classList.remove('on'))}
+function panic(){flushOffs();stopAudioClips();S.tracks.forEach(tr=>{if(tr._rt)[...tr._rt.live].forEach(h=>h.off(ctx.currentTime));tr._arpHeld=null});held.clear();sustained.length=0;keyCounts.clear();$$('.key.on').forEach(k=>k.classList.remove('on'))}
 function tick(){
   const horizon=ctx.currentTime+LOOK,q=[],sd=stepDur();
   while(nextT<horizon){
-    if(S.loop.on&&S.loop.end>S.loop.start&&step>=S.loop.end*16)step=Math.round(S.loop.start*16);
+    if(S.loop.on&&S.loop.end>S.loop.start&&step>=S.loop.end*16){step=Math.round(S.loop.start*16);segStep=step;audioRecWrap(nextT,step)}
     if(!S.loop.on&&step>=songEnd()*16){if(stopAtStep==null){stopAtStep=nextT;setTimeout(()=>{if(S.playing)stop()},(nextT-ctx.currentTime)*1000+50)}break}
     const k=step;stepLog.push([k,nextT,sd]);if(stepLog.length>128)stepLog.shift();
-    if(S.metro&&k%4===0)q.push({t:nextT,click:true,acc:k%16===0});stepEvents(k,nextT,sd,q);nextT+=sd;step=k+1}
+    if(S.metro&&k%4===0)q.push({t:nextT,click:true,acc:k%16===0});stepEvents(k,nextT,sd,q,segStep,S.loop.on&&S.loop.end>S.loop.start?S.loop.end*16:Infinity);nextT+=sd;step=k+1}
   const due=pendingOffs.filter(o=>o.t<horizon);pendingOffs=pendingOffs.filter(o=>o.t>=horizon);
   runEvents(q.concat(due),horizon,o=>pendingOffs.push(o),true);liveArpTick(horizon)}
 function posAt(t){if(!S.playing||!stepLog.length)return null;for(let i=stepLog.length-1;i>=0;i--){const[k,T,sd]=stepLog[i];if(T<=t)return k+(t-T)/sd}return stepLog[0][0]}
@@ -46,7 +47,7 @@ const posAtNow=()=>ctx&&S.playing?posAt(ctx.currentTime):null;
 const held=new Map(),sustained=[],keyCounts=new Map();
 function liveTargets(n,v,ch,src){const tr=selTrack();if(!tr)return [];const vel=Math.round(v*127);
   const pool=tr.input&&tr.input.group?S.tracks.filter(t=>t.input&&t.input.group===tr.input.group):[tr];
-  return pool.filter(t=>!t.input||((t.input.ch||0)===0||!ch||t.input.ch===ch)&&n>=t.input.lo&&n<=t.input.hi&&vel>=t.input.vlo&&vel<=t.input.vhi).map(t=>[t,ENG[t.engine].drum&&src!=='midi'?DRUM_NOTES[((n%12)+12)%12]:n+((t.input&&t.input.tr)||0)])}
+  return pool.filter(t=>!isAudio(t)).filter(t=>!t.input||((t.input.ch||0)===0||!ch||t.input.ch===ch)&&n>=t.input.lo&&n<=t.input.hi&&vel>=t.input.vlo&&vel<=t.input.vhi).map(t=>[t,ENG[t.engine].drum&&src!=='midi'?DRUM_NOTES[((n%12)+12)%12]:n+((t.input&&t.input.tr)||0)])}
 function liveOn(n,v,src,ch){
   if(rendering||!ensureAudio())return;const targets=liveTargets(n,v,ch,src);if(!targets.length)return;const key=src+':'+n;if(held.has(key))liveOff(n,src);
   const ent={n,v,hs:[],rec:S.rec&&S.playing?posAt(ctx.currentTime):null,targets};
@@ -72,10 +73,11 @@ async function renderOffline(opts,onProgress){
   const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!OAC)throw new Error('offline rendering is not supported in this browser');
   const sr=opts.sampleRate||44100,sd=stepDur(),from=Math.round(opts.startBar*16),to=Math.round(opts.endBar*16),tail=opts.tail==null?2.5:opts.tail,dur=(to-from)*sd+tail,len=Math.ceil(sr*dur);
   const liveCtx=ctx,liveGR=Object.assign({},GR),stash=S.tracks.map(t=>({rt:t._rt,fx:t.fx.map(f=>f._inst)})),mstash=S.masterFx.map(f=>f._inst),rstash=[S.returns.rev._inst,S.returns.dly._inst];
+  await ensureProjectOrch();
   rendering=true;OFF=true;renderOnly=opts.only||null;renderNoMaster=!!opts.noMaster;
   try{ctx=new OAC(2,len,sr);await loadWorklets(ctx);S.tracks.forEach(t=>{t._rt=null;t.fx.forEach(f=>f._inst=null)});S.masterFx.forEach(f=>f._inst=null);S.returns.rev._inst=S.returns.dly._inst=null;
     Object.keys(GR).forEach(k=>delete GR[k]);buildGraph();S.tracks.forEach(t=>buildTrackMod(t,0));
-    const ev=[];for(let k=from;k<to;k++)stepEvents(k,(k-from)*sd,sd,ev,from);runEvents(ev,Infinity,()=>{},false);
+    const ev=[];for(let k=from;k<to;k++)stepEvents(k,(k-from)*sd,sd,ev,from,to);runEvents(ev,Infinity,()=>{},false);
     const c=ctx;for(let s=1;s<Math.floor(dur);s++)c.suspend(s).then(()=>{onProgress&&onProgress(s/dur);c.resume()}).catch(()=>{});
     return await c.startRendering();
   }finally{ctx=liveCtx;Object.keys(GR).forEach(k=>delete GR[k]);Object.assign(GR,liveGR);S.tracks.forEach((t,i)=>{t._rt=stash[i].rt;t.fx.forEach((f,j)=>f._inst=stash[i].fx[j])});

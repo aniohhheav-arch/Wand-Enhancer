@@ -101,23 +101,37 @@ ENG.fm={name:'FM Synth',kind:KIND.synth,family:'keys',
 /* ───────── Tonewheel organ ───────── */
 const DRAWBARS=[[0.5,"16'"],[1.5,"5⅓'"],[1,"8'"],[2,"4'"],[3,"2⅔'"],[4,"2'"],[5,"1⅗'"],[6,"1⅓'"],[8,"1'"]];
 ENG.organ={name:'Tonewheel Organ',kind:KIND.synth,family:'keys',
-  desc:'Nine additive drawbars, percussion, key click, drive and a rotary speaker that speeds up and slows down like the real thing. Mod wheel above half switches the rotor to fast.',
+  desc:'Nine drawbars on a real 3 dB-per-step scale with tonewheel foldback, single-trigger percussion (it takes over the 1\' bar, like the original), key click, the vibrato/chorus scanner, a swell pedal, a tube preamp and a two-rotor speaker whose horn and drum speed up and slow down at their own rates. Mod wheel above half switches the rotor to fast.',
   params:[...DRAWBARS.map(([r,l],i)=>P('db'+i,l,'Drawbars',0,8,[8,8,8,0,0,0,0,0,0][i],{int:true,fmt:FMT.int})),C('perc','Percussion','Voice',[['off','Off'],['2nd','2nd'],['3rd','3rd']],'off'),P('percDecay','Perc decay','Voice',0.05,2,0.4,{log:true,fmt:FMT.s}),
-    P('click','Key click','Voice',0,1,0.3,{fmt:FMT.pct}),C('leslie','Rotary','Rotary',[['off','Off'],['slow','Slow'],['fast','Fast']],'slow'),P('drive','Drive','Rotary',0,1,0.2,{fmt:FMT.pct}),...OUT_GROUP(0.7)],
+    C('percVol','Perc volume','Voice',[['normal','Normal'],['soft','Soft']],'normal'),P('click','Key click','Voice',0,1,0.3,{fmt:FMT.pct}),P('leak','Tonewheel leakage','Voice',0,1,0.15,{fmt:FMT.pct}),
+    C('vib','Vibrato / chorus','Scanner',[['off','Off'],['V1','V1'],['V2','V2'],['V3','V3'],['C1','C1'],['C2','C2'],['C3','C3']],'off'),
+    P('swell','Swell pedal','Amp',0,1,0.85,{fmt:FMT.pct,live:1}),P('drive','Tube drive','Amp',0,1,0.2,{fmt:FMT.pct}),P('tone','Amp tone','Amp',0,1,0.6,{fmt:FMT.pct}),
+    C('leslie','Rotary','Rotary',[['off','Stopped'],['slow','Slow (chorale)'],['fast','Fast (tremolo)']],'slow'),P('hornBal','Horn / drum balance','Rotary',0,1,0.55,{fmt:FMT.pct}),...OUT_GROUP(0.7)],
   setup(tr,out){
-    const input=G(1),drv=ctx.createWaveShaper(),split=G(1),lo=F('lowpass',800,0.7),hi=F('highpass',800,0.7),sum=G(1);input.connect(drv).connect(split);split.connect(lo);split.connect(hi);
+    const input=G(1),scan=ctx.createDelay(0.01),scanLfo=ctx.createOscillator(),scanG=G(0),dry=G(1),wet=G(0),swell=G(1),pre=G(1),drv=ctx.createWaveShaper(),toneF=F('lowpass',6000,0.5),split=G(1),lo=F('lowpass',800,0.7),hi=F('highpass',800,0.7),sum=G(1),hiG=G(1),loG=G(1);
+    scan.delayTime.value=0.0012;scanLfo.frequency.value=6.9;scanLfo.start();scanLfo.connect(scanG).connect(scan.delayTime);input.connect(scan).connect(wet).connect(swell);input.connect(dry).connect(swell);
+    swell.connect(pre).connect(drv).connect(toneF).connect(split);split.connect(lo).connect(loG);split.connect(hi).connect(hiG);
     const rotor=(src,depthMs,amDepth)=>{const d=ctx.createDelay(0.02),am=G(1),pan=ctx.createStereoPanner(),l=ctx.createOscillator();l.frequency.value=0.8;l.start();const dg=G(0),ag=G(0),pg=G(0);
       d.delayTime.value=0.005;l.connect(dg).connect(d.delayTime);l.connect(ag).connect(am.gain);l.connect(pg).connect(pan.pan);src.connect(d).connect(am).connect(pan).connect(sum);return {l,dg,ag,pg,depthMs,amDepth}};
-    const horn=rotor(hi,0.0006,0.35),drum=rotor(lo,0.0003,0.15);sum.connect(out);
-    const st={input,update(P){drv.curve=curve('soft',P.drive*0.7);const mode=tr._mod!=null&&tr._mod>0.5?'fast':P.leslie,on=mode!=='off',t=ctx.currentTime;
-      [[horn,mode==='fast'?6.8:0.8,0.7],[drum,mode==='fast'?5.9:0.65,2.5]].forEach(([r,hz,ramp])=>{r.l.frequency.setTargetAtTime(hz,t,ramp/3);r.dg.gain.setTargetAtTime(on?r.depthMs:0,t,0.1);r.ag.gain.setTargetAtTime(on?r.amDepth:0,t,0.1);r.pg.gain.setTargetAtTime(on?0.7:0,t,0.1)})},
-      dispose(){[horn,drum].forEach(r=>{try{r.l.stop()}catch(e){}});try{sum.disconnect()}catch(e){}}};
-    st.update(tr.params);return st},
-  on(tr,n,v,t,out,P,M){const f=mtof(n),amp=G(0),sum=G(0.11),oscs=[];
-    DRAWBARS.forEach(([r],i)=>{const lv=P['db'+i];if(lv<0.5||f*r>15000)return;const o=O('sine',f*r,t,tr),g=G(lv/8);o.connect(g).connect(sum);oscs.push(o)});
-    if(P.perc!=='off'){const r=P.perc==='3rd'?3:2,o=O('sine',f*r,t,tr),g=G(0);g.gain.setValueAtTime(0.35,t);g.gain.setTargetAtTime(0,t,P.percDecay/3);o.connect(g).connect(sum);oscs.push(o)}
-    if(P.click>0.01){const c=N(t,0.012),g=G(P.click*0.25);c.connect(F('bandpass',2500,0.8)).connect(g).connect(amp)}
-    sum.connect(amp).connect(outStage(P,M,out));amp.gain.setValueAtTime(0,t);amp.gain.linearRampToValueAtTime(1,t+0.006);return voice(amp,oscs,0.03)}};
+    const horn=rotor(hiG,0.0006,0.35),drum=rotor(loG,0.0003,0.15);sum.connect(out);let lastMode=null;
+    const st={input,update(P){const t=ctx.currentTime;drv.curve=curve('soft',P.drive*0.8);at(pre.gain,1+P.drive*1.5);at(toneF.frequency,1800+P.tone*9000);
+      const sw=P.swell;at(swell.gain,0.15+0.85*sw*sw);const vd={off:0,V1:0.00025,V2:0.0005,V3:0.0009,C1:0.00025,C2:0.0005,C3:0.0009}[P.vib]||0,ch=P.vib&&P.vib[0]==='C';
+      at(scanG.gain,vd);at(wet.gain,vd?(ch?0.5:1):0);at(dry.gain,vd?(ch?0.5:0):1);at(hiG.gain,0.4+P.hornBal*1.2);at(loG.gain,1.6-P.hornBal*1.2);
+      const mode=tr._mod!=null&&tr._mod>0.5?'fast':P.leslie,on=mode!=='off',up=lastMode!=null&&mode==='fast'&&lastMode!=='fast';lastMode=mode;
+      // the light horn reaches speed in about a second; the heavy drum takes several
+      [[horn,mode==='fast'?6.8:mode==='slow'?0.8:0,up?0.9:1.6],[drum,mode==='fast'?5.9:mode==='slow'?0.65:0,up?4:5.5]].forEach(([r,hz,ramp])=>{r.l.frequency.setTargetAtTime(Math.max(0.0001,hz),t,ramp/3);r.dg.gain.setTargetAtTime(on?r.depthMs:0,t,0.3);r.ag.gain.setTargetAtTime(on?r.amDepth:0,t,0.3);r.pg.gain.setTargetAtTime(on?0.7:0,t,0.3)})},
+      dispose(){[horn,drum].forEach(r=>{try{r.l.stop()}catch(e){}});try{scanLfo.stop();sum.disconnect()}catch(e){}}};
+    const at=(p,v)=>p.setTargetAtTime(v,ctx.currentTime,0.03);st.update(tr.params);return st},
+  on(tr,n,v,t,out,P,M){const f=mtof(n),amp=G(0),sum=G(0.085),oscs=[],wave=cache('tonewheel',()=>ctx.createPeriodicWave(new Float32Array([0,0,0,0]),new Float32Array([0,1,0.02,0.03])));
+    const fold=x=>{while(x>5900)x/=2;while(x<32.7)x*=2;return x},dbl=lv=>lv<0.5?0:Math.pow(10,-(8-lv)*3/20);
+    // single-trigger percussion: only when no other key is down, and it borrows the 1' bar
+    const others=tr._rt?[...tr._rt.live].filter(h=>!h.released).length:0,perc=P.perc!=='off'&&others===0;
+    DRAWBARS.forEach(([r],i)=>{let lv=dbl(P['db'+i]);if(P.perc!=='off'&&i===8)lv=0;if(perc&&P.percVol==='normal')lv*=0.7;if(!lv)return;const o=O(wave,fold(f*r),t,tr),g=G(lv);o.connect(g).connect(sum);oscs.push(o)});
+    if(P.leak>0.01){const o=O('sine',fold(f*3.01),t,tr),g=G(P.leak*0.02);o.connect(g).connect(sum);oscs.push(o)}
+    if(perc){const r=P.perc==='3rd'?3:2,o=O('sine',fold(f*r),t,tr),g=G(0),pk=P.percVol==='soft'?0.35:0.7;g.gain.setValueAtTime(pk,t);g.gain.setTargetAtTime(0,t,P.percDecay/3);o.connect(g).connect(sum);oscs.push(o)}
+    const clickAt=(tt,lvl)=>{if(P.click<0.01)return;const c=N(tt,0.006+Math.random()*0.004),g=G(P.click*lvl*(0.7+Math.random()*0.6));c.connect(F('bandpass',1800+Math.random()*2400,0.7)).connect(g).connect(amp)};
+    clickAt(t,0.3);sum.connect(amp).connect(outStage(P,M,out));amp.gain.setValueAtTime(0,t);amp.gain.linearRampToValueAtTime(1,t+0.004);
+    const vo=voice(amp,oscs,0.02);const off=vo.off;vo.off=t2=>{vo.released=true;clickAt(Math.max(t2,ctx.currentTime),0.12);off.call(vo,t2)};return vo}};
 
 /* ───────── Piano (additive model with stretched partials) ───────── */
 ENG.piano={name:'Modeled Piano',kind:KIND.synth,family:'keys',
@@ -255,10 +269,37 @@ ENG.chip={name:'8-Bit',kind:KIND.synth,family:'synths',
     const vib=O('sine',6,t,Z),vg=G(0);vib.connect(vg).connect(o.detune);vg.gain.setValueAtTime(0,t+0.22);vg.gain.linearRampToValueAtTime(P.vibrato*45,t+0.45);
     o.connect(amp).connect(outStage(P,M,out));amp.gain.setValueAtTime(0.2*(0.5+v*0.5),t);amp.gain.setValueAtTime(0.15*(0.5+v*0.5),t+0.08);return voice(amp,[o],0.04,[vib])}};
 ENG.prism={name:'Prism Bells',kind:KIND.synth,family:'keys',
-  desc:'Additive bells with inharmonic partials that beat against each other, plus random sparkles above.',
+  desc:'Additive bells. The fundamental and its octave carry the pitch; quieter inharmonic partials give the metallic colour without pulling it out of tune. Shimmer detunes pairs symmetrically, so the average pitch stays exact, and sparkles only use in-tune octaves and fifths.',
   params:[P('shimmer','Shimmer','Bell',0,1,0.4,{fmt:FMT.pct}),P('decay','Decay','Bell',0,1,0.5,{fmt:FMT.pct}),P('sparkle','Sparkle','Bell',0,1,0.3,{fmt:FMT.pct}),...OUT_GROUP()],
-  on(tr,n,v,t,out,P,M){const f=mtof(n),amp=G(1),R=[1,2,2.76,4.07,5.4,8.93],A_=[1,0.42,0.55,0.22,0.26,0.1],oscs=[],dec=0.8+P.decay*5;amp.connect(outStage(P,M,out));
-    R.forEach((r,i)=>{if(f*r>16000)return;const g=G(0),pk=A_[i]*0.2*v;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+0.002);g.gain.setTargetAtTime(0,t+0.002,dec/(1+i*0.9)/3);
-      const o=O('sine',f*r,t,tr);o.connect(g);oscs.push(o);if(P.shimmer>0.02){const o2=O('sine',f*r,t,tr,P.shimmer*4.5*(i+1));o2.connect(g);oscs.push(o2)}g.connect(amp)});
-    if(P.sparkle>0.02){for(let j=0;j<1+Math.floor(P.sparkle*4);j++){const tt=t+0.04+Math.random()*0.5*P.sparkle,o=O('sine',Math.min(15000,f*(4+Math.floor(Math.random()*8))),tt,Z),g=G(0);g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(0.05*v,tt+0.002);g.gain.setTargetAtTime(0,tt+0.002,0.08);o.connect(g).connect(amp);o.stop(tt+0.6)}}
+  on(tr,n,v,t,out,P,M){const f=mtof(n),amp=G(1),R=[1,2,3,2.76,4.07,5.4,8.93],A_=[1,0.5,0.22,0.12,0.09,0.07,0.04],oscs=[],dec=0.8+P.decay*5;amp.connect(outStage(P,M,out));
+    R.forEach((r,i)=>{if(f*r>16000)return;const g=G(0),pk=A_[i]*0.24*v;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+0.002);g.gain.setTargetAtTime(0,t+0.002,dec/(1+i*0.9)/3);
+      const d=P.shimmer*2.2*(i+1);if(d>0.05){[-d,d].forEach(x=>{const o=O('sine',f*r,t,tr,x),h=G(0.5);o.connect(h).connect(g);oscs.push(o)})}else{const o=O('sine',f*r,t,tr);o.connect(g);oscs.push(o)}g.connect(amp)});
+    if(P.sparkle>0.02){const SP=[2,3,4,6,8];for(let j=0;j<1+Math.floor(P.sparkle*4);j++){const tt=t+0.04+Math.random()*0.5*P.sparkle,o=O('sine',Math.min(15000,f*SP[Math.floor(Math.random()*SP.length)]),tt,Z),g=G(0);g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(0.04*v,tt+0.002);g.gain.setTargetAtTime(0,tt+0.002,0.08);o.connect(g).connect(amp);o.stop(tt+0.6)}}
     return voice(amp,oscs,0.4+dec*0.5)}};
+
+/* ───────── Celesta (struck steel bars over wooden resonators) ───────── */
+const hash01=x=>{const s=Math.sin(x*12.9898)*43758.5453;return s-Math.floor(s)};
+ENG.celesta={name:'Celesta',kind:KIND.phys,family:'keys',
+  desc:'Modal model of a celesta: felt hammers strike steel bars (free-bar partials 1, 2.76, 5.40) above tuned wooden resonators that reinforce the fundamental. Low notes are round and woody, high notes short and glassy; harder playing brings out the upper partials and the hammer. Dampers stop notes on release unless the sustain pedal is down.',
+  params:[P('hardness','Hammer hardness','Bar',0,1,0.4,{fmt:FMT.pct}),P('resonator','Resonator','Bar',0,1,0.6,{fmt:FMT.pct}),P('decay','Ring time','Bar',0.3,3,1,{log:true,fmt:v=>v.toFixed(2)+'×'}),
+    P('damp','Damper release','Bar',0.05,2,0.25,{log:true,fmt:FMT.s}),...OUT_GROUP(0.8)],
+  on(tr,n,v,t,out,P,M){const f=mtof(n),amp=G(1),dst=outStage(P,M,out),oscs=[],reg=clamp((n-48)/48,0,1),hard=clamp(P.hardness*0.6+v*0.6,0,1);amp.connect(dst);
+    const T1=P.decay*(2.6-reg*1.9),parts=[[1,1,T1],[2.756,0.06+hard*0.12,T1*0.18],[5.404,0.02+hard*0.08,T1*0.06]];
+    parts.forEach(([r,a,T],i)=>{if(f*r>17000)return;const o=O('sine',f*r,t,tr),g=G(0),pk=a*0.32*(0.35+v*0.65),att=0.002+(1-hard)*0.004;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+att);g.gain.setTargetAtTime(0,t+att,T/4);o.connect(g).connect(amp);oscs.push(o)});
+    if(P.resonator>0.02){const o=O('sine',f,t,tr),g=G(0),pk=0.12*P.resonator*(1-reg*0.6)*(0.4+v*0.6);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+0.02);g.gain.setTargetAtTime(0,t+0.02,T1*0.35);o.connect(F('lowpass',f*1.5,0.7)).connect(g).connect(amp);oscs.push(o)}
+    const th=N(t,0.012),tg=G(0.05*hard*(0.8+hash01(n+(tr._hits=(tr._hits||0)+1))*0.4));th.connect(F('bandpass',f*2+600,1.2)).connect(tg).connect(amp);
+    return voice(amp,oscs,P.damp)}};
+/* ───────── Music box (plucked steel comb) ───────── */
+ENG.musicbox={name:'Music Box',kind:KIND.phys,family:'keys',
+  desc:'Modal model of a music-box comb: pins pluck clamped steel tines (cantilever partials 1, 6.27, 17.55) for a bright mechanical attack that rings on, with a small wooden case resonance. Each tine has its own fixed few-cent tuning error and pluck, like a real comb, and striking a tine that is still ringing gives the short damper buzz of the mechanism.',
+  params:[P('pin','Pin brightness','Comb',0,1,0.6,{fmt:FMT.pct}),P('ring','Ring time','Comb',0.3,3,1,{log:true,fmt:v=>v.toFixed(2)+'×'}),P('case','Wooden case','Comb',0,1,0.5,{fmt:FMT.pct}),
+    P('mech','Mechanism noise','Comb',0,1,0.2,{fmt:FMT.pct}),P('tuning','Comb tuning spread','Comb',0,1,0.4,{fmt:v=>'±'+(v*4).toFixed(1)+' c'}),...OUT_GROUP(0.8)],
+  on(tr,n,v,t,out,P,M){const amp=G(1),dst=outStage(P,M,out),oscs=[],reg=clamp((n-60)/36,0,1);amp.connect(dst);
+    const dev=(hash01(n*1.37)-0.5)*8*P.tuning,f=mtof(n)*Math.pow(2,dev/1200),hit=(tr._hits=(tr._hits||0)+1),var_=0.85+hash01(n+hit*0.71)*0.3;
+    const ringing=tr._rt&&[...tr._rt.live].some(h=>h.n===n);
+    if(ringing){const bz=N(t,0.035),bg=G(0.06*v);bz.connect(F('bandpass',f,6)).connect(bg).connect(amp)}
+    const T1=P.ring*(4.5-reg*3.2);[[1,1,T1],[6.267,0.25+P.pin*0.4,T1*0.08],[17.55,0.08+P.pin*0.25,T1*0.025]].forEach(([r,a,T])=>{if(f*r>18000)return;const o=O('sine',f*r,t,tr,dev),g=G(0),pk=a*0.3*(0.45+v*0.55)*var_;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+0.0008);g.gain.setTargetAtTime(0,t+0.0008,T/4);o.connect(g).connect(amp);oscs.push(o)});
+    const pk=N(t,0.004),pg=G(0.08*(0.4+P.pin)*v);pk.connect(F('highpass',4000,0.7)).connect(pg).connect(amp);
+    if(P.case>0.02){const c=N(t,0.03),cg=G(0.05*P.case*v);c.connect(F('bandpass',420,2.5)).connect(cg).connect(amp)}
+    if(P.mech>0.02){const tk=N(t+0.004+hash01(hit)*0.01,0.003),kg=G(0.03*P.mech);tk.connect(F('bandpass',2500,3)).connect(kg).connect(amp)}
+    const vo=voice(amp,oscs,2.5+T1*0.3);return vo}};

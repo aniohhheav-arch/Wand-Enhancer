@@ -18,9 +18,25 @@ const path = require('path'), fs = require('fs'), os = require('os');
   const midi = await win.evaluate(async () => { try { const a = await navigator.requestMIDIAccess({ sysex: false }); return 'granted (' + a.inputs.size + ' inputs)' } catch (e) { return e.name + ': ' + e.message } });
   res.push(['MIDI permission granted (no NotAllowedError)', midi]);
   if (/NotAllowedError|SecurityError/.test(midi)) { console.error('MIDI PERMISSION REGRESSION: ' + midi); process.exitCode = 1; }
+  const wk = await win.evaluate(async () => { ensureAudio(); await loadWorklets(ctx); return workletOK() });
+  res.push(['AudioWorklets load (plucked strings, gate, crusher, transient, mic recorder)', String(wk)]);
+  if (!wk) { console.error('WORKLETS DID NOT LOAD'); process.exitCode = 1; }
+  const rec = await win.evaluate(async () => { const ok = await orchLoad('trumpet', 'sus'); return ok && orchReady('trumpet', 'sus') ? 'loaded ' + orchArt('trumpet', 'sus').zones.length + ' zones' : 'FAILED ' + [...ORCH.failed].slice(0, 2).join(', ') });
+  res.push(['recorded instruments load from the packaged app', rec]); if (!/^loaded/.test(rec)) process.exitCode = 1;
   res.push(['cpu stat', String(await win.evaluate(() => window.native.cpu()))]);
   await win.click('#btnPlay'); await win.waitForTimeout(1500); res.push(['plays audio in the desktop shell', String(await win.evaluate(() => A.level))]);
   res.push(['page errors', errors.length ? errors.join(' | ') : 'none']);
   await win.screenshot({ path: (process.argv[2] || tmp) + '/electron.png' });
-  await app.close(); res.forEach(r => console.log(r[0] + ': ' + r[1]));
+  // save a session file through the desktop dialog, then launch Soundcraft with it the way a double-click does
+  const sesPath = tmp + '/My Session.soundcraft';
+  await app.evaluate(({ dialog }, out) => { dialog.showSaveDialog = async () => ({ canceled: false, filePath: out }); }, sesPath);
+  await win.evaluate(() => { LIB[curId].title = 'Double Click Test'; S.bpm = 99; markDirty(); return saveSession(true) });
+  await win.waitForTimeout(800); res.push(['session file written', fs.existsSync(sesPath) ? (fs.statSync(sesPath).size / 1024).toFixed(0) + ' KB' : 'MISSING']);
+  await app.close();
+  const app2 = await _electron.launch({ args: [path.join(__dirname, '..'), '--no-sandbox', '--user-data-dir=' + tmp + '/ud2', sesPath], executablePath: require(path.join(__dirname, '..', 'node_modules', 'electron')) });
+  const w2 = await app2.firstWindow(); await w2.waitForTimeout(3000);
+  const opened = await w2.evaluate(() => ({ title: LIB[curId].title, bpm: S.bpm, file: LIB[curId].filePath || '', win: document.title }));
+  res.push(['launching with a .soundcraft file opens that session', JSON.stringify(opened)]);
+  if (opened.title !== 'Double Click Test' || opened.bpm !== 99) { console.error('SESSION FILE DID NOT OPEN'); process.exitCode = 1; }
+  await app2.close(); res.forEach(r => console.log(r[0] + ': ' + r[1]));
 })().catch(e => { console.error('ELECTRON TEST FAILED', e); process.exit(1) });

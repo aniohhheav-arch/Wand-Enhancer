@@ -17,17 +17,11 @@ $('#tapes').addEventListener('click',e=>{const b=e.target.closest('[data-a]'),ca
   else if(a==='dup'){if(id===curId)saveNow();const nid=newEntry(ent.title+' (copy)',JSON.parse(JSON.stringify(ent.data)));LIB[nid].color=ent.color;writeLib();renderLibrary();toast('Duplicated '+ent.title+'.')}
   else if(a==='color'){ent.color=b.dataset.c;writeLib();renderLibrary()}
   else if(a==='del'){if(Object.keys(LIB).length<2)return;if(!b.classList.contains('confirm')){b.classList.add('confirm');b.textContent='Delete for good?';setTimeout(()=>{if(b.isConnected){b.classList.remove('confirm');b.textContent='Delete'}},3000);return}
-    const was=id===curId;delete LIB[id];if(was){curId=Object.values(LIB).sort((x,y)=>y.edited-x.edited)[0].id;openProject(curId)}writeLib();renderLibrary();toast('Deleted '+ent.title+'.')}});
+    const was=id===curId;delete LIB[id];dropHistory(id);if(was){curId=Object.values(LIB).sort((x,y)=>y.edited-x.edited)[0].id;openProject(curId)}writeLib();renderLibrary();toast('Deleted '+ent.title+'.')}});
 $('#libNew').onclick=()=>{saveNow();const v=$('#libTpl').value;let d,title='Untitled cassette '+(Object.keys(LIB).length+1);if(v==='demo'){d=demoProject();title='Midnight Rain'}else if(!v)d=blankProject();else{const t=TEMPLATES.find(x=>x.id===v)||USER.templates.find(x=>x.id===v);d=projectFromTemplate(t.data||t);title=(t.name||'Project')+' '+(Object.keys(LIB).length+1)}
   const id=newEntry(title,d);writeLib();openProject(id);$('#libModal').hidden=true;toast('New cassette "'+title+'".')};
-$('#libExport').onclick=async()=>{const json=await exportProjectFile($('#libExportSamples').checked);saveBlob(new Blob([json],{type:'application/json'}),fileSafe(LIB[curId].title)+'.soundcraft.json')};
-$('#libImport').onclick=()=>$('#libFile').click();
-$('#libFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-  try{const j=JSON.parse(await f.text());let data,title=f.name.replace(/(\.soundcraft)?\.json$/i,'');
-    if(j.format===FORMAT){if(j.formatVersion>FORMAT_VERSION)throw new Error('it was made with a newer Soundcraft (format '+j.formatVersion+')');if(j.type!=='project')throw new Error('it is a '+(CONTENT_TYPES[j.type]||j.type)+'. Import it in the Sounds workspace');data=j.data;title=j.name||title;if(j.samples){const n=await importEmbeddedSamples(j.samples);if(n)toast('Restored '+n+' embedded sample(s).')}}
-    else if(j.data&&j.data.tracks){data=j.data;title=j.title||title}else data=j;
-    migrate(JSON.parse(JSON.stringify(data)));saveNow();const id=newEntry(String(title).slice(0,60),data);writeLib();openProject(id);renderLibrary();toast('Imported '+LIB[id].title+'.')}
-  catch(err){toast('That file was not imported: '+err.message+'. Nothing was changed.')}};
+$('#libExport').onclick=()=>saveSession(true);
+$('#libImport').onclick=()=>{$('#libModal').hidden=true;openSessionDialog()};
 $('#midiImport').onclick=()=>$('#midiFile').click();
 $('#midiFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const made=importMidiData(await f.arrayBuffer());$('#libModal').hidden=true;setView('arrange');renderAll();toast('Imported '+made.length+' MIDI track(s) into this project. Undo removes them.')}catch(err){toast('Could not import that MIDI file: '+err.message)}};
 $('#midiExport').onclick=()=>{const data=exportMidi();saveBlob(new Blob([data],{type:'audio/midi'}),fileSafe(LIB[curId].title)+'.mid')};
@@ -58,12 +52,29 @@ $('#expGo').onclick=async()=>{if(rendering)return;if(!ensureAudio())return;stop(
 /* ───────── settings ───────── */
 const WEATHERS={rain:'Rainy night',storm:'Thunderstorm',snow:'Snowfall',night:'Clear night',evening:'Summer evening',morning:'Quiet morning'};
 const FUR_NAMES={ginger:'Ginger',black:'Midnight black',grey:'Dusty grey',cream:'Cream',tux:'Tuxedo'};
-$('#btnSettings').onclick=()=>{renderSettings();openModal('setModal')};
+let SET_TAB='General';
+function openSettings(tab){if(tab)SET_TAB=tab;renderSettings();openModal('setModal')}
+$('#btnSettings').onclick=()=>openSettings();
 async function renderSettings(){const opt=(arr,cur)=>arr.map(([v,l])=>'<option value="'+esc(v)+'"'+(String(cur)===String(v)?' selected':'')+'>'+esc(l)+'</option>').join('');
   let est='';try{const e=await navigator.storage.estimate();est=(e.usage/1048576).toFixed(1)+' MB used of about '+(e.quota/1048576).toFixed(0)+' MB available to Soundcraft'}catch(e){est='Not reported by this system'}
   let devs=[['','System default']];try{(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audiooutput'&&d.deviceId&&d.deviceId!=='default').forEach((d,i)=>devs.push([d.deviceId,d.label||'Output '+(i+1)]))}catch(e){}
   const canSink=ctx?!!ctx.setSinkId:!!(window.AudioContext&&AudioContext.prototype.setSinkId);
-  $('#setBody').innerHTML='<h4>Display</h4><label for="pTheme">Theme</label><select id="pTheme">'+opt([['auto','Match system'],['dark','Night (dark)'],['light','Day (light)']],PREF.theme)+'</select>'+
+  let ins=[['','System default input']];try{(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput'&&d.deviceId&&d.deviceId!=='default'&&d.deviceId!=='communications').forEach((d,i)=>ins.push([d.deviceId,d.label||'Input '+(i+1)+' (labels appear after you allow the microphone)']))}catch(e){}
+  const full=x=>'<p class="hint" style="grid-column:1/-1;margin:0">'+x+'</p>';
+  $('#setBody').innerHTML='<h4>General</h4><label for="pStart">When Soundcraft starts</label><select id="pStart">'+opt([['continue','Continue the last session'],['pick','Show History to choose a session']],PREF.startup||'continue')+'</select>'+
+    '<label for="pHist">Undo history</label><select id="pHist">'+opt([[50,'50 steps'],[100,'100 steps'],[200,'200 steps (uses more storage)']],PREF.historyMax||100)+'</select>'+
+    full('Every change autosaves on this device, and each project keeps its undo history after you close Soundcraft. Ctrl+S also writes the session file when the project has one; Ctrl+Shift+S saves a new .soundcraft file.')+
+    '<h4>MIDI</h4><label for="pVel">Velocity response</label><select id="pVel">'+opt([['soft','Soft (light touch plays louder)'],['normal','Normal'],['hard','Hard (needs a firm touch)'],['fixed','Fixed (ignore velocity)']],PREF.velCurve||'normal')+'</select>'+
+    '<label for="pMidiCh">Listen on channel</label><select id="pMidiCh">'+opt([[0,'All channels']].concat(Array.from({length:16},(_,i)=>[i+1,String(i+1)])),S.midiCh||0)+'</select>'+
+    '<span>Devices</span><span class="hint">'+(esc(midiInputs().map(i=>i.name).join(', '))||'None connected')+' · <button class="btn xs" id="pMidiScan">Scan again</button></span>'+
+    '<span>Latency</span><span class="hint">'+(ctx?'Sound output ≈ '+(((ctx.baseLatency||0)+(ctx.outputLatency||0))*1000).toFixed(0)+' ms'+(midiLag.n?' · MIDI handling '+(midiLag.sum/midiLag.n).toFixed(1)+' ms average':''):'Audio engine not started yet')+'</span>'+
+    full('For the tightest feel: Audio → Latency set to Lowest, wired headphones or speakers rather than Bluetooth, and other audio apps closed.')+
+    '<h4>Recording</h4><label for="pIn">Input device</label><select id="pIn">'+opt(ins,PREF.inputId||'')+'</select>'+
+    '<label for="pRecCh">Channels</label><select id="pRecCh">'+opt([[1,'Mono (one microphone)'],[2,'Stereo (two inputs)']],PREF.recCh||1)+'</select>'+
+    '<label for="pRecOff">Timing offset</label><div class="row-actions"><input type="range" id="pRecOff" min="-200" max="200" step="1" value="'+(+PREF.recOffset||0)+'"><span class="hint" id="pRecOffV">'+(+PREF.recOffset||0)+' ms</span></div>'+
+    '<label for="pMon">New mic tracks</label><select id="pMon">'+opt([['0','Monitoring off'],['1','Monitoring on (use headphones)']],PREF.monitorDefault?'1':'0')+'</select>'+
+    full('Takes are moved earlier by the latency the system reports. If they still sound late, raise the offset; if early, lower it. Recordings are stored on this device and inside .soundcraft session files.')+
+    '<h4>Display</h4><label for="pTheme">Theme</label><select id="pTheme">'+opt([['auto','Match system'],['dark','Night (dark)'],['light','Day (light)']],PREF.theme)+'</select>'+
     '<label for="pScale">Interface size</label><select id="pScale">'+opt([[0.9,'90%'],[1,'100%'],[1.1,'110%'],[1.25,'125%'],[1.4,'140%']],PREF.scale)+'</select>'+
     '<label for="pMotion">Animation</label><select id="pMotion">'+opt([['full','Full'],['reduced','Reduced motion']],PREF.motion)+'</select>'+
     '<h4>Studio</h4><label for="pWeather">Weather</label><select id="pWeather">'+opt(Object.entries(WEATHERS),PREF.weather)+'</select><label for="pLamp">Desk lamp</label><select id="pLamp">'+opt([['1','On'],['0','Off']],PREF.lamp?'1':'0')+'</select>'+
@@ -79,7 +90,16 @@ async function renderSettings(){const opt=(arr,cur)=>arr.map(([v,l])=>'<option v
     '<h4>Diagnostics</h4><div style="grid-column:1/-1" class="row-actions"><button class="btn" id="pDiagCopy">Copy report</button><button class="btn" id="pDiagSave">Save report</button></div><pre class="report" id="pDiag" style="grid-column:1/-1"></pre>'+
     '<h4>About</h4><p class="hint" style="grid-column:1/-1;margin:0">Soundcraft '+APP_VERSION+'. Every built-in instrument is synthesized or physically modeled in real time; no recorded samples ship with the app, so nothing here is redistributed from someone else\'s sample library. Fonts: IBM Plex Sans, Pixelify Sans and VT323 under the SIL Open Font License 1.1.</p>';
   $('#pDiag').textContent=diagnostics();
-  const on=(id,ev,fn)=>$('#'+id).addEventListener(ev,fn);
+  const on=(id,ev,fn)=>{const el=$('#'+id);if(el)el.addEventListener(ev,fn)};
+  const body=$('#setBody'),secs=[];let cur=null;[...body.children].forEach(el=>{if(el.tagName==='H4'){cur=document.createElement('div');cur.className='set-sec';cur.dataset.tab=el.textContent;secs.push(cur)}if(cur)cur.appendChild(el)});
+  body.innerHTML='';const nav=document.createElement('nav');nav.className='set-nav';nav.setAttribute('role','tablist');if(!secs.some(s=>s.dataset.tab===SET_TAB))SET_TAB=secs[0].dataset.tab;
+  secs.forEach(s=>{const b=document.createElement('button');b.textContent=s.dataset.tab;b.setAttribute('role','tab');b.setAttribute('aria-selected',s.dataset.tab===SET_TAB);b.onclick=()=>{SET_TAB=s.dataset.tab;secs.forEach(x=>x.hidden=x!==s);nav.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b))};nav.appendChild(b);s.hidden=s.dataset.tab!==SET_TAB});
+  body.appendChild(nav);const wrap=document.createElement('div');wrap.className='set-pages';secs.forEach(s=>wrap.appendChild(s));body.appendChild(wrap);
+  on('pStart','change',e=>{PREF.startup=e.target.value;savePrefs()});on('pHist','change',e=>{PREF.historyMax=+e.target.value;savePrefs()});
+  on('pVel','change',e=>{PREF.velCurve=e.target.value;savePrefs()});on('pMidiCh','change',e=>{S.midiCh=+e.target.value;$('#midiCh').value=S.midiCh});on('pMidiScan','click',()=>{midiAcc?bindInputs():initMIDI();setTimeout(renderSettings,400)});
+  on('pIn','change',e=>{PREF.inputId=e.target.value;savePrefs();if(micOpen()){closeMic();openMic().then(ok=>toast(ok?'Input changed to '+MIC.label+'.':'Could not open that input: '+MIC.err+'.'))}});
+  on('pRecCh','change',e=>{PREF.recCh=+e.target.value;savePrefs();if(micOpen()){closeMic();openMic()}});
+  on('pRecOff','input',e=>{PREF.recOffset=+e.target.value;$('#pRecOffV').textContent=PREF.recOffset+' ms';savePrefs()});on('pMon','change',e=>{PREF.monitorDefault=e.target.value==='1';savePrefs()});
   on('pTheme','change',e=>{PREF.theme=e.target.value;savePrefs();applyTheme()});on('pScale','change',e=>{PREF.scale=+e.target.value;savePrefs();applyTheme()});on('pMotion','change',e=>{PREF.motion=e.target.value;savePrefs();applyTheme()});
   on('pWeather','change',e=>{PREF.weather=e.target.value;savePrefs();startAmbience()});on('pLamp','change',e=>{PREF.lamp=e.target.value==='1';savePrefs()});on('pAmb','change',e=>{PREF.amb=e.target.value==='1';savePrefs();ensureAudio();startAmbience()});
   on('pAmbVol','input',e=>{PREF.ambVol=+e.target.value;savePrefs();startAmbience()});on('pFur','change',e=>{PREF.fur=e.target.value;savePrefs()});on('pSens','input',e=>{PREF.sens=+e.target.value;savePrefs()});
@@ -90,7 +110,7 @@ async function renderSettings(){const opt=(arr,cur)=>arr.map(([v,l])=>'<option v
   on('pDiagSave','click',()=>saveBlob(new Blob([diagnostics()],{type:'text/plain'}),'soundcraft-diagnostics.txt'))}
 function audioInfo(){if(!ctx)return 'Audio engine not started yet.';return ctx.sampleRate+' Hz · state '+ctx.state+(ctx.baseLatency!=null?' · base latency '+(ctx.baseLatency*1000).toFixed(1)+' ms':'')+(ctx.outputLatency?' · output latency '+(ctx.outputLatency*1000).toFixed(1)+' ms':'')}
 function diagnostics(){const L=[];L.push('Soundcraft '+APP_VERSION+(window.native?' (desktop '+window.native.version+', Electron '+window.native.electron+')':' (browser)'),'Time: '+new Date().toISOString(),'User agent: '+navigator.userAgent,
-  'Audio: '+audioInfo(),'AudioWorklet: '+(workletOK()?'loaded':'not available — plucked strings use a fallback tone; gate, bitcrusher and transient shaper pass audio through'),'Web MIDI: '+($('#midiChip').dataset.state)+' · inputs: '+midiInputs().map(i=>i.name).join(', '),
+  'Audio: '+audioInfo(),'MIDI handling: '+(midiLag.n?(midiLag.sum/midiLag.n).toFixed(1)+' ms average, '+midiLag.max.toFixed(0)+' ms worst over '+midiLag.n+' notes':'no notes yet'),'Audio input: '+(micOpen()?MIC.label+' ('+MIC.ch+' ch, reported latency '+(MIC.inLat*1000).toFixed(0)+' ms)':'closed'+(MIC.err?' — '+MIC.err:'')),'Session file: '+(LIB[curId]&&LIB[curId].filePath||'none')+' · undo steps '+undoStack.length,'AudioWorklet: '+(workletOK()?'loaded':'not available — plucked strings use a fallback tone; gate, bitcrusher and transient shaper pass audio through'),'Web MIDI: '+($('#midiChip').dataset.state)+' · inputs: '+midiInputs().map(i=>i.name).join(', '),
   'Project: '+(LIB[curId]?LIB[curId].title:'?')+' · '+S.tracks.length+' tracks · '+S.tracks.reduce((a,t)=>a+t.fx.length,0)+' inserts · '+S.tracks.reduce((a,t)=>a+t.mod.routes.length,0)+' modulation routes','Live voices: '+liveVoices(),
   'Engines: '+Object.keys(ENG).length+' · factory presets: '+FACTORY.length+' · user items: '+Object.values(USER).reduce((a,l)=>a+l.length,0),'Missing samples: '+([...SAMPLE_MISSING].join(', ')||'none'),'Storage OK: '+storageOk,'Recent errors:');
   (errLog.length?errLog.slice(-25):['none']).forEach(e=>L.push('  '+e));return L.join('\n')}
@@ -102,6 +122,8 @@ const DOCS=[
   ['Getting around','Studio is the pixel room. Arrange holds the song timeline, piano roll and instrument. Mix holds strips, effects and meters. Sounds is the browser for every kind of preset. Lab is the deep instrument editor with modulation and macros. F1–F5 switch between them; Space plays and stops.'],
   ['Songs, clips and patterns','Each track holds patterns. A clip places a pattern on the timeline and loops it for the clip\'s length. Click an empty lane to add a clip, drag to move, drag its end to resize, double-click to split, right-click for more. Clicking a clip opens its pattern in the piano roll. Drag across the ruler to set the loop region; click it to place the play cursor.'],
   ['Editing notes','Drag on empty grid to draw; the Draw menu can stack chords that follow the chosen scale. Drag notes to move, drag the right edge to resize, Shift-drag to select a region, double-click or right-click to delete. Delete removes the selection, Ctrl+D duplicates it, arrow keys nudge it. The lane below edits velocity or probability; notes below 100% probability sometimes skip.'],
+  ['Mic tracks','Add one with “+ Mic track” in Arrange. It is armed when created (the red dot); arming opens your microphone. Press R to record: the take starts at the playhead and lands on the timeline with its waveform. Takes are corrected for the latency the system reports; fine-tune with Settings → Recording → Timing offset. Recording over an earlier take replaces that part. With the loop on each pass is recorded and the last one ends up on top. Monitor plays the input through the track’s effects (use headphones).'],
+  ['Sessions and history','Everything autosaves. History (Ctrl+H) lists your recent sessions with a Continue button and every change in the current one; click “Go back to before this” to return to any point, and redo to come forward again. Undo history is kept after you close Soundcraft. Save session as… (Ctrl+Shift+S) writes a .soundcraft file with the whole session inside, including recordings, samples, snapshots and undo history; double-clicking that file opens Soundcraft right where you left off. Open one with Ctrl+O.'],
   ['Recording','Press R or the record button. Notes from your MIDI keyboard, the computer keyboard or the on-screen keys go into the clip under the playhead, or a new clip if there is none. Notes land when you release them and follow the Quantize setting. Recording loops and overdubs while the loop runs.'],
   ['Instruments and presets','Soundcraft has a set of sound engines (synthesis methods) and many presets for them. A preset is a saved configuration of one engine. Factory presets never change; edits live on the track until you save them as your own preset in the Lab.'],
   ['Modulation','Add sources in the Lab (LFOs, envelopes, step modulators, sample & hold, envelope followers) and drag them onto any knob. Velocity, key tracking, note random, mod wheel, pitch bend, aftertouch and MIDI CCs are always available. Controls marked live are modulated continuously; note start controls change when each note begins. A pink ring on a knob shows its modulation range and the dot shows where it is right now.'],
@@ -111,7 +133,7 @@ const DOCS=[
   ['Exporting','Export renders faster than real time to WAV at 44.1, 48 or 96 kHz in 16-bit, 24-bit or 32-bit float, as a stereo mix and/or per-track stems. MIDI files and project files are in the Cassettes library.'],
   ['Saving and recovery','Every change autosaves. The last five autosaves per project are kept as backups, and Snapshots lets you save named versions, compare them and restore them; restoring first saves a safety snapshot. Undo and redo cover the whole project.'],
   ['Missing content','If a project or preset needs a sample, preset or engine that is not on this device, Soundcraft lists exactly what is missing and leaves that part silent. It never swaps in a different sound.'],
-  ['Shortcuts','Space play/stop · R record · F1–F5 workspaces · Ctrl+Z undo · Ctrl+Shift+Z or Ctrl+Y redo · Ctrl+S save · Ctrl+D duplicate notes or clip · Delete delete selection · A–\' play notes · Z/X octave · C/V velocity · 1–9 select track · Escape closes dialogs.']
+  ['Shortcuts','Space play/stop · R record · F1–F5 workspaces · Ctrl+Z undo · Ctrl+Shift+Z or Ctrl+Y redo · Ctrl+S save · Ctrl+Shift+S save session as · Ctrl+O open session · Ctrl+H history · Ctrl+, settings · Ctrl+D duplicate notes or clip · Delete delete selection · A–\' play notes · Z/X octave · C/V velocity · 1–9 select track · Escape closes dialogs.']
 ];
 $('#btnHelp').onclick=()=>{renderHelp();openModal('helpModal')};$('#helpSearch').oninput=renderHelp;
 function renderHelp(){const q=$('#helpSearch').value.trim().toLowerCase();const ds=DOCS.filter(([h,p])=>!q||(h+' '+p).toLowerCase().includes(q));$('#helpBody').innerHTML=ds.map(([h,p])=>'<div><h4>'+esc(h)+'</h4><p>'+esc(p)+'</p></div>').join('')||'<p class="hint">No help topics match.</p>'}

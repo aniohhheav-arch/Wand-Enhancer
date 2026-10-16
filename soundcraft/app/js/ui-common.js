@@ -71,7 +71,7 @@ function panicLive(){if(!ctx)return;held.forEach(e=>e.hs.forEach(h=>h.off(ctx.cu
 /* ───────── transport ───────── */
 function renderTransport(){$('#btnPlay').setAttribute('aria-pressed',S.playing);$('#btnRec').setAttribute('aria-pressed',S.rec);$('#btnMetro').setAttribute('aria-pressed',S.metro);$('#btnLoop').setAttribute('aria-pressed',S.loop.on);
   $('#bpm').value=S.bpm;$('#quant').value=String(S.quant);$('#swing').value=S.swing;$('#masterVol').value=S.master;if(!S.playing){const b=S.loop.on?S.loop.start:S.cursor;$('#lcdPos').textContent=(Math.floor(b)+1)+'.'+(Math.floor(b%1*4)+1)+'.1';$('#playhead').hidden=true}}
-function toggleRec(){S.rec=!S.rec;if(S.rec&&!S.playing)play();renderTransport();if(S.rec)toast('Recording into '+selTrack().name+'. Each note lands when you release it.')}
+function toggleRec(){S.rec=!S.rec;if(S.rec&&!S.playing)play();renderTransport();audioRecSync();const mics=S.tracks.filter(t=>isAudio(t)&&t.arm);if(S.rec)toast(mics.length?'Recording audio into '+mics.map(t=>t.name).join(', ')+(isAudio(selTrack())?'':' and notes into '+selTrack().name)+'.':'Recording into '+selTrack().name+'. Each note lands when you release it.')}
 /* ───────── keybed ───────── */
 const KEYMAP="awsedftgyhujkolp;'";const liveBase=()=>S.octave*12+12;
 function renderKeyboard(){const el=$('#keyboard');if(!el||!el.clientWidth)return;const W=el.clientWidth,tr=selTrack(),drum=tr&&ENG[tr.engine].drum,base=liveBase();

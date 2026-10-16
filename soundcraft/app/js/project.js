@@ -29,11 +29,11 @@ function newTrack(src,o={}){
   if(pre&&pre.fx)tr.fx=sanitizeFxList(pre.fx);if(pre&&pre.input)Object.assign(tr.input,pre.input);
   tr.params=sanitizeParams(E.params,tr.params).o;return tr}
 /* Load an instrument preset onto an existing track (keeps notes, clips and mixer). */
-function applyInstrument(tr,pre){const E=ENG[pre.engine];if(!E)throw new Error('This preset needs an engine that is not available: '+pre.engine);
+function applyInstrument(tr,pre){const E=ENG[pre.engine];if(isAudio(tr))throw new Error('A mic track has no instrument. Choose "Add as new track" instead, or select an instrument track first');if(!E)throw new Error('This preset needs an engine that is not available: '+pre.engine);
   disposeTrack(tr);tr.engine=pre.engine;tr.preset=pre.id||null;tr.params=sanitizeParams(E.params,Object.assign(defaultsOf(E.params),pre.params||{})).o;
   tr.mod=pre.mod?sanitizeMod(JSON.parse(JSON.stringify(pre.mod))):newModState();tr.arp=Object.assign({on:false,mode:'up',rate:'1/16',oct:1,gate:0.6},pre.arp||{});tr.poly=pre.poly||16;tr.oct=pre.oct||E.oct||4;
   if(pre.engine==='sampler')tr.zones=(pre.zones||[]).map(sanitizeZone);else delete tr.zones;if(pre.engine==='fusion')tr.layerOver=pre.layerOver||[{},{},{},{}];else delete tr.layerOver;
-  if(ctx){buildTrack(tr);applyMix()}if(tr.engine==='sampler')loadTrackSamples(tr).then(m=>{if(m.length)toast(m.length+' sample'+(m.length>1?'s are':' is')+' missing: '+m.slice(0,3).join(', '))});
+  if(ctx){buildTrack(tr);applyMix()}if(tr.clips.some(c=>c.rec))tr.clips=tr.clips.filter(c=>!c.rec);if(tr.engine==='sampler')loadTrackSamples(tr).then(m=>{if(m.length)toast(m.length+' sample'+(m.length>1?'s are':' is')+' missing: '+m.slice(0,3).join(', '))});
   if(pre.id){PREF.recent=[pre.id].concat(PREF.recent.filter(x=>x!==pre.id)).slice(0,16);savePrefs()}}
 const curPattern=tr=>tr.patterns.find(p=>p.id===tr.curPat)||tr.patterns[0];
 const songEnd=()=>Math.max(4,...S.tracks.flatMap(t=>t.clips.map(c=>c.start+c.len)),S.loop.end);
@@ -84,7 +84,7 @@ function loadProject(raw){
     const E=ENG[t.engine],tr=Object.assign(newTrack({engine:t.engine,params:{}},{}),t);tr.params=sanitizeParams(E.params,Object.assign(defaultsOf(E.params),t.params)).o;tr.mod=sanitizeMod(t.mod);tr.fx=sanitizeFxList(t.fx,warn);
     tr.fx.forEach((f,i)=>{if(t.fx[i]&&t.fx[i].id)f.id=t.fx[i].id});tr.mod.routes.forEach(rt=>{if(rt.dst.startsWith('fx:')){/* fx ids preserved above */}});
     tr.patterns=(t.patterns||[]).map(p=>({id:p.id||uid('p'),name:String(p.name||'A').slice(0,30),len:clamp(+p.len||4,0.25,64),notes:(p.notes||[]).map(n=>({p:+n.p,s:+n.s,l:+n.l||1,v:clamp(+n.v||0.8,0.01,1),pr:n.pr!=null?clamp(+n.pr,0,1):undefined})).filter(n=>isFinite(n.p)&&isFinite(n.s))}));
-    if(!tr.patterns.length)tr.patterns=[newPattern('A',4)];tr.clips=(t.clips||[]).filter(c=>tr.patterns.some(p=>p.id===c.pat)).map(c=>({id:c.id||uid('c'),pat:c.pat,start:Math.max(0,+c.start||0),len:Math.max(0.25,+c.len||1)}));
+    if(!tr.patterns.length)tr.patterns=[newPattern('A',4)];tr.clips=(t.clips||[]).filter(c=>c&&(c.rec||tr.patterns.some(p=>p.id===c.pat))).map(c=>c.rec?sanitizeAudioClip(c):({id:c.id||uid('c'),pat:c.pat,start:Math.max(0,+c.start||0),len:Math.max(0.25,+c.len||1)}));tr.arm=!!t.arm;tr.monitor=!!t.monitor;
     if(!tr.patterns.some(p=>p.id===tr.curPat))tr.curPat=tr.patterns[0].id;if(tr.engine==='sampler')tr.zones=(t.zones||[]).map(sanitizeZone);if(tr.engine==='fusion')tr.layerOver=t.layerOver||[{},{},{},{}];
     tr.input=Object.assign({group:null,lo:0,hi:127,vlo:0,vhi:127,ch:0,tr:0},t.input||{});tr.poly=clamp(+t.poly||16,1,64);return tr});
   if(!S.tracks.length)S.tracks.push(newTrack('syn-poly'));S.sel=0;S.octave=selTrack().oct||4;S.selClip=null;
@@ -101,29 +101,40 @@ let LIB={},curId=null,storageOk=true,dirty=false;
 function writeLib(){storageOk=store(LIB_KEY,JSON.stringify(LIB))&&store(CUR_KEY,curId||'');return storageOk}
 let saveTimer=0;
 function markDirty(){dirty=true;setSaveState('dirty');clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,700)}
-function saveNow(){clearTimeout(saveTimer);const e=LIB[curId];if(!e)return false;const data=snapshot();e.data=data;e.edited=Date.now();e.bpm=S.bpm;
+function saveNow(){clearTimeout(saveTimer);const e=LIB[curId];if(!e)return false;const data=snapshot();e.data=data;if(dirty)e.edited=Date.now();e.bpm=S.bpm;e.ui=uiState();
   const lastB=e.backups&&e.backups[0];if(!lastB||Date.now()-lastB.date>120000){e.backups=[{date:Date.now(),data}].concat(e.backups||[]).slice(0,5);if(window.native)window.native.writeBackup(curId,e.title,JSON.stringify(data)).catch(err=>errLog.push('backup: '+err.message))}
   let ok=writeLib();if(!ok){e.backups=(e.backups||[]).slice(0,1);ok=writeLib()}dirty=!ok;setSaveState(ok?'saved':'err');return ok}
 function setSaveState(s){const el=$('#saveState');if(!el)return;el.classList.toggle('err',s==='err');el.textContent=s==='dirty'?'Unsaved changes…':s==='err'?'Not saved: storage blocked or full':'Saved'}
 function newEntry(title,data){const id=uid('p'),now=Date.now();LIB[id]={id,title,color:TRACK_COLORS[Object.keys(LIB).length%TRACK_COLORS.length],created:now,edited:now,bpm:data.bpm,data,snapshots:[],backups:[]};return id}
 function openProject(id){const e=LIB[id];if(!e)return false;stop();
   try{loadProject(e.data)}catch(err){toast('That cassette could not be opened ('+err.message+'). It was left untouched.');return false}
-  curId=id;writeLib();undoStack.length=0;redoStack.length=0;$('#projTitle').value=e.title;setSaveState(storageOk?'saved':'err');renderAll();return true}
+  curId=id;writeLib();undoStack.length=0;redoStack.length=0;loadHistory(id);$('#projTitle').value=e.title;setWindowTitle();setSaveState(storageOk?'saved':'err');restoreUi(e.ui);renderAll();return true}
 function migrateV1Library(){try{const old=JSON.parse(read('soundcraft.library.v1')||'null');if(!old)return 0;let n=0;
   Object.values(old).forEach(e=>{if(!e||!e.data||Object.values(LIB).some(x=>x.fromV1===e.id))return;try{const d=migrate(e.data);const id=newEntry(e.title||'Imported cassette',d);LIB[id].fromV1=e.id;LIB[id].color=e.color||LIB[id].color;n++}catch(err){errLog.push('v1 migrate: '+err.message)}});return n}catch(e){return 0}}
 /* ───────── snapshots ───────── */
 function takeSnapshot(name,desc){saveNow();const e=LIB[curId];e.snapshots=e.snapshots||[];e.snapshots.unshift({id:uid('n'),name:String(name||'Snapshot').slice(0,60),desc:String(desc||'').slice(0,300),date:Date.now(),data:snapshot()});e.snapshots=e.snapshots.slice(0,30);return writeLib()}
 function restoreSnapshot(snapId){const e=LIB[curId],sn=(e.snapshots||[]).find(x=>x.id===snapId)||(e.backups||[]).find(x=>'b'+x.date===snapId);if(!sn)return false;
   takeSnapshot('Before restoring "'+(sn.name||new Date(sn.date).toLocaleString())+'"','Automatic safety snapshot');pushUndo();loadProject(sn.data);saveNow();renderAll();return true}
-function compareSnapshot(data){const a=snapshot(),b=data,lines=[];if(a.bpm!==b.bpm)lines.push('Tempo '+b.bpm+' → '+a.bpm+' BPM now');
-  const ids=new Set(a.tracks.map(t=>t.id)),bid=new Set(b.tracks.map(t=>t.id));b.tracks.filter(t=>!ids.has(t.id)).forEach(t=>lines.push('Track "'+t.name+'" exists only in the snapshot'));a.tracks.filter(t=>!bid.has(t.id)).forEach(t=>lines.push('Track "'+t.name+'" was added since'));
-  a.tracks.forEach(t=>{const o=b.tracks.find(x=>x.id===t.id);if(!o)return;const nn=x=>x.patterns.reduce((s,p)=>s+p.notes.length,0);if(nn(t)!==nn(o))lines.push(t.name+': '+nn(o)+' → '+nn(t)+' notes');if(t.clips.length!==o.clips.length)lines.push(t.name+': '+o.clips.length+' → '+t.clips.length+' clips');
-    if(t.engine!==o.engine)lines.push(t.name+': instrument changed');if(JSON.stringify(t.params)!==JSON.stringify(o.params))lines.push(t.name+': sound settings differ');if(t.fx.length!==o.fx.length)lines.push(t.name+': '+o.fx.length+' → '+t.fx.length+' effects');if(Math.abs(t.vol-o.vol)>0.01)lines.push(t.name+': volume changed')});
-  return lines.length?lines:['No differences in tempo, tracks, notes, clips, sounds or effects.']}
+function compareSnapshot(data){return diffProjects(snapshot(),data,'No differences in tempo, tracks, notes, clips, sounds or effects.')}
+/* What changed from b (older) to a (newer), in words. Used by snapshot compare and the History panel. */
+function diffProjects(a,b,none){const lines=[],J=JSON.stringify;if(a.bpm!==b.bpm)lines.push('Tempo '+b.bpm+' → '+a.bpm+' BPM');if(a.swing!==b.swing)lines.push('Swing changed');
+  if(J(a.loop)!==J(b.loop))lines.push('Loop region changed');if(J(a.markers)!==J(b.markers))lines.push('Section markers changed');if(J(a.masterFx)!==J(b.masterFx))lines.push('Master effects changed');if(J(a.returns)!==J(b.returns))lines.push('Reverb or delay return changed');if(a.master!==b.master)lines.push('Master volume changed');
+  const ids=new Set(a.tracks.map(t=>t.id)),bid=new Set(b.tracks.map(t=>t.id));b.tracks.filter(t=>!ids.has(t.id)).forEach(t=>lines.push('Track "'+t.name+'" removed'));a.tracks.filter(t=>!bid.has(t.id)).forEach(t=>lines.push('Track "'+t.name+'" added'));
+  if(J(a.tracks.map(t=>t.id).filter(x=>bid.has(x)))!==J(b.tracks.map(t=>t.id).filter(x=>ids.has(x))))lines.push('Tracks reordered');
+  a.tracks.forEach(t=>{const o=b.tracks.find(x=>x.id===t.id);if(!o)return;const nn=x=>x.patterns.reduce((s,p)=>s+p.notes.length,0),n=t.name;if(t.name!==o.name)lines.push('Renamed "'+o.name+'" to "'+t.name+'"');
+    if(nn(t)!==nn(o))lines.push(n+': '+nn(o)+' → '+nn(t)+' notes');else if(J(t.patterns)!==J(o.patterns))lines.push(n+': notes edited');
+    const ta=t.clips.filter(c=>c.rec).length,tb=o.clips.filter(c=>c.rec).length;if(ta>tb)lines.push(n+': recorded audio');else if(t.clips.length!==o.clips.length)lines.push(n+': '+o.clips.length+' → '+t.clips.length+' clips');else if(J(t.clips)!==J(o.clips))lines.push(n+': clips moved or resized');
+    if(t.engine!==o.engine||t.preset!==o.preset)lines.push(n+': instrument changed');else if(J(t.params)!==J(o.params))lines.push(n+': sound settings changed');if(J(t.mod)!==J(o.mod))lines.push(n+': modulation or macros changed');
+    if(t.fx.length!==o.fx.length)lines.push(n+': '+o.fx.length+' → '+t.fx.length+' effects');else if(J(t.fx)!==J(o.fx))lines.push(n+': effect settings changed');
+    if(Math.abs(t.vol-o.vol)>0.005||t.pan!==o.pan||t.rev!==o.rev||t.dly!==o.dly)lines.push(n+': mix changed');if(t.mute!==o.mute)lines.push(n+(t.mute?': muted':': unmuted'));if(t.solo!==o.solo)lines.push(n+(t.solo?': soloed':': solo off'));
+    if(t.color!==o.color)lines.push(n+': color changed');if(J(t.arp)!==J(o.arp))lines.push(n+': arpeggiator changed')});
+  return lines.length?lines:[none||'Small change']}
 /* ───────── undo (whole-project snapshots) ───────── */
+/* Each entry is the project before one change, with the time of that change. The stacks are kept per
+   project on this device (History panel) and inside .soundcraft session files, so undo survives restarts. */
 const undoStack=[],redoStack=[];
-function pushUndo(){undoStack.push(JSON.stringify(snapshot()));if(undoStack.length>60)undoStack.shift();redoStack.length=0}
-function undoRedo(from,to,label){const s=from.pop();if(!s){toast('Nothing to '+label+'.');return}to.push(JSON.stringify(snapshot()));const sel=S.sel,view=S.view;loadProject(JSON.parse(s));S.sel=Math.min(sel,S.tracks.length-1);markDirty();renderAll()}
+function pushUndo(){undoStack.push({t:Date.now(),s:JSON.stringify(snapshot())});while(undoStack.length>(PREF.historyMax||100))undoStack.shift();redoStack.length=0;historyChanged()}
+function undoRedo(from,to,label,quiet){const e=from.pop();if(!e){if(!quiet)toast('Nothing to '+label+'.');return false}to.push({t:e.t,s:JSON.stringify(snapshot())});const sel=S.sel;loadProject(JSON.parse(e.s));S.sel=Math.min(sel,S.tracks.length-1);markDirty();if(!quiet)renderAll();historyChanged();return true}
 const undo=()=>undoRedo(undoStack,redoStack,'undo'),redo=()=>undoRedo(redoStack,undoStack,'redo');
 /* ───────── building from presets ───────── */
 function addTrackFrom(src,o={}){pushUndo();const tr=newTrack(src,o);S.tracks.push(tr);if(ctx)applyMix();markDirty();return tr}
@@ -133,7 +144,7 @@ function loadEnsemble(ens){pushUndo();const group=uid('g'),made=[],miss=[];
     (m.fx||[]).forEach(([type,params])=>{if(FX[type])tr.fx.push(newFx(type,params))});S.tracks.push(tr);made.push(tr)});
   if(ctx)applyMix();markDirty();return {made,miss,group}}
 function exportProjectFile(withSamples){saveNow();const e=LIB[curId],data=snapshot(),env=envelope('project',e.title,data,{type:'project'});
-  const ids=new Set();data.tracks.forEach(t=>(t.zones||[]).forEach(z=>z.sample&&ids.add(z.sample)));
+  const ids=new Set();data.tracks.forEach(t=>{(t.zones||[]).forEach(z=>z.sample&&ids.add(z.sample));(t.clips||[]).forEach(c=>c.rec&&ids.add(c.rec))});
   const finish=samples=>{if(samples)env.samples=samples;env.dependencies={samples:[...ids].map(id=>({id,name:(SAMPLE_META.get(id)||{}).name||id,embedded:!!(samples&&samples[id])}))};return JSON.stringify(env)};
   if(!withSamples||!ids.size)return Promise.resolve(finish(null));
   return Promise.all([...ids].map(id=>getSample(id).then(r=>[id,r]).catch(()=>[id,null]))).then(rs=>{const out={};rs.forEach(([id,r])=>{if(r)out[id]={name:r.name,b64:b64(r.bytes)}});return finish(out)})}

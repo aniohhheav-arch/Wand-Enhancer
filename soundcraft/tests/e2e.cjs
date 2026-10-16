@@ -3,17 +3,20 @@
    Set PLAYWRIGHT_MODULE to a playwright install if it is not resolvable from here. */
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const path = require('path'), fs = require('fs'), os = require('os');
-const URL = 'file://' + path.resolve(__dirname, '../app/index.html');
+/* Served over http, as AudioWorklets cannot load from file:// pages in a plain browser (the desktop app allows it). */
+const http = require('http'), ROOT = path.resolve(__dirname, '../app'), TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.json': 'application/json' };
+const server = http.createServer((q, r) => { const f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0]).replace(/^\/+/, '') || 'index.html'); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); r.end(); return } r.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r) }).listen(0);
+const URL = () => 'http://127.0.0.1:' + server.address().port + '/index.html';
 const OUT = process.argv[2] || fs.mkdtempSync(path.join(os.tmpdir(), 'soundcraft-'));
 const results = []; let failed = 0;
 const ok = (name, cond, info = '') => { if (!cond) failed++; const line = (cond ? 'PASS ' : 'FAIL ') + name + (info ? ' — ' + info : ''); results.push(line); console.log(line); };
 (async () => {
-  const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
-  const ctx = await browser.newContext({ viewport: { width: 1400, height: 950 }, acceptDownloads: true });
+  const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required', '--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
+  const ctx = await browser.newContext({ viewport: { width: 1400, height: 950 }, acceptDownloads: true, permissions: ['microphone'] });
   const page = await ctx.newPage(); const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push(m.text()) });
-  await page.goto(URL); await page.waitForTimeout(1000);
+  await page.goto(URL()); await page.waitForTimeout(1000);
   const E = (fn, arg) => page.evaluate(fn, arg);
   ok('app boots into a workspace with the demo song', await E(() => S.tracks.length === 5 && !!LIB[curId]));
   ok('engine registry and library loaded', await E(() => Object.keys(ENG).length >= 20 && FACTORY.length >= 90), await E(() => Object.keys(ENG).length + ' engines, ' + FACTORY.length + ' presets'));
@@ -116,8 +119,33 @@ const ok = (name, cond, info = '') => { if (!cond) failed++; const line = (cond 
   const fxr = await E(async () => { const out = {}; for (const k of FX_ORDER) { loadProject(T.oneTrack('syn-poly', [{ p: 60, s: 0, l: 16, v: 1 }], t => { t.fx = [newFx(k)] })); const b = await renderOffline({ startBar: 0, endBar: 1, tail: 0.5 }); out[k] = +T.rms(b, 0.2, 1.5).toFixed(3) } return out });
   ok('every effect renders audio without breaking the chain', Object.values(fxr).every(v => v > 0.002), JSON.stringify(fxr));
   // every engine makes sound
-  const eng = await E(async () => { const out = {}; for (const k of Object.keys(ENG)) { if (k === 'sampler') continue; const pre = FACTORY.find(p => p.engine === k); loadProject(T.oneTrack(pre, [{ p: k === 'kit' ? 36 : 60, s: 0, l: 8, v: 1 }])); const b = await renderOffline({ startBar: 0, endBar: 1, tail: 0.5 }); out[k] = +T.rms(b, 0, 2).toFixed(4) } return out });
+  const eng = await E(async () => { const out = {}; for (const k of Object.keys(ENG)) { if (k === 'sampler' || ENG[k].hidden) continue; const pre = FACTORY.find(p => p.engine === k); loadProject(T.oneTrack(pre, [{ p: k === 'kit' ? 36 : 60, s: 0, l: 8, v: 1 }])); const b = await renderOffline({ startBar: 0, endBar: 1, tail: 0.5 }); out[k] = +T.rms(b, 0, 2).toFixed(4) } return out });
   ok('every sound engine produces audio', Object.values(eng).every(v => v > 0.001), JSON.stringify(eng));
+  // instrument quality: tuning, distinct timbres, real ensembles
+  const q = await E(async () => {
+    const f0 = (buf, a, b, n) => { const sr = buf.sampleRate, d = buf.getChannelData(0).slice(Math.floor(a * sr), Math.floor(b * sr)), fe = 440 * Math.pow(2, (n - 69) / 12), L = Math.min(d.length, 12000), lo = Math.floor(sr / (fe * 1.2)), hi = Math.ceil(sr / (fe / 1.2));
+      const C = lag => { let s = 0, e1 = 0, e2 = 0; for (let i = 0; i < L - lag; i++) { s += d[i] * d[i + lag]; e1 += d[i] * d[i]; e2 += d[i + lag] * d[i + lag] } return s / Math.sqrt(e1 * e2 + 1e-12) };
+      let bl = lo, bc = -1; for (let lag = lo; lag <= hi; lag++) { const c = C(lag); if (c > bc) { bc = c; bl = lag } } if (bc < 0.5) return null; const y0 = C(bl - 1), y2 = C(bl + 1), den = y0 - 2 * bc + y2; return Math.round(1200 * Math.log2(sr / (bl + (Math.abs(den) > 1e-9 ? 0.5 * (y0 - y2) / den : 0)) / fe)) };
+    const bright = buf => { const d = buf.getChannelData(0), sr = buf.sampleRate, s0 = Math.floor(0.25 * sr), e = Math.min(d.length, s0 + sr); let a = 0, q = 0; for (let i = s0 + 1; i < e; i++) { a += d[i] * d[i]; const x = d[i] - d[i - 1]; q += x * x } return Math.round(Math.sqrt(q / a) * sr / (2 * Math.PI)) };
+    const att = buf => { const d = buf.getChannelData(0), sr = buf.sampleRate, s0 = Math.floor(0.004 * sr), e = Math.floor(0.08 * sr); let a = 0, q = 0; for (let i = s0 + 1; i < e; i++) { a += d[i] * d[i]; const x = d[i] - d[i - 1]; q += x * x } return Math.round(Math.sqrt(q / a) * sr / (2 * Math.PI)) };
+    const ring = buf => +(T.rms(buf, 1.0, 1.4) / Math.max(1e-6, T.rms(buf, 0.02, 0.2))).toFixed(3);
+    const one = async (pre, n, v = 0.8) => { loadProject(T.oneTrack(pre, [{ p: n, s: 0, l: 12, v }])); return await renderOffline({ startBar: 0, endBar: 1, sampleRate: 44100, tail: 0.2 }) };
+    const out = { tune: {}, bright: {}, rms: {} };
+    for (const [pre, ns] of [['keys-prism', [48, 60, 72, 84, 96]], ['keys-celesta', [60, 84]], ['brass-trumpet', [60, 74]], ['brass-horn', [48, 62]], ['brass-trombone', [43, 57]], ['brass-tuba', [38, 45]], ['str-violin', [67, 84]], ['str-cello', [40, 55]], ['ww-oboe', [65, 77]]]) {
+      out.tune[pre] = []; for (const n of ns) { const b = await one(pre, n); out.tune[pre].push(f0(b, pre === 'keys-celesta' || pre === 'keys-prism' ? 0.15 : 0.4, pre === 'keys-celesta' || pre === 'keys-prism' ? 0.45 : 0.7, n)) } }
+    for (const [pre, n] of [['brass-trumpet', 62], ['brass-horn', 62], ['brass-trombone', 55], ['brass-tuba', 45], ['brass-mutedtp', 62], ['keys-celesta', 84], ['keys-musicbox', 84], ['keys-organ', 60], ['keys-jazzorgan', 60], ['keys-gospel', 60], ['str-violin', 72], ['str-viola', 62], ['str-cello', 50], ['str-bass', 40]]) { const b = await one(pre, n); out.bright[pre] = bright(b); out.rms[pre] = +T.rms(b, 0, 1.5).toFixed(3); out.att = out.att || {}; out.att[pre] = att(b); out.ring = out.ring || {}; out.ring[pre] = ring(b) }
+    loadProject(T.oneTrack('brass-section', [43, 55, 64, 72].map(p => ({ p, s: 0, l: 12, v: 0.8 })))); ensureAudio(); await ensureProjectOrch(); const t = S.tracks[0]; buildTrack(t);
+    const now = ctx.currentTime + 0.05, hs = [43, 55, 64, 72].map(n => trigger(t, n, 0.8, now)); out.parts = Object.values(t._secLoad || {}).filter(x => x > 0).length; hs.forEach(h => h && h.off(ctx.currentTime));
+    out.recordedZones = Object.values(SAMPLE_LIB).reduce((a, l) => a + Object.values(l.arts).reduce((s, x) => s + x.zones.length, 0), 0); out.loadFailures = ORCH.failed.size; return out });
+  const allTune = Object.values(q.tune).flat();
+  ok('bells, celesta and recorded instruments play in tune (A4 = 440 Hz, within 10 cents)', allTune.every(c => c != null && Math.abs(c) <= 10), JSON.stringify(q.tune));
+  const B = q.bright, dif = (a, b) => Math.abs(B[a] - B[b]) / Math.max(B[a], B[b]);
+  ok('the five brass instruments have distinct timbres', ['brass-trumpet', 'brass-horn', 'brass-trombone', 'brass-tuba', 'brass-mutedtp'].every((a, i, l) => l.slice(i + 1).every(b => dif(a, b) > 0.08)) , JSON.stringify(['brass-trumpet', 'brass-horn', 'brass-trombone', 'brass-tuba', 'brass-mutedtp'].map(k => k + ' ' + B[k])));
+  const ca = q.att['keys-celesta'], ma = q.att['keys-musicbox'], cr = q.ring['keys-celesta'], mr = q.ring['keys-musicbox'];
+  ok('Celesta and Music Box sound different (attack spectrum and ring time)', Math.abs(ca - ma) / Math.max(ca, ma) > 0.25 && Math.abs(cr - mr) / Math.max(cr, mr) > 0.25, 'attack brightness ' + ca + ' vs ' + ma + ' Hz, ring ' + cr + ' vs ' + mr);
+  ok('the three organs are distinct (brightness or level differ clearly)', [['keys-organ', 'keys-jazzorgan'], ['keys-organ', 'keys-gospel'], ['keys-jazzorgan', 'keys-gospel']].every(([a, b]) => dif(a, b) > 0.15 || Math.abs(q.rms[a] - q.rms[b]) / Math.max(q.rms[a], q.rms[b]) > 0.3), JSON.stringify(['keys-organ', 'keys-jazzorgan', 'keys-gospel'].map(k => k + ' ' + B[k] + 'Hz rms ' + q.rms[k])));
+  ok('the string family is differentiated by register and timbre', ['str-violin', 'str-viola', 'str-cello', 'str-bass'].every((a, i, l) => l.slice(i + 1).every(b => dif(a, b) > 0.05)), JSON.stringify(['str-violin', 'str-viola', 'str-cello', 'str-bass'].map(k => k + ' ' + B[k])));
+  ok('Brass Section spreads a chord across different recorded players', q.parts >= 3 && q.loadFailures === 0, q.parts + ' parts playing · ' + q.recordedZones + ' recorded zones · load failures ' + q.loadFailures);
   // stability with modulation active, and timing
   await E(() => { openProject(Object.values(LIB).find(e => e.title === 'Midnight Rain').id); const t = S.tracks[3]; const s = newSource('lfo'); s.sync = '1/8'; t.mod.sources.push(s); t.mod.routes.push(newRoute(s.id, 'v:vpan', 0.6), newRoute(s.id, 'v:vcut', -0.4)); buildTrackMod(t) });
   await page.click('#btnPlay'); await page.waitForTimeout(3500);
@@ -136,18 +164,53 @@ const ok = (name, cond, info = '') => { if (!cond) failed++; const line = (cond 
   // MIDI file round trip
   const mid = await E(() => { const bytes = exportMidi(); const parsed = parseMidi(bytes.buffer); return { tracks: parsed.tracks.length, notes: parsed.tracks.reduce((a, t) => a + t.notes.length, 0), tempo: Math.round(parsed.tempo) } });
   ok('MIDI file export parses back with notes and tempo', mid.tracks >= 4 && mid.notes > 50 && mid.tempo === 112, JSON.stringify(mid));
+  // worklets (plucked strings, gate, crusher, transient, mic recorder)
+  ok('AudioWorklets load', await E(async () => { ensureAudio(); await loadWorklets(ctx); return workletOK() }));
+  // mic track: record a take from the (fake) microphone, play it back, export it, undo it
+  await E(() => { setView('arrange'); S.loop = { on: true, start: 0, end: 2 }; S.cursor = 0; renderTransport() });
+  await page.click('#btnAddMic'); await page.waitForTimeout(1200);
+  const micOk = await E(() => ({ open: micOpen(), audio: isAudio(selTrack()), dock: !$('#dockAudio').hidden, armed: selTrack().arm }));
+  ok('a mic track opens the input, is armed and shows its recording panel', micOk.open && micOk.audio && micOk.dock && micOk.armed, JSON.stringify(micOk));
+  await E(() => toggleRec()); await page.waitForTimeout(3200); await E(() => stop()); await page.waitForTimeout(1500);
+  const take = await E(async () => { const t = S.tracks.find(isAudio), c = t.clips.filter(c => c.rec); const b = c[0] && SAMPLE_BUF.get(c[0].rec);
+    const solo = S.tracks.map(x => x.mute); S.tracks.forEach(x => x.mute = !isAudio(x)); const r = await renderOffline({ startBar: 0, endBar: 2, sampleRate: 44100, tail: 0 }); S.tracks.forEach((x, i) => x.mute = solo[i]);
+    const stored = c[0] ? !!(await getSample(c[0].rec)) : false; return { clips: c.length, dur: b ? +b.duration.toFixed(2) : 0, rms: +T.rms(r, 0, 3.5).toFixed(4), stored, first: c[0] && +c[0].start.toFixed(3) } });
+  ok('recording captures a take into clips that play back and render in export', take.clips >= 1 && take.dur > 2 && take.rms > 0.005 && take.stored, JSON.stringify(take));
+  await page.screenshot({ path: OUT + '/mic-track.png' });
+  const und = await E(() => { const t = S.tracks.find(isAudio), n0 = t.clips.length; undo(); const n1 = S.tracks.find(isAudio).clips.length; redo(); return { n0, n1, n2: S.tracks.find(isAudio).clips.length } });
+  ok('undo removes a recorded take and redo restores it', und.n0 > 0 && und.n1 === 0 && und.n2 === und.n0, JSON.stringify(und));
+  // session file round trip (whole session in one file) and the History panel
+  const ses = await E(async () => { const text = await buildSessionFile(), j = JSON.parse(text); const before = { tracks: S.tracks.length, undo: undoStack.length, id: curId, title: LIB[curId].title };
+    const takes = Object.keys(j.samples || {}).length; j.session.uid = 'other-session'; j.name = 'Moved Session'; await openSessionData(j, null, 'Moved Session.soundcraft');
+    return { ext: SESSION_EXT, format: j.format, type: j.type, takes, newId: curId !== before.id, title: LIB[curId].title, tracks: S.tracks.length, before, undo: undoStack.length, audio: S.tracks.some(t => t.clips.some(c => c.rec && SAMPLE_BUF.has(c.rec))) } });
+  ok('a .soundcraft file holds the whole session and reopens it with recordings and undo history', ses.format === 'soundcraft' && ses.type === 'project' && ses.takes >= 1 && ses.newId && ses.title === 'Moved Session' && ses.tracks === ses.before.tracks && ses.undo === Math.min(60, ses.before.undo) && ses.audio, JSON.stringify(ses));
+  await E(() => { pushUndo(); S.bpm = 131; renderTransport(); markDirty(); openHistory() }); await page.waitForTimeout(300);
+  const hist = await E(() => ({ sessions: $$('#histSessions li').length, steps: $$('#histSteps li.done').length, top: ($('#histSteps li.done') || {}).textContent || '' }));
+  ok('History lists recent sessions and describes each change', hist.sessions >= 2 && hist.steps >= 2 && /Tempo .* 131 BPM/.test(hist.top), JSON.stringify(hist).slice(0, 200));
+  await page.locator('#histSteps li.done button').first().click(); await page.waitForTimeout(200);
+  const back = await E(() => ({ bpm: S.bpm, redo: redoStack.length }));
+  ok('History can go back to before any change, and redo forward again', back.bpm !== 131 && back.redo >= 1, JSON.stringify(back));
+  await page.keyboard.press('Escape');
+  // settings
+  await E(() => openSettings()); await page.waitForTimeout(400);
+  const tabs = await E(async () => { const names = $$('.set-nav button').map(b => b.textContent); const vis = []; for (const b of $$('.set-nav button')) { b.click(); vis.push($$('.set-sec').filter(s => !s.hidden).length) } return { names, vis } });
+  ok('Settings has tabbed sections including General, MIDI and Recording', ['General', 'MIDI', 'Recording', 'Audio', 'Display'].every(n => tabs.names.includes(n)) && tabs.vis.every(v => v === 1), JSON.stringify(tabs));
+  await page.keyboard.press('Escape');
+  const hsig = await E(async () => { await persistHistory(); return undoStack.length });
   // save, close, reopen
   const sig = await E(() => { saveNow(); return JSON.stringify(S.tracks.map(t => [t.engine, t.mod.routes.length, t.fx.length, t.patterns.reduce((a, p) => a + p.notes.length, 0)])) + curId });
-  await page.close(); const p2 = await ctx.newPage(); p2.on('pageerror', e => errors.push(e.message)); await p2.goto(URL); await p2.waitForTimeout(1000);
+  await page.close(); const p2 = await ctx.newPage(); p2.on('pageerror', e => errors.push(e.message)); await p2.goto(URL()); await p2.waitForTimeout(1000);
   const sig2 = await p2.evaluate(() => JSON.stringify(S.tracks.map(t => [t.engine, t.mod.routes.length, t.fx.length, t.patterns.reduce((a, p) => a + p.notes.length, 0)])) + curId);
   ok('the project reopens with notes, modulation and effects intact', sig === sig2, sig2.slice(0, 120));
+  await p2.waitForTimeout(500); const h2 = await p2.evaluate(() => undoStack.length);
+  ok('undo history survives closing and reopening Soundcraft', h2 === hsig && h2 > 0, hsig + ' → ' + h2);
   // click every visible button in every workspace (destructive ones excluded) and watch for errors
   const skip = /Delete|Clear|Restore|New cassette|Overwrite|Revert|Import|Load reference|Export|Download|Render|Save report|Copy report|Apply and restart|Scan again|Start the tour/i;
   let clicked = 0;
   for (const v of ['arrange', 'mix', 'sounds', 'lab']) {
     await p2.evaluate(v => setView(v), v); await p2.waitForTimeout(400);
     const n = await p2.locator('.view:visible button:visible').count();
-    for (let i = 0; i < Math.min(n, 60); i++) { const b = p2.locator('.view:visible button:visible').nth(i); const t = (await b.innerText().catch(() => '')).trim(); if (skip.test(t)) continue; await b.click({ timeout: 1500 }).catch(() => { }); clicked++; await p2.keyboard.press('Escape'); if (p2.isClosed()) break }
+    for (let i = 0; i < Math.min(n, 60); i++) { if (i >= await p2.locator('.view:visible button:visible').count()) break; const b = p2.locator('.view:visible button:visible').nth(i); const t = (await b.innerText({ timeout: 500 }).catch(() => '')).trim(); if (skip.test(t)) continue; if (process.env.SWEEP_LOG) console.log('  click', v, i, t.slice(0, 30)); await b.click({ timeout: 1500 }).catch(() => { }); clicked++; await p2.keyboard.press('Escape'); if (p2.isClosed()) break }
   }
   ok('clicking every visible control raises no errors', errors.length === 0, clicked + ' buttons clicked; ' + (errors.slice(0, 3).join(' | ') || 'no errors'));
   await p2.setViewportSize({ width: 390, height: 844 }); for (const v of ['studio', 'arrange', 'mix', 'sounds', 'lab']) { await p2.evaluate(v => setView(v), v); await p2.waitForTimeout(250) }

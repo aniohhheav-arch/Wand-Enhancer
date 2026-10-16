@@ -3,7 +3,7 @@
    Everything that touches an AudioContext reads the global `ctx`, so offline rendering can
    swap in an OfflineAudioContext and rebuild the same graph. Per-track runtime nodes live in
    `tr._rt` and global graph nodes in `GR`, both of which are excluded from saved projects. */
-const APP_VERSION='0.3.0';
+const APP_VERSION='0.4.0';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
@@ -105,7 +105,20 @@ class Transient extends AudioWorkletProcessor{
       const d=(this.f-this.s)/(this.s+1e-4);let g=1+(d>0?A*Math.min(d,3)*0.6:S*Math.min(-d,1)*0.9);g=Math.max(0,Math.min(4,g));
       for(let c=0;c<o.length;c++)o[c][n]=(i[c]||i[0])[n]*g}
     return true}}
-registerProcessor('sc-transient',Transient);`;
+registerProcessor('sc-transient',Transient);
+/* Microphone recorder: captures from the first render quantum at or after 'at' (context time) and reports the
+   exact start time, so takes line up with the song. Blocks without input are recorded as silence. */
+class Rec extends AudioWorkletProcessor{
+  constructor(o){super();this.ch=o.processorOptions.ch||1;this.at=Infinity;this.stopAt=Infinity;this.on=false;this.alloc();
+    this.port.onmessage=e=>{const m=e.data;if(m.cmd==='start'){this.at=m.at;this.stopAt=Infinity}else if(m.cmd==='stop')this.stopAt=m.at}}
+  alloc(){this.buf=[];for(let c=0;c<this.ch;c++)this.buf.push(new Float32Array(16384));this.n=0}
+  flush(){if(!this.n)return;const d=this.buf.map(b=>b.slice(0,this.n));this.port.postMessage({data:d},d.map(x=>x.buffer));this.alloc()}
+  process(ins){const t=currentTime,i=ins[0];
+    if(!this.on&&t>=this.at-0.5/sampleRate&&t<this.stopAt){this.on=true;this.port.postMessage({start:t})}
+    if(this.on&&t>=this.stopAt){this.on=false;this.flush();this.port.postMessage({done:true});return false}
+    if(this.on){const L=128;for(let c=0;c<this.ch;c++){const src=i&&i.length?(i[c]||i[0]):null;if(src)this.buf[c].set(src,this.n);else this.buf[c].fill(0,this.n,this.n+L)}this.n+=L;if(this.n+L>this.buf[0].length)this.flush()}
+    return true}}
+registerProcessor('sc-rec',Rec);`;
 const workletState=new WeakMap();
 function loadWorklets(c){
   if(workletState.has(c))return workletState.get(c).p;
@@ -144,7 +157,7 @@ function buildTrack(tr){
   if(!ctx||(tr._rt&&tr._rt.ctx===ctx))return;const E=ENG[tr.engine];
   const rt=tr._rt={ctx,live:new Set(),mod:null,in:G(1),pan:ctx.createStereoPanner(),vol:G(0),rev:G(0),dly:G(0),an:ctx.createAnalyser(),fx:[]};
   rt.an.fftSize=1024;
-  if(E.setup)rt.eng=E.setup(tr,rt.in);
+  if(E.setup)rt.eng=E.setup(tr,rt.in);if(tr.engine==='orch'||tr.engine==='section')ensureTrackSamples(tr);
   rt.pan.connect(rt.vol).connect(GR.bus);rt.vol.connect(rt.rev).connect(GR.revIn);rt.vol.connect(rt.dly).connect(GR.dlyIn);rt.vol.connect(rt.an);
   rebuildTrackChain(tr);
 }
@@ -191,8 +204,10 @@ function ensureAudio(){
   if(PREF.sinkId&&ctx.setSinkId)ctx.setSinkId(PREF.sinkId).catch(e=>{errLog.push('setSinkId: '+e.message);toast('The chosen audio output is not available, so the default output is used.')});
   ctx.onstatechange=()=>{updateWake();if(ctx&&ctx.state==='interrupted')toast('Audio was interrupted by the system.')};
   if('onsinkchange' in ctx)ctx.onsinkchange=()=>toast('Audio output changed.');
-  updateWake();return ctx;
+  prewarmAudio();updateWake();return ctx;
 }
+/* Builds per-context tables that would otherwise be made on the first live note, a few per idle slice. */
+function prewarmAudio(){const c=ctx;let i=0;const step=()=>{if(ctx!==c||OFF||i>=24)return;try{glitchWave()}catch(e){return}i++;setTimeout(step,40)};setTimeout(step,300)}
 async function restartAudio(){
   const was=S.playing;stop();if(ctx){S.tracks.forEach(disposeTrack);S.masterFx.forEach(f=>f._inst=null);[S.returns.rev,S.returns.dly].forEach(f=>f._inst=null);try{await ctx.close()}catch(e){}}
   ctx=null;ensureAudio();if(was)play();toast('Audio engine restarted at '+ctx.sampleRate+' Hz.');

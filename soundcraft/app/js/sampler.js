@@ -13,7 +13,7 @@ const deleteSample=id=>idbReq('readwrite',st=>st.delete(id));
 async function hashBytes(buf){try{const h=await crypto.subtle.digest('SHA-256',buf);return [...new Uint8Array(h)].slice(0,12).map(b=>b.toString(16).padStart(2,'0')).join('')}
   catch(e){let h=2166136261;const u=new Uint8Array(buf);for(let i=0;i<u.length;i+=Math.max(1,u.length>>16))h=Math.imul(h^u[i],16777619);return 'f'+(h>>>0).toString(16)+u.length.toString(16)}}
 const SAMPLE_BUF=new Map(),SAMPLE_META=new Map(),SAMPLE_MISSING=new Set();
-function decoderCtx(){return ctx&&!OFF?ctx:new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,1,44100)}
+let decCtx=null;function decoderCtx(){if(ctx&&!OFF)return ctx;return decCtx||(decCtx=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,1,48000))}
 async function importSampleFile(file){
   if(file.size>200*1024*1024)throw new Error(file.name+' is larger than 200 MB');
   const bytes=await file.arrayBuffer();let buf;
@@ -28,7 +28,7 @@ async function loadSample(id){
   try{const b=await decoderCtx().decodeAudioData(rec.bytes.slice(0));SAMPLE_BUF.set(id,b);SAMPLE_META.set(id,{name:rec.name,duration:b.duration});SAMPLE_MISSING.delete(id);return b}
   catch(e){SAMPLE_MISSING.add(id);errLog.push('decode '+id+': '+e.message);return null}}
 async function loadTrackSamples(tr){if(!tr.zones)return [];const miss=[];for(const z of tr.zones){if(!z.sample)continue;const b=await loadSample(z.sample);if(!b)miss.push(z.name||z.sample)}return miss}
-async function loadProjectSamples(){const miss=[];for(const t of S.tracks)if(t.engine==='sampler')miss.push(...await loadTrackSamples(t));return miss}
+async function loadProjectSamples(){const miss=[];for(const t of S.tracks)if(t.engine==='sampler')miss.push(...await loadTrackSamples(t));miss.push(...await loadTakes());return miss}
 function reversedBuf(id){const k=id+'#rev';if(SAMPLE_BUF.has(k))return SAMPLE_BUF.get(k);const b=SAMPLE_BUF.get(id);if(!b)return null;
   const r=new AudioBuffer({length:b.length,numberOfChannels:b.numberOfChannels,sampleRate:b.sampleRate});for(let c=0;c<b.numberOfChannels;c++){const s=b.getChannelData(c),d=r.getChannelData(c);for(let i=0;i<s.length;i++)d[i]=s[s.length-1-i]}SAMPLE_BUF.set(k,r);return r}
 function newZone(sample,name,o={}){return Object.assign({id:uid('z'),sample,name:name||'Zone',root:60,lo:0,hi:127,vlo:0,vhi:127,start:0,end:1,loop:false,ls:0,le:1,reverse:false,tune:0,vol:1,pan:0,group:0},o)}

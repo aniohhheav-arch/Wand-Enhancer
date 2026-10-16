@@ -6,18 +6,19 @@ function renderArrange(){if(S.view!=='arrange')return;renderArrangeHeads();drawT
 function renderArrangeHeads(){const box=$('#arrHeadsInner');if(!box)return;
   box.innerHTML=S.tracks.map((t,i)=>{const E=ENG[t.engine],pre=t.preset&&presetById(t.preset);return '<div class="th'+(i===S.sel?' sel':'')+'" data-i="'+i+'" style="--c:'+t.color+'">'+
     '<div class="th-top"><input class="th-name" value="'+esc(t.name)+'" aria-label="Track name" data-act="name"><button class="ms wide" data-act="menu" aria-label="Track options for '+esc(t.name)+'">⋯</button></div>'+
-    '<div class="th-ctl"><button class="ms" data-act="mute" aria-pressed="'+t.mute+'" title="Mute">M</button><button class="ms" data-act="solo" aria-pressed="'+t.solo+'" title="Solo">S</button>'+
+    '<div class="th-ctl"><button class="ms" data-act="mute" aria-pressed="'+t.mute+'" title="Mute">M</button><button class="ms" data-act="solo" aria-pressed="'+t.solo+'" title="Solo">S</button>'+(isAudio(t)?'<button class="ms arm" data-act="arm" aria-pressed="'+!!t.arm+'" title="Arm for recording">●</button>':'')+
     '<input type="range" min="0" max="1" step="0.01" value="'+t.vol+'" data-act="vol" aria-label="'+esc(t.name)+' volume"><span class="meter-h"><i></i></span></div>'+
-    '<div class="th-inst" title="'+esc(E.name)+'">'+esc(pre?pre.name:E.name)+(t.input&&t.input.group?' · ensemble':'')+(t.arp&&t.arp.on?' · arp':'')+'</div></div>'}).join('');
+    '<div class="th-inst" title="'+esc(E.name)+'">'+(isAudio(t)?esc('Mic · '+(t.arm?(micOpen()?MIC.label:'armed'):'not armed')+(t.monitor?' · monitoring':'')):esc(pre?pre.name:E.name))+(t.input&&t.input.group?' · ensemble':'')+(t.arp&&t.arp.on?' · arp':'')+'</div></div>'}).join('');
   updateStudioTrack()}
 $('#arrHeadsInner').addEventListener('click',e=>{const th=e.target.closest('.th');if(!th)return;const i=+th.dataset.i,t=S.tracks[i],a=e.target.dataset.act;
   if(a==='mute'||a==='solo'){pushUndo();t[a]=!t[a];e.target.setAttribute('aria-pressed',t[a]);applyMix();markDirty();return}
-  if(a==='menu'){const r=e.target.getBoundingClientRect();openMenu(r.left,r.bottom,[
-    {label:'Edit instrument in Lab',act:()=>{selectTrack(i);setView('lab')}},{label:'Change sound…',act:()=>{selectTrack(i);setView('sounds')}},
+  if(a==='arm'){toggleArm(t);return}
+  if(a==='menu'){const r=e.target.getBoundingClientRect();openMenu(r.left,r.bottom,(isAudio(t)?[{label:t.arm?'Disarm':'Arm for recording',act:()=>toggleArm(t)},{label:t.monitor?'Monitoring off':'Monitor input',act:()=>{t.monitor=!t.monitor;markDirty();updateMonitors();renderArrangeHeads()}}]:[
+    {label:'Edit instrument in Lab',act:()=>{selectTrack(i);setView('lab')}},{label:'Change sound…',act:()=>{selectTrack(i);setView('sounds')}}]).concat([
     {label:'Duplicate track',act:()=>dupTrack(i)},{label:'Save as track preset',act:()=>saveTrackPreset(t)},
     {label:'Move up',act:()=>moveTrack(i,-1)},{label:'Move down',act:()=>moveTrack(i,1)},
     {label:'Next color',act:()=>{pushUndo();t.color=TRACK_COLORS[(TRACK_COLORS.indexOf(t.color)+1)%TRACK_COLORS.length];markDirty();renderArrange();renderKeyboard()}},'-',
-    {label:'Delete track…',act:()=>confirmDeleteTrack(i)}]);return}
+    {label:'Delete track…',act:()=>confirmDeleteTrack(i)}]));return}
   if(a!=='name'&&a!=='vol')selectTrack(i)});
 $('#arrHeadsInner').addEventListener('change',e=>{const th=e.target.closest('.th');if(!th)return;const t=S.tracks[+th.dataset.i];if(e.target.dataset.act==='name'){pushUndo();t.name=e.target.value.trim().slice(0,40)||t.name;markDirty();updateStudioTrack()}});
 $('#arrHeadsInner').addEventListener('input',e=>{if(e.target.dataset.act!=='vol')return;const t=S.tracks[+e.target.closest('.th').dataset.i];t.vol=+e.target.value;applyMix();markDirty()});
@@ -42,8 +43,8 @@ function drawTimeline(){const cv=$('#tl'),wrap=$('#arrScroll');if(!cv||S.view!==
   c.fillStyle=col('--accent');c.fillRect(S.cursor*bw,0,2,TL.RULER);
   S.tracks.forEach((t,i)=>{const y=TL.RULER+i*TL.ROW;t.clips.forEach(cl=>{const x=cl.start*bw+1,w=Math.max(4,cl.len*bw-2),pat=t.patterns.find(p=>p.id===cl.pat),sel=S.selClip&&S.selClip.clip===cl.id;
     c.globalAlpha=0.85;c.fillStyle=t.color;roundRect(c,x,y+3,w,TL.ROW-7,5);c.fill();c.globalAlpha=1;if(sel){c.strokeStyle=col('--fg');c.lineWidth=2;c.stroke()}
-    c.fillStyle='rgba(20,19,48,.85)';c.font='600 10.5px "IBM Plex Sans",sans-serif';c.save();c.beginPath();c.rect(x,y,w,TL.ROW);c.clip();c.fillText(pat?pat.name:'?',x+4,y+15);
-    if(pat&&pat.notes.length){const ps=pat.notes.map(n=>n.p),lo=Math.min(...ps),hi=Math.max(...ps)+1,L=pat.len;c.fillStyle='rgba(20,19,48,.55)';
+    c.fillStyle='rgba(20,19,48,.85)';c.font='600 10.5px "IBM Plex Sans",sans-serif';c.save();c.beginPath();c.rect(x,y,w,TL.ROW);c.clip();c.fillText(cl.rec?(cl.name||'Take'):pat?pat.name:'?',x+4,y+15);if(cl.rec)drawAudioClip(c,cl,x,y,w,TL.ROW,bw);
+    else if(pat&&pat.notes.length){const ps=pat.notes.map(n=>n.p),lo=Math.min(...ps),hi=Math.max(...ps)+1,L=pat.len;c.fillStyle='rgba(20,19,48,.55)';
       for(let rep=0;rep*L<cl.len;rep++)pat.notes.forEach(n=>{const nx=x+(rep*L+n.s/16)*bw;if(nx>x+w)return;c.fillRect(nx,y+TL.ROW-8-(n.p-lo)/(hi-lo)*(TL.ROW-26),Math.max(1,n.l/16*bw),2)});
       for(let rep=1;rep*L<cl.len;rep++){c.fillStyle='rgba(20,19,48,.35)';c.fillRect(x+rep*L*bw,y+4,1,TL.ROW-9)}}c.restore()})});
   let ph=$('#tlHead');if(!ph){ph=document.createElement('div');ph.id='tlHead';ph.className='playhead';wrap.appendChild(ph)}ph.style.height=H+'px'}
@@ -56,7 +57,8 @@ function clipHit(x,y){const row=Math.floor((y-TL.RULER)/TL.ROW),t=S.tracks[row];
 $('#tl').addEventListener('pointerdown',e=>{if(e.button!==0)return;const {x,y}=tlPoint(e),bw=barW();
   if(y<TL.RULER){const m=S.markers.find(m=>x>=m.bar*bw&&x<=m.bar*bw+80&&y<15);if(m){editMarker(m,e.clientX,e.clientY);return}TL.drag={mode:'ruler',b0:Math.floor(x/bw),moved:false};$('#tl').setPointerCapture(e.pointerId);return}
   const h=clipHit(x,y);if(!h.t)return;selectTrack(h.row);
-  if(h.c){S.selClip={tr:h.t.id,clip:h.c.id};h.t.curPat=h.c.pat;pushUndo();TL.drag={mode:h.edge?'resize':'move',t:h.t,c:h.c,x0:x,s0:h.c.start,l0:h.c.len,moved:false};renderRoll(true)}
+  if(h.c){S.selClip={tr:h.t.id,clip:h.c.id};if(h.c.pat)h.t.curPat=h.c.pat;else renderAudioDock();pushUndo();TL.drag={mode:h.edge?'resize':'move',t:h.t,c:h.c,x0:x,s0:h.c.start,l0:h.c.len,moved:false};renderRoll(true)}
+  else if(isAudio(h.t)){S.selClip=null;S.cursor=Math.max(0,Math.floor(h.bar/clipSnap())*clipSnap());renderTransport();drawTimeline();renderAudioDock();return}
   else{pushUndo();const pat=curPattern(h.t),q=clipSnap(),cl={id:uid('c'),pat:pat.id,start:Math.floor(h.bar/q)*q,len:pat.len};h.t.clips.push(cl);S.selClip={tr:h.t.id,clip:cl.id};TL.drag={mode:'resize',t:h.t,c:cl,x0:x,s0:cl.start,l0:cl.len,moved:true,created:true};markDirty()}
   $('#tl').setPointerCapture(e.pointerId);drawTimeline()});
 $('#tl').addEventListener('pointermove',e=>{const {x,y}=tlPoint(e),g=TL.drag,bw=barW();
@@ -71,12 +73,12 @@ $('#tl').addEventListener('dblclick',e=>{const {x,y}=tlPoint(e),h=clipHit(x,y);i
 $('#tl').addEventListener('contextmenu',e=>{e.preventDefault();const {x,y}=tlPoint(e),h=clipHit(x,y);if(!h.c)return;S.selClip={tr:h.t.id,clip:h.c.id};drawTimeline();
   openMenu(e.clientX,e.clientY,[{label:'Duplicate clip',act:dupClip},{label:'Split here',act:()=>splitClip(h.t,h.c,snapBar(h.bar,clipSnap()))},{label:'Make unique',act:makeUnique},'-',{label:'Delete clip',act:delClip}])});
 function selClipObj(){if(!S.selClip)return {};const t=trById(S.selClip.tr);return {t,c:t&&t.clips.find(c=>c.id===S.selClip.clip)}}
-function dupClip(){const {t,c}=selClipObj();if(!c){toast('Select a clip first.');return}pushUndo();const n={id:uid('c'),pat:c.pat,start:c.start+c.len,len:c.len};t.clips.push(n);S.selClip={tr:t.id,clip:n.id};markDirty();drawTimeline()}
+function dupClip(){const {t,c}=selClipObj();if(!c){toast('Select a clip first.');return}pushUndo();const n=Object.assign({},c,{id:uid('c'),start:c.start+c.len});t.clips.push(n);S.selClip={tr:t.id,clip:n.id};markDirty();drawTimeline()}
 function delClip(){const {t,c}=selClipObj();if(!c){toast('Select a clip first.');return}pushUndo();t.clips=t.clips.filter(x=>x!==c);S.selClip=null;markDirty();drawTimeline()}
-function splitClip(t,c,at){if(at<=c.start||at>=c.start+c.len){toast('Split point must be inside the clip.');return}pushUndo();const pat=t.patterns.find(p=>p.id===c.pat),off=(at-c.start)%pat.len;
+function splitClip(t,c,at){if(at<=c.start||at>=c.start+c.len){toast('Split point must be inside the clip.');return}pushUndo();if(c.rec){splitAudioClip(t,c,at);markDirty();drawTimeline();return}const pat=t.patterns.find(p=>p.id===c.pat),off=(at-c.start)%pat.len;
   let np=pat;if(off){np=JSON.parse(JSON.stringify(pat));np.id=uid('p');np.name=pat.name+'′';np.notes=pat.notes.map(n=>({...n,s:((n.s-off*16)%(pat.len*16)+pat.len*16)%(pat.len*16)}));t.patterns.push(np)}
   t.clips.push({id:uid('c'),pat:np.id,start:at,len:c.start+c.len-at});c.len=at-c.start;markDirty();drawTimeline()}
-function makeUnique(){const {t,c}=selClipObj();if(!c){toast('Select a clip first.');return}pushUndo();const pat=t.patterns.find(p=>p.id===c.pat),np=JSON.parse(JSON.stringify(pat));np.id=uid('p');np.name=nextPatName(t);t.patterns.push(np);c.pat=np.id;t.curPat=np.id;markDirty();drawTimeline();renderRoll();toast('The clip now has its own pattern "'+np.name+'".')}
+function makeUnique(){const {t,c}=selClipObj();if(!c){toast('Select a clip first.');return}if(c.rec){toast('Audio clips have no pattern to copy.');return}pushUndo();const pat=t.patterns.find(p=>p.id===c.pat),np=JSON.parse(JSON.stringify(pat));np.id=uid('p');np.name=nextPatName(t);t.patterns.push(np);c.pat=np.id;t.curPat=np.id;markDirty();drawTimeline();renderRoll();toast('The clip now has its own pattern "'+np.name+'".')}
 function nextPatName(t){const used=new Set(t.patterns.map(p=>p.name));for(let i=0;i<26;i++){const n=String.fromCharCode(65+i);if(!used.has(n))return n}return 'P'+(t.patterns.length+1)}
 function editMarker(m,x,y){openMenu(x,y,[{label:'Rename "'+m.name+'"…',act:()=>{const inp=document.createElement('input');inp.type='text';inp.value=m.name;inp.className='ctxmenu';inp.style.cssText='left:'+x+'px;top:'+y+'px;min-width:160px;padding:6px';document.body.appendChild(inp);inp.focus();inp.select();
     const done=()=>{if(inp.value.trim()){pushUndo();m.name=inp.value.trim().slice(0,40);markDirty();drawTimeline()}inp.remove()};inp.onkeydown=e=>{if(e.key==='Enter')done();if(e.key==='Escape')inp.remove()};inp.onblur=done}},
@@ -87,17 +89,17 @@ $('#btnSplitClip').onclick=()=>{const {t,c}=selClipObj();if(!c){toast('Select a 
 $('#btnDupClip').onclick=dupClip;$('#btnDelClip').onclick=delClip;$('#btnUniqueClip').onclick=makeUnique;
 $('#zoomIn').onclick=()=>{S.zoom=Math.min(160,Math.round(S.zoom*1.3));drawTimeline()};$('#zoomOut').onclick=()=>{S.zoom=Math.max(10,Math.round(S.zoom/1.3));drawTimeline()};
 $('#btnAddTrack').onclick=()=>{UI.addMode=true;setView('sounds');toast('Pick a sound and choose "Add as new track".')};
-$('#btnDupTrack').onclick=()=>dupTrack(S.sel);
+$('#btnDupTrack').onclick=()=>dupTrack(S.sel);$('#btnAddMic').onclick=addMicTrack;
 /* splitter */
 (()=>{const sp=$('#splitter');let y0=null,h0=0;sp.addEventListener('pointerdown',e=>{y0=e.clientY;h0=PREF.splitH;sp.setPointerCapture(e.pointerId)});
   sp.addEventListener('pointermove',e=>{if(y0==null)return;PREF.splitH=clamp(h0+e.clientY-y0,120,900);$('#arrBody').style.setProperty('--arr-h',PREF.splitH+'px')});sp.addEventListener('pointerup',()=>{y0=null;savePrefs();drawTimeline()});
   sp.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown'){PREF.splitH=clamp(PREF.splitH+(e.key==='ArrowUp'?-20:20),120,900);$('#arrBody').style.setProperty('--arr-h',PREF.splitH+'px');savePrefs()}})})();
 $$('.dock-tabs [data-dock]').forEach(b=>b.onclick=()=>{PREF.dock=b.dataset.dock;savePrefs();showDock()});
-function showDock(){$$('.dock-tabs [data-dock]').forEach(b=>b.setAttribute('aria-selected',b.dataset.dock===PREF.dock));$('#dockRoll').hidden=PREF.dock!=='roll';$('#dockInst').hidden=PREF.dock!=='inst';if(PREF.dock==='roll')renderRoll(true);else renderSimple()}
+function showDock(){$$('.dock-tabs [data-dock]').forEach(b=>b.setAttribute('aria-selected',b.dataset.dock===PREF.dock));syncDock();if(isAudio(selTrack()))return;if(PREF.dock==='roll')renderRoll(true);else renderSimple()}
 /* ───────── simple instrument view ───────── */
 function simpleKeys(tr){const E=ENG[tr.engine];if(E.simple)return E.simple;const ps=E.params.filter(p=>!/^p\d+[tdlp]$/.test(p.k)&&!/^L\d/.test(p.k));const groups=[...new Set(ps.map(p=>p.group))];
   return ps.filter(p=>groups.slice(0,3).includes(p.group)||p.k==='level').slice(0,12).map(p=>p.k)}
-function renderSimple(){const card=$('#instCard');if(!card||S.view!=='arrange')return;const tr=selTrack();if(!tr)return;const E=ENG[tr.engine],pre=tr.preset&&presetById(tr.preset);
+function renderSimple(){const card=$('#instCard');if(!card||S.view!=='arrange')return;const tr=selTrack();if(!tr)return;if(isAudio(tr)){syncDock();return}const E=ENG[tr.engine],pre=tr.preset&&presetById(tr.preset);
   card.style.setProperty('--c',tr.color);$('#instTag').textContent=E.kind+' · '+E.name;$('#instName').textContent=pre?pre.name:E.name;$('#instDesc').textContent=(pre&&pre.desc?pre.desc+' ':'')+E.desc;
   $('#perfMacros').innerHTML=tr.mod.macros.length?tr.mod.macros.map(m=>ctlHTML(tr,'macro:'+m.id,{big:true,color:'var(--pink)'})).join(''):'<span class="hint">This sound has no macros yet. Create them in the Lab, or right-click any knob and choose “Add to a new macro”.</span>';
   $('#simpleKnobs').innerHTML=simpleKeys(tr).map(k=>ctlHTML(tr,'eng:'+k,{color:tr.color})).join('')+ctlHTML(tr,'trk:rev',{color:tr.color})+ctlHTML(tr,'trk:dly',{color:tr.color})}

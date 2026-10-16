@@ -11,7 +11,7 @@ const CATS=[['engines','Instruments'],['presets','Instrument presets'],['ensembl
 function presetItems(){return FACTORY.map(p=>({kind:'preset',id:p.id,name:p.name,desc:p.desc,tags:p.tags,genre:p.genre||[],mood:p.mood||[],family:p.family,engine:p.engine,factory:true,pre:p}))
   .concat(USER.presets.map(u=>({kind:'preset',id:u.id,name:u.name,desc:u.desc,tags:u.tags||[],genre:u.genre||[],mood:u.mood||[],family:u.data.family||(ENG[u.data.engine]||{}).family,engine:u.data.engine,factory:false,user:u,pre:Object.assign({id:u.id,name:u.name},u.data)})))}
 function itemsFor(cat){
-  if(cat==='engines')return Object.keys(ENG).map(k=>({kind:'engine',id:'eng-'+k,name:ENG[k].name,desc:ENG[k].desc,tags:[ENG[k].kind],genre:[],mood:[],family:ENG[k].family,engine:k,factory:true}));
+  if(cat==='engines')return Object.keys(ENG).filter(k=>!ENG[k].hidden).map(k=>({kind:'engine',id:'eng-'+k,name:ENG[k].name,desc:ENG[k].desc,tags:[ENG[k].kind],genre:[],mood:[],family:ENG[k].family,engine:k,factory:true}));
   if(cat==='presets')return presetItems();
   if(cat==='ensembles')return ENSEMBLES.map(e=>({kind:'ensemble',id:e.id,name:e.name,desc:e.desc,tags:e.tags||[],genre:[],mood:[],factory:true,ens:e})).concat(USER.ensembles.map(u=>({kind:'ensemble',id:u.id,name:u.name,desc:u.desc,tags:u.tags||[],genre:[],mood:[],factory:false,user:u,ens:u.data})));
   if(cat==='tracks')return TRACKPRESETS.map(t=>({kind:'track',id:t.id,name:t.name,desc:t.desc,tags:[],genre:[],mood:[],factory:true,tp:t})).concat(USER.tracks.map(u=>({kind:'track',id:u.id,name:u.name,desc:u.desc,tags:u.tags||[],genre:[],mood:[],factory:false,user:u})));
@@ -33,7 +33,7 @@ function renderSounds(){if(S.view!=='sounds')return;
   $('#moodChips').innerHTML=moods.map(g=>'<button class="chip" data-mood="'+esc(g)+'" aria-pressed="'+(SND.mood===g)+'">'+esc(g)+'</button>').join('')||'<span class="hint">—</span>';
   if(SND.genre)items=items.filter(i=>i.genre.includes(SND.genre));if(SND.mood)items=items.filter(i=>i.mood.includes(SND.mood));
   const title=SND.fam?FAMILIES.find(f=>f[0]===SND.fam)[1]:CATS.find(c=>c[0]===SND.cat)[1];
-  $('#soundsTitle').textContent=title+(SND.cat==='engines'&&!SND.fam?' · '+Object.keys(ENG).length+' sound engines, '+FACTORY.length+' factory presets':'');
+  $('#soundsTitle').textContent=title+(SND.cat==='engines'&&!SND.fam?' · '+Object.keys(ENG).filter(k=>!ENG[k].hidden).length+' sound engines, '+FACTORY.length+' factory presets':'');
   const tr=selTrack(),extra=SND.cat==='templates'&&!SND.fam?'<div class="card" style="--c:var(--accent)"><h4><span>Save this project as a template</span></h4><p>Keeps tracks, sounds, effects, returns, tempo and markers. Notes and clips are left out.</p><div class="acts"><button class="btn primary" data-a="saveTpl">Save as template</button></div></div>'
     :SND.cat==='ensembles'&&!SND.fam?'<div class="card" style="--c:var(--accent)"><h4><span>Save an ensemble</span></h4><p>Saves the selected track'+(tr.input&&tr.input.group?'\'s ensemble':' and every track sharing its keyboard group')+' with zones, layers, effects and channels.</p><div class="acts"><button class="btn primary" data-a="saveEns">Save as ensemble</button></div></div>':'';
   $('#cards').innerHTML=extra+(items.length?items.map(cardHTML).join(''):'<p class="hint" style="padding:10px">Nothing matches. Clear the search or filters.</p>')}
@@ -98,7 +98,11 @@ $('#contentFile').onchange=async e=>{const f=e.target.files[0];e.target.value=''
 /* previews play through a temporary track that is never part of the project */
 let previewTracks=[];
 function stopPreview(){previewTracks.forEach(t=>{try{disposeTrack(t)}catch(e){}});previewTracks=[]}
-function previewItem(it){if(!ensureAudio())return;stopPreview();const t0=ctx.currentTime+0.05;
+function previewItem(it){if(!ensureAudio())return;const pre=it.kind!=='engine'&&it.kind!=='track'?itemPreset(it):null;
+  if(pre&&(pre.engine==='orch'||pre.engine==='section')){const tmp={engine:pre.engine,params:Object.assign(defaultsOf(ENG[pre.engine].params),pre.params)};const need=trackOrchNeeds(tmp);
+    if(!need.every(([i,a])=>orchReady(i,a))){toast('Loading the recordings…');Promise.all(need.map(([i,a])=>orchLoad(i,a))).then(()=>previewNow(it));return}}
+  previewNow(it)}
+function previewNow(it){stopPreview();const t0=ctx.currentTime+0.05;
   const playOn=(pre,notes)=>{const tr=newTrack(pre);tr.vol=0.8;tr.rev=0.2;if(it.kind==='track'){tr.fx=sanitizeFxList(pre.fx)}buildTrack(tr);applyMixOne(tr);previewTracks.push(tr);notes.forEach(([n,s,l,v])=>{const h=trigger(tr,n,v||0.8,t0+s);if(h)h.off(t0+s+l)})};
   const phrase=pre=>{const fam=pre.family||(ENG[pre.engine]||{}).family,b=(pre.oct||4)*12+12;
     if(ENG[pre.engine]&&ENG[pre.engine].drum){const N=i=>DRUM_NOTES[i];return [[N(0),0,0.2],[N(5),0,0.1,0.6],[N(5),0.27,0.1,0.5],[N(2),0.54,0.2],[N(5),0.54,0.1,0.6],[N(0),0.81,0.2],[N(0),1.08,0.2],[N(5),1.08,0.1],[N(2),1.62,0.2],[N(7),1.89,0.2,0.6]]}

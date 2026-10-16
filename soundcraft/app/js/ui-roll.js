@@ -16,7 +16,7 @@ const gridQ=()=>+$('#grid').value;
 function renderPatternBar(){const tr=selTrack();if(!tr)return;const pat=curPattern(tr);$('#patSel').innerHTML=tr.patterns.map(p=>'<option value="'+p.id+'"'+(p.id===pat.id?' selected':'')+'>'+esc(p.name)+' · '+p.len+' bar'+(p.len>1?'s':'')+'</option>').join('');
   $('#patName').value=pat.name;$('#patLen').value=String(pat.len);$('#rollTitle').textContent=tr.name;$('#btnBreak').hidden=!isDrum(tr);$('#scaleRoot').value=String(S.scale.root);$('#scaleType').value=S.scale.type}
 function renderRoll(scroll){
-  const tr=selTrack();if(!tr||S.view!=='arrange'||PREF.dock!=='roll')return;renderPatternBar();const pat=curPattern(tr),wrap=$('#rollWrap'),cv=$('#roll'),drum=isDrum(tr),rows=rollRows(tr),L=pat.len*16;
+  const tr=selTrack();if(!tr||S.view!=='arrange')return;syncDock();if(isAudio(tr)||PREF.dock!=='roll')return;renderPatternBar();const pat=curPattern(tr),wrap=$('#rollWrap'),cv=$('#roll'),drum=isDrum(tr),rows=rollRows(tr),L=pat.len*16;
   R.rows=rows;R.rowH=drum?24:14;R.keysW=drum?96:56;R.colW=Math.max(drum?16:12,(wrap.clientWidth-R.keysW)/Math.min(L,64));R.idx={};rows.forEach((r,i)=>R.idx[r.n]=i);
   const W=Math.ceil(R.keysW+R.colW*L),H=rows.length*R.rowH,dpr=window.devicePixelRatio||1;cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;$('#playhead').style.height=H+'px';
   const c=cv.getContext('2d');c.scale(dpr,dpr);const css=getComputedStyle(document.documentElement),col=k=>css.getPropertyValue(k).trim(),sc=scaleSet();

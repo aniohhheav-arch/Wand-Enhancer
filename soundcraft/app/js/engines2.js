@@ -140,6 +140,12 @@ ENG.impact={name:'Cinematic Impact',kind:KIND.synth,family:'experimental',
 
 /* ───────── Glitch ───────── */
 const GLITCH_DIV=['1/8','1/16','1/16t','1/32'];
+/* Building a PeriodicWave costs several ms, which would delay live notes, so each note picks one of 24
+   pre-built random eight-step sequences (made lazily, one per note until the pool is full). */
+function glitchWave(){const pool=cache('glitchWaves',()=>[]);if(pool.length>=24&&!OFF)return pool[Math.floor(Math.random()*pool.length)];
+  const re=new Float32Array(32),im=new Float32Array(32),steps=Array.from({length:8},()=>Math.random()*2-1);
+  for(let k=1;k<32;k++){let a=0,b=0;for(let s=0;s<8;s++){const p0=2*Math.PI*k*s/8,p1=2*Math.PI*k*(s+1)/8;a+=steps[s]*(Math.sin(p1)-Math.sin(p0))/(Math.PI*k);b+=steps[s]*(Math.cos(p0)-Math.cos(p1))/(Math.PI*k)}re[k]=a;im[k]=b}
+  const w=ctx.createPeriodicWave(re,im,{disableNormalization:true});pool.push(w);return w}
 ENG.glitch={name:'Glitch Stutter',kind:KIND.synth,family:'experimental',
   desc:'Tempo-locked gating with stepped random pitch jumps and crushing. The randomness is a fresh eight-step sequence for every note.',
   params:[C('wave','Source','Source',[['square','Square'],['sawtooth','Saw'],['fm','FM']],'square'),C('rate','Gate rate','Gate',GLITCH_DIV.map(d=>[d,d.toUpperCase().replace('T',' T')]),'1/16'),P('duty','Gate length','Gate',0.1,0.9,0.5,{fmt:FMT.pct}),
@@ -147,9 +153,7 @@ ENG.glitch={name:'Glitch Stutter',kind:KIND.synth,family:'experimental',
   on(tr,n,v,t,out,P,M){const f=mtof(n),oscs=[],ext=[],src=G(0.4);
     if(P.wave==='fm'){const c=O('sine',f,t,tr),m=O('sine',f*3.5,t,tr),mg=G(f*3);m.connect(mg).connect(c.frequency);c.connect(src);oscs.push(c,m)}else{const o=O(P.wave,f,t,tr);o.connect(src);oscs.push(o)}
     const hz=divHz(P.rate),gate=O(pulse(Math.round(P.duty*8)/8||0.125),hz,t,Z),gg=G(0.5),vca=G(0.5);gate.connect(gg).connect(vca.gain);ext.push(gate);
-    if(P.chaos>0.1){const re=new Float32Array(32),im=new Float32Array(32),steps=Array.from({length:8},()=>Math.random()*2-1);
-      for(let k=1;k<32;k++){let a=0,b=0;for(let s=0;s<8;s++){const p0=2*Math.PI*k*s/8,p1=2*Math.PI*k*(s+1)/8;a+=steps[s]*(Math.sin(p1)-Math.sin(p0))/(Math.PI*k);b+=steps[s]*(Math.cos(p0)-Math.cos(p1))/(Math.PI*k)}re[k]=a;im[k]=b}
-      const sh=ctx.createOscillator();sh.setPeriodicWave(ctx.createPeriodicWave(re,im,{disableNormalization:true}));sh.frequency.value=hz/8;sh.start(t);const sg=G(P.chaos*100);sh.connect(sg);oscs.forEach(o=>sg.connect(o.detune));ext.push(sh)}
+    if(P.chaos>0.1){const sh=ctx.createOscillator();sh.setPeriodicWave(glitchWave());sh.frequency.value=hz/8;sh.start(t);const sg=G(P.chaos*100);sh.connect(sg);oscs.forEach(o=>sg.connect(o.detune));ext.push(sh)}
     const lp=F('lowpass',P.cutoff,1);M.bind('cutoff',lp.detune,Math.log2(18000/200)*1200);src.connect(vca);(P.crush>0.02?vca.connect(shaper(P.crush,'hard')):vca).connect(lp);
     const amp=G(0);lp.connect(amp).connect(outStage(P,M,out));env(amp.gain,t,0.003,0.6*(0.4+v*0.6),0,1);return voice(amp,oscs,0.03,ext)}};
 
@@ -163,9 +167,9 @@ ENG.organic={name:'Organic Modal',kind:KIND.phys,family:'experimental',
     const modes=P.mode==='wood'?[[1,1],[3.93,0.4],[9.2,0.15],[15.8,0.06]]:P.mode==='bowl'?[[1,1],[2.71,0.6],[5.15,0.35],[8.2,0.15]]:[[1,1],[2,0.5],[3,0.3],[4,0.15]];
     const exc=G(1);if(P.mode==='breeze'){const ns=N(t),lg=G(0);ns.connect(lg).connect(exc);env(lg.gain,t,0.3,0.25*v,0.5,0.8);ext.push(ns);
       if(P.motion>0.01){const l=O('sine',0.3+P.motion,t,Z),lgg=G(P.motion*0.15);l.connect(lgg).connect(lg.gain);ext.push(l)}}
-    else{const ns=N(t,0.01),eg=G(0);ns.connect(F('lowpass',1000+P.bright*12000,0.5)).connect(eg).connect(exc);hitEnv(eg,t,v,0.006);
+    else{const ns=N(t,0.02),eg=G(0);ns.connect(F('lowpass',1000+P.bright*12000,0.5)).connect(eg).connect(exc);hitEnv(eg,t,v,0.006);
       if(P.mode==='bowl'&&P.motion>0.01){const ns2=N(t),bg=G(P.motion*0.02);ns2.connect(bg).connect(exc);ext.push(ns2)}}
-    modes.forEach(([m,a])=>{const fm=f*m;if(fm>18000)return;const q=clamp(Math.PI*fm*(P.mode==='breeze'?0.05+P.decay*0.02:P.decay/(1+m*0.15)),2,800),b=F('bandpass',fm,q),g=G(P.mode==='breeze'?a*Math.sqrt(q)*0.35:a*q*0.06);exc.connect(b).connect(g).connect(amp)});
+    modes.forEach(([m,a])=>{const fm=f*m;if(fm>18000)return;const q=clamp(Math.PI*fm*(P.mode==='breeze'?0.05+P.decay*0.02:P.decay/(1+m*0.15)),2,800),b=F('bandpass',fm,q),g=G(P.mode==='breeze'?a*Math.sqrt(q)*0.35:a*q*(P.mode==='wood'?0.24:0.1));exc.connect(b).connect(g).connect(amp)});
     if(P.mode==='breeze')return voice(amp,ext,0.8);
     if(!OFF)setTimeout(()=>{try{amp.disconnect()}catch(e){}},(t-ctx.currentTime+P.decay*2+1)*1000);return {oscs,off(){}}}};
 
