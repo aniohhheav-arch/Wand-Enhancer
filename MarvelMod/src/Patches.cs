@@ -96,6 +96,7 @@ public static class MeetingCleanupPatch
         UI.MeetingPanel.Clear();
         Abilities.Loki.Possessions.EndAll();
         CharacterVisuals.RestoreAll();
+        Abilities.AbilityBase.ClearToggles();
         IllusionManager.Instance?.DespawnAll();
         ShapeshiftManager.Instance?.RestoreAll();
         StatusManager.Instance?.ClearAll();

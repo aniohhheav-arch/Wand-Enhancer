@@ -92,8 +92,10 @@ public class CosmicBeam : ThanosAbility
     public override Stone Stone => Stone.Power;
     public override string Id => "cosmic_beam";
     public override string Name => "Cosmic Beam";
-    public override string Label => "BEAM";
+    public override string Label => IsOn(PlayerControl.LocalPlayer) ? "STOP BEAM" : "BEAM";
     public override TargetMode Targeting => TargetMode.Optional;
+    /// <summary>Press to fire, press again to stop. Duration is the maximum time it can stay on.</summary>
+    public override bool IsToggle => true;
 
     protected override void Prepare(PlayerControl caster, ref PlayerControl? target, ref Vector2 point)
         => point = Players.SafeDestination(caster.transform.position, AimDir(caster, target), Cfg.Range);
@@ -102,19 +104,43 @@ public class CosmicBeam : ThanosAbility
 
     private IEnumerator Run(CastContext ctx)
     {
-        StatusManager.Instance?.ApplyStatus(ctx.Caster, StatusEffect.Rooted, 0.9f);
-        var charge = Fx.Aura(ctx.Caster.transform, Sprites.Glow, new Color(C.r, C.g, C.b, 0.8f), 0.4f, 0.8f, 0f, 0f, false);
-        for (float t = 0; t < 0.75f; t += Time.deltaTime)
+        var caster = ctx.Caster;
+        // charge: purple energy gathers into the gauntlet
+        var charge = Fx.Aura(caster.transform, Sprites.Glow, new Color(C.r, C.g, C.b, 0.8f), 0.4f, 0.8f, 0f, 0f, false);
+        Sfx.Play(SfxKind.Rise, 0.8f, ctx.CasterPos, 0.6f);
+        for (float t = 0; t < 0.6f; t += Time.deltaTime)
         {
-            if (charge != null) charge.transform.localScale = Vector3.one * (0.4f + t * 2.2f);
+            if (charge != null) charge.transform.localScale = Vector3.one * (0.4f + t * 2.6f);
             yield return null;
         }
-        if (ctx.Caster == null) yield break;
-        Vector2 from = ctx.Caster.transform.position;
-        Fx.Beam(from, ctx.Point, C, 0.7f, 0.6f);
+        Vector2 dir = (ctx.Point - ctx.CasterPos).normalized;
+        if (dir.sqrMagnitude < 0.01f) dir = Vector2.right;
+        float hitTimer = 0f, drawTimer = 0f, hum = 0f;
         Fx.Shake(0.3f, 0.4f);
-        Sfx.Play(SfxKind.Zap, 0.6f, from);
-        foreach (var pc in OnLine(ctx, from, ctx.Point, 0.55f)) Hit(ctx, pc, from, ctx.Cfg.Duration);
+        Sfx.Play(SfxKind.Zap, 0.6f, ctx.CasterPos);
+        // sustained: the beam stays on, swings toward the closest player in range, and hits along its length
+        for (float t = 0; t < ctx.Cfg.Duration; t += Time.deltaTime)
+        {
+            if (!IsOn(caster) || caster == null || !Players.IsAlive(caster) || MeetingHud.Instance != null) break;
+            StatusManager.Instance?.ApplyStatus(caster, StatusEffect.Rooted, 0.3f);
+            Vector2 from = caster.transform.position;
+            var lock_ = Players.ClosestTarget(caster, ctx.Cfg.Range);
+            if (lock_ != null) dir = Vector2.Lerp(dir, (Players.Pos(lock_) - from).normalized, 4f * Time.deltaTime).normalized;
+            var end = Players.SafeDestination(from, dir, ctx.Cfg.Range);
+            drawTimer -= Time.deltaTime;
+            if (drawTimer <= 0f) { drawTimer = 0.12f; Fx.Beam(from, end, C, 0.55f + Mathf.Sin(t * 30f) * 0.08f, 0.16f); Fx.Sparkles(end, C, 2, 0.4f, 0.25f); }
+            hum -= Time.deltaTime;
+            if (hum <= 0f) { hum = 0.45f; Sfx.Play(SfxKind.Hum, 0.7f, from, 0.35f); }
+            hitTimer -= Time.deltaTime;
+            if (hitTimer <= 0f)
+            {
+                hitTimer = 0.5f;
+                foreach (var pc in OnLine(ctx, from, end, 0.55f)) Hit(ctx, pc, from, 0.6f);
+            }
+            yield return null;
+        }
+        if (caster != null) { Fx.Burst(caster.transform.position, C, 1.2f, 0.3f); Sfx.Play(SfxKind.Thud, 0.8f, caster.transform.position, 0.5f); }
+        ToggleEnded(caster);
     }
 }
 

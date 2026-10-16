@@ -566,16 +566,33 @@ public class AstralProjection : StrangeAbility
     public override string Id => "astral_projection";
     public override string Name => "Astral Projection";
     public override string Category => "Astral";
-    public override string Label => "ASTRAL";
+    public override string Label => IsOn(PlayerControl.LocalPlayer) ? "RETURN" : "ASTRAL";
+    /// <summary>Press to leave your body, press again to return. Duration is the maximum time out.</summary>
+    public override bool IsToggle => true;
 
     protected override void OnCast(CastContext ctx)
     {
-        StatusManager.Instance?.ApplyStatus(ctx.Caster, StatusEffect.Rooted, ctx.Cfg.Duration);
-        Fx.Aura(ctx.Caster.transform, Sprites.Glow, new Color(Astral.r, Astral.g, Astral.b, 0.45f), 1.4f, ctx.Cfg.Duration);
+        Coroutines.Start(BodyLoop(ctx));
         if (ctx.LocalIs(ctx.Caster)) Coroutines.Start(Run(ctx));
     }
 
-    private static IEnumerator Run(CastContext ctx)
+    /// <summary>Every client: the body stays rooted with a soft glow until the projection returns.</summary>
+    private IEnumerator BodyLoop(CastContext ctx)
+    {
+        var caster = ctx.Caster;
+        var glow = Fx.Aura(caster.transform, Sprites.Glow, new Color(Astral.r, Astral.g, Astral.b, 0.45f), 1.4f, ctx.Cfg.Duration + 1f);
+        for (float t = 0; t < ctx.Cfg.Duration; t += Time.deltaTime)
+        {
+            if (!IsOn(caster) || caster == null || !Players.IsAlive(caster) || MeetingHud.Instance != null) break;
+            StatusManager.Instance?.ApplyStatus(caster, StatusEffect.Rooted, 0.3f);
+            yield return null;
+        }
+        if (glow != null) Object.Destroy(glow.gameObject);
+        if (caster != null) { Fx.Sparkles(caster.transform.position, Astral, 8, 0.8f, 0.5f); Sfx.Play(SfxKind.Shimmer, 0.8f, caster.transform.position, 0.5f); }
+        ToggleEnded(caster);
+    }
+
+    private IEnumerator Run(CastContext ctx)
     {
         var hud = HudManager.Instance;
         var astral = IllusionManager.Instance!.SpawnIllusion(ctx.Caster, ctx.CasterPos, quiet: true);
@@ -584,10 +601,10 @@ public class AstralProjection : StrangeAbility
         astral.Lifetime = ctx.Cfg.Duration + 1f;
         astral.SetTint(new Color(1f, 0.92f, 0.6f, 0.5f));
         if (hud != null && hud.PlayerCam != null) hud.PlayerCam.SetTarget(astral);
-        Fx.Toast("ASTRAL FORM: WASD / ARROWS", Astral, 2f, 3.4f);
+        Fx.Toast("ASTRAL FORM: WASD / ARROWS — PRESS AGAIN TO RETURN", Astral, 2.5f, 3.4f);
         for (float t = 0; t < ctx.Cfg.Duration; t += Time.deltaTime)
         {
-            if (MeetingHud.Instance != null || astral == null || !Players.IsAlive(ctx.Caster)) break;
+            if (!IsOn(ctx.Caster) || MeetingHud.Instance != null || astral == null || !Players.IsAlive(ctx.Caster)) break;
             if (Vector2.Distance(astral.transform.position, ctx.CasterPos) > ctx.Cfg.Range)   // leash
             {
                 var back = ctx.CasterPos + ((Vector2)astral.transform.position - ctx.CasterPos).normalized * ctx.Cfg.Range;

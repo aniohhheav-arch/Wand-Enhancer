@@ -14,7 +14,7 @@ public static class ModConfig
     // System.Text.Json: Newtonsoft.Json resolves to the game's IL2CPP copy, which cannot serialize managed types.
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
-    private const int CurrentConfigVersion = 2;
+    private const int CurrentConfigVersion = 3;
 
     public static ConfigData Data { get; private set; } = new();
 
@@ -32,6 +32,15 @@ public static class ModConfig
         {
             BepInEx.Logging.Logger.CreateLogSource("MarvelMod").LogWarning($"Config load failed: {e.Message}");
             Data = new ConfigData();
+        }
+        if (Data.ConfigVersion == 2)
+        {
+            // v3: Cosmic Beam / Astral Projection became toggles; Duration is now the max time on
+            Data.Abilities.Remove("cosmic_beam");
+            Data.Abilities.Remove("astral_projection");
+            Data.ConfigVersion = CurrentConfigVersion;
+            EnsureDefaults();
+            Save();
         }
         if (Data.ConfigVersion < CurrentConfigVersion)
         {

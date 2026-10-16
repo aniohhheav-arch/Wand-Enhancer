@@ -61,7 +61,7 @@ public static class DefaultAbilities
 
         // ── THANOS: Power ───────────────────────────────────────────────
         ["power_blast"]           = new() { Cooldown=6,  Duration=1.5f, Range=6 },
-        ["cosmic_beam"]           = new() { Cooldown=14, Duration=1.5f, Range=7 },
+        ["cosmic_beam"]           = new() { Cooldown=14, Duration=6, Range=7 },
         ["shockwave"]             = new() { Cooldown=16, Duration=1f,   Range=3 },
         ["power_overload"]        = new() { Cooldown=30, Duration=6 },
         ["planetbreaker"]         = new() { Cooldown=90, Range=5, Radius=2, Damage=100, CinematicDur=2.5f },
@@ -133,7 +133,7 @@ public static class DefaultAbilities
         ["strange_echo"]          = new() { Cooldown=18, Duration=6 },
         ["time_loop"]             = new() { Cooldown=28, Duration=5, Range=4 },
         ["eye_of_agamotto"]       = new() { Cooldown=80, Duration=4, Range=4, CinematicDur=1.5f },
-        ["astral_projection"]     = new() { Cooldown=30, Duration=8, Range=8 },
+        ["astral_projection"]     = new() { Cooldown=30, Duration=30, Range=8 },
         ["astral_sight"]          = new() { Cooldown=30, Duration=8 },
         ["astral_bind"]           = new() { Cooldown=18, Duration=3, Range=4 },
         ["dimension_step"]        = new() { Cooldown=7,  Range=3.5f },

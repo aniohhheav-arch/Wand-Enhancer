@@ -52,7 +52,7 @@ public static class AbilityDescriptions
         ["possess_kill"]   = "(While possessing) Kill the body you're possessing, then return to your own.",
         // ── THANOS: Power (purple) ──
         ["power_blast"]    = "Purple energy orb (aims at the closest player, otherwise where you walk). Hit = stunned + knocked back.",
-        ["cosmic_beam"]    = "Charge for a moment, then a piercing beam that stuns everyone along it.",
+        ["cosmic_beam"]    = "TOGGLE. Press to fire a sustained beam that swings toward the closest player and stuns everyone along it; press again to stop (max 6 s). You stay rooted while it fires. Cooldown starts when it stops.",
         ["shockwave"]      = "Slam the ground: everyone around you is stunned and thrown back.",
         ["power_overload"] = "For a few seconds you move faster and your stuns last 50% longer.",
         ["planetbreaker"]  = "ULTIMATE. Float up, then a giant purple explosion: players very close die, the rest are stunned and thrown.",
@@ -122,7 +122,7 @@ public static class AbilityDescriptions
         ["strange_echo"]     = "An echo of you replays the path you just walked.",
         ["time_loop"]        = "Needs a target. They keep snapping back to the same spot for a few seconds.",
         ["eye_of_agamotto"]  = "ULTIMATE. Needs a target. The Eye opens: they're frozen in a sphere of runes while their echoes wander.",
-        ["astral_projection"]= "Leave your body as an astral form (WASD / arrows) within a leash range. Your body stays put.",
+        ["astral_projection"]= "TOGGLE. Press to leave your body as an astral form (WASD / arrows) within a leash range; press again (RETURN) to snap back. Your body stays put. Cooldown starts when you return.",
         ["astral_sight"]     = "See every player AND every portal through walls for a while.",
         ["astral_bind"]      = "Needs a target. Spectral chains root them.",
         ["dimension_step"]   = "A quick portal hop in the direction you're walking.",

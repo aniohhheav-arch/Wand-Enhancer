@@ -25,7 +25,8 @@ public static class LokiRpc
         if (ability == null || caster == null) return;
         var target = targetId == NoTarget ? null : Players.ById(targetId);
         // everyone sees a quick cast flash on the caster
-        if (ability.Category != "Hidden" && !ability.Silent && ability.Category != "Meeting")
+        bool off = new Vector2(x2, y2) == Abilities.AbilityBase.OffSignal;
+        if (ability.Category != "Hidden" && !ability.Silent && ability.Category != "Meeting" && !off)
         {
             VFX.Fx.Motif(ability.Category, caster.transform, ability.CastColor);
             VFX.SoundBook.PlayActivation(ability, caster.transform.position);

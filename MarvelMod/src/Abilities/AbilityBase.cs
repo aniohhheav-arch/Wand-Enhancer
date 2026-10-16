@@ -42,6 +42,8 @@ public sealed class CastContext
     }
 
     public Vector2 CasterPos => Caster.transform.position;
+    /// <summary>True when this cast is the "turn it off" press of a toggle ability.</summary>
+    public bool ToggleOff => Point2 == AbilityBase.OffSignal;
     public bool IsLocalCaster => Caster.AmOwner;
     public bool IsLocalTarget => Target != null && Target.AmOwner;
     public bool LocalIs(PlayerControl? pc) => pc != null && pc == PlayerControl.LocalPlayer;
@@ -66,6 +68,19 @@ public abstract class AbilityBase
     public List<Vector2> PickedPoints { get; } = new();
     /// <summary>Set in Prepare to send a second point.</summary>
     protected Vector2 SecondPoint;
+    /// <summary>Press once to turn on, press again to turn off. Cooldown starts when it turns off.</summary>
+    public virtual bool IsToggle => false;
+    /// <summary>Sent as Point2 to switch a toggle ability off.</summary>
+    public static readonly Vector2 OffSignal = new(-99999f, -99999f);
+    private static readonly HashSet<(string, byte)> _on = new();
+    /// <summary>Is this toggle ability currently on for that player (tracked on every client).</summary>
+    public bool IsOn(PlayerControl? pc) => pc != null && _on.Contains((Id, pc.PlayerId));
+    public static void ClearToggles() => _on.Clear();
+    protected void SetOn(PlayerControl pc, bool on)
+    {
+        if (on) _on.Add((Id, pc.PlayerId)); else _on.Remove((Id, pc.PlayerId));
+    }
+
     /// <summary>Colour of the cast flash everyone sees on the caster.</summary>
     public virtual Color CastColor => new(0.3f, 1f, 0.45f, 1f);
 
@@ -93,6 +108,13 @@ public abstract class AbilityBase
     /// <summary>Validate, then broadcast the cast to every client. Returns true on success.</summary>
     public bool TryActivate(PlayerControl? caster, PlayerControl? target = null)
     {
+        if (IsToggle && IsOn(caster))
+        {
+            LokiRpc.RpcCast(caster!, Id, LokiRpc.NoTarget, 0f, 0f, OffSignal.x, OffSignal.y, 0);
+            if (!PracticeModeUnlimited) _lastUsed = Time.realtimeSinceStartup;
+            PracticeLog($"[{Name}] turned off");
+            return true;
+        }
         if (caster == null || !IsReady || !Players.IsAlive(caster) || !CanUse(caster)) return false;
         if (Targeting is TargetMode.Required or TargetMode.Optional && target == null) target = FindTarget(caster);
         if (Targeting is TargetMode.Required or TargetMode.Menu && !Players.IsAlive(target)) return false;
@@ -105,7 +127,7 @@ public abstract class AbilityBase
         LokiRpc.RpcCast(caster, Id, target != null ? target.PlayerId : LokiRpc.NoTarget,
             point.x, point.y, SecondPoint.x, SecondPoint.y, UnityEngine.Random.Range(int.MinValue, int.MaxValue));
 
-        if (!PracticeModeUnlimited)
+        if (!PracticeModeUnlimited && !IsToggle)
             _lastUsed = Time.realtimeSinceStartup;
         PracticeLog($"[{Name}] activated" + (target != null ? $" -> {target.Data?.PlayerName}" : ""));
         return true;
@@ -119,6 +141,11 @@ public abstract class AbilityBase
     {
         try
         {
+            if (IsToggle)
+            {
+                if (ctx.ToggleOff) { SetOn(ctx.Caster, false); return; }   // the running loop sees this and winds down
+                SetOn(ctx.Caster, true);
+            }
             BeforeCast(ctx);
             OnCast(ctx);
         }
@@ -142,6 +169,15 @@ public abstract class AbilityBase
     protected abstract void OnCast(CastContext ctx);
 
     public void ResetCooldown() => _lastUsed = -9999f;
+
+    /// <summary>A toggle that ran out on its own (time cap, meeting, death): start the cooldown for the caster.</summary>
+    protected void ToggleEnded(PlayerControl? caster)
+    {
+        if (caster == null) return;
+        bool wasOn = IsOn(caster);
+        SetOn(caster, false);
+        if (wasOn && caster.AmOwner && !PracticeModeUnlimited) _lastUsed = Time.realtimeSinceStartup;
+    }
 
     private static void PracticeLog(string msg)
     {

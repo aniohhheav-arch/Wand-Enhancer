@@ -338,7 +338,7 @@ public static class AbilityButtons
             var target = a.FindTarget(lp);
             if (target != null && a.IsReady && (outline == null || Closer(lp, target, outline))) outline = target;
 
-            bool usable = canAct && a.IsReady && a.CanUse(lp) && (a.Targeting != TargetMode.Required || target != null);
+            bool usable = a.IsToggle && a.IsOn(lp) ? true : canAct && a.IsReady && a.CanUse(lp) && (a.Targeting != TargetMode.Required || target != null);
             if (usable) b.SetEnabled(); else b.SetDisabled();
         }
         SetOutline(outline);
@@ -375,6 +375,7 @@ public static class AbilityButtons
         var slots = Slots();
         if (slot >= slots.Count || !lp.CanMove || lp.inVent) return;
         var ability = slots[slot];
+        if (ability.IsToggle && ability.IsOn(lp)) { ability.TryActivate(lp, null); return; }
         if (!ability.IsReady) return;
 
         if (ability.MapPoints > 0)
