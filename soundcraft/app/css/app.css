@@ -375,3 +375,7 @@ body.reduced *{animation:none!important;transition:none!important}
 .head-split{position:absolute;top:0;right:0;width:6px;height:100%;cursor:ew-resize;z-index:3}
 .head-split:hover{background:linear-gradient(90deg,transparent 2px,var(--accent) 2px,var(--accent) 4px,transparent 4px)}
 body.dock-max .dock{display:none}
+
+/* MIDI learn */
+body.midi-learning [data-learn],body.midi-learning .fader,body.midi-learning .th input[type=range]{outline:2px dashed var(--pink);outline-offset:2px}
+#btnHold[aria-pressed="true"],#btnArp[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}

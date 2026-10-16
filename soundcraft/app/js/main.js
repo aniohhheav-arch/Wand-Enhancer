@@ -11,6 +11,9 @@ $('#projTitle').addEventListener('change',e=>{const t=e.target.value.trim()||'Un
 $('#midiChip').onclick=e=>{e.stopPropagation();const p=$('#midiPop');p.hidden=!p.hidden;$('#midiChip').setAttribute('aria-expanded',!p.hidden);renderMidiPop();if(!midiAcc&&!p.hidden&&$('#midiChip').dataset.state!=='unsupported')initMIDI()};
 document.addEventListener('click',e=>{if(!e.target.closest('#midiPop,#midiChip')&&!$('#midiPop').hidden){$('#midiPop').hidden=true;$('#midiChip').setAttribute('aria-expanded','false')}});
 $('#midiCh').innerHTML='<option value="0">All channels</option>'+Array.from({length:16},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('');$('#midiCh').onchange=e=>S.midiCh=+e.target.value;
+$('#btnHold').onclick=()=>setLatch(!S.latch);$('#btnArp').onclick=()=>runAction('arp',1,true);
+$('#mapLearn').onclick=()=>{const k=$('#mapPick').value;if(k)startActionLearn(k)};
+$('#mapList').onclick=e=>{const b=e.target.closest('[data-unmapa]');if(!b)return;delete PREF.midiMap[b.dataset.unmapa];savePrefs();renderMidiPop()};
 $('#btnRescan').onclick=()=>midiAcc?bindInputs():initMIDI();
 $('#ccMaps').onclick=e=>{const b=e.target.closest('[data-unmap]');if(!b)return;delete S.ccMap[b.dataset.unmap];markDirty();renderMidiPop()};
 $('#btnGetApp').onclick=async()=>{try{const r=await fetch('soundcraft-app.html');if(!r.ok)throw 0;saveBlob(await r.blob(),'soundcraft.html')}catch(e){toast('The app file is not available from this page.')}};

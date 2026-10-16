@@ -49,12 +49,13 @@ function liveTargets(n,v,ch,src){const tr=selTrack();if(!tr)return [];const vel=
   const pool=tr.input&&tr.input.group?S.tracks.filter(t=>t.input&&t.input.group===tr.input.group):[tr];
   return pool.filter(t=>!isAudio(t)).filter(t=>!t.input||((t.input.ch||0)===0||!ch||t.input.ch===ch)&&n>=t.input.lo&&n<=t.input.hi&&vel>=t.input.vlo&&vel<=t.input.vhi).map(t=>[t,ENG[t.engine].drum&&src!=='midi'?DRUM_NOTES[((n%12)+12)%12]:n+((t.input&&t.input.tr)||0)])}
 function liveOn(n,v,src,ch){
-  if(rendering||!ensureAudio())return;const targets=liveTargets(n,v,ch,src);if(!targets.length)return;const key=src+':'+n;if(held.has(key))liveOff(n,src);
+  if(rendering||!ensureAudio())return;if(S.latch&&!physDown.size)releaseLatched();physDown.add(src+':'+n);const targets=liveTargets(n,v,ch,src);if(!targets.length)return;const key=src+':'+n;if(held.has(key))liveOff(n,src);
   const ent={n,v,hs:[],rec:S.rec&&S.playing?posAt(ctx.currentTime):null,targets};
   targets.forEach(([tr,nn])=>{if(tr.arp&&tr.arp.on){(tr._arpHeld=tr._arpHeld||new Map()).set(nn,v);if(!tr._arpClock)tr._arpClock={next:ctx.currentTime+0.01,i:0,start:ctx.currentTime};liveArpTick(ctx.currentTime+0.05)}
     else{const h=trigger(tr,nn,v,ctx.currentTime);if(h)ent.hs.push(h)}});
   held.set(key,ent);keyVisual(n,true);studioNote(v);quest('play')}
-function liveOff(n,src){const key=src+':'+n,e=held.get(key);if(!e)return;held.delete(key);keyVisual(n,false);
+function liveOff(n,src){physDown.delete(src+':'+n);if(S.latch&&held.has(src+':'+n)){latched.push([n,src]);return}liveOffNow(n,src)}
+function liveOffNow(n,src){const key=src+':'+n,e=held.get(key);if(!e)return;held.delete(key);keyVisual(n,false);
   e.targets.forEach(([tr,nn])=>{if(tr._arpHeld){tr._arpHeld.delete(nn);if(!tr._arpHeld.size){tr._arpHeld=null;tr._arpClock=null}}});
   e.hs.forEach(h=>{if(S.sustain)sustained.push(h);else h.off(ctx.currentTime)});
   if(e.rec!=null&&S.rec&&S.playing){const end=posAt(ctx.currentTime);e.targets.forEach(([tr,nn])=>commitRec(tr,nn,e.v,e.rec,end))}}

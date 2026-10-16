@@ -24,6 +24,7 @@ function velCurve(v){const x=v/127;return PREF.velCurve==='soft'?Math.pow(x,0.5)
 function onMidi(ev,inp){
   const d=ev.data;if(!d||d.length<1)return;const st=d[0],type=st&0xf0,ch=(st&0x0f)+1,d1=d[1]||0,d2=d.length>2?d[2]:0;
   if(type<0x80||type===0xF0)return;if(S.midiCh&&ch!==S.midiCh)return;const now=performance.now();lastMidi=now;devHits[inp.id]=now;
+  if(midiMapped(type,ch,d1,d2))return;
   if(type===0x90&&d2>0){if(ev.timeStamp>0&&ev.timeStamp<=now){const lag=now-ev.timeStamp;midiLag.n++;midiLag.sum+=lag;if(lag>midiLag.max)midiLag.max=lag}liveOn(d1,velCurve(d2),'midi',ch)}
   else if(type===0x80||(type===0x90&&d2===0))liveOff(d1,'midi');
   else if(type===0xB0)onCC(d1,d2/127);
@@ -53,4 +54,69 @@ function renderMidiPop(){
     lat.textContent=ctx?'Sound output latency ≈ '+o.toFixed(0)+' ms'+(midiLag.n?' · MIDI handling '+(midiLag.sum/midiLag.n).toFixed(1)+' ms average, '+midiLag.max.toFixed(0)+' ms worst':'')+(o>25?'. Higher than ideal: set Settings → Audio → Latency to Lowest, use wired headphones or speakers instead of Bluetooth, and close other audio apps.':''):''}
   $('#devList').innerHTML=list.map(i=>'<li><i class="led on" data-dev="'+esc(i.id)+'"></i>'+esc(i.name||'MIDI input')+'<small>'+esc(i.manufacturer||'')+'</small></li>').join('');
   const maps=Object.entries(S.ccMap).map(([cc,m])=>{const tr=S.tracks.find(t=>t.id===m.track);if(!tr)return '';const lbl=m.macro?'Macro '+((tr.mod.macros.find(x=>x.id===m.macro)||{}).name||'?'):(destDef(tr,m.dst)||{label:m.dst}).label;return '<li>CC '+cc+' → '+esc(tr.name)+' · '+esc(lbl)+'<button class="btn xs" data-unmap="'+cc+'">Remove</button></li>'}).join('');
+  const pick=$('#mapPick');if(pick&&!pick.dataset.filled){pick.dataset.filled=1}if(pick)pick.innerHTML=['play','stop','rec','loop','metro','hold','arp','arpRate','arpMode','arpOct','master','swing','bpm','selvol','selpan','selrev','selmute','selsolo','selmacro:0','selmacro:1','selmacro:2','selmacro:3','trkNext','trkPrev','octUp','octDown','undo','marker','panic','ret:rev','ret:dly'].map(k=>'<option value="'+k+'">'+esc(actionDef(k).label)+'</option>').join('');
+  const ml=$('#mapList');if(ml)ml.innerHTML=Object.entries(PREF.midiMap).map(([id,k])=>{const d=actionDef(k);return '<li>'+esc(id.startsWith('cc:')?'CC '+id.slice(3):'Pad '+noteName(+id.slice(5)))+' → '+esc(d?d.label:k+' (track gone)')+'<button class="btn xs" data-unmapa="'+esc(id)+'">Remove</button></li>'}).join('')||'<li class="hint">Nothing mapped yet.</li>';
   $('#ccMaps').innerHTML=maps||'<li class="hint">No CC links yet. Right-click any knob and choose “Learn MIDI CC”.</li>'}
+
+/* ───────── controller mapping: any knob, fader, button or pad on a controller to app controls ─────────
+   Mappings are global (stored with the preferences), because they describe your hardware, not a song.
+   A CC drives continuous controls directly and toggles buttons when it crosses the middle; a note (a pad
+   or key) presses buttons, sets toggles, or, for continuous controls, jumps to its velocity. Mapped notes
+   do not play sound. Learn: right-click a control → "Learn MIDI", or the MIDI panel's Learn list. */
+PREF.midiMap=PREF.midiMap||{};
+let actLearn=null;const ccState={};
+const trkOf=id=>S.tracks.find(t=>t.id===id);
+function actionDef(key){const [a,b,c]=key.split(':');
+  const T={master:['Master volume','cont'],swing:['Swing','cont'],bpm:['Tempo','cont'],play:['Play / stop','btn'],stop:['Stop','btn'],rec:['Record','btn'],loop:['Loop on/off','btn'],metro:['Metronome','btn'],
+    hold:['Hold (latch notes)','btn'],arp:['Arpeggiator on/off (selected track)','btn'],arpRate:['Arp rate (selected track)','cont'],arpMode:['Arp mode (selected track)','cont'],arpOct:['Arp octaves (selected track)','cont'],
+    trkNext:['Next track','btn'],trkPrev:['Previous track','btn'],octUp:['Octave up','btn'],octDown:['Octave down','btn'],panic:['All notes off','btn'],undo:['Undo','btn'],marker:['Add section marker','btn'],
+    selvol:['Selected track volume','cont'],selpan:['Selected track pan','cont'],selrev:['Selected track reverb send','cont'],selmute:['Selected track mute','btn'],selsolo:['Selected track solo','btn'],
+    selmacro:['Selected track macro '+(+b+1),'cont']}[a];
+  if(T)return {label:T[0],kind:T[1]};
+  if(a==='trk'){const t=trkOf(b);if(!t)return null;const L={vol:['volume','cont'],pan:['pan','cont'],rev:['reverb send','cont'],dly:['delay send','cont'],mute:['mute','btn'],solo:['solo','btn'],arm:['record arm','btn'],sel:['select','btn']}[c];return L&&{label:t.name+' '+L[0],kind:L[1]}}
+  if(a==='ret')return {label:(b==='rev'?'Reverb':'Delay')+' return level',kind:'cont'};return null}
+const ARP_RATES=['1/4','1/8','1/8t','1/16','1/16t','1/32'];
+function runAction(key,v,press){const d=actionDef(key);if(!d)return;const [a,b,c]=key.split(':'),tr=selTrack();
+  if(d.kind==='btn'&&!press)return;
+  const mix=()=>{applyMix();markDirty();later('ui:mixer',()=>{if(S.view==='mix')renderMix();if(S.view==='arrange')renderArrangeHeads()})};
+  switch(a){
+    case 'master':S.master=v;applyMix();later('ui:master',()=>{$('#masterVol').value=S.master});markDirty();return;
+    case 'swing':S.swing=v*0.5;later('ui:swing',()=>{$('#swing').value=S.swing});markDirty();return;
+    case 'bpm':S.bpm=Math.round(60+v*140);later('ui:bpm',()=>{$('#bpm').value=S.bpm;fxTempoChanged()});markDirty();return;
+    case 'play':S.playing?stop():play();return;case 'stop':stop();return;case 'rec':toggleRec();return;case 'loop':$('#btnLoop').click();return;case 'metro':$('#btnMetro').click();return;
+    case 'hold':setLatch(!S.latch);return;
+    case 'arp':if(tr&&!isAudio(tr)){tr.arp.on=!tr.arp.on;if(!tr.arp.on){tr._arpHeld=null;tr._arpClock=null}markDirty();later('ui:arp',()=>{renderTransport();renderArrangeHeads();if(S.view==='lab')renderLab()});toast('Arpeggiator '+(tr.arp.on?'on':'off')+' on '+tr.name+'.')}return;
+    case 'arpRate':if(tr){tr.arp.rate=ARP_RATES[Math.min(ARP_RATES.length-1,Math.floor(v*ARP_RATES.length))];later('ui:arp',()=>{if(S.view==='lab')renderLab()});markDirty()}return;
+    case 'arpMode':if(tr){tr.arp.mode=ARP_MODES[Math.min(ARP_MODES.length-1,Math.floor(v*ARP_MODES.length))][0];later('ui:arp',()=>{if(S.view==='lab')renderLab()});markDirty()}return;
+    case 'arpOct':if(tr){tr.arp.oct=1+Math.min(3,Math.floor(v*4));markDirty()}return;
+    case 'trkNext':later('sel',()=>selectTrack(Math.min(S.tracks.length-1,S.sel+1)));return;case 'trkPrev':later('sel',()=>selectTrack(Math.max(0,S.sel-1)));return;
+    case 'octUp':S.octave=Math.min(8,S.octave+1);later('ui:kb',renderKeyboard);return;case 'octDown':S.octave=Math.max(0,S.octave-1);later('ui:kb',renderKeyboard);return;
+    case 'panic':if(ctx)panic();return;case 'undo':later('undo',undo);return;case 'marker':$('#btnMarker').click();return;
+    case 'selvol':if(tr){tr.vol=v;mix()}return;case 'selpan':if(tr){tr.pan=v*2-1;mix()}return;case 'selrev':if(tr){tr.rev=v;mix()}return;
+    case 'selmute':if(tr){tr.mute=!tr.mute;mix()}return;case 'selsolo':if(tr){tr.solo=!tr.solo;mix()}return;
+    case 'selmacro':{const m=tr&&tr.mod.macros[+b];if(m){applyMacro(tr,m,v);later('mac'+b,()=>syncControl(tr,'macro:'+m.id))}return}
+    case 'ret':S.returns[b].vol=v;mix();return;
+    case 'trk':{const t=trkOf(b);if(!t)return;if(c==='vol')t.vol=v;else if(c==='pan')t.pan=v*2-1;else if(c==='rev')t.rev=v;else if(c==='dly')t.dly=v;else if(c==='mute')t.mute=!t.mute;else if(c==='solo')t.solo=!t.solo;
+      else if(c==='arm'){toggleArm(t);return}else if(c==='sel'){later('sel',()=>selectTrack(S.tracks.indexOf(t)));return}mix();return}}}
+/* Called first for every message; returns true when the message drove a mapped control (so it does not play). */
+function midiMapped(type,ch,d1,d2){
+  const isNote=type===0x90||type===0x80,isCC=type===0xB0;if(!isNote&&!isCC)return false;
+  const id=(isNote?'note:':'cc:')+d1,on=type===0x90&&d2>0;
+  if(actLearn&&(isCC||on)){PREF.midiMap[id]=actLearn;savePrefs();const d=actionDef(actLearn);toast((isCC?'CC '+d1:'Pad / key '+noteName(d1))+' now controls '+(d?d.label:actLearn)+'.');actLearn=null;document.body.classList.remove('midi-learning');renderMidiPop();return true}
+  const key=PREF.midiMap[id];if(!key)return false;const d=actionDef(key);if(!d)return true;
+  if(isCC){const v=d2/127;if(d.kind==='cont')runAction(key,v,false);else{const was=ccState[id]>=0.5;ccState[id]=v;if(v>=0.5&&!was)runAction(key,1,true)}}
+  else if(on){if(d.kind==='cont')runAction(key,d2/127,false);else runAction(key,1,true)}
+  return true}
+function startActionLearn(key){actLearn=key;learn=null;document.body.classList.add('midi-learning');const d=actionDef(key);toast('Move a knob or fader, or hit a pad, on your controller to control '+(d?d.label:key)+'. Esc cancels.')}
+/* right-click any mappable control → Learn MIDI */
+function learnKeyFor(el){if(!el||!el.closest)return null;const x=el.closest('[data-learn]');if(x)return x.dataset.learn;
+  const strip=el.closest('.strip[data-strip]'),k=el.dataset&&(el.dataset.k||(el.dataset.ret?'ret':null));
+  if(strip){const s=strip.dataset.strip;if(s==='master'&&el.classList.contains('fader'))return 'master';if(s.startsWith('ret:')&&el.classList.contains('fader'))return 'ret:'+s.slice(4);if(s.startsWith('track:')&&k&&['vol','pan','rev','dly'].includes(k))return 'trk:'+s.slice(6)+':'+k}
+  const th=el.closest('.th[data-i]');if(th){const t=S.tracks[+th.dataset.i],a=el.dataset.act;if(t&&['vol','mute','solo','arm'].includes(a))return 'trk:'+t.id+':'+a;if(t&&!a)return 'trk:'+t.id+':sel'}return null}
+document.addEventListener('contextmenu',e=>{if(e.defaultPrevented)return;const key=learnKeyFor(e.target);if(!key)return;e.preventDefault();const d=actionDef(key),mapped=Object.entries(PREF.midiMap).filter(([,k])=>k===key).map(([id])=>id);
+  openMenu(e.clientX,e.clientY,[{label:'Learn MIDI for '+(d?d.label:key)+'…',act:()=>startActionLearn(key)}].concat(mapped.length?[{label:'Forget MIDI ('+mapped.join(', ')+')',act:()=>{mapped.forEach(id=>delete PREF.midiMap[id]);savePrefs();renderMidiPop()}}]:[]))});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&actLearn){actLearn=null;document.body.classList.remove('midi-learning')}},true);
+/* Hold: notes keep sounding after you let go; the next chord (or turning Hold off) releases them. */
+const latched=[],physDown=new Set();
+function setLatch(on){S.latch=on;const b=$('#btnHold');if(b)b.setAttribute('aria-pressed',on);if(!on)releaseLatched();toast('Hold '+(on?'on: notes keep sounding until you play the next chord.':'off.'))}
+function releaseLatched(){latched.splice(0).forEach(([n,src])=>liveOffNow(n,src))}

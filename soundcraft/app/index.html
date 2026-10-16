@@ -35,20 +35,22 @@
   <header class="transport" id="transport">
     <div class="tgroup">
       <button class="tbtn play" id="btnPlay" aria-pressed="false" aria-label="Play" title="Play (Space)"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></button>
-      <button class="tbtn" id="btnStop" aria-label="Stop" title="Stop. Press again to silence every note."><svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg></button>
-      <button class="tbtn rec" id="btnRec" aria-pressed="false" aria-label="Record" title="Record into the selected track (R)"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg></button>
+      <button class="tbtn" id="btnStop" data-learn="stop" aria-label="Stop" title="Stop. Press again to silence every note."><svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg></button>
+      <button class="tbtn rec" id="btnRec" data-learn="rec" aria-pressed="false" aria-label="Record" title="Record into the selected track (R)"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/></svg></button>
     </div>
     <div class="lcd">
       <div class="lcd-pos" id="lcdPos">1.1.1</div>
-      <label class="lcd-cell"><span>BPM</span><input id="bpm" type="number" min="40" max="240" step="1" value="112"></label>
+      <label class="lcd-cell"><span>BPM</span><input id="bpm" data-learn="bpm" type="number" min="40" max="240" step="1" value="112"></label>
       <div class="lcd-cell" title="Soundcraft currently works in 4/4 only"><span>Time</span><b>4/4</b></div>
     </div>
     <div class="tgroup">
-      <button class="btn" id="btnLoop" aria-pressed="true" title="Loop the region set in the timeline ruler (L)">Loop</button>
-      <button class="btn" id="btnMetro" aria-pressed="false" title="Metronome">Click</button>
+      <button class="btn" id="btnLoop" data-learn="loop" aria-pressed="true" title="Loop the region set in the timeline ruler (L)">Loop</button>
+      <button class="btn" id="btnMetro" data-learn="metro" aria-pressed="false" title="Metronome">Click</button>
+      <button class="btn" id="btnHold" data-learn="hold" aria-pressed="false" title="Hold: notes keep sounding after you let go, until the next chord (great with the arpeggiator)">Hold</button>
+      <button class="btn" id="btnArp" data-learn="arp" aria-pressed="false" title="Arpeggiator on the selected track">Arp</button>
       <label class="tf">Quantize <select id="quant"><option value="0">Off</option><option value="0.5">1/32</option><option value="1">1/16</option><option value="2">1/8</option><option value="4">1/4</option></select></label>
-      <label class="tf">Swing <input id="swing" type="range" min="0" max="0.5" step="0.01"></label>
-      <label class="tf">Master <input id="masterVol" type="range" min="0" max="1" step="0.01"></label>
+      <label class="tf">Swing <input id="swing" data-learn="swing" type="range" min="0" max="0.5" step="0.01"></label>
+      <label class="tf">Master <input id="masterVol" data-learn="master" type="range" min="0" max="1" step="0.01"></label>
     </div>
     <div class="tgroup" style="margin-left:auto">
       <button class="midi-chip" id="midiChip" data-state="idle" aria-haspopup="true" aria-expanded="false"><i class="led" id="midiLed"></i><span id="midiText">MIDI</span></button>
@@ -60,7 +62,11 @@
       <p id="midiLat" class="hint" hidden></p>
       <ul class="dev-list" id="devList"></ul>
       <div class="row-actions"><label class="tf">Channel <select id="midiCh"></select></label><button class="btn" id="btnRescan">Scan again</button><button class="btn" id="btnGetApp" hidden>Download app file</button></div>
-      <h3>CC links</h3>
+      <h3>Controller mapping</h3>
+      <p class="hint">Right-click any fader, knob or button (transport, mixer, track headers) and choose Learn MIDI, or pick one here:</p>
+      <div class="row-actions"><select id="mapPick" aria-label="Control to learn"></select><button class="btn" id="mapLearn">Learn</button></div>
+      <ul class="dev-list" id="mapList"></ul>
+      <h3>CC links to sound controls</h3>
       <ul class="dev-list" id="ccMaps"></ul>
     </div>
   </header>
