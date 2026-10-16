@@ -866,6 +866,9 @@ public class TemporalEcho : ThanosAbility
         echo.SetTint(new Color(0.5f, 1f, 0.6f, 0.6f));
         echo.Untouchable = true;
         echo.PlayPath(path, 4f);
+        // Thanos's echo marks every footstep of the path with a fading green clock tick
+        for (int i = 0; i < path.Count; i += Mathf.Max(1, path.Count / 6)) Fx.ShockRing(path[i], new Color(C.r, C.g, C.b, 0.6f), 0.8f, 0.9f, squash: 0.5f);
+        Sfx.Play(SfxKind.Tick, 1.3f, path[0], 0.45f);
         echo.Lifetime = ctx.Cfg.Duration;
     }
 }

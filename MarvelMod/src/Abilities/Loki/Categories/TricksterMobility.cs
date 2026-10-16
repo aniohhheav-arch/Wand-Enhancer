@@ -116,6 +116,9 @@ public class MasterOfMisdirection : AbilityBase
                 Fx.Comic((Vector2)positions[i] + new Vector2(0f, 0.9f), "OR AM I?", Fx.LokiGold, 0.8f);
             }
             var last = positions[positions.Count - 1];
+            // a shell game: gold threads link every copy, then they all flash at once so nobody can tell which is real
+            for (int i = 0; i < positions.Count - 1; i++) Fx.Tendril(positions[i], positions[i + 1], Fx.LokiGold, 0.6f, 10);
+            foreach (var p in positions) Fx.Release(p, Fx.LokiGold, ImpactStyle.Magic, 0.7f);
             VfxPlayer.PlayLocal(VfxType.LokiSmoke, ctx.Caster.transform.position);
             VfxPlayer.PlayLocal(VfxType.LokiTeleport, last);
             Players.Teleport(ctx.Caster, last);

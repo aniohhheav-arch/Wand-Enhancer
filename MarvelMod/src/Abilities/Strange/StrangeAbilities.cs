@@ -122,6 +122,8 @@ public class PortalSnare : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         var exit = (Vector2)MapSpawnPoints.GetRandom(1, ctx.Rng, ctx.CasterPos)[0];
+        // a trap must stay hidden: only Strange sees a faint sigil where he set it
+        if (ctx.LocalIs(ctx.Caster)) Fx.Sigil(ctx.CasterPos, new Color(Gold.r, Gold.g, Gold.b, 0.5f), 0.9f, 0.6f);
         PortalEngine.OpenSnare(ctx.Caster, ctx.CasterPos + AbilityButtons.LastMoveDirection * 0.01f, exit, ctx.Cfg.Duration);
     }
 }
@@ -453,6 +455,9 @@ public class MirrorWorldCollapse : StrangeAbility
             var c = DimensionalPrison.MirrorCenter;
             Fx.Release(caster.transform.position, MirrorBlue, ImpactStyle.Glitch, 2.5f, cinematic: true);
             Fx.Fragments(caster.transform.position, MirrorBlue, 70, ctx.Cfg.Range, 1.2f);
+            // the whole area folds: a big mirror sigil and the rest of the world dims
+            Fx.Sigil(caster.transform.position, MirrorBlue, ctx.Cfg.Range * 1.4f, 0.8f);
+            Fx.Darken(0.3f, 1.5f, new Color(0.1f, 0.15f, 0.3f));
             DimensionalPrison.MirrorScenery(c, ctx.Cfg.Duration + 1f, seed);
             var who = Players.InRadius(caster.transform.position, ctx.Cfg.Range, 15, caster);
             who.Add(caster);
@@ -553,6 +558,8 @@ public class StrangeTemporalEcho : StrangeAbility
         echo.Untouchable = true;
         echo.PlayPath(path, 4f);
         echo.Lifetime = ctx.Cfg.Duration;
+        // Strange's echo leaves a smear of afterimages, like a long exposure
+        Fx.Trail(echo.transform, TimeGreen, Mathf.Min(4f, ctx.Cfg.Duration), 0.09f);
     }
 }
 
@@ -570,6 +577,7 @@ public class TimeLoop : StrangeAbility
     private static IEnumerator Run(CastContext ctx, PlayerControl target)
     {
         Vector2 anchor = target.transform.position;
+        Fx.Sigil(anchor, TimeGreen, 1.3f, ctx.Cfg.Duration, spinBack: false);   // the loop's anchor point
         for (float t = 0; t < ctx.Cfg.Duration; t += 1.2f)
         {
             for (float w = 0; w < 1.2f; w += Time.deltaTime)
@@ -578,6 +586,7 @@ public class TimeLoop : StrangeAbility
                 yield return null;
             }
             Fx.Release(anchor, TimeGreen, ImpactStyle.Time, 0.6f);
+            Fx.Beam(target.transform.position, anchor, TimeGreen, 0.08f, 0.25f);   // yanked back along a thread of time
             Players.Teleport(target, anchor);
         }
     }
