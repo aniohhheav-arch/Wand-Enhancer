@@ -102,6 +102,14 @@ public class ConfigData
     public bool    VfxScreenShake   { get; set; } = true;
     public bool    VfxDistortion    { get; set; } = true;
     public string  VfxQuality       { get; set; } = "high";
+    /// <summary>Screen shake strength in percent (0 = none).</summary>
+    public int     ShakeStrength    { get; set; } = 100;
+    /// <summary>Flashes, darkening and cinematic camera moves.</summary>
+    public bool    CameraEffects    { get; set; } = true;
+    /// <summary>Animation tempo for build-ups and sigils (1 = normal, 2 = twice as fast, 0.5 = twice as slow).</summary>
+    public float   AnimationSpeed   { get; set; } = 1f;
+    /// <summary>Global cooldown multiplier in percent (practice tuning).</summary>
+    public int     CooldownScale    { get; set; } = 100;
     public bool    CinematicSkip    { get; set; } = false;
     public bool    PracticeUnlimited{ get; set; } = false;
     public bool    PracticeInvincible{ get; set; } = false;

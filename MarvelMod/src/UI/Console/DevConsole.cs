@@ -117,6 +117,10 @@ public class DevConsole : MonoBehaviour
         "finisher"   => CmdFinisher(p),
         "snap"       => CmdSnap(p),
         "portal"     => CmdPortal(p),
+        "sfx"        => CmdSfx(p),
+        "arena"      => CmdArena(p),
+        "cast"       => CmdCast(p),
+        "tune"       => CmdTune(p),
         _            => throw new ConsoleException($"Unknown command '{p[0]}'. Type 'help' for commands."),
     };
 
@@ -126,7 +130,7 @@ public class DevConsole : MonoBehaviour
     {
         if (p.Length > 1) return GetDetailedHelp(p[1]);
         return
-            "Commands: help, clear, status, config, character, ability, meeting, finisher, snap, portal, illusion, practice, vfx, cinematic, debug\n" +
+            "Commands: help, clear, status, config, character, ability, cast, tune, meeting, finisher, snap, portal, illusion, practice, vfx, sfx, arena, cinematic, debug\n" +
             "Use 'help <command>' for details.";
     }
 
@@ -135,7 +139,11 @@ public class DevConsole : MonoBehaviour
         "ability"   => "ability cooldown <id> <s> | duration <id> <s> | casttime | range | damage | radius | enabled <id> <on|off> | reset <id> | reset_all",
         "illusion"  => "illusion spawn <n> | behavior <idle|wander|follow|task|random> | despawn_all | movement_speed <v> | lifetime <s> | nameplates <on|off>",
         "practice"  => "practice reset | dummies <n> | spawn_dummy | clear_dummies | invincible <on|off> | unlimited <on|off>",
-        "vfx"       => "vfx enabled <on|off> | intensity <0-100> | particles <on|off> | screen_shake <on|off> | quality <low|medium|high|ultra>",
+        "vfx"       => "vfx enabled <on|off> | intensity <0-200> | particles <on|off> | screen_shake <on|off> | shake <0-300 %> | camera <on|off> | speed <0.4-2.5> | distortion <on|off> | quality <low|medium|high|ultra> (preset) | test <heavy|magic|electric|glitch|cosmic|comedy|eerie|time|chaos|lightning|sigil|charge>",
+        "sfx"       => "sfx enabled <on|off> | volume <0-100> | cinematic <0-100> | test <kind or cue> | list | stop",
+        "arena"     => "arena reset  (removes leftover effects, restores players, camera, statuses, portals, pocket dimensions; stops sounds)",
+        "cast"      => "cast <ability_id>  (practice/freeplay: fire any ability as yourself, on the closest player if it needs a target)",
+        "tune"      => "tune cooldowns <percent> | tune reset",
         "character" => "character loki | thanos | strange | none | info | abilities",
         "meeting"   => "meeting ability cooldown|uses_per_meeting|duration <id> <value> | meeting ability enabled|practice_only <id> <on|off> | meeting ability phase <id> <discussion|voting|both> | meeting list | meeting reset",
         "finisher"  => "finisher list | preview <id> (on the closest player, nobody dies) | replay <id> | duration <id> <s> | mode <full|short|skip> | body <on|off>",
@@ -459,10 +467,45 @@ public class DevConsole : MonoBehaviour
             case "particles":    ModConfig.Data.VfxParticles    = ParseBool(p, 2);  break;
             case "screen_shake": ModConfig.Data.VfxScreenShake  = ParseBool(p, 2);  break;
             case "distortion":   ModConfig.Data.VfxDistortion   = ParseBool(p, 2);  break;
+            case "shake":        ModConfig.Data.ShakeStrength   = Math.Clamp(ParseInt(p, 2), 0, 300); break;
+            case "camera":       ModConfig.Data.CameraEffects   = ParseBool(p, 2);  break;
+            case "speed":        ModConfig.Data.AnimationSpeed  = Math.Clamp(ParseFloat(p, 2), 0.4f, 2.5f); break;
             case "quality":
+            {
                 if (p.Length < 3) throw new ConsoleException("Usage: vfx quality <low|medium|high|ultra>");
-                ModConfig.Data.VfxQuality = p[2].ToLowerInvariant();
-                break;
+                var q = p[2].ToLowerInvariant();
+                var d = ModConfig.Data;
+                switch (q)
+                {
+                    case "low":    d.VfxParticles = true; d.VfxIntensity = 70;  d.VfxDistortion = false; d.ShakeStrength = Math.Min(d.ShakeStrength, 60); break;
+                    case "medium": d.VfxParticles = true; d.VfxIntensity = 85;  d.VfxDistortion = true; break;
+                    case "high":   d.VfxParticles = true; d.VfxIntensity = 100; d.VfxDistortion = true; break;
+                    case "ultra":  d.VfxParticles = true; d.VfxIntensity = 120; d.VfxDistortion = true; break;
+                    default: throw new ConsoleException($"Unknown quality '{p[2]}'. Use low, medium, high or ultra.");
+                }
+                d.VfxQuality = q;
+                ModConfig.Save();
+                return $"Quality preset '{q}': particles x{(q == "low" ? 0.35f : q == "medium" ? 0.65f : q == "ultra" ? 1.4f : 1f)}, intensity {d.VfxIntensity}%, distortion {d.VfxDistortion}.";
+            }
+            case "test":
+            {
+                if (p.Length < 3) throw new ConsoleException("Usage: vfx test <style>");
+                var lp = PlayerControl.LocalPlayer ?? throw new ConsoleException("No local player.");
+                Vector2 at = (Vector2)lp.transform.position + VFX.Fx.TestOffset;
+                var s = p[2].ToLowerInvariant();
+                switch (s)
+                {
+                    case "lightning": Reactor.Utilities.Coroutines.Start(VFX.Fx.StrikeFromSky(at, new Color(0.6f, 0.8f, 1f), 0.6f)); break;
+                    case "sigil": VFX.Fx.Sigil(at, VFX.Fx.LokiGold, 2f, 1.5f); break;
+                    case "charge": Reactor.Utilities.Coroutines.Start(VFX.Fx.Charge(lp.transform, VFX.Fx.ChaosPurple, 1.2f)); break;
+                    default:
+                        if (!Enum.TryParse<VFX.ImpactStyle>(s, true, out var style))
+                            throw new ConsoleException($"Unknown style '{p[2]}'. Try: {string.Join(", ", Enum.GetNames(typeof(VFX.ImpactStyle))).ToLowerInvariant()}, lightning, sigil, charge.");
+                        VFX.Fx.Release(at, VFX.Fx.ChaosPurple, style, 1.4f);
+                        break;
+                }
+                return $"Played {s}.";
+            }
             default: throw new ConsoleException($"Unknown vfx subcommand '{p[1]}'.");
         }
         ModConfig.Save();
@@ -481,7 +524,7 @@ public class DevConsole : MonoBehaviour
             case "replay":
                 // replay <ability_id>
                 if (p.Length < 3) throw new ConsoleException("Usage: cinematic replay <ability_id>");
-                var ability = LokiCharacter.Instance.GetById(p[2]);
+                var ability = CharacterRegistry.Ability(p[2]);
                 if (ability == null) throw new ConsoleException($"Unknown ability '{p[2]}'.");
                 ability.TryActivate(PlayerControl.LocalPlayer);
                 return $"Replaying {ability.Name}.";
@@ -519,6 +562,66 @@ public class DevConsole : MonoBehaviour
             default:
                 throw new ConsoleException($"Unknown debug subcommand '{p[1]}'.");
         }
+    }
+
+    private string CmdSfx(string[] p)
+    {
+        if (p.Length < 2) throw new ConsoleException("Usage: sfx <enabled|volume|cinematic|test|list|stop> ...");
+        var d = ModConfig.Data;
+        switch (p[1].ToLowerInvariant())
+        {
+            case "enabled":   d.SfxEnabled = ParseBool(p, 2); break;
+            case "volume":    d.SfxVolume = Math.Clamp(ParseInt(p, 2), 0, 100) / 100f; break;
+            case "cinematic": d.CinematicVolume = Math.Clamp(ParseInt(p, 2), 0, 100) / 100f; break;
+            case "stop":      VFX.Sfx.StopAll(); return "All sounds stopped.";
+            case "list":
+                return "Kinds: " + string.Join(", ", Enum.GetNames(typeof(VFX.SfxKind))).ToLowerInvariant() +
+                       "\nCues: " + string.Join(", ", Enum.GetNames(typeof(VFX.SfxCue))).ToLowerInvariant();
+            case "test":
+            {
+                if (p.Length < 3) throw new ConsoleException("Usage: sfx test <kind or cue>  (see 'sfx list')");
+                if (Enum.TryParse<VFX.SfxCue>(p[2], true, out var cue)) { VFX.Sfx.Cue(cue, null, 1.4f); return $"Cue {cue}."; }
+                if (Enum.TryParse<VFX.SfxKind>(p[2], true, out var kind)) { VFX.Sfx.Play(kind); return $"Sound {kind}."; }
+                throw new ConsoleException($"Unknown sound '{p[2]}'. Type 'sfx list'.");
+            }
+            default: throw new ConsoleException($"Unknown sfx subcommand '{p[1]}'.");
+        }
+        ModConfig.Save();
+        return $"sfx: enabled={d.SfxEnabled} volume={(int)(d.SfxVolume * 100)}% cinematic={(int)(d.CinematicVolume * 100)}%.";
+    }
+
+    private string CmdArena(string[] p)
+    {
+        if (p.Length < 2 || p[1].ToLowerInvariant() != "reset") throw new ConsoleException("Usage: arena reset");
+        return Arena.Reset();
+    }
+
+    private string CmdCast(string[] p)
+    {
+        if (p.Length < 2) throw new ConsoleException("Usage: cast <ability_id>");
+        if (!CharacterRegistry.IsFreeplay && !CharacterRegistry.InLobby)
+            throw new ConsoleException("cast only works in freeplay / practice.");
+        var ability = CharacterRegistry.Ability(p[1]) ?? throw new ConsoleException($"Unknown ability '{p[1]}'. Use 'character abilities' to list ids.");
+        var lp = PlayerControl.LocalPlayer ?? throw new ConsoleException("No local player.");
+        PlayerControl? target = null;
+        if (ability.Targeting != Abilities.TargetMode.None) target = Players.ClosestTarget(lp, 99f);
+        if (ability.Targeting is Abilities.TargetMode.Required or Abilities.TargetMode.Menu && target == null)
+            throw new ConsoleException($"{ability.Name} needs a target: spawn a dummy first ('practice spawn_dummy').");
+        ability.ResetCooldown();
+        return ability.TryActivate(lp, target) ? $"Cast {ability.Name}." : $"{ability.Name} could not be cast right now (disabled, dead or its own rule refused).";
+    }
+
+    private string CmdTune(string[] p)
+    {
+        if (p.Length < 2) throw new ConsoleException("Usage: tune cooldowns <percent> | tune reset");
+        switch (p[1].ToLowerInvariant())
+        {
+            case "cooldowns": ModConfig.Data.CooldownScale = Math.Clamp(ParseInt(p, 2), 0, 500); break;
+            case "reset":     ModConfig.Data.CooldownScale = 100; ModConfig.Data.AnimationSpeed = 1f; ModConfig.Data.ShakeStrength = 100; break;
+            default: throw new ConsoleException($"Unknown tune subcommand '{p[1]}'.");
+        }
+        ModConfig.Save();
+        return $"Cooldowns at {ModConfig.Data.CooldownScale}% of normal.";
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

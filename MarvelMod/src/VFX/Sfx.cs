@@ -6,7 +6,11 @@ using UnityEngine;
 namespace MarvelMod.VFX;
 
 public enum SfxKind { Zap, Boom, Whoosh, Chime, Hum, Snap, Slash, Splat, Choir, Bell, Creak, Swell,
-    Crackle, Rumble, Shimmer, Glass, Warp, Tick, Gong, Heartbeat, Rise, Thud }
+    Crackle, Rumble, Shimmer, Glass, Warp, Tick, Gong, Heartbeat, Rise, Thud,
+    Boing, Pop, Glitch, Reverse, Thunder, Stab, Sizzle, Clang }
+
+/// <summary>Layered impact families: each mixes a main hit, a body layer and an optional low accent.</summary>
+public enum SfxCue { Heavy, Magic, Electric, Glitch, Cosmic, Comedy, Eerie, Time, Chaos, Metal }
 
 /// <summary>
 /// Procedurally synthesised sound effects (no audio files needed). Each stone / effect picks a
@@ -30,6 +34,40 @@ public static class Sfx
     private static readonly List<float> _activeUntil = new();
     private static readonly Dictionary<string, float> _lastPlayed = new();
     private const int MaxVoices = 10;
+
+    /// <summary>Stops every playing sound (ability interrupted, meeting, arena reset).</summary>
+    public static void StopAll()
+    {
+        if (_source != null) _source.Stop();
+        _activeUntil.Clear();
+    }
+
+    /// <summary>
+    /// A layered impact: main hit + body + optional sub-bass accent, each with a little pitch variation
+    /// so repeated hits never sound identical. `size` 0.5 (light) .. 2 (ultimate).
+    /// </summary>
+    public static void Cue(SfxCue cue, Vector2? at = null, float size = 1f, bool cinematic = false)
+    {
+        float v = Mathf.Clamp(0.45f + size * 0.25f, 0.4f, 1f);
+        float low = Mathf.Lerp(1.15f, 0.75f, Mathf.InverseLerp(0.5f, 2f, size));   // bigger = deeper
+        void P(SfxKind k, float pitch, float vol) => Play(k, pitch * low * Vary(), at, vol * v, cinematic);
+        switch (cue)
+        {
+            case SfxCue.Heavy:    P(SfxKind.Thud, 1f, 0.9f); P(SfxKind.Boom, 1.1f, 0.6f); if (size > 1f) P(SfxKind.Rumble, 0.8f, 0.6f); break;
+            case SfxCue.Magic:    P(SfxKind.Chime, 1.2f, 0.6f); P(SfxKind.Shimmer, 1f, 0.5f); if (size > 1f) P(SfxKind.Choir, 1f, 0.35f); break;
+            case SfxCue.Electric: P(SfxKind.Crackle, 1f, 0.8f); P(SfxKind.Zap, 0.9f, 0.6f); if (size > 1f) P(SfxKind.Thunder, 1f, 0.8f); break;
+            case SfxCue.Glitch:   P(SfxKind.Glitch, 1f, 0.8f); P(SfxKind.Glass, 1.1f, 0.4f); if (size > 1f) P(SfxKind.Reverse, 0.9f, 0.5f); break;
+            case SfxCue.Cosmic:   P(SfxKind.Warp, 0.8f, 0.6f); P(SfxKind.Boom, 0.8f, 0.7f); if (size > 1f) P(SfxKind.Gong, 0.7f, 0.6f); break;
+            case SfxCue.Comedy:   P(SfxKind.Boing, 1f, 0.8f); P(SfxKind.Pop, 1.2f, 0.6f); break;
+            case SfxCue.Eerie:    P(SfxKind.Reverse, 1f, 0.6f); P(SfxKind.Heartbeat, 0.9f, 0.6f); if (size > 1f) P(SfxKind.Choir, 0.7f, 0.4f); break;
+            case SfxCue.Time:     P(SfxKind.Tick, 1f, 0.7f); P(SfxKind.Bell, 1f, 0.5f); if (size > 1f) P(SfxKind.Warp, 0.6f, 0.5f); break;
+            case SfxCue.Chaos:    P(SfxKind.Reverse, 1.2f, 0.6f); P(SfxKind.Sizzle, 0.9f, 0.6f); if (size > 1f) P(SfxKind.Stab, 0.8f, 0.7f); break;
+            case SfxCue.Metal:    P(SfxKind.Clang, 1f, 0.9f); P(SfxKind.Thud, 1f, 0.6f); if (size > 1f) P(SfxKind.Rumble, 0.9f, 0.5f); break;
+        }
+    }
+
+    /// <summary>Small random pitch step (cached clips are quantised to 0.05, so this picks a neighbour).</summary>
+    public static float Vary() => 1f + UnityEngine.Random.Range(-1, 2) * 0.05f;
 
     /// <summary>Plays a sound; quieter the further `at` is from the local player.</summary>
     public static void Play(SfxKind kind, float pitch = 1f, Vector2? at = null, float volume = 1f, bool cinematic = false)
@@ -81,6 +119,14 @@ public static class Sfx
             SfxKind.Heartbeat => Heartbeat(pitch),
             SfxKind.Rise   => Rise(pitch),
             SfxKind.Thud   => Thud(pitch),
+            SfxKind.Boing  => Boing(pitch),
+            SfxKind.Pop    => Pop(pitch),
+            SfxKind.Glitch => Glitch(pitch),
+            SfxKind.Reverse => Reverse(pitch),
+            SfxKind.Thunder => Thunder(pitch),
+            SfxKind.Stab   => Stab(pitch),
+            SfxKind.Sizzle => Sizzle(pitch),
+            SfxKind.Clang  => Clang(pitch),
             _              => Splat(),
         };
         var clip = AudioClip.Create(key, data.Length, 1, Rate, false);
@@ -398,6 +444,133 @@ public static class Sfx
             float t = (float)i / b.Length;
             phase += 2 * Math.PI * Mathf.Lerp(120f, 45f, t) * p / Rate;
             b[i] = ((float)Math.Sin(phase) + Rnd() * 0.3f * Mathf.Exp(-t * 30f)) * Mathf.Exp(-t * 6f) * 0.9f;
+        }
+        return b;
+    }
+
+    /// <summary>Cartoon spring: pitch wobbles up and down.</summary>
+    private static float[] Boing(float p)
+    {
+        var b = Buf(0.6f);
+        double phase = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            float f = (180f + 220f * t + 90f * Mathf.Sin(t * 40f) * (1f - t)) * p;
+            phase += 2 * Math.PI * f / Rate;
+            b[i] = (float)Math.Sin(phase) * 0.6f * Mathf.Exp(-t * 3.5f);
+        }
+        return b;
+    }
+
+    /// <summary>Short bubbly pop.</summary>
+    private static float[] Pop(float p)
+    {
+        var b = Buf(0.12f);
+        double phase = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            phase += 2 * Math.PI * Mathf.Lerp(300f, 1200f, t) * p / Rate;
+            b[i] = (float)Math.Sin(phase) * 0.7f * (1f - t);
+        }
+        return b;
+    }
+
+    /// <summary>Bit-crushed digital stutter (reality corruption).</summary>
+    private static float[] Glitch(float p)
+    {
+        var b = Buf(0.5f);
+        double phase = 0;
+        float hold = 0; int holdN = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            int seg = (int)(t * 12f);
+            float f = (seg % 3 == 0 ? 220f : seg % 3 == 1 ? 660f : 1320f) * p;
+            phase += 2 * Math.PI * f / Rate;
+            if (holdN-- <= 0) { hold = Mathf.Round((float)Math.Sin(phase) * 3f) / 3f + Rnd() * 0.2f; holdN = 6 + seg % 4 * 4; }
+            b[i] = (seg % 4 == 3 ? 0f : hold) * 0.45f * (1f - t * 0.6f);
+        }
+        return b;
+    }
+
+    /// <summary>Reversed swell: noise and tone that grow then cut off abruptly.</summary>
+    private static float[] Reverse(float p)
+    {
+        var b = Buf(0.9f);
+        double phase = 0;
+        float lp = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            phase += 2 * Math.PI * 220f * p * (1f + t * 0.3f) / Rate;
+            lp += (Rnd() - lp) * 0.08f;
+            float env = Mathf.Pow(t, 2.5f) * (t > 0.97f ? (1f - t) / 0.03f : 1f);
+            b[i] = ((float)Math.Sin(phase) * 0.4f + lp * 0.9f) * env;
+        }
+        return b;
+    }
+
+    /// <summary>Thunder: a sharp crack followed by a long rolling rumble.</summary>
+    private static float[] Thunder(float p)
+    {
+        var b = Buf(2.2f);
+        float lp = 0, lp2 = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float crack = t < 0.08f ? Rnd() * (1f - t / 0.08f) : 0f;
+            lp += (Rnd() - lp) * 0.04f * p;
+            lp2 += (lp - lp2) * 0.2f;
+            float roll = lp2 * 2.2f * Mathf.Exp(-t * 1.4f) * (0.7f + 0.3f * Mathf.Sin(t * 9f));
+            b[i] = crack * 0.9f + roll;
+        }
+        return b;
+    }
+
+    /// <summary>Orchestral-style hit: stacked low tones with a hard attack.</summary>
+    private static float[] Stab(float p)
+    {
+        var b = Buf(1.1f);
+        float[] f = { 65f, 98f, 130.8f, 155.6f };
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float s = 0;
+            foreach (var x in f) s += Mathf.Sin(2 * Mathf.PI * x * p * t) + 0.3f * Mathf.Sin(4 * Mathf.PI * x * p * t);
+            b[i] = (s * 0.16f + Rnd() * 0.25f * Mathf.Exp(-t * 40f)) * Mathf.Exp(-t * 3f);
+        }
+        return b;
+    }
+
+    /// <summary>Electric sizzle: buzzing saw with random spikes.</summary>
+    private static float[] Sizzle(float p)
+    {
+        var b = Buf(0.8f);
+        double phase = 0;
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / b.Length;
+            phase += 120f * p / Rate;
+            float saw = (float)(phase % 1.0) * 2f - 1f;
+            float spike = Rnd() > 0.985f ? Rnd() : 0f;
+            b[i] = (saw * 0.25f + spike * 0.6f + Rnd() * 0.08f) * Mathf.Sin(t * Mathf.PI);
+        }
+        return b;
+    }
+
+    /// <summary>Metal hammer clang: inharmonic partials.</summary>
+    private static float[] Clang(float p)
+    {
+        var b = Buf(1.2f);
+        float[] f = { 310f, 523f, 847f, 1290f };
+        for (int i = 0; i < b.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float s = 0;
+            for (int k = 0; k < f.Length; k++) s += Mathf.Sin(2 * Mathf.PI * f[k] * p * t) * Mathf.Exp(-t * (3f + k * 2f));
+            b[i] = s * 0.3f + Rnd() * 0.4f * Mathf.Exp(-t * 60f);
         }
         return b;
     }

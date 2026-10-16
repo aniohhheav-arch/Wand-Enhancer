@@ -14,7 +14,7 @@ namespace MarvelMod.VFX;
 /// Sprite-based visual effects. Everything is drawn with generated sprites on the
 /// player layer, so it renders with the game's own camera and needs no asset bundles.
 /// </summary>
-public static class Fx
+public static partial class Fx
 {
     public static readonly Color LokiGreen  = new(0.20f, 0.85f, 0.35f, 1f);
     public static readonly Color LokiLight  = new(0.60f, 1.00f, 0.65f, 1f);
@@ -49,6 +49,7 @@ public static class Fx
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = sprite;
         sr.color = color;
+        Track(go);
         return sr;
     }
 
@@ -105,8 +106,8 @@ public static class Fx
             float spin = Random.Range(-360f, 360f);
             float life = dur * Random.Range(0.7f, 1.2f);
             var c = Color.Lerp(color, Color.white, Random.Range(0f, 0.5f));
-            var star = MakeSprite(Sprites.Star, pos, c, size);
-            Animate(star, life, k =>
+            var star = Pooled(Sprites.Star, pos, c, size);
+            AnimatePooled(star, life, k =>
             {
                 var p = pos + dir * (dist * EaseOut(k));
                 star.transform.position = new Vector3(p.x, p.y, star.transform.position.z);
@@ -129,8 +130,8 @@ public static class Fx
             float size = Random.Range(0.6f, 1.1f);
             float life = dur * Random.Range(0.7f, 1.2f);
             var c = Color.Lerp(color, Color.black, Random.Range(0.1f, 0.4f));
-            var puff = MakeSprite(Sprites.Glow, start, A(c, 0.8f), size * 0.4f);
-            Animate(puff, life, k =>
+            var puff = Pooled(Sprites.Glow, start, A(c, 0.8f), size * 0.4f);
+            AnimatePooled(puff, life, k =>
             {
                 var p = start + drift * k;
                 puff.transform.position = new Vector3(p.x, p.y, puff.transform.position.z);
@@ -162,8 +163,8 @@ public static class Fx
             if (trail > 0.03f / Quality && Enabled)
             {
                 trail = 0f;
-                var bit = MakeSprite(Sprites.Glow, p, A(color, 0.6f), 0.45f);
-                Animate(bit, 0.3f, k =>
+                var bit = Pooled(Sprites.Glow, p, A(color, 0.6f), 0.45f);
+                AnimatePooled(bit, 0.3f, k =>
                 {
                     bit.transform.localScale = Vector3.one * 0.45f * (1f - k);
                     bit.color = A(color, 0.6f * (1f - k));
@@ -644,7 +645,7 @@ public static class Fx
     {
         if (!Enabled || !ModConfig.Data.VfxScreenShake) return;
         var cam = HudManager.Instance != null ? HudManager.Instance.PlayerCam : null;
-        if (cam != null) cam.ShakeScreen(dur, severity * Intensity);
+        if (cam != null) cam.ShakeScreen(dur, severity * Intensity * Mathf.Clamp(ModConfig.Data.ShakeStrength, 0, 300) / 100f);
     }
 }
 

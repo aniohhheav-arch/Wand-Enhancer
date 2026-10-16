@@ -76,4 +76,10 @@ public static class Dimensions
     }
 
     public static void Clear() => Away.Clear();
+
+    /// <summary>Sends everyone in a pocket dimension home on the next tick (arena reset).</summary>
+    public static void ReturnAll()
+    {
+        foreach (var k in new List<byte>(Away.Keys)) Away[k] = (Away[k].home, 0f);
+    }
 }

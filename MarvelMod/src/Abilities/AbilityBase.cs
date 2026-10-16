@@ -89,7 +89,7 @@ public abstract class AbilityBase
     public AbilityConfig Cfg => ModConfig.GetAbility(Id);
 
     public float CooldownRemaining =>
-        Mathf.Max(0f, PracticeModeUnlimited ? 0f : _lastUsed + Cfg.Cooldown - Time.realtimeSinceStartup);
+        Mathf.Max(0f, PracticeModeUnlimited ? 0f : _lastUsed + Cfg.Cooldown * Mathf.Max(0, ModConfig.Data.CooldownScale) / 100f - Time.realtimeSinceStartup);
 
     public bool IsReady => Cfg.Enabled && CooldownRemaining <= 0f;
 

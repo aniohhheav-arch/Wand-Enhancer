@@ -97,6 +97,7 @@ public static class MeetingCleanupPatch
         Abilities.Loki.Possessions.EndAll();
         CharacterVisuals.RestoreAll();
         Abilities.AbilityBase.ClearToggles();
+        VFX.Sfx.StopAll();
         IllusionManager.Instance?.DespawnAll();
         ShapeshiftManager.Instance?.RestoreAll();
         StatusManager.Instance?.ClearAll();

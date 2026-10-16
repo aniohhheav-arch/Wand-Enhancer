@@ -204,7 +204,7 @@ public sealed class CinematicDirector
     }
 
     /// <summary>Camera back on the local player, normal zoom, HUD visible.</summary>
-    private static void RestoreLocalView()
+    internal static void RestoreLocalView()
     {
         var hud = HudManager.Instance;
         var lp = PlayerControl.LocalPlayer;

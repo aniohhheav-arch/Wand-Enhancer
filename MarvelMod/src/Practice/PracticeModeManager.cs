@@ -84,8 +84,8 @@ public class PracticeModeManager : MonoBehaviour
     {
         ClearDummies();
         ResetLog();
-        IllusionManager.Instance?.DespawnAll();
-        LokiCharacter.Instance.ResetAllCooldowns();
+        Arena.Reset();
+        foreach (var a in Characters.CharacterRegistry.AllAbilities()) a.ResetCooldown();
         SpawnDummies(ModConfig.Data.PracticeDummies);
         TestLog("Sandbox reset.");
     }
