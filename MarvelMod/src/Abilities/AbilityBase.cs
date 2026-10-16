@@ -55,6 +55,8 @@ public abstract class AbilityBase
     public virtual string Label => Name.ToUpperInvariant();
     public virtual TargetMode Targeting => TargetMode.None;
     public virtual bool IsUltimate => false;
+    /// <summary>No cast flash or sound for anyone (stealth abilities).</summary>
+    public virtual bool Silent => false;
 
     private float _lastUsed = -9999f;
 

@@ -87,7 +87,6 @@ public class StatusManager : MonoBehaviour
                 StatusEffect.Puppet        => ("SOMETHING CONTROLS YOUR BODY...", new Color(1f, 0.9f, 0.3f)),
                 StatusEffect.Blinded       => ("YOUR MEMORY FADES...", new Color(1f, 0.9f, 0.3f)),
                 StatusEffect.Pulled        => ("PULLED IN!", new Color(0.4f, 0.7f, 1f)),
-                StatusEffect.Possessed     => ("YOUR BODY MOVES ON ITS OWN...", Fx.LokiGreen),
                 _                          => ((string?)null, Color.white),
             };
             if (msg.Item1 != null) Fx.Toast(msg.Item1, msg.Item2, 1.8f, 3.4f);
@@ -119,7 +118,6 @@ public class StatusManager : MonoBehaviour
         StatusEffect.Puppet        => Fx.Aura(target.transform, Sprites.Ring, new Color(1f, 0.9f, 0.3f, 0.9f), 1.0f, duration, 90f, 0.9f),
         StatusEffect.Pulled        => Fx.Aura(target.transform, Sprites.Ring, new Color(0.3f, 0.6f, 1f, 0.8f), 0.9f, duration, -300f),
         StatusEffect.Prison        => Fx.Aura(target.transform, Sprites.Box, new Color(0.4f, 0.75f, 1f, 0.95f), 1.5f, duration, 25f, 0.2f),
-        StatusEffect.Possessed     => Fx.Aura(target.transform, Sprites.Ring, new Color(0.3f, 1f, 0.4f, 0.95f), 1.1f, duration, 260f, 0.85f),
         StatusEffect.Chained       => Fx.Aura(target.transform, Sprites.Ring, new Color(1f, 0.55f, 0.15f, 0.95f), 1.25f, duration, -120f),
         StatusEffect.Transmuted    => Fx.Aura(target.transform, Sprites.Icon("prop_crate", 300f) ?? Sprites.Box, Color.white, 1f, duration, 0f, 0.1f, false),
         _                          => null,

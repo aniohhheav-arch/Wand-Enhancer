@@ -23,7 +23,7 @@ public class IllusionManager : MonoBehaviour
 
     public void Awake() => Instance = this;
 
-    public LokiIllusion SpawnIllusion(PlayerControl template, Vector3 position)
+    public LokiIllusion SpawnIllusion(PlayerControl template, Vector3 position, bool quiet = false)
     {
         var root = new GameObject($"LokiIllusion_{_active.Count}") { layer = template.gameObject.layer };
         root.transform.position = new Vector3(position.x, position.y, position.y / 1000f);
@@ -40,7 +40,7 @@ public class IllusionManager : MonoBehaviour
             _        => IllusionBehavior.Wander,
         });
         _active.Add(ill);
-        Fx.Smoke(position, Fx.LokiGreen, 6, 0.7f);
+        if (!quiet) Fx.Smoke(position, Fx.LokiGreen, 6, 0.7f);
         return ill;
     }
 
@@ -324,6 +324,13 @@ public class LokiIllusion : MonoBehaviour
                 return;
             }
         }
+    }
+
+    /// <summary>Remove without any effect (stealthy abilities).</summary>
+    public void Vanish()
+    {
+        _popped = true;
+        Destroy(gameObject);
     }
 
     public void Pop()

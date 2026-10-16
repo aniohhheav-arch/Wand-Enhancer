@@ -35,8 +35,29 @@ public static class Kills
             Log.LogWarning($"MurderPlayer failed, using fallback death: {e.Message}");
             if (Players.IsAlive(target)) target.Die(DeathReason.Kill, false);
         }
+        if (Players.IsAlive(target))
+        {
+            // the game refuses some kills (e.g. impostor on impostor): force the death and leave a real body
+            Log.LogInfo($"Kill of {target.Data?.PlayerName} was refused by the game; forcing it");
+            target.Die(DeathReason.Kill, false);
+            if (leaveBody) SpawnBody(target);
+        }
         if (!leaveBody && !Config.ModConfig.Data.FinisherLeavesBody) RemoveBody(target.PlayerId);
         return true;
+    }
+
+    private static void SpawnBody(PlayerControl victim)
+    {
+        var gm = GameManager.Instance;
+        if (gm == null || gm.deadBodyPrefab == null || gm.deadBodyPrefab.Length == 0) return;
+        var body = UnityEngine.Object.Instantiate(gm.deadBodyPrefab[0]);
+        Vector2 p = victim.transform.position;
+        body.transform.position = new Vector3(p.x, p.y, p.y / 1000f);
+        body.ParentId = victim.PlayerId;
+        int colorId = victim.Data != null ? victim.Data.DefaultOutfit.ColorId : 0;
+        if (body.bodyRenderers != null)
+            foreach (var r in body.bodyRenderers)
+                if (r != null) PlayerMaterial.SetColors(colorId, r);
     }
 
     private static void RemoveBody(byte playerId)

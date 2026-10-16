@@ -42,6 +42,14 @@ public static class Employees
         return list;
     }
 
+    public static void Remove(PlayerControl employee)
+    {
+        foreach (var set in ByBoss.Values) set.Remove(employee.PlayerId);
+    }
+
+    public static bool BelongsTo(PlayerControl boss, PlayerControl employee) =>
+        ByBoss.TryGetValue(boss.PlayerId, out var set) && set.Contains(employee.PlayerId);
+
     public static void Clear() => ByBoss.Clear();
 }
 
@@ -76,7 +84,7 @@ public static class Possessions
         End(master, teleportBack: false);
 
         // Loki's body stays where he was (an illusion), the real Loki becomes an invisible passenger
-        var shell = IllusionManager.Instance?.SpawnIllusion(master, anchor);
+        var shell = IllusionManager.Instance?.SpawnIllusion(master, anchor, quiet: true);
         if (shell != null)
         {
             shell.SetBehavior(IllusionBehavior.Idle);
@@ -90,9 +98,7 @@ public static class Possessions
         StatusManager.Instance?.ApplyStatus(host, StatusEffect.Possessed, duration, Vector2.zero, master.PlayerId);
         ByMaster[master.PlayerId] = new State { Master = master, Host = host, Anchor = anchor, Shell = shell, EndsAt = Time.time + duration };
 
-        Fx.Beam(anchor, host.transform.position, Fx.LokiGreen, 0.25f, 0.5f);
-        Fx.Aura(host.transform, Sprites.Glow, new Color(0.3f, 1f, 0.4f, 0.8f), 0.4f, 1.5f, 0f, 0.3f);   // glowing eyes
-        Sfx.Play(SfxKind.Creak, 0.8f, host.transform.position);
+        // completely silent for everyone else: no beam, no aura, no sound
         if (master == PlayerControl.LocalPlayer)
             Fx.Toast($"POSSESSING {host.Data?.PlayerName?.ToUpperInvariant()}", Fx.LokiGreen, 2f, 3.6f);
     }
@@ -102,12 +108,11 @@ public static class Possessions
         if (!ByMaster.TryGetValue(master.PlayerId, out var s)) return;
         ByMaster.Remove(master.PlayerId);
         if (s.Host != null) StatusManager.Instance?.RemoveStatus(s.Host, StatusEffect.Possessed);
-        if (s.Shell != null) Object.Destroy(s.Shell.gameObject);
+        if (s.Shell != null) s.Shell.Vanish();
         if (master != null)
         {
             if (teleportBack && MeetingHud.Instance == null) Players.Teleport(master, s.Anchor);
             StatusManager.SetHidden(master, false);
-            Fx.Smoke(s.Anchor, Fx.LokiGreen, 6, 0.6f);
         }
     }
 
@@ -141,6 +146,7 @@ public class Possession : AbilityBase
     public override string Category => "Mind";
     public override string Label    => "POSSESS";
     public override TargetMode Targeting => TargetMode.Menu;
+    public override bool Silent => true;
 
     public override bool CanUse(PlayerControl caster) => LobbyBehaviour.Instance == null && !Possessions.IsPossessing(caster);
 
@@ -200,13 +206,14 @@ public class LokiContract : AbilityBase
     }
 }
 
-/// <summary>Kill every employee, wherever they are.</summary>
+/// <summary>Pick one of your employees from the menu and kill them, wherever they are.</summary>
 public class UltimateBetrayal : AbilityBase
 {
     public override string Id       => "ultimate_betrayal";
     public override string Name     => "The Ultimate Betrayal";
     public override string Category => "Mind";
     public override bool IsUltimate => true;
+    public override TargetMode Targeting => TargetMode.Menu;
 
     public override string Label
     {
@@ -221,18 +228,25 @@ public class UltimateBetrayal : AbilityBase
     public override bool CanUse(PlayerControl caster) =>
         LobbyBehaviour.Instance == null && !Possessions.IsPossessing(caster) && Employees.LivingOf(caster).Count > 0;
 
+    public override bool IsValidTarget(PlayerControl caster, PlayerControl target)
+    {
+        bool ok = Employees.BelongsTo(caster, target);
+        if (!ok && caster == PlayerControl.LocalPlayer)
+            Fx.Toast("THAT'S NOT ONE OF YOUR EMPLOYEES", Fx.AlarmRed, 2f, 3.2f);
+        return ok;
+    }
+
     protected override void OnCast(CastContext ctx)
     {
-        Sfx.Play(SfxKind.Snap, 1f, ctx.CasterPos);
-        foreach (var e in Employees.LivingOf(ctx.Caster))
-        {
-            Vector2 p = e.transform.position;
-            Fx.Burst(p, Fx.LokiGold, 1.6f, 0.4f);
-            Fx.Fragments(p, Fx.LokiGold, 40, 1.4f, 1f);
-            Sfx.Play(SfxKind.Bell, 0.9f, p);
-            if (ctx.LocalIs(e)) Fx.Toast("\"NOTHING PERSONAL.\" — LOKI", Fx.LokiGold, 3f, 4f);
-            Kills.Kill(ctx.Caster, e, leaveBody: true);
-        }
+        var e = ctx.Target;
+        if (e == null || !Employees.BelongsTo(ctx.Caster, e)) return;
+        Employees.Remove(e);
+        Vector2 p = e.transform.position;
+        Sfx.Play(SfxKind.Snap, 1f, p);
+        Fx.Burst(p, Fx.LokiGold, 1.6f, 0.4f);
+        Fx.Fragments(p, Fx.LokiGold, 40, 1.4f, 1f);
+        if (ctx.LocalIs(e)) Fx.Toast("\"NOTHING PERSONAL.\" - LOKI", Fx.LokiGold, 3f, 4f);
+        Kills.Kill(ctx.Caster, e, leaveBody: true, checkShield: false);
     }
 }
 
@@ -244,6 +258,7 @@ public class PossessStop : AbilityBase
     public override string Name     => "Stop Possessing";
     public override string Category => "Possessing";
     public override string Label    => "STOP";
+    public override bool Silent => true;
 
     public override bool CanUse(PlayerControl caster) => Possessions.IsPossessing(caster);
     protected override void OnCast(CastContext ctx) => Possessions.End(ctx.Caster);
@@ -256,6 +271,7 @@ public class PossessFrameKill : AbilityBase
     public override string Name     => "Frame Kill";
     public override string Category => "Possessing";
     public override string Label    => "FRAME KILL";
+    public override bool Silent => true;
 
     private static PlayerControl? Victim(PlayerControl caster, float range)
     {
@@ -292,6 +308,7 @@ public class PossessKillHost : AbilityBase
     public override string Name     => "Kill Host";
     public override string Category => "Possessing";
     public override string Label    => "KILL HOST";
+    public override bool Silent => true;
 
     public override bool CanUse(PlayerControl caster) => Possessions.IsPossessing(caster);
 
@@ -299,7 +316,6 @@ public class PossessKillHost : AbilityBase
     {
         var host = Possessions.HostOf(ctx.Caster);
         if (host == null) return;
-        Fx.Fragments(host.transform.position, Fx.LokiGreen, 30, 1.2f);
         Possessions.End(ctx.Caster);
         Kills.Kill(ctx.Caster, host, leaveBody: true);
     }

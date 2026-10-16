@@ -29,9 +29,23 @@ public static class ZoomInput
             return;
         }
 
+        // zoomed out: right-click anywhere to teleport there (character players only)
+        if (Input.GetMouseButtonDown(1) && cam.orthographicSize > _normal * 1.05f)
+            TeleportToMouse(cam);
+
         float scroll = Input.mouseScrollDelta.y;
         if (Mathf.Abs(scroll) < 0.01f) return;
         float size = cam.orthographicSize * (scroll < 0f ? 1.15f : 1f / 1.15f);
         cam.orthographicSize = Mathf.Clamp(size, _normal, _normal * MaxZoomOut);
+    }
+
+    private static void TeleportToMouse(Camera cam)
+    {
+        var lp = PlayerControl.LocalPlayer;
+        if (Characters.CharacterRegistry.Local == null || !Characters.Players.IsAlive(lp) || lp.inVent) return;
+        Vector2 dest = cam.ScreenToWorldPoint(Input.mousePosition);
+        var teleport = Characters.LokiCharacter.Instance.MapTeleport;
+        teleport.PendingDestination = dest;
+        teleport.TryActivate(lp, null);
     }
 }
