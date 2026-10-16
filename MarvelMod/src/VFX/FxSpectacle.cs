@@ -375,12 +375,13 @@ public static partial class Fx
     public static void ShockRing(Vector2 p, Color c, float size, float dur, float squash = 1f)
     {
         if (!Enabled) return;
-        var sr = Pooled(Sprites.Ring, p, A(c, 1f), 0.1f);
+        float a0 = c.a;
+        var sr = Pooled(Sprites.Ring, p, c, 0.1f);
         AnimatePooled(sr, dur, k =>
         {
             float s = Mathf.Lerp(0.1f, size, EaseOut(k));
             sr.transform.localScale = new Vector3(s, s * squash, 1f);
-            sr.color = A(c, 1f - k);
+            sr.color = A(c, a0 * (1f - k));
         });
     }
 
@@ -734,6 +735,22 @@ public static partial class Fx
                 sr.color = A(c, 1f - k * k);
             });
         }
+    }
+
+    /// <summary>One spark flying with a velocity and slowing down (sling-ring rim sparks, grinding metal).</summary>
+    public static void Spark(Vector2 p, Vector2 vel, Color c, float life = 0.35f)
+    {
+        if (!Enabled || !ModConfig.Data.VfxParticles) return;
+        var sr = Pooled(Sprites.Bar, p, c, 1f);
+        float ang = Mathf.Atan2(vel.y, vel.x) * Mathf.Rad2Deg;
+        sr.transform.rotation = Quaternion.Euler(0, 0, ang);
+        AnimatePooled(sr, life, k =>
+        {
+            var q = p + vel * (k * life) * (1f - k * 0.5f) + new Vector2(0f, -0.8f * k * k * life);
+            sr.transform.position = new Vector3(q.x, q.y, q.y / 1000f - 0.62f);
+            sr.transform.localScale = new Vector3(0.18f * (1f - k), 0.04f, 1f);
+            sr.color = A(Color.Lerp(Color.white, c, k), 1f - k);
+        });
     }
 
     /// <summary>Comic-book word popping up at a point ("BONK!").</summary>

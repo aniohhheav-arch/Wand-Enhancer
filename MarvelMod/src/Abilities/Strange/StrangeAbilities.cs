@@ -22,9 +22,19 @@ public abstract class StrangeAbility : AbilityBase
 
     public override Color CastColor => Gold;
 
-    /// <summary>Preparation: a spell circle forms under Strange's feet.</summary>
+    /// <summary>Preparation: hand gesture mandalas flare at both hands while a spell circle forms underfoot.</summary>
     protected override void BeforeCast(CastContext ctx)
     {
+        foreach (var side in new[] { -1f, 1f })
+        {
+            var hand = Fx.MakeSprite(Sprites.Runes, ctx.CasterPos + new Vector2(0.42f * side, 0.05f), new Color(Gold.r, Gold.g, Gold.b, 0f), 0.1f, "HandMandala");
+            Fx.Animate(hand, 0.55f, k =>
+            {
+                hand.transform.localScale = Vector3.one * Mathf.Lerp(0.1f, 0.5f, Mathf.Min(1f, k * 3f));
+                hand.transform.Rotate(0, 0, side * 420f * Time.deltaTime);
+                hand.color = new Color(Gold.r, Gold.g, Gold.b, 0.95f * (k < 0.7f ? 1f : (1f - k) / 0.3f));
+            });
+        }
         var circle = Fx.MakeSprite(Sprites.Runes, ctx.CasterPos + new Vector2(0f, -0.3f), new Color(Gold.r, Gold.g, Gold.b, 0.9f), 0.2f, "SpellCircle");
         Fx.Animate(circle, 0.7f, k =>
         {
@@ -54,6 +64,7 @@ public class SlingRing : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         PortalEngine.OpenPortal(ctx.Caster, ctx.CasterPos, ModConfig.Data.PortalLifetime, linkToPending: false);
+        Fx.Release(ctx.CasterPos, Gold, ImpactStyle.Magic, 0.6f);
         if (ctx.LocalIs(ctx.Caster)) Fx.Toast("PORTAL OPEN - WALK SOMEWHERE AND USE PORTAL LINK", Gold, 2.5f, 3f);
     }
 }
@@ -71,6 +82,9 @@ public class PortalLink : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         PortalEngine.OpenPortal(ctx.Caster, ctx.CasterPos, ModConfig.Data.PortalLifetime, linkToPending: true);
+        Fx.Release(ctx.CasterPos, Gold, ImpactStyle.Magic, 0.6f);
+        var other = PortalEngine.LatestExit(ctx.Caster);
+        if (other.HasValue) Fx.Tendril(ctx.CasterPos, other.Value, Gold, 0.6f, 12);   // the link snaps across
         if (ctx.LocalIs(ctx.Caster)) Fx.Toast("PORTALS LINKED", Gold, 1.5f, 3.5f);
     }
 }
@@ -90,7 +104,9 @@ public class PortalRedirect : StrangeAbility
         if (target == null) return;
         var exit = PortalEngine.LatestExit(ctx.Caster) ?? (Vector2)MapSpawnPoints.GetRandom(1, ctx.Rng, ctx.CasterPos)[0];
         var temp = PortalEngine.OpenPair(ctx.Caster, target.transform.position, exit, 1.2f);
-        Fx.Burst(target.transform.position, Gold, 1.5f, 0.3f);
+        Fx.Release(target.transform.position, Gold, ImpactStyle.Cosmic, 0.8f);
+        Fx.Comic((Vector2)target.transform.position + new Vector2(0f, 1f), "WHEEE!", Gold, 1f);
+        Fx.Release(exit, Gold, ImpactStyle.Cosmic, 0.8f);
         Players.Teleport(target, Players.SafeDestination(exit, Vector2.down, 0.6f));
     }
 }
@@ -128,6 +144,9 @@ public class MultiversalGateway : StrangeAbility
     private static IEnumerator Run(CastContext ctx)
     {
         Vector2 c = ctx.Caster.transform.position;
+        Fx.Darken(0.3f, 4f, new Color(0.08f, 0.03f, 0f));
+        Fx.Sigil(c, Gold, 3f, 3f);
+        Sfx.Play(SfxKind.Gong, 0.8f, c, 0.7f, cinematic: true);
         var giant = Fx.MakeSprite(Sprites.Runes, c, Gold, 0.2f);
         Fx.Animate(giant, 3.5f, k => { giant.transform.localScale = Vector3.one * Mathf.Min(6f, k * 20f); giant.transform.Rotate(0, 0, 50f * Time.deltaTime); });
         var victims = Players.InRadius(c, ctx.Cfg.Range, 15, ctx.Caster);
@@ -137,6 +156,7 @@ public class MultiversalGateway : StrangeAbility
         foreach (var stop in stops)
         {
             PortalEngine.OpenPair(ctx.Caster, c, stop, 1f);
+            Fx.Release(stop, Gold, ImpactStyle.Cosmic, 1f);
             foreach (var v in victims) Players.Teleport(v, (Vector2)stop + Random.insideUnitCircle * 0.3f);
             for (float t = 0; t < 0.9f; t += Time.deltaTime) yield return null;
             if (MeetingHud.Instance != null) yield break;
@@ -162,6 +182,13 @@ public class CrimsonBands : StrangeAbility
         if (target == null) return;
         Fx.Projectile(ctx.CasterPos, target.transform.position, Crimson, 14f, () =>
         {
+            // bands snap shut with a metal clang, three loops cinching one after another
+            for (int i = 0; i < 3; i++)
+            {
+                float a = i * 2.1f;
+                Fx.Tendril((Vector2)target.transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 1.1f, target.transform.position, Crimson, 0.4f, 8);
+            }
+            Sfx.Play(SfxKind.Clang, 1.2f, target.transform.position, 0.6f);
             StatusManager.Instance?.ApplyStatus(target, StatusEffect.Bound, ctx.Cfg.Duration);
             Fx.Aura(target.transform, Sprites.Ring, new Color(0.9f, 0.15f, 0.15f, 0.95f), 1.05f, ctx.Cfg.Duration, -220f);
         });
@@ -181,8 +208,12 @@ public class EldritchWhip : StrangeAbility
     {
         var target = ctx.Target;
         if (target == null) return;
+        // a crackling gold lash, a whip-crack and a "YOINK"
+        Fx.Lightning(ctx.CasterPos, target.transform.position, Gold, 0.3f, 1, 0.2f);
         Fx.Beam(ctx.CasterPos, target.transform.position, Gold, 0.12f, 0.45f);
         Sfx.Play(SfxKind.Slash, 1.2f, ctx.CasterPos);
+        Sfx.Play(SfxKind.Snap, 1.6f, target.transform.position, 0.4f);
+        Fx.Comic((Vector2)target.transform.position + new Vector2(0f, 1f), "YOINK!", Gold, 1f);
         var pull = Players.SafeDestination(ctx.CasterPos, (Vector2)target.transform.position - ctx.CasterPos, 0.7f);
         Players.Teleport(target, pull);
         StatusManager.Instance?.ApplyStatus(target, StatusEffect.Stunned, 0.6f);
@@ -199,6 +230,8 @@ public class EldritchShield : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         StatusManager.Instance?.ApplyStatus(ctx.Caster, StatusEffect.Shielded, ctx.Cfg.Duration);
+        Fx.Sigil(ctx.CasterPos + new Vector2(0.5f, 0f), Gold, 1.4f, 0.4f);
+        Sfx.Play(SfxKind.Glass, 1.2f, ctx.CasterPos, 0.4f);
         Fx.Aura(ctx.Caster.transform, Sprites.Runes, new Color(1f, 0.7f, 0.2f, 0.8f), 1.5f, ctx.Cfg.Duration, 60f);
     }
 }
@@ -240,8 +273,14 @@ public class MysticBlades : StrangeAbility
         Vector2 from = ctx.Caster.transform.position;
         var target = ctx.Target;
         var to = target != null ? (Vector2)target.transform.position : Players.SafeDestination(from, AbilityButtons.LastMoveDirection, ctx.Cfg.Range);
+        Sfx.Play(SfxKind.Whoosh, 1.6f, from, 0.5f);
         for (int i = 0; i < 3; i++)
-            Fx.Projectile(from + Random.insideUnitCircle * 0.3f, to, Gold, 16f + i * 2f, i == 0 && target != null ? () => Hit(ctx, target, from, ctx.Cfg.Duration) : null);
+            Fx.Projectile(from + Random.insideUnitCircle * 0.3f, to, Gold, 16f + i * 2f, i == 0 ? () =>
+            {
+                Fx.Streaks(to, Gold, 6, 0.9f);
+                Sfx.Play(SfxKind.Clang, 1.5f, to, 0.4f);
+                if (target != null) Hit(ctx, target, from, ctx.Cfg.Duration);
+            } : null);
     }
 }
 
@@ -275,7 +314,8 @@ public class CrimsonJudgment : StrangeAbility
         }
         yield return Kills.Wait(0.6f);
         CinematicDirector.Pose(target, 0f, 0f);
-        Fx.Burst(target.transform.position, Gold, 2.5f, 0.5f);
+        Fx.Release(target.transform.position, Crimson, ImpactStyle.Magic, 2f, cinematic: true);
+        Fx.Flash(new Color(1f, 0.8f, 0.4f, 0.4f), 0.2f);
         Fx.Sparkles(target.transform.position, Astral, 30, 1.6f);
         Sfx.Play(SfxKind.Bell, 1f, target.transform.position);
         Kills.Kill(ctx.Caster, target, leaveBody: false);
@@ -301,7 +341,7 @@ public class MirrorShard : StrangeAbility
         Fx.Projectile(from, ctx.Point, MirrorBlue, 14f, () =>
         {
             Fx.Fragments(ctx.Point, MirrorBlue, 40, 1.4f, 1f);
-            Sfx.Play(SfxKind.Slash, 2.2f, ctx.Point);
+            Fx.Release(ctx.Point, MirrorBlue, ImpactStyle.Glitch, 0.8f);
             foreach (var pc in Players.InRadius(ctx.Point, 1f, 6, ctx.Caster)) Hit(ctx, pc, ctx.Point, ctx.Cfg.Duration);
         });
     }
@@ -318,7 +358,11 @@ public class FracturedReality : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         var c = ctx.CasterPos;
+        // kaleidoscope: the floor folds into mirror panels and the space ripples twice
         Fx.Cracks(c, MirrorBlue, 14, ctx.Cfg.Range, ctx.Cfg.Duration, ctx.Rng.Next());
+        Fx.Release(c, MirrorBlue, ImpactStyle.Glitch, 1.3f);
+        Fx.ShockRing(c, MirrorBlue, ctx.Cfg.Range * 2f, 0.8f);
+        Sfx.Play(SfxKind.Reverse, 1.1f, c, 0.5f);
         foreach (var pc in Players.InRadius(c, ctx.Cfg.Range, 15, ctx.Caster))
         {
             StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Slowed, ctx.Cfg.Duration);
@@ -340,7 +384,10 @@ public class MirrorClone : StrangeAbility
 
     protected override void OnCast(CastContext ctx)
     {
-        var clone = IllusionManager.Instance!.SpawnIllusion(ctx.Caster, MapSpawnPoints.NearbyOpenPoint(ctx.CasterPos, ctx.Rng, 0.6f, 1.2f));
+        var spot = MapSpawnPoints.NearbyOpenPoint(ctx.CasterPos, ctx.Rng, 0.6f, 1.2f);
+        Fx.Beam(ctx.CasterPos, spot, MirrorBlue, 0.08f, 0.3f);
+        Fx.Release(spot, MirrorBlue, ImpactStyle.Glitch, 0.5f);
+        var clone = IllusionManager.Instance!.SpawnIllusion(ctx.Caster, spot);
         clone.SetBehavior(IllusionBehavior.Wander);
         clone.Lifetime = ctx.Cfg.Duration;
     }
@@ -360,6 +407,9 @@ public class DimensionalPrison : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         if (ctx.Target == null) return;
+        // the target falls into their own reflection: a pane of glass shatters where they stood
+        Fx.Release(ctx.Target.transform.position, MirrorBlue, ImpactStyle.Glitch, 1.1f);
+        Fx.Fragments(ctx.Target.transform.position, MirrorBlue, 30, 1.2f, 0.9f);
         MirrorScenery(MirrorCenter, ctx.Cfg.Duration + 1f, ctx.Rng.Next());
         Dimensions.Send(ctx.Target, MirrorCenter, Vector2.zero, ctx.Cfg.Duration, MirrorBlue, "TRAPPED IN THE MIRROR DIMENSION");
     }
@@ -401,6 +451,8 @@ public class MirrorWorldCollapse : StrangeAbility
         CinematicPlayer.Play("MIRROR WORLD", MirrorBlue, caster, ctx.Cfg.CinematicDur, () =>
         {
             var c = DimensionalPrison.MirrorCenter;
+            Fx.Release(caster.transform.position, MirrorBlue, ImpactStyle.Glitch, 2.5f, cinematic: true);
+            Fx.Fragments(caster.transform.position, MirrorBlue, 70, ctx.Cfg.Range, 1.2f);
             DimensionalPrison.MirrorScenery(c, ctx.Cfg.Duration + 1f, seed);
             var who = Players.InRadius(caster.transform.position, ctx.Cfg.Range, 15, caster);
             who.Add(caster);
@@ -436,7 +488,8 @@ public class TemporalRewind : StrangeAbility
 
     protected override void OnCast(CastContext ctx)
     {
-        Fx.Beam(ctx.CasterPos, ctx.Point, TimeGreen, 0.15f, 0.5f);
+        for (int i = 1; i <= 4; i++) Fx.Flare(Vector2.Lerp(ctx.CasterPos, ctx.Point, i / 5f), new Color(TimeGreen.r, TimeGreen.g, TimeGreen.b, 0.6f), 0.6f, 0.2f + i * 0.07f);
+        Fx.Release(ctx.Point, TimeGreen, ImpactStyle.Time, 0.8f);
         var clock = Fx.MakeSprite(Sprites.Runes, ctx.Point, TimeGreen, 1.3f);
         Fx.Animate(clock, 0.8f, k => { clock.transform.Rotate(0, 0, -600f * Time.deltaTime); clock.color = new Color(TimeGreen.r, TimeGreen.g, TimeGreen.b, 1f - k); });
         Players.Teleport(ctx.Caster, ctx.Point);
@@ -461,9 +514,11 @@ public class TimeBubble : StrangeAbility
         float r = ctx.Cfg.Radius;
         var bubble = Fx.MakeSprite(Sprites.Glow, p, new Color(TimeGreen.r, TimeGreen.g, TimeGreen.b, 0.3f), r * 2f);
         var ring = Fx.MakeSprite(Sprites.Runes, p, new Color(TimeGreen.r, TimeGreen.g, TimeGreen.b, 0.7f), r * 2f);
+        int tick = 0;
         for (float t = 0; t < ctx.Cfg.Duration; t += 0.4f)
         {
             if (MeetingHud.Instance != null) break;
+            if (tick++ % 2 == 0) Sfx.Play(SfxKind.Tick, 0.7f, p, 0.35f);   // slow, heavy clock
             foreach (var pc in Players.InRadius(p, r, 15, ctx.Caster))
                 StatusManager.Instance?.ApplyStatus(pc, StatusEffect.Slowed, 0.6f);
             for (float w = 0; w < 0.4f; w += Time.deltaTime)
@@ -474,6 +529,7 @@ public class TimeBubble : StrangeAbility
         }
         if (bubble != null) Object.Destroy(bubble.gameObject);
         if (ring != null) Object.Destroy(ring.gameObject);
+        Fx.Release(p, TimeGreen, ImpactStyle.Time, r * 0.6f);
     }
 }
 
@@ -491,6 +547,7 @@ public class StrangeTemporalEcho : StrangeAbility
     {
         var path = ctx.LocalIs(ctx.Caster) ? PositionHistory.Since(4f) : new List<Vector2> { ctx.Point, ctx.CasterPos };
         if (path.Count < 2) path = new List<Vector2> { ctx.Point, ctx.CasterPos };
+        Fx.Release(path[0], TimeGreen, ImpactStyle.Time, 0.5f);
         var echo = IllusionManager.Instance!.SpawnIllusion(ctx.Caster, path[0]);
         echo.SetTint(new Color(0.5f, 1f, 0.6f, 0.6f));
         echo.Untouchable = true;
@@ -520,7 +577,7 @@ public class TimeLoop : StrangeAbility
                 if (MeetingHud.Instance != null || !Players.IsAlive(target)) yield break;
                 yield return null;
             }
-            Fx.Burst(anchor, TimeGreen, 1f, 0.3f);
+            Fx.Release(anchor, TimeGreen, ImpactStyle.Time, 0.6f);
             Players.Teleport(target, anchor);
         }
     }
@@ -540,8 +597,12 @@ public class EyeOfAgamotto : StrangeAbility
     {
         var target = ctx.Target;
         if (target == null) return;
+        // the Eye opens on Strange's chest during the wind-up
+        Fx.Aura(ctx.Caster.transform, Sprites.Glow, new Color(TimeGreen.r, TimeGreen.g, TimeGreen.b, 0.9f), 0.3f, ctx.Cfg.CinematicDur + 0.5f, 0f, 0.15f);
         CinematicPlayer.Play("EYE OF AGAMOTTO", TimeGreen, ctx.Caster, ctx.Cfg.CinematicDur, () =>
         {
+            Fx.Sigil(target.transform.position, TimeGreen, 2.4f, ctx.Cfg.Duration * 0.3f);
+            Fx.Release(target.transform.position, TimeGreen, ImpactStyle.Time, 2f, cinematic: true);
             StatusManager.Instance?.ApplyStatus(target, StatusEffect.Frozen, ctx.Cfg.Duration);
             for (int i = 0; i < 3; i++)
                 Fx.Aura(target.transform, Sprites.Runes, new Color(TimeGreen.r, TimeGreen.g, TimeGreen.b, 0.8f), 1.2f + i * 0.4f, ctx.Cfg.Duration, (i % 2 == 0 ? 1 : -1) * (60f + i * 30f));
@@ -628,6 +689,7 @@ public class AstralSight : StrangeAbility
 
     protected override void OnCast(CastContext ctx)
     {
+        Fx.Release(ctx.CasterPos, Astral, ImpactStyle.Eerie, 0.6f);
         if (!ctx.LocalIs(ctx.Caster)) return;
         foreach (var pc in Players.All())
             if (pc != ctx.Caster && Players.IsAlive(pc)) Fx.ScreenMarker(pc.transform, Astral, ctx.Cfg.Duration);
@@ -648,7 +710,9 @@ public class AstralBind : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         if (ctx.Target == null) return;
-        Fx.Beam(ctx.CasterPos, ctx.Target.transform.position, Astral, 0.15f, 0.5f);
+        Coroutines.Start(Fx.Bind(ctx.Caster.transform, ctx.Target.transform, Astral, Mathf.Min(1.5f, ctx.Cfg.Duration), 2));
+        Fx.Rising(ctx.Target.transform.position, Astral, 6, 0.6f, 1f);
+        Sfx.Play(SfxKind.Choir, 1.5f, ctx.Target.transform.position, 0.3f);
         StatusManager.Instance?.ApplyStatus(ctx.Target, StatusEffect.Chained, ctx.Cfg.Duration);
     }
 }
@@ -665,6 +729,7 @@ public class DimensionStep : StrangeAbility
     protected override void OnCast(CastContext ctx)
     {
         PortalEngine.OpenPair(ctx.Caster, ctx.CasterPos, ctx.Point, 0.8f);
+        Fx.Trail(ctx.Caster.transform, Gold, 0.3f);
         Players.Teleport(ctx.Caster, ctx.Point);
     }
 }
@@ -686,8 +751,11 @@ public class AstralExile : StrangeAbility
         var target = ctx.Target;
         if (target == null) return;
         int seed = ctx.Rng.Next();
+        // the target's soul starts leaking out of their body during the wind-up
+        Fx.Rising(target.transform.position, Astral, 14, 0.8f, ctx.Cfg.CinematicDur + 0.5f);
         CinematicPlayer.Play("ASTRAL EXILE", Astral, ctx.Caster, ctx.Cfg.CinematicDur, () =>
         {
+            Fx.Release(target.transform.position, Astral, ImpactStyle.Eerie, 1.8f, cinematic: true);
             Dimensions.Scenery(AstralCenter, Astral, ctx.Cfg.Duration + 1f, seed);
             Dimensions.Send(target, AstralCenter, Vector2.zero, ctx.Cfg.Duration, Astral, "YOUR SOUL IS PULLED FROM YOUR BODY");
         });

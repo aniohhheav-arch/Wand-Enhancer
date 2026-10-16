@@ -102,11 +102,25 @@ public static class PortalEngine
         var inner = Fx.MakeSprite(Sprites.Glow, pos, new Color(0.1f, 0.05f, 0.15f, 0.85f), size * 0.8f, "PortalHole");
         var r1 = Fx.MakeSprite(Sprites.Runes, pos, Orange, size, "PortalRing1");
         var r2 = Fx.MakeSprite(Sprites.Ring, pos, new Color(1f, 0.85f, 0.4f, 1f), size * 0.85f, "PortalRing2");
-        foreach (var sr in new[] { glow, inner, r1, r2 })
+        var swirl = Fx.MakeSprite(Sprites.Runes, pos, new Color(0.45f, 0.2f, 0.7f, 0.35f), size * 0.65f, "PortalSwirl");
+        var parts = new System.Collections.Generic.List<SpriteRenderer> { glow, inner, swirl, r1, r2 };
+        // the dimension on the other side: distant stars drifting toward the centre give the hole depth
+        for (int i = 0; i < 7; i++)
+        {
+            var star = Fx.MakeSprite(Sprites.Star, pos, new Color(1f, 0.9f, 0.7f, 0.8f), 0.08f, "PortalStar");
+            parts.Add(star);
+        }
+        foreach (var sr in parts)
         {
             sr.transform.SetParent(root.transform, true);
             sr.transform.localScale = new Vector3(sr.transform.localScale.x * 0.8f, sr.transform.localScale.y, 1f);
         }
+        foreach (var sr in parts)
+            if (sr.name == "PortalStar")
+            {
+                var d = Random.insideUnitCircle * size * 0.35f;
+                sr.transform.localPosition = new Vector3(d.x * 0.8f, d.y, -0.02f);
+            }
         root.transform.localScale = Vector3.one * 0.05f;
         root.AddComponent<PortalSpin>();
         return root;
@@ -212,19 +226,49 @@ public static class PortalEngine
 public class PortalSpin : MonoBehaviour
 {
     public PortalSpin(System.IntPtr ptr) : base(ptr) { }
-    private float _age;
+    private float _age, _ripple;
 
     public void Update()
     {
         _age += Time.deltaTime;
-        transform.localScale = Vector3.one * Mathf.Min(1f, _age / 0.35f);
+        // opens with a slight overshoot, like a ring being spun up
+        float open = Mathf.Min(1f, _age / 0.35f);
+        transform.localScale = Vector3.one * (open < 1f ? open * 1.12f : 1f + 0.03f * Mathf.Sin(_age * 5f));
+        float size = Mathf.Clamp(Config.ModConfig.Data.PortalSize, 0.5f, 3f);
         for (int i = 0; i < transform.childCount; i++)
         {
             var c = transform.GetChild(i);
             if (c.name == "PortalRing1") c.Rotate(0, 0, 70f * Time.deltaTime);
             else if (c.name == "PortalRing2") c.Rotate(0, 0, -120f * Time.deltaTime);
+            else if (c.name == "PortalSwirl") c.Rotate(0, 0, -30f * Time.deltaTime);
+            else if (c.name == "PortalStar")
+            {
+                // drift toward the centre and shrink, then respawn at the edge: a tunnel of depth
+                var lp = c.localPosition;
+                var to = Vector2.MoveTowards(lp, Vector2.zero, 0.25f * size * Time.deltaTime);
+                if (to.sqrMagnitude < 0.0025f)
+                {
+                    var d = Random.insideUnitCircle.normalized * size * 0.35f;
+                    to = new Vector2(d.x * 0.8f, d.y);
+                }
+                c.localPosition = new Vector3(to.x, to.y, lp.z);
+                c.localScale = Vector3.one * 0.1f * Mathf.Clamp01(to.magnitude / (size * 0.3f) + 0.15f);
+            }
         }
-        if (Random.value < 0.25f)
-            Fx.Sparkles((Vector2)transform.position + Random.insideUnitCircle * 0.5f, PortalEngine.Orange, 1, 0.4f, 0.4f);
+        if (open < 1f) return;
+        // sparks fly off the rim tangentially, like the films' sling ring
+        if (Random.value < 0.6f)
+        {
+            float a = Random.Range(0f, Mathf.PI * 2f);
+            var rim = new Vector2(Mathf.Cos(a) * 0.8f, Mathf.Sin(a)) * size * 0.45f;
+            var tangent = new Vector2(Mathf.Sin(a), -Mathf.Cos(a)) * Random.Range(1.5f, 3f);
+            Fx.Spark((Vector2)transform.position + rim, tangent, PortalEngine.Orange);
+        }
+        _ripple -= Time.deltaTime;
+        if (_ripple <= 0f)   // faint space distortion rolling off the portal
+        {
+            _ripple = 1.4f;
+            Fx.ShockRing(transform.position, new Color(1f, 0.6f, 0.2f, 0.25f), size * 1.8f, 1f, squash: 1.2f);
+        }
     }
 }

@@ -74,6 +74,8 @@ public class PortalMaze : StrangeFinisher
         Fx.WorldText(strange.transform, "*closes his hand*", Gold, 1f * d.TimeScale, 2.4f);
         var ring = Fx.MakeSprite(Sprites.Ring, Pos(strange) + new Vector2(0.8f, 0f), Gold, 3f);
         Fx.Animate(ring, 0.8f * d.TimeScale, k => ring.transform.localScale = Vector3.one * 3f * (1f - k));
+        Fx.Release(Pos(strange) + new Vector2(0.8f, 0f), Gold, ImpactStyle.Cosmic, 1.6f, cinematic: true);
+        Sfx.Play(SfxKind.Gong, 0.9f, null, 0.6f, cinematic: true);
         d.Finish();
         Sfx.Play(SfxKind.Bell, 1.1f, null, 0.7f);
         yield return d.Wait(1.2f);
@@ -125,6 +127,8 @@ public class MirrorDimensionFinisher : StrangeFinisher
         yield return d.Wait(0.6f);
         foreach (var c in clones) if (c != null) c.Pop();
         Fx.Fragments(vp, blue, 80, 2f, 1.4f * d.TimeScale);
+        Fx.Release(vp, blue, ImpactStyle.Glitch, 2.2f, cinematic: true);
+        Sfx.Play(SfxKind.Glass, 0.5f, vp, 0.8f, cinematic: true);
         d.Fade(victim, 0f);
         d.Finish();
         yield return d.Wait(1.2f);
@@ -178,6 +182,8 @@ public class CrimsonBandsFinisher : StrangeFinisher
         d.Fade(victim, 0f);
         yield return d.Wait(0.8f);
         Fx.Sparkles(vp + new Vector2(0f, 0.45f), Gold, 40, 1.8f, 1f);
+        Fx.Release(vp + new Vector2(0f, 0.45f), red, ImpactStyle.Magic, 1.8f, cinematic: true);
+        Sfx.Play(SfxKind.Clang, 0.8f, vp, 0.6f, cinematic: true);
         Sfx.Play(SfxKind.Bell, 1f, vp);
         d.Finish();
         yield return d.Wait(1f);
@@ -240,6 +246,7 @@ public class TemporalFracture : StrangeFinisher
         yield return d.Wait(1.4f);
         if (glow != null) Object.Destroy(glow.gameObject);
         Fx.Burst(vp, Color.white, 0.6f, 0.2f);
+        Fx.Release(vp, green, ImpactStyle.Time, 2f, cinematic: true);
         Sfx.Play(SfxKind.Bell, 1.3f, vp);
         d.Finish();
         yield return d.Wait(1f);   // time resumes; the Eye closes
@@ -313,6 +320,8 @@ public class SorcererSupreme : StrangeFinisher
             sigil.color = new Color(1f, 0.85f, 0.4f, 1f - k);
         });
         Fx.WorldText(strange.transform, "*sweeping gesture*", Gold, 1f * d.TimeScale, 2.4f);
+        Fx.Release(sp + new Vector2(0f, 0.5f), Gold, ImpactStyle.Magic, 2.6f, cinematic: true);
+        Fx.Flash(new Color(1f, 0.85f, 0.4f, 0.45f), 0.3f);
         Fx.Shake(0.8f, 0.6f);
         yield return d.Wait(1f);
 
