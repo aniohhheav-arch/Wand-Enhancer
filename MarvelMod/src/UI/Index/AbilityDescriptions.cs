@@ -90,6 +90,17 @@ public static class AbilityDescriptions
         ["infinity_surge"] = "Six rainbow shockwaves: everyone around you is stunned and thrown back.",
         ["the_snap"]       = "ULTIMATE. Gauntlet close-up, the stones light up, SNAP. Outcome set by SnapMode in the config: visual (default, nobody hurt), practice_kill (freeplay only: half the dummies turn to dust), match_kill_half, match_stun.",
         ["titans_judgment"]= "ULTIMATE. A colossal six-coloured beam in your aim direction kills everyone it hits.",
+        // ── Meeting powers (panel on the left during meetings) ──
+        ["read_their_minds"] = "MEETING (Thanos). Pick a player: see whether they voted, skipped, or who they voted for. Real vote data.",
+        ["rewrite_the_vote"] = "MEETING (Thanos). For a few seconds the names on YOUR ballot scramble red. Visual only: real votes are untouched.",
+        ["second_chance"]    = "MEETING (Thanos). After you voted: the host clears your vote (the game's own clear-vote) so you can vote again.",
+        ["soul_verdict"]     = "MEETING (Thanos). Pick a player: learn how many real kills they made this game. True information.",
+        ["snap_vote"]        = "MEETING ULTIMATE (Thanos). Gauntlet snap cinematic for everyone. Votes are not changed; in freeplay it shows a simulated result.",
+        ["illusionary_testimony"] = "MEETING (Loki). Shows you a made-up 'sighting' you can use to bluff. Only you see it; it's marked as fabricated.",
+        ["shapeshifters_alibi"]   = "MEETING (Loki). Pick a player: on your screen your ballot portrait wears their look for a while.",
+        ["meeting_whisper"]       = "MEETING (Loki). Pick a player: a voice-in-your-head message appears on their screen only.",
+        ["vote_illusion"]         = "MEETING (Loki). Fake 'VOTED?' marks appear on ballots on your screen. Real votes are unchanged.",
+        ["council_of_variants"]   = "MEETING ULTIMATE (Loki). A council of Lokis circles everyone's screen, then collapses. The meeting keeps running.",
         // ── Hidden ──
         ["map_teleport"]   = "Open the map and left-click anywhere to teleport there. No cooldown.",
     };

@@ -88,6 +88,13 @@ public class LokiCharacter : CharacterDef
         new("FINISHERS",  "infinite_deception",         Executions, _ => !CharacterRegistry.InLobby),
     };
 
+    private readonly List<AbilityBase> _meeting = new()
+    {
+        new MarvelMod.Abilities.Meeting.IllusionaryTestimony(), new MarvelMod.Abilities.Meeting.ShapeshiftersAlibi(), new MarvelMod.Abilities.Meeting.MeetingWhisper(),
+        new MarvelMod.Abilities.Meeting.VoteIllusion(), new MarvelMod.Abilities.Meeting.CouncilOfVariants(),
+    };
+    public override IReadOnlyList<AbilityBase> MeetingAbilities => _meeting;
+
     public override IEnumerable<AbilityBase> Hidden
     {
         get

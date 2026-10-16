@@ -36,12 +36,15 @@ public abstract class CharacterDef
     public abstract IReadOnlyList<AbilityTab> Tabs { get; }
     /// <summary>Abilities without a button (map teleport, internal events).</summary>
     public virtual IEnumerable<AbilityBase> Hidden => Array.Empty<AbilityBase>();
+    /// <summary>Abilities shown in the meeting panel.</summary>
+    public virtual IReadOnlyList<AbilityBase> MeetingAbilities => Array.Empty<AbilityBase>();
 
     public IEnumerable<AbilityBase> AllAbilities()
     {
         foreach (var tab in Tabs)
             foreach (var a in tab.Abilities) yield return a;
         foreach (var a in Hidden) yield return a;
+        foreach (var a in MeetingAbilities) yield return a;
     }
 
     /// <summary>A page that temporarily replaces the normal tabs (e.g. while possessing someone).</summary>

@@ -72,12 +72,25 @@ public static class MovementStatusPatch
     }
 }
 
+/// <summary>Records real kills (for Soul Verdict) on every client.</summary>
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
+public static class KillLogPatch
+{
+    public static void Postfix(PlayerControl __instance, PlayerControl target)
+    {
+        if (__instance != null && target != null && target.Data != null && target.Data.IsDead)
+            Abilities.Meeting.KillLog.Record(__instance);
+    }
+}
+
 /// <summary>Meetings wipe all Loki trickery so nobody is stuck disguised/rooted/invisible at the table.</summary>
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
 public static class MeetingCleanupPatch
 {
     public static void Postfix()
     {
+        Abilities.Meeting.MeetingAbility.NewMeeting();
+        UI.MeetingPanel.Clear();
         Abilities.Loki.Possessions.EndAll();
         IllusionManager.Instance?.DespawnAll();
         ShapeshiftManager.Instance?.RestoreAll();

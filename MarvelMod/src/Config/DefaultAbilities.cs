@@ -100,6 +100,18 @@ public static class DefaultAbilities
         ["the_snap"]              = new() { Cooldown=180 },
         ["titans_judgment"]       = new() { Cooldown=120, Range=12, Damage=100, CinematicDur=2.5f },
 
+        // ── Meeting abilities (Damage on read_their_minds: 1 = show who they voted for, 0 = only "voted / skipped") ──
+        ["read_their_minds"]      = new() { Cooldown=0, UsesPerMeeting=1, Damage=1 },
+        ["rewrite_the_vote"]      = new() { Cooldown=0, UsesPerMeeting=1, Duration=8, MeetingPhase="voting" },
+        ["second_chance"]         = new() { Cooldown=0, UsesPerMeeting=1, MeetingPhase="voting" },
+        ["soul_verdict"]          = new() { Cooldown=0, UsesPerMeeting=1 },
+        ["snap_vote"]             = new() { Cooldown=0, UsesPerMeeting=1, MeetingPhase="voting" },
+        ["illusionary_testimony"] = new() { Cooldown=0, UsesPerMeeting=2 },
+        ["shapeshifters_alibi"]   = new() { Cooldown=0, UsesPerMeeting=1, Duration=15 },
+        ["meeting_whisper"]       = new() { Cooldown=0, UsesPerMeeting=2 },
+        ["vote_illusion"]         = new() { Cooldown=0, UsesPerMeeting=1, Duration=10, MeetingPhase="voting" },
+        ["council_of_variants"]   = new() { Cooldown=0, UsesPerMeeting=1, Duration=5 },
+
         // ── Hidden ──────────────────────────────────────────────────────
         ["map_teleport"]          = new() { Cooldown=0 },
     };
@@ -126,5 +138,7 @@ public static class DefaultAbilities
         VfxIntensity = src.VfxIntensity,
         CinematicDur = src.CinematicDur,
         PracticeOnly = src.PracticeOnly,
+        UsesPerMeeting = src.UsesPerMeeting,
+        MeetingPhase = src.MeetingPhase,
     };
 }

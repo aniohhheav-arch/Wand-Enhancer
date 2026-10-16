@@ -16,4 +16,8 @@ public class AbilityConfig
     public float  VfxIntensity   { get; set; } = 1f;
     public float  CinematicDur   { get; set; } = 3f;
     public bool   PracticeOnly   { get; set; } = false;
+    /// <summary>Meeting abilities: uses per meeting.</summary>
+    public int    UsesPerMeeting { get; set; } = 1;
+    /// <summary>Meeting abilities: discussion, voting or both.</summary>
+    public string MeetingPhase   { get; set; } = "both";
 }

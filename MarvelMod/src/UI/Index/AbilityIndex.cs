@@ -64,6 +64,11 @@ public class AbilityIndex : MonoBehaviour
                 foreach (var a in tab.Abilities) y = DrawAbility(a, y, view.width - 30);
                 y += 6;
             }
+            if (character.MeetingAbilities.Count > 0)
+            {
+                GUI.Label(new Rect(0, y, view.width - 30, 24), "── MEETING POWERS ──", _head!); y += 26;
+                foreach (var a in character.MeetingAbilities) y = DrawAbility(a, y, view.width - 30);
+            }
             foreach (var a in character.Hidden) y = DrawAbility(a, y, view.width - 30);
         }
         GUI.EndScrollView();
@@ -94,6 +99,8 @@ public class AbilityIndex : MonoBehaviour
             foreach (var a in tab.Abilities)
                 y += 20 + _dim!.CalcHeight(new GUIContent(AbilityDescriptions.For(a.Id)), width - 30) + 6;
         }
+        if (c.MeetingAbilities.Count > 0) y += 26;
+        foreach (var a in c.MeetingAbilities) y += 20 + _dim!.CalcHeight(new GUIContent(AbilityDescriptions.For(a.Id)), width - 30) + 6;
         foreach (var a in c.Hidden) y += 20 + _dim!.CalcHeight(new GUIContent(AbilityDescriptions.For(a.Id)), width - 30) + 6;
         return y + 20;
     }

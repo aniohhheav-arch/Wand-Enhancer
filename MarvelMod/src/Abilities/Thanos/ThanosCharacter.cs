@@ -65,6 +65,13 @@ public class ThanosCharacter : CharacterDef
     public override IReadOnlyList<AbilityTab> Tabs => _tabs;
     public override IEnumerable<AbilityBase> Hidden => new AbilityBase[] { LokiCharacter.Instance.MapTeleport };
 
+    private readonly List<AbilityBase> _meeting = new()
+    {
+        new Abilities.Meeting.ReadTheirMinds(), new Abilities.Meeting.RewriteTheVote(), new Abilities.Meeting.SecondChance(),
+        new Abilities.Meeting.SoulVerdict(), new Abilities.Meeting.SnapVote(),
+    };
+    public override IReadOnlyList<AbilityBase> MeetingAbilities => _meeting;
+
     private ThanosCharacter()
     {
         AbilityTab Tab(string name, Stone s, List<AbilityBase> list) =>

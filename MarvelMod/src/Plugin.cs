@@ -30,6 +30,7 @@ public class MarvelModPlugin : BasePlugin
         AddComponent<PracticeModeManager>();
         AddComponent<DevConsole>();
         AddComponent<MarvelMod.UI.Index.AbilityIndex>();
+        AddComponent<MarvelMod.UI.MeetingPanel>();
         AddComponent<MarvelMod.Characters.IllusionManager>();
         AddComponent<MarvelMod.Characters.ShapeshiftManager>();
         AddComponent<MarvelMod.Characters.StatusManager>();

@@ -113,6 +113,9 @@ public class DevConsole : MonoBehaviour
         "vfx"        => CmdVfx(p),
         "cinematic"  => CmdCinematic(p),
         "debug"      => CmdDebug(p),
+        "meeting"    => CmdMeeting(p),
+        "finisher"   => CmdFinisher(p),
+        "snap"       => CmdSnap(p),
         _            => throw new ConsoleException($"Unknown command '{p[0]}'. Type 'help' for commands."),
     };
 
@@ -122,7 +125,7 @@ public class DevConsole : MonoBehaviour
     {
         if (p.Length > 1) return GetDetailedHelp(p[1]);
         return
-            "Commands: help, clear, status, config, character, ability, illusion, practice, vfx, cinematic, debug\n" +
+            "Commands: help, clear, status, config, character, ability, meeting, finisher, snap, illusion, practice, vfx, cinematic, debug\n" +
             "Use 'help <command>' for details.";
     }
 
@@ -132,7 +135,10 @@ public class DevConsole : MonoBehaviour
         "illusion"  => "illusion spawn <n> | behavior <idle|wander|follow|task|random> | despawn_all | movement_speed <v> | lifetime <s> | nameplates <on|off>",
         "practice"  => "practice reset | dummies <n> | spawn_dummy | clear_dummies | invincible <on|off> | unlimited <on|off>",
         "vfx"       => "vfx enabled <on|off> | intensity <0-100> | particles <on|off> | screen_shake <on|off> | quality <low|medium|high|ultra>",
-        "character" => "character loki | info | abilities",
+        "character" => "character loki | thanos | none | info | abilities",
+        "meeting"   => "meeting ability cooldown|uses_per_meeting|duration <id> <value> | meeting ability enabled|practice_only <id> <on|off> | meeting ability phase <id> <discussion|voting|both> | meeting list | meeting reset",
+        "finisher"  => "finisher list | preview <id> (on the closest player, nobody dies) | replay <id> | duration <id> <s> | mode <full|short|skip> | body <on|off>",
+        "snap"      => "snap mode <visual|practice_kill|match_kill_half|match_stun>",
         "config"    => "config list | save | reload | reset",
         "debug"     => "debug on | off | abilities | targets | cooldowns | performance | errors",
         _           => $"No help for '{cmd}'.",
@@ -172,21 +178,123 @@ public class DevConsole : MonoBehaviour
 
     private string CmdCharacter(string[] p)
     {
-        if (p.Length < 2) throw new ConsoleException("Usage: character <loki|info|abilities>");
+        if (p.Length < 2) throw new ConsoleException("Usage: character <loki|thanos|none|info|abilities>");
+        var arg = p[1].ToLowerInvariant();
+        switch (arg)
+        {
+            case "info":
+                return $"Freeplay character: {ModConfig.Data.ActiveCharacter} | Playing now: {CharacterRegistry.Local?.DisplayName ?? "none"} | Impostors get: {ModConfig.Data.ImpostorCharacter}";
+            case "abilities":
+                var c = CharacterRegistry.Local ?? CharacterRegistry.ById(ModConfig.Data.ActiveCharacter);
+                if (c == null) return "No character selected.";
+                return string.Join("\n", c.AllAbilities().Select(a =>
+                    $"  [{a.Id}] {a.Name} ({a.Category}) - CD:{a.Cfg.Cooldown}s Dur:{a.Cfg.Duration}s"));
+            case "none":
+                CharacterRegistry.Choose("none");
+                return "Freeplay character cleared.";
+            default:
+                if (CharacterRegistry.ById(arg) == null) throw new ConsoleException($"Unknown character '{p[1]}'. Options: loki, thanos, none.");
+                CharacterRegistry.Choose(arg);
+                return $"Freeplay character set to {arg} (used in freeplay and the lobby).";
+        }
+    }
+
+    private static string RequireAbility(string id)
+    {
+        if (CharacterRegistry.Ability(id) == null)
+            throw new ConsoleException($"Unknown ability id '{id}'. Use 'character abilities' to list ids.");
+        return id;
+    }
+
+    private string CmdMeeting(string[] p)
+    {
+        if (p.Length < 2) throw new ConsoleException("Usage: " + GetDetailedHelp("meeting"));
         switch (p[1].ToLowerInvariant())
         {
-            case "loki":
-                ModConfig.Data.ActiveCharacter = "loki";
-                ModConfig.Save();
-                return "Character set to Loki.";
-            case "info":
-                return $"Active: {ModConfig.Data.ActiveCharacter} | Loki abilities: {LokiCharacter.Instance.All.Count}";
-            case "abilities":
-                return string.Join("\n", LokiCharacter.Instance.All.Select(a =>
-                    $"  [{a.Id}] {a.Name} ({a.Category}) — CD:{a.Cfg.Cooldown}s Dur:{a.Cfg.Duration}s"));
+            case "list":
+                return string.Join("\n", CharacterRegistry.All.SelectMany(c => c.MeetingAbilities).Select(a =>
+                    $"  [{a.Id}] {a.Name} - uses {a.Cfg.UsesPerMeeting}/meeting, phase {a.Cfg.MeetingPhase}, enabled {a.Cfg.Enabled}, practice_only {a.Cfg.PracticeOnly}"));
+            case "reset":
+                foreach (var a in CharacterRegistry.All.SelectMany(c => c.MeetingAbilities))
+                    ModConfig.SetAbility(a.Id, DefaultAbilities.Get(a.Id));
+                Abilities.Meeting.MeetingAbility.NewMeeting();
+                return "Meeting abilities reset to defaults (uses refilled).";
+            case "ability":
+                if (p.Length < 5) throw new ConsoleException("Usage: meeting ability <setting> <id> <value>");
+                var sub = p[2].ToLowerInvariant();
+                var id = RequireAbility(p[3].ToLowerInvariant());
+                if (CharacterRegistry.Ability(id) is not Abilities.Meeting.MeetingAbility)
+                    throw new ConsoleException($"'{id}' is not a meeting ability. Use 'meeting list'.");
+                var cfg = ModConfig.GetAbility(id);
+                switch (sub)
+                {
+                    case "cooldown":         cfg.Cooldown = ParseFloat(p, 4); break;
+                    case "duration":         cfg.Duration = ParseFloat(p, 4); break;
+                    case "uses_per_meeting": cfg.UsesPerMeeting = Math.Max(0, ParseInt(p, 4)); break;
+                    case "enabled":          cfg.Enabled = ParseBool(p, 4); break;
+                    case "practice_only":    cfg.PracticeOnly = ParseBool(p, 4); break;
+                    case "phase":
+                        var phase = p[4].ToLowerInvariant();
+                        if (phase is not ("discussion" or "voting" or "both")) throw new ConsoleException("Phase must be discussion, voting or both.");
+                        cfg.MeetingPhase = phase; break;
+                    default: throw new ConsoleException($"Unknown setting '{sub}'.");
+                }
+                ModConfig.SetAbility(id, cfg);
+                return $"[{id}] {sub} = {p[4]} (saved, applies immediately).";
             default:
-                throw new ConsoleException($"Unknown character '{p[1]}'.");
+                throw new ConsoleException("Usage: " + GetDetailedHelp("meeting"));
         }
+    }
+
+    private string CmdFinisher(string[] p)
+    {
+        if (p.Length < 2) throw new ConsoleException("Usage: " + GetDetailedHelp("finisher"));
+        var finishers = LokiCharacter.Instance.Executions.OfType<Abilities.Loki.FinisherAbility>().ToList();
+        switch (p[1].ToLowerInvariant())
+        {
+            case "list":
+                return string.Join("\n", finishers.Select(f => $"  [{f.Id}] {f.Name} - duration {(f.Cfg.Duration > 0 ? f.Cfg.Duration + "s" : "default")}"));
+            case "mode":
+                var mode = p.Length > 2 ? p[2].ToLowerInvariant() : "";
+                if (mode is not ("full" or "short" or "skip")) throw new ConsoleException("Mode must be full, short or skip.");
+                ModConfig.Data.FinisherMode = mode; ModConfig.Save();
+                return $"Finisher mode = {mode}.";
+            case "body":
+                ModConfig.Data.FinisherLeavesBody = ParseBool(p, 2); ModConfig.Save();
+                return $"Finishers leave a body = {ModConfig.Data.FinisherLeavesBody}.";
+            case "duration":
+            {
+                if (p.Length < 4) throw new ConsoleException("Usage: finisher duration <id> <seconds>");
+                var f = finishers.FirstOrDefault(x => x.Id == p[2].ToLowerInvariant()) ?? throw new ConsoleException($"Unknown finisher '{p[2]}'.");
+                var cfg = ModConfig.GetAbility(f.Id);
+                cfg.Duration = Math.Max(0f, ParseFloat(p, 3));
+                ModConfig.SetAbility(f.Id, cfg);
+                return $"[{f.Id}] duration = {cfg.Duration}s (0 = default).";
+            }
+            case "preview":
+            case "replay":
+            {
+                if (p.Length < 3) throw new ConsoleException("Usage: finisher preview <id>");
+                var f = finishers.FirstOrDefault(x => x.Id == p[2].ToLowerInvariant()) ?? throw new ConsoleException($"Unknown finisher '{p[2]}'.");
+                var lp = PlayerControl.LocalPlayer ?? throw new ConsoleException("Not in a game.");
+                var target = Players.ClosestTarget(lp, 50f) ?? throw new ConsoleException("No player nearby to preview on (freeplay dummies work).");
+                _open = false; IsOpen = false;
+                f.Preview(lp, target);
+                return $"Previewing {f.Name} on {target.Data?.PlayerName} (nobody dies).";
+            }
+            default:
+                throw new ConsoleException("Usage: " + GetDetailedHelp("finisher"));
+        }
+    }
+
+    private string CmdSnap(string[] p)
+    {
+        if (p.Length < 3 || p[1].ToLowerInvariant() != "mode") throw new ConsoleException("Usage: " + GetDetailedHelp("snap"));
+        var mode = p[2].ToLowerInvariant();
+        if (mode is not ("visual" or "practice_kill" or "match_kill_half" or "match_stun"))
+            throw new ConsoleException("Snap mode must be visual, practice_kill, match_kill_half or match_stun.");
+        ModConfig.Data.SnapMode = mode; ModConfig.Save();
+        return $"The Snap outcome = {mode}.";
     }
 
     private string CmdAbility(string[] p)
@@ -194,19 +302,19 @@ public class DevConsole : MonoBehaviour
         if (p.Length < 2) throw new ConsoleException("Usage: ability <subcommand> ...");
         if (p[1] == "reset_all")
         {
-            LokiCharacter.Instance.ResetAllCooldowns();
+            foreach (var a in CharacterRegistry.AllAbilities()) a.ResetCooldown();
             return "All cooldowns reset.";
         }
         if (p.Length < 3) throw new ConsoleException("Usage: ability <subcommand> <id> [value]");
 
         var sub = p[1].ToLowerInvariant();
-        var id  = p[2].ToLowerInvariant();
+        var id  = RequireAbility(p[2].ToLowerInvariant());
 
         if (sub == "reset")
         {
             var def = DefaultAbilities.Get(id);
             ModConfig.SetAbility(id, def);
-            LokiCharacter.Instance.GetById(id)?.ResetCooldown();
+            CharacterRegistry.Ability(id)?.ResetCooldown();
             return $"[{id}] reset to defaults.";
         }
 
