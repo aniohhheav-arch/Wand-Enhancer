@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using MarvelMod.Config;
 using MarvelMod.VFX;
 using Reactor.Utilities.Attributes;
-using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -45,38 +44,45 @@ public class IllusionManager : MonoBehaviour
         return ill;
     }
 
-    /// <summary>Copies the player's rendered cosmetics (body, hat, skin, visor, name) without any game scripts.</summary>
-    private static Transform? CopyAppearance(PlayerControl template, Transform parent)
+    /// <summary>
+    /// Builds a full player model using the game's PoolablePlayer (the one used in the intro and
+    /// meeting screens), dressed in the template's current outfit and sized like a real player.
+    /// </summary>
+    private static PoolablePlayer? CopyAppearance(PlayerControl template, Transform parent)
     {
-        if (template.cosmetics == null) return null;
-        var src = template.cosmetics.transform;
+        var hud = HudManager.Instance;
+        if (hud == null || hud.IntroPrefab == null || hud.IntroPrefab.PlayerPrefab == null) return null;
+        var outfit = template.CurrentOutfit ?? template.Data?.DefaultOutfit;
+        if (outfit == null) return null;
 
-        // Instantiate under an inactive holder so none of the copied scripts ever run.
-        var holder = new GameObject("IllusionHolder");
-        holder.SetActive(false);
-        var copy = Object.Instantiate(src.gameObject, holder.transform);
-        UnityHelpers.StripScripts(copy);
+        var pp = Object.Instantiate(hud.IntroPrefab.PlayerPrefab, parent);
+        pp.name = "IllusionModel";
+        pp.transform.localPosition = Vector3.zero;
+        pp.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, false, null, false);
+        pp.SetName(outfit.PlayerName);
+        pp.ToggleName(ModConfig.Data.IllusionNameplates);
+        SetLayer(pp.gameObject, template.gameObject.layer);
 
-        copy.transform.SetParent(parent, false);
-        copy.transform.localPosition = src.localPosition;
-        copy.transform.localScale = src.localScale;
-        Object.Destroy(holder);
+        // match a real player's on-screen height
+        float want = BodyHeight(template.cosmetics);
+        float have = BodyHeight(pp.cosmetics);
+        if (want > 0.01f && have > 0.01f)
+            pp.transform.localScale = pp.transform.localScale * (want / have);
+        return pp;
+    }
 
-        int colorId = template.CurrentOutfit != null ? template.CurrentOutfit.ColorId : 0;
-        foreach (var sr in copy.GetComponentsInChildren<SpriteRenderer>(true))
-        {
-            if (sr.sharedMaterial == null) continue;
-            sr.material = new Material(sr.sharedMaterial);   // detach from the real player's material
-            if (sr.material.HasProperty(PlayerMaterial.BodyColor))
-                PlayerMaterial.SetColors(colorId, sr.material);
-        }
+    private static float BodyHeight(CosmeticsLayer? cosmetics)
+    {
+        var body = cosmetics?.currentBodySprite?.BodySprite;
+        if (body == null || body.sprite == null) return 0f;
+        return body.sprite.bounds.size.y * Mathf.Abs(body.transform.lossyScale.y);
+    }
 
-        if (!ModConfig.Data.IllusionNameplates)
-            foreach (var tmp in copy.GetComponentsInChildren<TMP_Text>(true))
-                tmp.gameObject.SetActive(false);
-
-        copy.SetActive(true);
-        return copy.transform;
+    private static void SetLayer(GameObject go, int layer)
+    {
+        go.layer = layer;
+        for (int i = 0; i < go.transform.childCount; i++)
+            SetLayer(go.transform.GetChild(i).gameObject, layer);
     }
 
     public void DespawnAll()
@@ -105,8 +111,9 @@ public class LokiIllusion : MonoBehaviour
 
     private const float TouchRadius = 0.45f;
 
-    private Transform? _visual;
-    private Vector3 _visualBase;
+    private PoolablePlayer? _model;
+    private Vector3 _modelBase;
+    private bool _flipped;
     private PlayerControl? _owner;
     private PlayerControl? _followTarget;
     private Vector2 _followOffset;
@@ -115,11 +122,11 @@ public class LokiIllusion : MonoBehaviour
     private float _behaviorTimer;
     private bool _popped;
 
-    public void Init(PlayerControl template, Transform? visual, float lifetime)
+    public void Init(PlayerControl template, PoolablePlayer? model, float lifetime)
     {
         _owner = template;
-        _visual = visual;
-        if (_visual != null) _visualBase = _visual.localPosition;
+        _model = model;
+        if (_model != null) _modelBase = _model.transform.localPosition;
         Lifetime = lifetime;
         _spawnTime = Time.time;
         _wanderTarget = transform.position;
@@ -206,22 +213,21 @@ public class LokiIllusion : MonoBehaviour
     /// <summary>Face the walking direction and bob like a walking crewmate.</summary>
     private void Animate(Vector2 delta)
     {
-        if (_visual == null) return;
+        if (_model == null) return;
         bool moving = delta.sqrMagnitude > 0.000001f;
         if (moving && Mathf.Abs(delta.x) > 0.0005f)
         {
-            float sign = delta.x < 0 ? -1f : 1f;
-            var s = _visual.localScale;
-            _visual.localScale = new Vector3(Mathf.Abs(s.x) * sign, s.y, s.z);
-            // keep the name text readable when flipped
-            foreach (var tmp in _visual.GetComponentsInChildren<TMP_Text>())
+            bool flip = delta.x < 0;
+            if (flip != _flipped)
             {
-                var ts = tmp.transform.localScale;
-                tmp.transform.localScale = new Vector3(Mathf.Abs(ts.x) * sign, ts.y, ts.z);
+                _flipped = flip;
+                _model.SetFlipX(flip);
             }
         }
         float bob = moving ? Mathf.Abs(Mathf.Sin(Time.time * 14f)) * 0.06f : 0f;
-        _visual.localPosition = _visualBase + new Vector3(0f, bob, 0f);
+        float squash = moving ? 1f + Mathf.Sin(Time.time * 28f) * 0.03f : 1f;
+        _model.transform.localPosition = _modelBase + new Vector3(0f, bob, 0f);
+        transform.localScale = new Vector3(1f / squash, squash, 1f);
     }
 
     /// <summary>Illusions burst when a real player (other than Loki) walks into them.</summary>

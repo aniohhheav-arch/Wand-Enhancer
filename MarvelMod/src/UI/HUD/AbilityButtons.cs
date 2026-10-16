@@ -4,6 +4,8 @@ using MarvelMod.Abilities;
 using MarvelMod.Assets;
 using MarvelMod.Characters;
 using MarvelMod.Config;
+using MarvelMod.UI.Console;
+using MarvelMod.VFX;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -11,44 +13,34 @@ namespace MarvelMod.UI.HUD;
 
 /// <summary>
 /// Real Among Us action buttons (cloned from the Kill button) placed next to Use / Report.
-/// Click with the left mouse button, or press 1-5. The 6th button (or Q / E) switches the
-/// ability category. H hides / shows the buttons.
 ///
-/// Layout (left of the vanilla buttons):
 ///   [1] [2] [3]
-///   [4] [5] [category]   [use] [report]
+///   [4] [5] [tab]   [vanilla buttons]
+///
+/// Left-click or press 1-5 to cast. The tab button (or Q / E) switches page.
+/// H hides the buttons, F4 toggles cooldowns, F3 switches character (freeplay / lobby).
 /// </summary>
 public static class AbilityButtons
 {
     private const int AbilitySlots = 5;
     private const int SwitchSlot = 5;
 
-    private static readonly string[] TabNames = { "ILLUSIONS", "SHAPESHIFT", "TRICKSTER", "SORCERY", "MISCHIEF" };
     private static readonly KeyCode[] SlotKeys = { KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, KeyCode.Alpha5 };
     private static readonly Color TargetOutline = new(0.25f, 1f, 0.4f, 1f);
+    private static readonly BepInEx.Logging.ManualLogSource Log = BepInEx.Logging.Logger.CreateLogSource("MarvelMod.HUD");
 
     private static readonly ActionButton?[] Buttons = new ActionButton?[AbilitySlots + 1];
     private static HudManager? _hud;
     private static HudManager? _failedHud;   // never retry creation every frame on a HUD where it failed
-    private static readonly BepInEx.Logging.ManualLogSource Log = BepInEx.Logging.Logger.CreateLogSource("MarvelMod.HUD");
+    private static CharacterDef? _character;
     private static int _tab;
-    private static int _shownTab = -1;
+    private static string _shownKey = "";
     private static bool _visible = true;
     private static PlayerControl? _outlined;
 
-    /// <summary>Last direction the local player walked in (used by Blink / Green Bolt).</summary>
+    /// <summary>Last direction the local player walked in (used by aimed abilities).</summary>
     public static Vector2 LastMoveDirection { get; private set; } = Vector2.right;
 
-    private static List<AbilityBase> Slots(int tab) => tab switch
-    {
-        1 => LokiCharacter.Instance.Shapeshifting,
-        2 => LokiCharacter.Instance.TricksterMobility,
-        3 => LokiCharacter.Instance.SorceryAndCombat,
-        4 => LokiCharacter.Instance.GodOfMischief,
-        _ => LokiCharacter.Instance.IllusionMagic,
-    };
-
-    /// <summary>Called every frame from HudManager.Update.</summary>
     public static void Update(HudManager hud)
     {
         try
@@ -70,10 +62,19 @@ public static class AbilityButtons
 
         if (_hud != hud || !AllCreated()) Create(hud);
 
+        CharacterRegistry.UpdateLocal(lp);
+        if (_character != CharacterRegistry.Local)
+        {
+            _character = CharacterRegistry.Local;
+            _tab = 0;
+            _shownKey = "";
+        }
+
         TrackMovement(lp);
         HandleKeys(lp);
+        _character?.LocalUpdate(lp, hud);
 
-        bool show = ShouldShow(hud, lp);
+        bool show = _character != null && ShouldShow(hud, lp);
         foreach (var b in Buttons)
             if (b != null && b.gameObject.activeSelf != show) b.gameObject.SetActive(show);
         if (!show)
@@ -82,7 +83,9 @@ public static class AbilityButtons
             return;
         }
 
-        if (_shownTab != _tab) RefreshTab();
+        EnsureTabUnlocked(lp);
+        var key = $"{_character!.Id}:{_tab}";
+        if (_shownKey != key) RefreshTab(key);
         Layout(hud);
         UpdateStates(lp);
     }
@@ -100,7 +103,7 @@ public static class AbilityButtons
     {
         _hud = hud;
         _failedHud = hud;   // cleared below only if every button was built
-        _shownTab = -1;
+        _shownKey = "";
         var template = hud.KillButton;
 
         for (int i = 0; i < Buttons.Length; i++)
@@ -127,15 +130,18 @@ public static class AbilityButtons
             // The Kill button has no uses counter (SetInfiniteUses() throws on it), so only hide it if present.
             if (b.usesRemainingSprite != null) b.usesRemainingSprite.gameObject.SetActive(false);
             if (b.usesRemainingText != null) b.usesRemainingText.gameObject.SetActive(false);
-            b.gameObject.SetActive(false);   // Layout() shows it once it's in place
+            b.gameObject.SetActive(false);
         }
         _failedHud = null;
     }
 
-    private static void RefreshTab()
+    private static List<AbilityBase> Slots() =>
+        _character == null ? new List<AbilityBase>() : _character.Tabs[_tab].Abilities;
+
+    private static void RefreshTab(string key)
     {
-        _shownTab = _tab;
-        var slots = Slots(_tab);
+        _shownKey = key;
+        var slots = Slots();
         for (int i = 0; i < AbilitySlots; i++)
         {
             var b = Buttons[i];
@@ -145,13 +151,14 @@ public static class AbilityButtons
                 SetIcon(b, slots[i].Id);
                 b.OverrideText(slots[i].Label);
             }
+            else b.OverrideText("");
         }
 
         var sw = Buttons[SwitchSlot];
-        if (sw != null)
+        if (sw != null && _character != null)
         {
-            SetIcon(sw, "switch_tab");
-            sw.OverrideText(TabNames[_tab]);
+            SetIcon(sw, _character.Tabs[_tab].IconId);
+            sw.OverrideText(_character.Tabs[_tab].Name);
             sw.SetCoolDown(0f, 1f);
             sw.SetEnabled();
         }
@@ -177,8 +184,8 @@ public static class AbilityButtons
         if (MeetingHud.Instance != null || ExileController.Instance != null || hud.IsIntroDisplayed) return false;
         if (MapBehaviour.Instance != null && MapBehaviour.Instance.IsOpen) return false;
         if (hud.Chat != null && hud.Chat.IsOpenOrOpening) return false;
-        // follow the vanilla HUD: hidden whenever Use and Report are both hidden (always on in the lobby)
-        return LobbyBehaviour.Instance != null
+        if (TargetMenu.IsOpen || Minigame.Instance != null) return false;
+        return CharacterRegistry.InLobby
             || (hud.UseButton != null && hud.UseButton.gameObject.activeInHierarchy)
             || (hud.ReportButton != null && hud.ReportButton.gameObject.activeInHierarchy);
     }
@@ -190,46 +197,95 @@ public static class AbilityButtons
         if (v.sqrMagnitude > 0.01f) LastMoveDirection = v.normalized;
     }
 
+    private static bool TypingSomewhere() =>
+        DevConsole.IsOpen || (_hud != null && _hud.Chat != null && _hud.Chat.IsOpenOrOpening);
+
     private static void HandleKeys(PlayerControl lp)
     {
+        if (TypingSomewhere()) return;
+
         if (Input.GetKeyDown(KeyCode.H)) _visible = !_visible;
-        if (!_visible || (_hud != null && _hud.Chat != null && _hud.Chat.IsOpenOrOpening)) return;
 
-        if (Input.GetKeyDown(KeyCode.Q)) _tab = (_tab + 4) % 5;
-        if (Input.GetKeyDown(KeyCode.E)) _tab = (_tab + 1) % 5;
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            ModConfig.Data.PracticeUnlimited = !ModConfig.Data.PracticeUnlimited;
+            ModConfig.Save();
+            if (!ModConfig.Data.PracticeUnlimited)
+                foreach (var a in CharacterRegistry.AllAbilities()) a.ResetCooldown();
+            Fx.Toast(ModConfig.Data.PracticeUnlimited ? "COOLDOWNS OFF" : "COOLDOWNS ON", Fx.LokiGold, 1.5f, 4f, 1.2f);
+        }
 
+        if (Input.GetKeyDown(KeyCode.F3) && (CharacterRegistry.IsFreeplay || CharacterRegistry.InLobby))
+        {
+            var id = CharacterRegistry.CycleFreeplayCharacter();
+            var def = CharacterRegistry.ById(id);
+            Fx.Toast(def != null ? $"CHARACTER: {def.DisplayName.ToUpperInvariant()}" : "CHARACTER: NONE",
+                def?.Color ?? Color.white, 1.8f, 4f, 1.2f);
+        }
+
+        if (!_visible || _character == null) return;
+        if (Input.GetKeyDown(KeyCode.Q)) CycleTab(lp, -1);
+        if (Input.GetKeyDown(KeyCode.E)) CycleTab(lp, +1);
         for (int i = 0; i < AbilitySlots; i++)
             if (Input.GetKeyDown(SlotKeys[i])) OnClick(i);
+    }
+
+    private static void CycleTab(PlayerControl lp, int dir)
+    {
+        if (_character == null) return;
+        int n = _character.Tabs.Count;
+        for (int step = 1; step <= n; step++)
+        {
+            int t = ((_tab + dir * step) % n + n) % n;
+            if (_character.Tabs[t].Unlocked(lp)) { _tab = t; return; }
+        }
+    }
+
+    private static void EnsureTabUnlocked(PlayerControl lp)
+    {
+        if (_character == null) return;
+        if (_tab >= _character.Tabs.Count) _tab = 0;
+        if (!_character.Tabs[_tab].Unlocked(lp)) CycleTab(lp, +1);
     }
 
     /// <summary>Places the buttons in a 3x2 block directly left of the vanilla button grid.</summary>
     private static void Layout(HudManager hud)
     {
-        float minX = float.MaxValue, minY = float.MaxValue, z = 0f;
-        foreach (var vanilla in new MonoBehaviour?[]
+        var vanilla = new List<Vector3>();
+        foreach (var v in new MonoBehaviour?[]
                  { hud.UseButton, hud.ReportButton, hud.KillButton, hud.ImpostorVentButton, hud.SabotageButton, hud.AbilityButton })
+            if (v != null && v.gameObject.activeInHierarchy) vanilla.Add(v.transform.position);
+
+        var first = Buttons[0]!;
+        float size = 1f;
+        if (first.graphic != null && first.graphic.sprite != null)
+            size = first.graphic.sprite.bounds.size.x * first.graphic.transform.lossyScale.x;
+
+        // spacing = the gap the game itself uses between neighbouring buttons
+        float spacing = size * 1.3f;
+        for (int i = 0; i < vanilla.Count; i++)
+        for (int j = i + 1; j < vanilla.Count; j++)
         {
-            if (vanilla == null || !vanilla.gameObject.activeInHierarchy) continue;
-            var p = vanilla.transform.position;
+            float dx = Mathf.Abs(vanilla[i].x - vanilla[j].x);
+            if (Mathf.Abs(vanilla[i].y - vanilla[j].y) < 0.1f && dx > size * 0.8f)
+                spacing = Mathf.Min(spacing, dx);
+        }
+        spacing = Mathf.Max(spacing, size * 1.15f);
+
+        float minX = float.MaxValue, minY = float.MaxValue, z = first.transform.position.z;
+        foreach (var p in vanilla)
+        {
             minX = Mathf.Min(minX, p.x);
             minY = Mathf.Min(minY, p.y);
             z = p.z;
         }
-
-        var first = Buttons[0]!;
-        float cell = 1f;
-        if (first.graphic != null && first.graphic.sprite != null)
-            cell = first.graphic.sprite.bounds.size.x * first.graphic.transform.lossyScale.x;
-        cell *= 1.08f;
-
-        if (minX == float.MaxValue)   // vanilla grid not visible: anchor to the bottom-right corner
+        if (vanilla.Count == 0)   // vanilla grid hidden (lobby): anchor to the bottom-right corner
         {
             var cam = Camera.main;
             if (cam == null) return;
             var c = cam.transform.position;
-            minX = c.x + cam.orthographicSize * cam.aspect - cell * 0.1f;
-            minY = c.y - cam.orthographicSize + cell * 0.6f;
-            z = first.transform.position.z;
+            minX = c.x + cam.orthographicSize * cam.aspect - size * 0.1f;
+            minY = c.y - cam.orthographicSize + size * 0.7f;
         }
 
         // (row, column-from-right) for slots 0..5
@@ -239,13 +295,13 @@ public static class AbilityButtons
             var b = Buttons[i];
             if (b == null) continue;
             var (row, col) = grid[i];
-            b.transform.position = new Vector3(minX - cell * (col + 1), minY + cell * row, z);
+            b.transform.position = new Vector3(minX - spacing * (col + 1), minY + spacing * row, z);
         }
     }
 
     private static void UpdateStates(PlayerControl lp)
     {
-        var slots = Slots(_tab);
+        var slots = Slots();
         PlayerControl? outline = null;
         bool canAct = lp.CanMove && !lp.inVent;
 
@@ -253,7 +309,7 @@ public static class AbilityButtons
         {
             var b = Buttons[i];
             if (b == null) continue;
-            if (i >= slots.Count) { b.SetDisabled(); continue; }
+            if (i >= slots.Count) { b.SetCoolDown(0f, 1f); b.SetDisabled(); continue; }
 
             var a = slots[i];
             b.SetCoolDown(a.CooldownRemaining, Mathf.Max(0.01f, a.Cfg.Cooldown));
@@ -285,17 +341,26 @@ public static class AbilityButtons
     private static void OnClick(int slot)
     {
         var lp = PlayerControl.LocalPlayer;
-        if (lp == null || _hud == null || !ShouldShow(_hud, lp)) return;
+        if (lp == null || _hud == null || _character == null || !ShouldShow(_hud, lp)) return;
+        var button = Buttons[slot];
+        if (button != null) Fx.Punch(button.transform);
 
         if (slot == SwitchSlot)
         {
-            _tab = (_tab + 1) % 5;
+            CycleTab(lp, +1);
             return;
         }
 
-        var slots = Slots(_tab);
+        var slots = Slots();
         if (slot >= slots.Count || !lp.CanMove || lp.inVent) return;
         var ability = slots[slot];
+        if (!ability.IsReady) return;
+
+        if (ability.Targeting == TargetMode.Menu)
+        {
+            TargetMenu.Open(picked => ability.TryActivate(PlayerControl.LocalPlayer, picked));
+            return;
+        }
         ability.TryActivate(lp, ability.FindTarget(lp));
     }
 }

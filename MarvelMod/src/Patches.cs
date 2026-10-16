@@ -1,5 +1,6 @@
 using HarmonyLib;
 using MarvelMod.Characters;
+using MarvelMod.UI;
 using MarvelMod.UI.HUD;
 using UnityEngine;
 
@@ -9,7 +10,11 @@ namespace MarvelMod.Patches;
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
 public static class HudUpdatePatch
 {
-    public static void Postfix(HudManager __instance) => AbilityButtons.Update(__instance);
+    public static void Postfix(HudManager __instance)
+    {
+        AbilityButtons.Update(__instance);
+        MapTeleportInput.Update();
+    }
 }
 
 /// <summary>Rooted (Bound / Stunned) and inverted (Chaos Contract) movement, enforced by the owning client.</summary>
@@ -40,5 +45,6 @@ public static class MeetingCleanupPatch
         ShapeshiftManager.Instance?.RestoreAll();
         StatusManager.Instance?.ClearAll();
         InvisibilityManager.Instance?.RestoreAll();
+        VFX.Fx.ClearStains();
     }
 }

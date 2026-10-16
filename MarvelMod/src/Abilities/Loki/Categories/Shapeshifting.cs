@@ -11,7 +11,7 @@ public class Disguise : AbilityBase
     public override string Id       => "disguise";
     public override string Name     => "Disguise";
     public override string Category => "Shapeshifting";
-    public override TargetMode Targeting => TargetMode.Required;
+    public override TargetMode Targeting => TargetMode.Menu;
 
     protected override void OnCast(CastContext ctx)
     {
@@ -27,8 +27,8 @@ public class PerfectImpersonation : AbilityBase
     public override string Id       => "perfect_impersonation";
     public override string Name     => "Perfect Impersonation";
     public override string Category => "Shapeshifting";
-    public override string Label    => "IMPERSONATE";
-    public override TargetMode Targeting => TargetMode.Required;
+    public override string Label    => "MIMIC";
+    public override TargetMode Targeting => TargetMode.Menu;
 
     protected override void OnCast(CastContext ctx)
     {
@@ -59,8 +59,8 @@ public class IdentitySwap : AbilityBase
     public override string Id       => "identity_swap";
     public override string Name     => "Identity Swap";
     public override string Category => "Shapeshifting";
-    public override string Label    => "SWAP LOOKS";
-    public override TargetMode Targeting => TargetMode.Required;
+    public override string Label    => "LOOK SWAP";
+    public override TargetMode Targeting => TargetMode.Menu;
 
     protected override void OnCast(CastContext ctx)
     {
@@ -76,9 +76,10 @@ public class TheOtherYou : AbilityBase
 {
     public override string Id       => "the_other_you";
     public override string Name     => "The Other You";
+    public override string Label    => "OTHER YOU";
     public override string Category => "Shapeshifting";
     public override bool IsUltimate => true;
-    public override TargetMode Targeting => TargetMode.Required;
+    public override TargetMode Targeting => TargetMode.Menu;
 
     protected override void OnCast(CastContext ctx)
     {

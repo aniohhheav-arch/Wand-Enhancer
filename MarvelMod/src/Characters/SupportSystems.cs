@@ -30,14 +30,7 @@ public class StatusManager : MonoBehaviour
     {
         if (!Players.IsAlive(target)) return false;
         bool hostile = effect is StatusEffect.Bound or StatusEffect.Stunned or StatusEffect.ChaosContract;
-        if (hostile && HasStatus(target, StatusEffect.Shielded))
-        {
-            RemoveStatus(target, StatusEffect.Shielded);
-            Fx.Burst(target.transform.position, Fx.LokiLight, 2.2f, 0.5f);
-            Fx.Sparkles(target.transform.position, Color.white, 12, 1.4f);
-            if (target.AmOwner) Fx.Toast("SHIELD BLOCKED IT!", Fx.LokiLight, 1.5f, 3.5f);
-            return false;
-        }
+        if (hostile && ConsumeShield(target)) return false;
 
         if (duration <= 0f) duration = 30f;
         if (!_statuses.TryGetValue(target.PlayerId, out var list))
@@ -69,6 +62,17 @@ public class StatusManager : MonoBehaviour
                 case StatusEffect.ChaosContract: Fx.Toast("CHAOS CONTRACT: YOUR CONTROLS ARE CURSED!", Fx.ChaosPurple, 2.5f, 3.2f); break;
             }
         }
+        return true;
+    }
+
+    /// <summary>If the target is shielded, the shield pops instead. Returns true when something was blocked.</summary>
+    public bool ConsumeShield(PlayerControl target)
+    {
+        if (!HasStatus(target, StatusEffect.Shielded)) return false;
+        RemoveStatus(target, StatusEffect.Shielded);
+        Fx.Burst(target.transform.position, Fx.LokiLight, 2.2f, 0.5f);
+        Fx.Sparkles(target.transform.position, Color.white, 12, 1.4f);
+        if (target.AmOwner) Fx.Toast("SHIELD BLOCKED IT!", Fx.LokiLight, 1.5f, 3.5f);
         return true;
     }
 

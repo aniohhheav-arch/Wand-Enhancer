@@ -21,9 +21,15 @@ public static class LokiRpc
     [MethodRpc((uint)RpcIds.Cast, LocalHandling = RpcLocalHandling.Before)]
     public static void RpcCast(PlayerControl caster, string abilityId, byte targetId, float x, float y, int seed)
     {
-        var ability = LokiCharacter.Instance.GetById(abilityId);
+        var ability = CharacterRegistry.Ability(abilityId);
         if (ability == null || caster == null) return;
         var target = targetId == NoTarget ? null : Players.ById(targetId);
+        // everyone sees a quick cast flash on the caster
+        if (ability.Category != "Hidden")
+        {
+            VFX.Fx.Aura(caster.transform, Assets.Sprites.Glow, new Color(0.3f, 1f, 0.45f, 0.6f), 1.5f, 0.45f, pulse: false);
+            VFX.Fx.Sparkles(caster.transform.position, VFX.Fx.LokiGold, 5, 0.9f, 0.4f);
+        }
         ability.Execute(new Abilities.CastContext(caster, target, new Vector2(x, y), seed, ability.Cfg));
     }
 }

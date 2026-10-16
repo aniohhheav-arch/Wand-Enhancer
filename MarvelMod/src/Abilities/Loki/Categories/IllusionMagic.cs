@@ -11,6 +11,7 @@ public class MirrorImage : AbilityBase
 {
     public override string Id       => "mirror_image";
     public override string Name     => "Mirror Image";
+    public override string Label    => "MIRROR";
     public override string Category => "Illusion Magic";
 
     protected override void OnCast(CastContext ctx)
@@ -51,7 +52,7 @@ public class FalseEmergency : AbilityBase
     public override string Id       => "false_emergency";
     public override string Name     => "False Emergency";
     public override string Category => "Illusion Magic";
-    public override string Label    => "FAKE ALARM";
+    public override string Label    => "ALARM";
 
     protected override void OnCast(CastContext ctx)
     {
@@ -107,6 +108,7 @@ public class HallOfLoki : AbilityBase
 {
     public override string Id       => "hall_of_loki";
     public override string Name     => "Hall of Loki";
+    public override string Label    => "HALL";
     public override string Category => "Illusion Magic";
     public override bool IsUltimate => true;
 

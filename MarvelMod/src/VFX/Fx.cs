@@ -190,19 +190,40 @@ public static class Fx
         return sr.gameObject;
     }
 
-    /// <summary>Full-screen colour tint (fades in, holds, fades out). pulses > 0 makes it flash.</summary>
+    /// <summary>
+    /// Camera-attached sprite at a depth relative to the HUD buttons: behind them (+) or in front (-).
+    /// Keeps tints from washing out the buttons.
+    /// </summary>
+    private static Transform? ScreenLayer(float depthFromButtons, out int layer)
+    {
+        layer = 0;
+        var cam = Camera.main;
+        var hud = HudManager.Instance;
+        if (cam == null || hud == null) return null;
+        layer = hud.gameObject.layer;
+        float buttonsZ = hud.UseButton != null ? hud.UseButton.transform.position.z : cam.transform.position.z + 1f;
+        float z = buttonsZ + depthFromButtons;
+        if (PlayerControl.LocalPlayer != null)   // never go behind the world
+            z = Mathf.Min(z, PlayerControl.LocalPlayer.transform.position.z - 1f);
+        var go = new GameObject("MarvelScreenFx") { layer = layer };
+        go.transform.SetParent(cam.transform, false);
+        go.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, z);
+        return go.transform;
+    }
+
+    /// <summary>Full-screen colour tint behind the HUD (fades in, holds, fades out). pulses > 0 makes it flash.</summary>
     public static void ScreenTint(Color color, float dur, int pulses = 0)
     {
         if (!Enabled || !ModConfig.Data.VfxDistortion) return;
-        var hud = HudManager.Instance;
-        if (hud == null || hud.FullScreen == null) return;
-
-        var sr = Object.Instantiate(hud.FullScreen, hud.FullScreen.transform.parent);
-        sr.name = "MarvelTint";
-        sr.sprite = hud.FullScreen.sprite != null ? hud.FullScreen.sprite : Sprites.Square;
-        sr.gameObject.SetActive(true);
-        sr.enabled = true;
+        var root = ScreenLayer(0.5f, out int layer);
+        var cam = Camera.main;
+        if (root == null || cam == null) return;
+        var sr = root.gameObject.AddComponent<SpriteRenderer>();
+        sr.sprite = Sprites.Square;
+        float h = cam.orthographicSize * 2.4f;
+        root.localScale = new Vector3(h * cam.aspect, h, 1f);
         float maxA = color.a;
+        sr.color = A(color, 0f);
         Animate(sr, dur, k =>
         {
             float env = Mathf.Min(1f, k / 0.1f) * Mathf.Min(1f, (1f - k) / 0.25f);
@@ -211,17 +232,19 @@ public static class Fx
         });
     }
 
-    /// <summary>Big centred text on this player's screen.</summary>
+    /// <summary>Big centred text on this player's screen, in front of everything.</summary>
     public static void Toast(string text, Color color, float dur = 2.5f, float size = 4f, float yOffset = 1.4f)
     {
         var hud = HudManager.Instance;
-        if (hud == null || hud.KillButton == null || hud.FullScreen == null) return;
+        if (hud == null || hud.KillButton == null) return;
+        var root = ScreenLayer(-1f, out int layer);
+        if (root == null) return;
 
-        var tmp = UnityHelpers.CloneStripped(hud.KillButton.buttonLabelText, hud.FullScreen.transform.parent);
+        var tmp = UnityHelpers.CloneStripped(hud.KillButton.buttonLabelText, root);
         if (tmp == null) return;
+        tmp.gameObject.layer = layer;
         tmp.name = "MarvelToast";
-        var basePos = hud.FullScreen.transform.localPosition;
-        tmp.transform.localPosition = new Vector3(0f, yOffset, basePos.z - 0.1f);
+        tmp.transform.localPosition = new Vector3(0f, yOffset, 0f);
         tmp.transform.localScale = Vector3.one;
         tmp.enableAutoSizing = false;
         tmp.enableWordWrapping = false;
@@ -230,10 +253,10 @@ public static class Fx
         tmp.rectTransform.sizeDelta = new Vector2(14f, 2f);
         tmp.text = text;
         tmp.color = color;
-        Coroutines.Start(CoToast(tmp, color, dur));
+        Coroutines.Start(CoToast(tmp, root.gameObject, color, dur));
     }
 
-    private static IEnumerator CoToast(TMP_Text tmp, Color color, float dur)
+    private static IEnumerator CoToast(TMP_Text tmp, GameObject root, Color color, float dur)
     {
         for (float t = 0; t < dur; t += Time.deltaTime)
         {
@@ -244,7 +267,88 @@ public static class Fx
             tmp.color = A(color, k > 0.75f ? (1f - k) / 0.25f : 1f);
             yield return null;
         }
-        if (tmp != null) Object.Destroy(tmp.gameObject);
+        if (root != null) Object.Destroy(root);
+    }
+
+    // ── gore ─────────────────────────────────────────────────────────────────
+
+    private static readonly System.Collections.Generic.List<GameObject> Stains = new();
+    public static readonly Color Blood     = new(0.62f, 0.02f, 0.04f, 1f);
+    public static readonly Color BloodDark = new(0.35f, 0.00f, 0.02f, 1f);
+
+    /// <summary>Blood spray: droplets fly in an arc and leave stains on the floor (cleared at meetings).</summary>
+    public static void BloodSplatter(Vector2 pos, float power = 1f, Vector2? direction = null)
+    {
+        if (!Enabled) return;
+        int count = Mathf.RoundToInt(18 * power * Intensity);
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 dir;
+            if (direction.HasValue)
+            {
+                float spread = Random.Range(-0.7f, 0.7f);
+                var d = direction.Value.normalized;
+                dir = new Vector2(d.x * Mathf.Cos(spread) - d.y * Mathf.Sin(spread), d.x * Mathf.Sin(spread) + d.y * Mathf.Cos(spread));
+            }
+            else dir = Random.insideUnitCircle.normalized;
+
+            float dist = Random.Range(0.3f, 1.6f) * power;
+            float arc = Random.Range(0.3f, 0.9f);
+            float size = Random.Range(0.12f, 0.3f);
+            float life = Random.Range(0.35f, 0.6f);
+            var c = Color.Lerp(Blood, BloodDark, Random.value);
+            var start = pos + new Vector2(0f, 0.2f);
+            var land = pos + dir * dist + new Vector2(0f, -0.25f);
+            var drop = MakeSprite(Sprites.Glow, start, c, size);
+            float landSize = size * Random.Range(1.2f, 2.2f);
+            Animate(drop, life, k =>
+            {
+                var p = Vector2.Lerp(start, land, k) + new Vector2(0f, Mathf.Sin(k * Mathf.PI) * arc);
+                drop.transform.position = new Vector3(p.x, p.y, p.y / 1000f - 0.5f);
+                if (k > 0.97f) Stain(land, c, landSize);
+            });
+        }
+        // central spurt
+        Burst(pos, Blood, 1.3f * power, 0.3f);
+        Stain(pos + new Vector2(0f, -0.3f), BloodDark, 1.1f * power);
+    }
+
+    private static void Stain(Vector2 pos, Color c, float size)
+    {
+        var sr = MakeSprite(Sprites.Glow, pos, A(c, 0.85f), size, "MarvelBloodStain");
+        sr.transform.position = new Vector3(pos.x, pos.y, pos.y / 1000f + 0.4f);   // on the floor, behind players
+        sr.transform.localScale = new Vector3(size * 1.4f, size * 0.8f, 1f);
+        Stains.Add(sr.gameObject);
+        Object.Destroy(sr.gameObject, 45f);
+    }
+
+    public static void ClearStains()
+    {
+        foreach (var s in Stains)
+            if (s != null) Object.Destroy(s);
+        Stains.Clear();
+    }
+
+    /// <summary>Quick "punch" scale on a HUD button when it's used.</summary>
+    private static readonly System.Collections.Generic.HashSet<IntPtr> Punching = new();
+
+    public static void Punch(Transform t, float amount = 0.18f, float dur = 0.18f)
+    {
+        if (Punching.Add(t.Pointer)) Coroutines.Start(CoPunch(t, amount, dur));
+    }
+
+    private static IEnumerator CoPunch(Transform t, float amount, float dur)
+    {
+        var ptr = t.Pointer;
+        var baseScale = t.localScale;
+        for (float e = 0; e < dur; e += Time.deltaTime)
+        {
+            if (t == null) yield break;
+            t.localScale = baseScale * (1f + amount * Mathf.Sin(e / dur * Mathf.PI));
+            yield return null;
+        }
+        if (t != null) t.localScale = baseScale;
+        Punching.Remove(ptr);
     }
 
     /// <summary>Camera shake using the game's own follower camera.</summary>

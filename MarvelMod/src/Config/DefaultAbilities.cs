@@ -43,6 +43,16 @@ public static class DefaultAbilities
         ["enchanted_witness"]     = new() { Cooldown=25, Duration=8,  Range=6 },
         ["chaos_contract"]        = new() { Cooldown=35, Duration=8,  Range=3.5f },
         ["the_grand_deception"]   = new() { Cooldown=90, Duration=12, Range=4, MaxTargets=6, CinematicDur=2.5f },
+
+        // ── Executions (real kills) ─────────────────────────────────────
+        ["backstab"]              = new() { Cooldown=25, Range=1.8f },
+        ["scepter_blast"]         = new() { Cooldown=35, Range=4 },
+        ["serpent_strike"]        = new() { Cooldown=30, Duration=3, Range=2.5f },
+        ["illusion_ambush"]       = new() { Cooldown=40, Range=3.5f },
+        ["royal_execution"]       = new() { Cooldown=60, Range=3, CinematicDur=1.5f },
+
+        // ── Hidden ──────────────────────────────────────────────────────
+        ["map_teleport"]          = new() { Cooldown=0 },
     };
 
     public static AbilityConfig Get(string id) =>

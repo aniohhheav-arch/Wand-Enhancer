@@ -19,6 +19,7 @@ public class DevConsole : MonoBehaviour
     public DevConsole(IntPtr ptr) : base(ptr) { }
 
     private bool   _open;
+    public static bool IsOpen { get; private set; }
     private string _input       = "";
     private string _lastOutput  = "";
     private readonly List<string> _history = new();
@@ -40,7 +41,7 @@ public class DevConsole : MonoBehaviour
             "F10" => Input.GetKeyDown(KeyCode.F10),
             _     => Input.GetKeyDown(KeyCode.F6),
         };
-        if (toggle) _open = !_open;
+        if (toggle) IsOpen = _open = !_open;
     }
 
     public void OnGUI()

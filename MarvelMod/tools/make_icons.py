@@ -498,12 +498,84 @@ def switch_tab():
     finish(img, "switch_tab")
 
 
+BLOOD = (170, 10, 20, 255)
+BLUE = (80, 170, 255, 255)
+BLUE_L = (190, 230, 255, 255)
+
+
+def blood_drops(d, pts):
+    for (x, y, r) in pts:
+        d.ellipse([x - r, y - r, x + r, y + r], fill=BLOOD, outline=BLACK, width=max(8, int(r * 0.3)))
+        d.polygon([(x - r * 0.75, y - r * 0.4), (x, y - r * 2.1), (x + r * 0.75, y - r * 0.4)], fill=BLOOD)
+
+
+def backstab():
+    img = new()
+    img = layer(img, lambda d, _: crewmate(d, 420, 560, 260, GREY, flip=True))
+    img = layer(img, lambda d, _: dagger(d, 660, 430, 640, math.radians(-40), blade=GREEN_L, glow_col=WHITE))
+    img = layer(img, lambda d, _: blood_drops(d, [(560, 600, 44), (640, 760, 34), (480, 820, 28)]))
+    finish(img, "backstab", glow_col=RED)
+
+
+def scepter_blast():
+    img = new()
+    def fn(d, _):
+        d.line([(250, 860), (600, 380)], fill=BLACK, width=110)
+        d.line([(250, 860), (600, 380)], fill=GOLD, width=66)
+        d.polygon([(600, 380), (520, 250), (640, 130), (760, 250), (680, 380)], fill=GOLD, outline=BLACK, width=OL)
+        d.ellipse([560, 200, 720, 360], fill=BLUE, outline=BLACK, width=OL)
+        d.ellipse([600, 230, 660, 290], fill=BLUE_L)
+        for i in range(5):
+            a = math.radians(-60 + i * 25)
+            d.line([(640 + 180 * math.cos(a), 280 + 180 * math.sin(a)), (640 + 330 * math.cos(a), 280 + 330 * math.sin(a))], fill=BLUE_L, width=26)
+    img = layer(img, fn)
+    finish(img, "scepter_blast", glow_col=BLUE)
+
+
+def serpent_strike():
+    img = new()
+    def fn(d, _):
+        d.ellipse([170, 300, 830, 760], fill=GREEN, outline=BLACK, width=OL + 6)       # head
+        d.chord([210, 520, 790, 900], 0, 180, fill=GREEN_D, outline=BLACK, width=OL)   # jaw
+        d.chord([250, 560, 750, 760], 0, 180, fill=RED_D)                              # mouth
+        for x in (350, 650):                                                           # fangs
+            d.polygon([(x - 45, 580), (x + 45, 580), (x, 780)], fill=WHITE, outline=BLACK, width=18)
+        for x in (330, 690):                                                           # eyes
+            d.ellipse([x - 70, 380, x + 70, 480], fill=GOLD_L, outline=BLACK, width=18)
+            d.ellipse([x - 14, 390, x + 14, 470], fill=BLACK)
+        blood_drops(d, [(650, 870, 34)])
+    img = layer(img, fn)
+    finish(img, "serpent_strike", glow_col=GREEN_L)
+
+
+def illusion_ambush():
+    img = new()
+    img = layer(img, lambda d, _: [crewmate(d, x, y, 140, GREEN_L, flip=f) for x, y, f in ((230, 360, False), (800, 360, True), (512, 830, False))], 170)
+    img = layer(img, lambda d, _: crewmate(d, 512, 470, 170, GREY))
+    img = layer(img, lambda d, _: [dagger(d, x, y, 300, a, blade=GREEN_L, ow=20) for x, y, a in ((360, 420, math.radians(70)), (670, 420, math.radians(-70)), (512, 700, 0))])
+    img = layer(img, lambda d, _: blood_drops(d, [(512, 470, 40)]))
+    finish(img, "illusion_ambush", glow_col=RED)
+
+
+def royal_execution():
+    img = ult_backdrop(new())
+    def fn(d, _):
+        # crown
+        d.polygon([(250, 520), (250, 300), (380, 420), (512, 240), (644, 420), (774, 300), (774, 520)], fill=GOLD, outline=BLACK, width=OL)
+        d.rectangle([250, 500, 774, 600], fill=GOLD, outline=BLACK, width=OL)
+        for x in (360, 512, 664):
+            d.ellipse([x - 36, 515, x + 36, 585], fill=GREEN, outline=BLACK, width=14)
+        blood_drops(d, [(360, 760, 50), (560, 820, 40), (700, 720, 34)])
+    img = layer(img, fn)
+    finish(img, "royal_execution", glow_col=RED, ult=True)
+
+
 if __name__ == "__main__":
     for fn in (mirror_image, phantom_squad, false_emergency, illusion_trap, hall_of_loki,
                disguise, perfect_impersonation, creature_form, identity_swap, the_other_you,
                mystic_blink, swap_trick, decoy_escape, shadow_step, master_of_misdirection,
                green_bolt, binding_ribbons, mystic_shield, enchanted_dagger, asgardian_wrath,
                fake_body, mind_whisper, enchanted_witness, chaos_contract, the_grand_deception,
-               switch_tab):
+               switch_tab, backstab, scepter_blast, serpent_strike, illusion_ambush, royal_execution):
         fn()
     print("icons written to", os.path.normpath(OUT_DIR))

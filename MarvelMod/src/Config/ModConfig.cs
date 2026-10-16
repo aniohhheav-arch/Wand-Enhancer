@@ -83,7 +83,10 @@ public static class ModConfig
 public class ConfigData
 {
     public int     ConfigVersion    { get; set; } = 0;
+    /// <summary>Freeplay/lobby character: loki, thanos or none (pick on the freeplay laptop or with F3).</summary>
     public string  ActiveCharacter  { get; set; } = "loki";
+    /// <summary>Online games: what impostors become — random, loki or thanos.</summary>
+    public string  ImpostorCharacter { get; set; } = "random";
     public bool    VfxEnabled       { get; set; } = true;
     public int     VfxIntensity     { get; set; } = 100;
     public bool    VfxParticles     { get; set; } = true;

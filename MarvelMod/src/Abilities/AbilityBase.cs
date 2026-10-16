@@ -14,6 +14,8 @@ public enum TargetMode
     Required,
     /// <summary>Uses the closest player in range if there is one (aim assist).</summary>
     Optional,
+    /// <summary>Pick any player from the Shapeshifter menu (no range limit).</summary>
+    Menu,
 }
 
 /// <summary>Everything an ability needs when it runs (on every client).</summary>
@@ -67,14 +69,14 @@ public abstract class AbilityBase
 
     /// <summary>Picks the target this ability would use right now (for HUD state and casting).</summary>
     public PlayerControl? FindTarget(PlayerControl caster) =>
-        Targeting == TargetMode.None ? null : Players.ClosestTarget(caster, Cfg.Range);
+        Targeting is TargetMode.None or TargetMode.Menu ? null : Players.ClosestTarget(caster, Cfg.Range);
 
     /// <summary>Validate, then broadcast the cast to every client. Returns true on success.</summary>
     public bool TryActivate(PlayerControl? caster, PlayerControl? target = null)
     {
         if (caster == null || !IsReady || !Players.IsAlive(caster)) return false;
-        if (Targeting != TargetMode.None && target == null) target = FindTarget(caster);
-        if (Targeting == TargetMode.Required && target == null) return false;
+        if (Targeting is TargetMode.Required or TargetMode.Optional && target == null) target = FindTarget(caster);
+        if (Targeting is TargetMode.Required or TargetMode.Menu && !Players.IsAlive(target)) return false;
 
         Vector2 point = caster.transform.position;
         Prepare(caster, ref target, ref point);

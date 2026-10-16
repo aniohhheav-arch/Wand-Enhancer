@@ -22,6 +22,7 @@ public class MarvelModPlugin : BasePlugin
     public override void Load()
     {
         ModConfig.Load();
+        MarvelMod.Characters.CharacterRegistry.Register(MarvelMod.Characters.LokiCharacter.Instance);
         Harmony.PatchAll();
 
         // Ability buttons are driven by Patches.HudUpdatePatch (they live on the game's HUD).

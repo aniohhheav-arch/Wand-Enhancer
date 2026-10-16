@@ -11,6 +11,7 @@ public class FakeBody : AbilityBase
 {
     public override string Id       => "fake_body";
     public override string Name     => "Fake Body";
+    public override string Label    => "FAKE BODY";
     public override string Category => "God of Mischief";
 
     protected override void OnCast(CastContext ctx)
@@ -37,7 +38,7 @@ public class MindWhisper : AbilityBase
     public override string Name     => "Mind Whisper";
     public override string Category => "God of Mischief";
     public override string Label    => "WHISPER";
-    public override TargetMode Targeting => TargetMode.Required;
+    public override TargetMode Targeting => TargetMode.Menu;
 
     protected override void OnCast(CastContext ctx)
     {
@@ -58,7 +59,7 @@ public class EnchantedWitness : AbilityBase
     public override string Name     => "Enchanted Witness";
     public override string Category => "God of Mischief";
     public override string Label    => "FALSE SIGHT";
-    public override TargetMode Targeting => TargetMode.Required;
+    public override TargetMode Targeting => TargetMode.Menu;
 
     protected override void OnCast(CastContext ctx)
     {
@@ -106,7 +107,7 @@ public class TheGrandDeception : AbilityBase
     public override string Id       => "the_grand_deception";
     public override string Name     => "The Grand Deception";
     public override string Category => "God of Mischief";
-    public override string Label    => "DECEPTION";
+    public override string Label    => "DECEIVE";
     public override bool IsUltimate => true;
 
     protected override void OnCast(CastContext ctx)
