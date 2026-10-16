@@ -59,6 +59,47 @@ public static class DefaultAbilities
         ["possess_frame"]         = new() { Cooldown=0, Range=2f },
         ["possess_kill"]          = new() { Cooldown=0 },
 
+        // ── THANOS: Power ───────────────────────────────────────────────
+        ["power_blast"]           = new() { Cooldown=6,  Duration=1.5f, Range=6 },
+        ["cosmic_beam"]           = new() { Cooldown=14, Duration=1.5f, Range=7 },
+        ["shockwave"]             = new() { Cooldown=16, Duration=1f,   Range=3 },
+        ["power_overload"]        = new() { Cooldown=30, Duration=6 },
+        ["planetbreaker"]         = new() { Cooldown=90, Range=5, Radius=2, Damage=100, CinematicDur=2.5f },
+        // ── Space ──
+        ["space_blink"]           = new() { Cooldown=6,  Range=4 },
+        ["space_rift"]            = new() { Cooldown=25, Duration=12 },
+        ["gravity_well"]          = new() { Cooldown=20, Duration=3, Range=3.5f },
+        ["spatial_prison"]        = new() { Cooldown=20, Duration=4, Range=4 },
+        ["cosmic_exile"]          = new() { Cooldown=70, Duration=6, Range=4, CinematicDur=1.5f },
+        // ── Reality ──
+        ["reality_warp"]          = new() { Cooldown=18, Duration=4, Range=4 },
+        ["transmutation"]         = new() { Cooldown=25, Duration=5, Range=3 },
+        ["reality_shatter"]       = new() { Cooldown=14, Duration=1.2f, Radius=2 },
+        ["false_world"]           = new() { Cooldown=35, Duration=8, Range=5 },
+        ["reality_collapse"]      = new() { Cooldown=90, Duration=1.5f, Range=25, CinematicDur=2.5f },
+        // ── Soul ──
+        ["soul_sight"]            = new() { Cooldown=30, Duration=8 },
+        ["soul_drain"]            = new() { Cooldown=25, Duration=3, Range=3 },
+        ["spirit_projection"]     = new() { Cooldown=35, Duration=8 },
+        ["soul_chains"]           = new() { Cooldown=18, Duration=3.5f, Range=4 },
+        ["soul_world"]            = new() { Cooldown=90, Duration=7, Range=4, CinematicDur=2f },
+        // ── Time ──
+        ["time_freeze"]           = new() { Cooldown=22, Duration=3, Range=4 },
+        ["rewind"]                = new() { Cooldown=15, Duration=3 },
+        ["temporal_echo"]         = new() { Cooldown=20, Duration=6 },
+        ["age_manipulation"]      = new() { Cooldown=25, Duration=5, Range=4 },
+        ["eternal_loop"]          = new() { Cooldown=80, Duration=6, Range=4, CinematicDur=1.5f },
+        // ── Mind ──
+        ["thanos_mind_control"]   = new() { Cooldown=25, Duration=3, Range=4 },
+        ["psychic_pulse"]         = new() { Cooldown=20, Duration=3, Range=4 },
+        ["memory_erasure"]        = new() { Cooldown=30, Duration=5, Range=4 },
+        ["illusion_army"]         = new() { Cooldown=25, Duration=12, MaxTargets=4 },
+        ["absolute_domination"]   = new() { Cooldown=90, Duration=10, MaxTargets=8, CinematicDur=2.5f },
+        // ── Infinity (all six stones) ──
+        ["infinity_surge"]        = new() { Cooldown=45, Duration=2, Range=6 },
+        ["the_snap"]              = new() { Cooldown=180 },
+        ["titans_judgment"]       = new() { Cooldown=120, Range=12, Damage=100, CinematicDur=2.5f },
+
         // ── Hidden ──────────────────────────────────────────────────────
         ["map_teleport"]          = new() { Cooldown=0 },
     };

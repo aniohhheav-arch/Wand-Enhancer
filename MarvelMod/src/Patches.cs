@@ -16,6 +16,7 @@ public static class HudUpdatePatch
         MapTeleportInput.Update();
         ZoomInput.Update(__instance);
         Abilities.Loki.Possessions.Tick();
+        Dimensions.Tick();
     }
 }
 

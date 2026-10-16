@@ -38,6 +38,11 @@ public static class AbilityButtons
     private static bool _visible = true;
     private static PlayerControl? _outlined;
 
+    /// <summary>The page-switch button (Thanos hangs his gauntlet above it).</summary>
+    public static Transform? SwitchButton => Buttons[SwitchSlot] != null ? Buttons[SwitchSlot]!.transform : null;
+    public static bool Visible { get; private set; }
+    public static float Spacing { get; private set; } = 1f;
+
     /// <summary>Last direction the local player walked in (used by aimed abilities).</summary>
     public static Vector2 LastMoveDirection { get; private set; } = Vector2.right;
 
@@ -77,6 +82,7 @@ public static class AbilityButtons
         _character?.LocalUpdate(lp, hud);
 
         bool show = _character != null && ShouldShow(hud, lp);
+        Visible = show;
         foreach (var b in Buttons)
             if (b != null && b.gameObject.activeSelf != show) b.gameObject.SetActive(show);
         if (!show)
@@ -283,6 +289,7 @@ public static class AbilityButtons
                 spacing = Mathf.Min(spacing, dx);
         }
         spacing = Mathf.Max(spacing, size * 1.15f);
+        Spacing = spacing;
 
         float minX = float.MaxValue, minY = float.MaxValue, z = first.transform.position.z;
         foreach (var p in vanilla)

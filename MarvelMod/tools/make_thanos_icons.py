@@ -274,7 +274,7 @@ def mind_icons():
         for x in (380, 512, 640):
             d.line([(x, 160), (x, 470)], fill=c, width=16)
         d.rounded_rectangle([280, 120, 744, 190], radius=30, fill=GOLD_D, outline=BLACK, width=20)
-    make("mind_control", "mind", control)
+    make("thanos_mind_control", "mind", control)
     def pulse(d, c, l):
         for r in (420, 320, 220):
             ring(d, 512, 512, r, c, 36)

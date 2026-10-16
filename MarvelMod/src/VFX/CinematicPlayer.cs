@@ -25,6 +25,40 @@ public static class CinematicPlayer
         Coroutines.Start(RunCinematic(type, caster, cfg.CinematicDur, onComplete));
     }
 
+    /// <summary>Generic ultimate wind-up (title, tint, shake, charge sparks) for any character.</summary>
+    public static void Play(string title, Color color, PlayerControl caster, float dur, Action onComplete)
+    {
+        if (ModConfig.Data.CinematicSkip || dur <= 0f) { onComplete(); return; }
+        Coroutines.Start(RunGeneric(title, color, caster, dur, onComplete));
+    }
+
+    private static IEnumerator RunGeneric(string title, Color color, PlayerControl caster, float dur, Action onComplete)
+    {
+        bool mine = caster.AmOwner;
+        if (mine) caster.moveable = false;
+        Fx.Toast(title, color, dur + 0.8f, 6f, 1.8f);
+        Fx.Shake(dur, 0.25f);
+        Fx.ScreenTint(new Color(color.r, color.g, color.b, 0.3f), dur + 0.4f);
+        Sfx.Play(SfxKind.Swell, 1f, caster.transform.position, 0.7f);
+        float spark = 0f;
+        for (float t = 0; t < dur; t += Time.deltaTime)
+        {
+            if (caster == null) yield break;
+            spark += Time.deltaTime;
+            if (spark > 0.2f)
+            {
+                spark = 0f;
+                Fx.Sparkles(caster.transform.position, color, 4, 1.4f, 0.5f);
+            }
+            yield return null;
+        }
+        if (caster == null) yield break;
+        Fx.Burst(caster.transform.position, color, 3.5f, 0.7f);
+        Fx.Shake(0.4f, 0.4f);
+        try { onComplete(); }
+        finally { if (mine && caster != null) caster.moveable = true; }
+    }
+
     private static IEnumerator RunCinematic(CinematicType type, PlayerControl caster, float dur, Action onComplete)
     {
         bool mine = caster.AmOwner;

@@ -57,6 +57,8 @@ public abstract class AbilityBase
     public virtual bool IsUltimate => false;
     /// <summary>No cast flash or sound for anyone (stealth abilities).</summary>
     public virtual bool Silent => false;
+    /// <summary>Colour of the cast flash everyone sees on the caster.</summary>
+    public virtual Color CastColor => new(0.3f, 1f, 0.45f, 1f);
 
     private float _lastUsed = -9999f;
 
@@ -107,12 +109,23 @@ public abstract class AbilityBase
     {
         try
         {
+            BeforeCast(ctx);
             OnCast(ctx);
         }
         catch (Exception e)
         {
             PracticeLog($"[{Name}] ERROR: {e}");
         }
+    }
+
+    /// <summary>Shared cast presentation (e.g. Thanos stone glow + sound). Runs on every client.</summary>
+    protected virtual void BeforeCast(CastContext ctx) { }
+
+    /// <summary>Lower the remaining cooldown by a fraction (Soul Drain).</summary>
+    public void ReduceCooldown(float fraction)
+    {
+        float remaining = CooldownRemaining;
+        if (remaining > 0f) _lastUsed -= remaining * fraction;
     }
 
     /// <summary>Ability logic. Runs on every client — only move players you own (see Players.Teleport).</summary>

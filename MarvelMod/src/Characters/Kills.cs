@@ -43,6 +43,9 @@ public static class Kills
             if (leaveBody) SpawnBody(target);
         }
         if (!leaveBody && !Config.ModConfig.Data.FinisherLeavesBody) RemoveBody(target.PlayerId);
+        // Thanos collects a stone for every kill he makes
+        if (killer == PlayerControl.LocalPlayer && CharacterRegistry.Local == ThanosCharacter.Instance)
+            ThanosCharacter.Instance.GrantRandomStone();
         return true;
     }
 

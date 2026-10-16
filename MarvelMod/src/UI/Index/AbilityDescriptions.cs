@@ -50,6 +50,46 @@ public static class AbilityDescriptions
         ["possess_stop"]   = "(While possessing) Leave the body and return to your own.",
         ["possess_frame"]  = "(While possessing) The body you control kills the nearest crewmate. It's THEIR kill, not yours.",
         ["possess_kill"]   = "(While possessing) Kill the body you're possessing, then return to your own.",
+        // ── THANOS: Power (purple) ──
+        ["power_blast"]    = "Purple energy orb (aims at the closest player, otherwise where you walk). Hit = stunned + knocked back.",
+        ["cosmic_beam"]    = "Charge for a moment, then a piercing beam that stuns everyone along it.",
+        ["shockwave"]      = "Slam the ground: everyone around you is stunned and thrown back.",
+        ["power_overload"] = "For a few seconds you move faster and your stuns last 50% longer.",
+        ["planetbreaker"]  = "ULTIMATE. Float up, then a giant purple explosion: players very close die, the rest are stunned and thrown.",
+        // ── Space (blue) ──
+        ["space_blink"]    = "Short teleport in the direction you're walking (stops at walls).",
+        ["space_rift"]     = "Opens two linked portals: here and at a random vent. Anyone who steps into one comes out of the other.",
+        ["gravity_well"]   = "A black hole in front of you pulls everyone nearby toward it.",
+        ["spatial_prison"] = "Needs a target. Traps them inside a glowing cube; they can't move.",
+        ["cosmic_exile"]   = "ULTIMATE. Needs a target. Sends them to a starry dimension far from the map for a few seconds, then back.",
+        // ── Reality (red) ──
+        ["reality_warp"]   = "Everyone nearby is slowed and their screen warps red.",
+        ["transmutation"]  = "Needs a target. They turn into a crate and can't move for a few seconds.",
+        ["reality_shatter"]= "Red cracks appear in front of you, then explode, stunning anyone standing there.",
+        ["false_world"]    = "Players near you see fake bodies and fake crewmates walking around (only they see it).",
+        ["reality_collapse"]= "ULTIMATE. A crimson wave spreads across the whole map, stunning everyone it reaches.",
+        // ── Soul (orange) ──
+        ["soul_sight"]     = "For a few seconds you see where every player is, through walls.",
+        ["soul_drain"]     = "Needs a target. Slows them and halves the cooldowns of your other non-ultimate abilities.",
+        ["spirit_projection"] = "Leave your body as a spirit and scout with WASD / arrow keys. Your body stays rooted.",
+        ["soul_chains"]    = "Needs a target. Orange chains root them in place.",
+        ["soul_world"]     = "ULTIMATE. You and everyone near you are pulled into the orange Soul World for a few seconds.",
+        // ── Time (green) ──
+        ["time_freeze"]    = "Everyone near you is frozen in time for a few seconds.",
+        ["rewind"]         = "Teleport back to where you were a few seconds ago.",
+        ["temporal_echo"]  = "A green echo of you replays the path you just walked (a moving decoy).",
+        ["age_manipulation"] = "Everyone near you is slowed as time drags; their screen turns sepia.",
+        ["eternal_loop"]   = "ULTIMATE. Needs a target. They keep getting snapped back to the same spot for several seconds.",
+        // ── Mind (yellow) ──
+        ["thanos_mind_control"] = "Needs a target. Their body walks toward you on its own for a few seconds.",
+        ["psychic_pulse"]  = "A yellow wave: everyone nearby is briefly stunned and their controls are inverted.",
+        ["memory_erasure"] = "Needs a target. For a few seconds they can't see any other players.",
+        ["illusion_army"]  = "Several copies of you appear and wander around.",
+        ["absolute_domination"] = "ULTIMATE. Gold screen for all, fake players everywhere and a giant spectral Thanos.",
+        // ── Infinity ──
+        ["infinity_surge"] = "Six rainbow shockwaves: everyone around you is stunned and thrown back.",
+        ["the_snap"]       = "ULTIMATE. Gauntlet close-up, the stones light up, SNAP. Outcome set by SnapMode in the config: visual (default, nobody hurt), practice_kill (freeplay only: half the dummies turn to dust), match_kill_half, match_stun.",
+        ["titans_judgment"]= "ULTIMATE. A colossal six-coloured beam in your aim direction kills everyone it hits.",
         // ── Hidden ──
         ["map_teleport"]   = "Open the map and left-click anywhere to teleport there. No cooldown.",
     };
@@ -64,6 +104,7 @@ public static class AbilityDescriptions
         "Mouse wheel: scroll down to zoom out, up to zoom back in. While zoomed out: right-click to teleport there",
         "F1: this index    H: hide buttons    F4: cooldowns on/off",
         "F3 (freeplay/lobby): switch character    F6: dev console",
+        "Thanos: you start a match with 2 stones; you get one more every 60 s and one per kill. Locked pages unlock as you collect them.",
         "Green outline on a player = who a targeted ability will hit",
     };
 }
