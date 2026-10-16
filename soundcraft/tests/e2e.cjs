@@ -177,6 +177,8 @@ const ok = (name, cond, info = '') => { if (!cond) failed++; const line = (cond 
     const stored = c[0] ? !!(await getSample(c[0].rec)) : false; return { clips: c.length, dur: b ? +b.duration.toFixed(2) : 0, rms: +T.rms(r, 0, 3.5).toFixed(4), stored, first: c[0] && +c[0].start.toFixed(3) } });
   ok('recording captures a take into clips that play back and render in export', take.clips >= 1 && take.dur > 2 && take.rms > 0.005 && take.stored, JSON.stringify(take));
   await page.screenshot({ path: OUT + '/mic-track.png' });
+  const und = await E(() => { const t = S.tracks.find(isAudio), n0 = t.clips.length; undo(); const n1 = S.tracks.find(isAudio).clips.length; redo(); return { n0, n1, n2: S.tracks.find(isAudio).clips.length } });
+  ok('undo removes a recorded take and redo restores it', und.n0 > 0 && und.n1 === 0 && und.n2 === und.n0, JSON.stringify(und));
   // record straight into the Sampler, and turn a take into a Sampler instrument
   await E(() => { addTrackFrom(presetById('sampler-empty')); selectTrack(S.tracks.length - 1); setView('lab') }); await page.waitForTimeout(400);
   await page.click('#zoneRec'); await page.waitForTimeout(1600); await page.click('#zoneRec'); await page.waitForTimeout(1500);
@@ -186,8 +188,6 @@ const ok = (name, cond, info = '') => { if (!cond) failed++; const line = (cond 
   const ts = await E(async () => { const t = S.tracks.find(isAudio), c = t.clips.find(c => c.rec); const n0 = S.tracks.length; await takeToSampler(t, c); const s = S.tracks[S.tracks.length - 1]; return { added: S.tracks.length === n0 + 1, engine: s.engine, zones: (s.zones || []).length } });
   ok('a recorded take becomes a Sampler instrument', ts.added && ts.engine === 'sampler' && ts.zones === 1, JSON.stringify(ts));
   await E(() => setView('arrange'));
-  const und = await E(() => { const t = S.tracks.find(isAudio), n0 = t.clips.length; undo(); const n1 = S.tracks.find(isAudio).clips.length; redo(); return { n0, n1, n2: S.tracks.find(isAudio).clips.length } });
-  ok('undo removes a recorded take and redo restores it', und.n0 > 0 && und.n1 === 0 && und.n2 === und.n0, JSON.stringify(und));
   // session file round trip (whole session in one file) and the History panel
   const ses = await E(async () => { const text = await buildSessionFile(), j = JSON.parse(text); const before = { tracks: S.tracks.length, undo: undoStack.length, id: curId, title: LIB[curId].title };
     const takes = Object.keys(j.samples || {}).length; j.session.uid = 'other-session'; j.name = 'Moved Session'; await openSessionData(j, null, 'Moved Session.soundcraft');
