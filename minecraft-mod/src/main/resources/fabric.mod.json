@@ -3,5 +3,5 @@
   "description": "A bigger-on-the-inside time machine with a time vortex and travel to other eras and dimensions.",
   "environment": "*",
   "entrypoints": { "main": ["com.tardismod.TardisMod"], "client": ["com.tardismod.TardisModClient"] },
-  "depends": { "fabricloader": "*", "minecraft": "26.3.*", "fabric-api": "*" }
+  "depends": { "fabricloader": "*", "minecraft": "26.3.*", "fabric-api": "*", "geckolib": "*" }
 }
