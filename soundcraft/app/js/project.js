@@ -7,7 +7,7 @@ function store(k,v){try{localStorage.setItem(k,v);return true}catch(e){return fa
 function read(k){try{return localStorage.getItem(k)}catch(e){return null}}
 /* ───────── preferences ───────── */
 const PREF_KEY='soundcraft.prefs.v2';
-const PREF={weather:'rain',lamp:true,amb:false,ambVol:0.35,motion:'full',fur:'ginger',sens:0.5,view:'studio',theme:'auto',scale:1,latency:'interactive',sampleRate:'auto',sinkId:'',favs:[],recent:[],tourDone:false,keysOpen:true,dock:'roll',splitH:300};
+const PREF={weather:'live',lamp:true,amb:false,ambVol:0.35,motion:'full',fur:'ginger',sens:0.5,view:'studio',theme:'auto',scale:1,latency:'interactive',sampleRate:'auto',sinkId:'',favs:[],recent:[],tourDone:false,keysOpen:true,dock:'roll',splitH:300};
 try{Object.assign(PREF,JSON.parse(read(PREF_KEY)||'{}'))}catch(e){}
 function savePrefs(){store(PREF_KEY,JSON.stringify(PREF))}
 /* ───────── state ───────── */

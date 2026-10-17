@@ -8,7 +8,7 @@ const ARC={games:[],cur:null,state:'menu',paused:false,raf:0,t:0,prog:null,keys:
 function arcLoad(){let p=null;try{p=JSON.parse(read(ARC_KEY)||'null')}catch(e){}ARC.prog=Object.assign({coins:0,best:{},ach:{},plays:0},p||{})}
 function arcSave(){store(ARC_KEY,JSON.stringify(ARC.prog))}
 const ACHIEVEMENTS={first:['First game','Finish any arcade game'],combo50:['On fire','Reach a 50 combo in Beat Blaster'],fc:['Full combo','Finish a Beat Blaster song with no misses'],aRank:['A rank','Get an A or better in Beat Blaster'],own:['My song','Play Beat Blaster on your own song']};
-function arcAchieve(id){if(ARC.prog.ach[id])return;ARC.prog.ach[id]=Date.now();ARC.prog.coins+=25;arcSave();toast('Achievement: '+ACHIEVEMENTS[id][0]+' (+25 coins)')}
+function arcAchieve(id){if(ARC.prog.ach[id])return;ARC.prog.ach[id]=Date.now();ARC.prog.coins+=25;arcSave();(typeof notify==='function'?notify:toast)('Achievement: '+ACHIEVEMENTS[id][0]+' (+25 coins)')}
 function registerGame(g){ARC.games.push(g)}
 /* ───────── shell ───────── */
 function openArcade(){if(S.rec){toast('The arcade waits until recording has stopped.');return}arcLoad();$('#arcade').hidden=false;ARC.state='menu';ARC.cur=null;arcResize();renderArcMenu();cancelAnimationFrame(ARC.raf);ARC.raf=requestAnimationFrame(arcFrame)}
@@ -19,7 +19,7 @@ function renderArcMenu(){$('#arcMenu').hidden=false;$('#arcCoins').textContent=A
 function startGame(id,mode){const g=ARC.games.find(x=>x.id===id);if(!g)return;if(S.rec){toast('The arcade waits until recording has stopped.');return}
   if(!ensureAudio())return;$('#arcMenu').hidden=true;ARC.cur=g;ARC.state='play';ARC.paused=false;ARC.prog.plays++;g.start(mode);$('#arcade').focus()}
 function finishGame(res){const g=ARC.cur;ARC.state='results';const key=g.id+':'+res.mode,b=ARC.prog.best[key];const isBest=!b||res.score>b.score;if(isBest)ARC.prog.best[key]={score:res.score,grade:res.grade,date:Date.now()};
-  const coins=Math.max(1,Math.round(res.score/1000));ARC.prog.coins+=coins;arcSave();arcAchieve('first');(res.ach||[]).forEach(arcAchieve);ARC.result=Object.assign({coins,isBest},res)}
+  const coins=Math.max(1,Math.round(res.score/1000));ARC.prog.coins+=coins;arcSave();arcAchieve('first');try{questProgress('game');if(res.mode&&ARC.cur.id==='beatblaster'&&res.score>=10000)questProgress('beat');addXP(5+Math.min(20,Math.round(res.score/2000)),'Arcade')}catch(e){}(res.ach||[]).forEach(arcAchieve);ARC.result=Object.assign({coins,isBest},res)}
 function arcPause(on){if(ARC.state!=='play'||!ARC.cur)return;if(on===ARC.paused)return;ARC.paused=on;if(ARC.cur.pause)ARC.cur.pause(on)}
 function arcResize(){const cv=$('#arcCanvas'),dpr=window.devicePixelRatio||1;cv.width=Math.round(cv.clientWidth*dpr);cv.height=Math.round(cv.clientHeight*dpr)}
 function arcFrame(now){ARC.raf=requestAnimationFrame(arcFrame);const cv=$('#arcCanvas'),c=cv.getContext('2d'),dpr=window.devicePixelRatio||1,W=cv.width/dpr,H=cv.height/dpr;c.setTransform(dpr,0,0,dpr,0,0);
@@ -118,7 +118,7 @@ registerGame({id:'fishing',name:'Lo-Fi Fishing',desc:'Hold Space to cast, press 
     if(this.phase==='reel'){this.fv+=(Math.random()-0.5)*dt*8*this.hard;this.fv*=0.96;this.fx=clamp(this.fx+this.fv*dt,0.05,0.95);if(this.fx<=0.05||this.fx>=0.95)this.fv*=-0.8;
       this.barV+=(this.space?1.6:-1.6)*dt;this.barV*=0.92;this.bar=clamp(this.bar+this.barV*dt,0.06,0.94);if(this.bar<=0.06||this.bar>=0.94)this.barV=0;
       const on=Math.abs(this.bar-this.fx)<0.09;this.prog+=dt*(on?0.25:-0.18/this.hard*1.6);
-      if(this.prog>=1){const f=this.fish;this.caught.push(f);ARC.prog.fish[f[0]]=(ARC.prog.fish[f[0]]||0)+1;const pts=f[2]*100;this.score+=pts;ARC.prog.coins+=f[2];arcSave();this.phase='show';this.msg='Caught: '+f[0]+' ('+f[1]+') +'+f[2]+' coins · Space to continue';
+      if(this.prog>=1){const f=this.fish;this.caught.push(f);ARC.prog.fish[f[0]]=(ARC.prog.fish[f[0]]||0)+1;try{questProgress('fish')}catch(e){}const pts=f[2]*100;this.score+=pts;ARC.prog.coins+=f[2];arcSave();this.phase='show';this.msg='Caught: '+f[0]+' ('+f[1]+') +'+f[2]+' coins · Space to continue';
         if(f[1]==='legendary'||f[1]==='epic')toast('Wow! '+f[0]+'!')}
       else if(this.prog<=0){this.phase='idle';this.lost=(this.lost||0)+1;this.msg='The line went slack. Hold Space to cast'}}},
   /* Pixel art: everything is drawn on a 320×180 buffer and scaled up with crisp pixels. */

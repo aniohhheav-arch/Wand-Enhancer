@@ -25,7 +25,7 @@ const OBJ=[
 const catObj={id:'cat',label:'Cat · give a pet',act:petCat};
 function catRect(){return cat.state==='sleep'?[cat.x-7,cat.y-6,14,8]:[cat.x-6,cat.y-10,12,11]}
 function inR(x,y,r){return x>=r[0]&&x<r[0]+r[2]&&y>=r[1]&&y<r[1]+r[3]}
-function objAt(x,y){if(inR(x,y,catRect()))return catObj;for(let i=OBJ.length-1;i>=0;i--)if(inR(x,y,OBJ[i].r))return OBJ[i];return null}
+function objAt(x,y){if(typeof LIFE!=='undefined'&&LIFE.box&&inR(x,y,[LIFE.box.x-2,LIFE.box.y-4,14,14]))return {id:'parcel',label:'A delivery · open it',r:[LIFE.box.x,LIFE.box.y,10,8],stand:[LIFE.box.x+5,124],act:openParcel};if(inR(x,y,catRect()))return catObj;for(let i=OBJ.length-1;i>=0;i--)if(inR(x,y,OBJ[i].r))return OBJ[i];return null}
 function roomPt(e){const b=room.getBoundingClientRect();return{x:(e.clientX-b.left)/b.width*RW,y:(e.clientY-b.top)/b.height*RH}}
 room.addEventListener('pointermove',e=>{const p=roomPt(e),o=objAt(p.x,p.y);hover=o;room.classList.toggle('hot',!!o);const l=$('#roomLabel');l.hidden=!o;if(o)l.textContent=o.label});
 room.addEventListener('pointerleave',()=>{hover=null;$('#roomLabel').hidden=true});
@@ -55,7 +55,7 @@ function stepMe(dt){
 function px(x,y,w,h,c){rc.fillStyle=c;rc.fillRect(Math.round(x),Math.round(y),w,h)}
 const SKY={rain:['#1d2a4d','#2b3763'],storm:['#141a33','#232a4a'],snow:['#29304f','#3d4670'],night:['#0f1433','#232a5a'],evening:['#c9737e','#f2b070'],morning:['#9fc6e0','#e7d9c3']};
 function drawRoom(dt,now){
-  const W=PREF.weather,day=W==='morning'||W==='evening',rm=reduced(),beat=S.playing?A.bass:0;
+  const W=liveWeather(),day=W==='morning'||W==='evening'||W==='day',rm=reduced(),beat=S.playing?A.bass:0;
   const sh=(x,y,w,h,a)=>{rc.fillStyle='rgba(10,8,30,'+a+')';rc.fillRect(Math.round(x),Math.round(y),w,h)};
   // wallpaper: two-tone vertical stripes with a small diamond motif
   const wA=day?'#4d4580':'#2e2a5c',wB=day?'#554d8a':'#332f66',wC=day?'#6a60a0':'#3e3a78';
@@ -74,7 +74,7 @@ function drawRoom(dt,now){
   // window: sky, skyline, weather, frame, curtains, sill
   const sky=SKY[W],g=rc.createLinearGradient(0,14,0,58);g.addColorStop(0,sky[0]);g.addColorStop(1,sky[1]);rc.fillStyle=g;rc.fillRect(18,14,52,44);
   if(W==='night'||W==='snow'||W==='rain'){for(let i=0;i<14;i++){const sx=20+(i*29)%48,sy=16+(i*17)%30;if(W!=='night'&&i%2)continue;px(sx,sy,1,1,(Math.floor(now/600+i)%5)?'#f4ead6':'#8a86b8')}px(58,19,6,6,'#f4ead6');px(60,19,4,4,sky[0])}
-  if(W==='evening'){px(26,40,10,10,'#ffd28a');px(24,42,14,6,'#ffd28a')}if(W==='morning'){px(52,22,8,8,'#fff3cf');px(50,24,12,4,'#fff3cf')}
+  if(W==='evening'){px(26,40,10,10,'#ffd28a');px(24,42,14,6,'#ffd28a')}if(W==='morning'||W==='day'){px(52,22,8,8,'#fff3cf');px(50,24,12,4,'#fff3cf')}if(W==='day'){px(24,24,10,3,'#ffffff');px(27,22,6,2,'#ffffff')}
   for(let i=0;i<7;i++){const bx=18+i*8,bh=8+((i*13)%11);px(bx,58-bh,7,bh,day?'#6a5c8c':'#191d3d');px(bx,58-bh,7,1,day?'#7d70a0':'#262b52');if(!day)for(let j=0;j<3;j++)if((i+j)%2)px(bx+2,58-bh+2+j*3,1,1,'#ffb454')}
   if(W==='rain'||W==='storm'){rc.fillStyle='rgba(180,200,255,.55)';const n=W==='storm'?26:16,sp=rm?0.25:1;for(let i=0;i<n;i++){const x=18+((i*53+Math.floor(now*0.05*sp))%52),y=14+((i*31+now*0.09*sp)%44);rc.fillRect(Math.floor(x),Math.floor(y),1,3)}}
   if(W==='snow'){rc.fillStyle='#f4ead6';const sp=rm?0.2:1;for(let i=0;i<18;i++){const x=18+((i*23+Math.sin(now/900+i)*3*sp)%52+52)%52,y=14+((i*19+now*0.012*sp)%44);rc.fillRect(Math.floor(x),Math.floor(y),1,1)}}
@@ -171,7 +171,7 @@ function drawFx(dt){
   notesFx=notesFx.filter(n=>n.life>0);if(notesFx.length>40)notesFx.splice(0,notesFx.length-40);
 }
 function drawStudio(dt,now){
-  studioClock+=dt;stepMe(dt);catThink(dt);drawRoom(dt,now);
+  studioClock+=dt;stepMe(dt);catThink(dt);drawRoom(dt,now);drawLife(dt,now);
   const depth=[{y:cat.y,f:()=>drawCat(dt,now)},{y:me.y,f:drawMe}].sort((a,b)=>a.y-b.y);depth.forEach(d=>d.f());drawFx(dt);
   if(hover){const r=hover===catObj?catRect():hover.r;rc.strokeStyle='rgba(255,180,84,.8)';rc.lineWidth=1;rc.strokeRect(r[0]-1.5,r[1]-1.5,r[2]+3,r[3]+3)}
 }

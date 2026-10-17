@@ -393,3 +393,9 @@ body.midi-learning [data-learn],body.midi-learning .fader,body.midi-learning .th
 /* the save status must never change the top bar layout (it used to wrap it and move everything below) */
 .save-state{display:inline-block;width:8.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .save-state.err{width:auto;max-width:16em}
+
+/* living studio */
+.q-level{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}.q-bar{height:10px;border-radius:5px;background:var(--lcd);overflow:hidden}.q-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--accent))}
+#questBody li.got{color:var(--accent)}
+body.focus [data-view="studio"],body.focus #btnArcade,body.focus #btnQuests{display:none}
+#btnFocus[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}

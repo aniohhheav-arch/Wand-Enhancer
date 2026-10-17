@@ -11,6 +11,7 @@ $('#projTitle').addEventListener('change',e=>{const t=e.target.value.trim()||'Un
 $('#midiChip').onclick=e=>{e.stopPropagation();const p=$('#midiPop');p.hidden=!p.hidden;$('#midiChip').setAttribute('aria-expanded',!p.hidden);renderMidiPop();if(!midiAcc&&!p.hidden&&$('#midiChip').dataset.state!=='unsupported')initMIDI()};
 document.addEventListener('click',e=>{if(!e.target.closest('#midiPop,#midiChip')&&!$('#midiPop').hidden){$('#midiPop').hidden=true;$('#midiChip').setAttribute('aria-expanded','false')}});
 $('#midiCh').innerHTML='<option value="0">All channels</option>'+Array.from({length:16},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('');$('#midiCh').onchange=e=>S.midiCh=+e.target.value;
+$('#btnQuests').onclick=openQuests;$('#btnFocus').onclick=()=>setFocus(!document.body.classList.contains('focus'));
 $('#btnHold').onclick=()=>setLatch(!S.latch);$('#btnArp').onclick=()=>runAction('arp',1,true);
 $('#mapLearn').onclick=()=>{const k=$('#mapPick').value;if(k)startActionLearn(k)};
 $('#mapList').onclick=e=>{const b=e.target.closest('[data-unmapa]');if(!b)return;delete PREF.midiMap[b.dataset.unmapa];savePrefs();renderMidiPop()};
@@ -63,7 +64,7 @@ window.addEventListener('pagehide',()=>{saveNow();store(SESSION_KEY,'0')});docum
   if(!LIB[curId])curId=Object.values(LIB).sort((a,b)=>b.edited-a.edited)[0].id;
   const crashed=read(SESSION_KEY)==='1';store(SESSION_KEY,'1');
   try{loadProject(LIB[curId].data)}catch(e){errLog.push('open: '+e.message);toast('The last cassette could not be read ('+e.message+'), so a new demo opened. The original is untouched in the library.');curId=newEntry('Midnight Rain',demoProject());loadProject(LIB[curId].data)}
-  writeLib();$('#projTitle').value=LIB[curId].title;setSaveState(storageOk?'saved':'err');applyTheme();setView(PREF.view);restoreUi(LIB[curId].ui);showDock();renderAll();sessionBoot();requestAnimationFrame(frame);updateWake();initMIDI();
+  writeLib();$('#projTitle').value=LIB[curId].title;setSaveState(storageOk?'saved':'err');applyTheme();setView(PREF.view);restoreUi(LIB[curId].ui);showDock();renderAll();sessionBoot();worldBoot();requestAnimationFrame(frame);updateWake();initMIDI();
   if(imported)toast('Imported '+imported+' cassette(s) from the previous Soundcraft version. The originals are untouched.');
   else if(crashed)toast('Soundcraft did not close cleanly last time. Your work is autosaved up to the last change; older versions are in Snapshots → Automatic backups.');
   if(window.native){if(window.native.onQuit)window.native.onQuit(()=>{saveNow();store(SESSION_KEY,'0')})}
