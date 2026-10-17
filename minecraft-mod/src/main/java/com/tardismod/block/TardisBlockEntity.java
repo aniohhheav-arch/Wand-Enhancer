@@ -35,6 +35,29 @@ public class TardisBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     public boolean isOpen() { return open; }
 
+    private static final java.util.Map<java.util.UUID, Long> COOLDOWN = new java.util.HashMap<>();
+
+    /** Doors open: anyone stepping into the doorway slab goes through (in -> interior, interior door -> outside). */
+    public void serverTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state) {
+        if (!open || !(level instanceof net.minecraft.server.level.ServerLevel sl)) return;
+        net.minecraft.core.Direction f = state.getValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING);
+        double x0 = pos.getX(), z0 = pos.getZ(), y0 = pos.getY();
+        net.minecraft.world.phys.AABB zone = switch (f) {
+            case NORTH -> new net.minecraft.world.phys.AABB(x0 + 0.2, y0, z0, x0 + 0.8, y0 + 2, z0 + 0.3);
+            case SOUTH -> new net.minecraft.world.phys.AABB(x0 + 0.2, y0, z0 + 0.7, x0 + 0.8, y0 + 2, z0 + 1);
+            case WEST -> new net.minecraft.world.phys.AABB(x0, y0, z0 + 0.2, x0 + 0.3, y0 + 2, z0 + 0.8);
+            default -> new net.minecraft.world.phys.AABB(x0 + 0.7, y0, z0 + 0.2, x0 + 1, y0 + 2, z0 + 0.8);
+        };
+        long now = level.getGameTime();
+        for (net.minecraft.server.level.ServerPlayer p : level.getEntitiesOfClass(net.minecraft.server.level.ServerPlayer.class, zone)) {
+            Long until = COOLDOWN.get(p.getUUID());
+            if (until != null && until > now) continue;
+            COOLDOWN.put(p.getUUID(), now + 40);
+            if (level.dimension() == com.tardismod.Interior.KEY) com.tardismod.Interior.leave(p, this);
+            else com.tardismod.Interior.enter(p, sl, pos);
+        }
+    }
+
     /** Server-side: set the doors and tell tracking clients which animation to play. */
     public void setOpen(boolean value) {
         if (open == value) return;

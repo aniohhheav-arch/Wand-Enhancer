@@ -47,7 +47,7 @@ public final class Interior {
         build(interior, id);
         if (interior.getBlockEntity(doorPos(id)) instanceof TardisBlockEntity door) { door.setReturn(from.dimension().identifier().toString(), exteriorPos); door.setOpen(true); }
         BlockPos c = center(id);
-        player.teleportTo(interior, c.getX() + 0.5, c.getY() + 1, c.getZ() + 4.5, Set.of(), 180f, 0f, true);
+        player.teleportTo(interior, c.getX() + 0.5, c.getY() + 1, c.getZ() + 7.5, Set.of(), 180f, 0f, true); // just inside the exit door, facing the console
     }
 
     public static void leave(ServerPlayer player, TardisBlockEntity interiorDoor) {

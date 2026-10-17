@@ -49,14 +49,27 @@ public class TardisBlock extends Block implements EntityBlock {
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) { return SHAPE; }
 
-    /** Click: open the doors; click again with the doors open to walk through; sneak-click closes them. */
+    /** Right-click opens/closes the doors. With the doors open, walk into the doorway to go through. */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (level.isClientSide() || !(level.getBlockEntity(pos) instanceof TardisBlockEntity be) || !(player instanceof ServerPlayer sp)) return InteractionResult.SUCCESS;
-        if (!be.isOpen()) be.setOpen(true);
-        else if (player.isSecondaryUseActive()) be.setOpen(false);
-        else if (level.dimension() == Interior.KEY) Interior.leave(sp, be);
-        else Interior.enter(sp, (ServerLevel) level, pos);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof TardisBlockEntity be) be.setOpen(!be.isOpen());
         return InteractionResult.SUCCESS;
+    }
+
+    /** With the doors open the front slab of the box is passable, so the player can step into the doorway. */
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+        if (!(level.getBlockEntity(pos) instanceof TardisBlockEntity be) || !be.isOpen()) return SHAPE;
+        return switch (state.getValue(HorizontalDirectionalBlock.FACING)) {
+            case NORTH -> Shapes.box(0.02, 0, 0.32, 0.98, 2.0, 0.98);
+            case SOUTH -> Shapes.box(0.02, 0, 0.02, 0.98, 2.0, 0.68);
+            case WEST -> Shapes.box(0.32, 0, 0.02, 0.98, 2.0, 0.98);
+            default -> Shapes.box(0.02, 0, 0.02, 0.68, 2.0, 0.98);
+        };
+    }
+
+    @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level, BlockState state, net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        return level.isClientSide() ? null : (lvl, p, st, be) -> { if (be instanceof TardisBlockEntity t) t.serverTick(lvl, p, st); };
     }
 }
