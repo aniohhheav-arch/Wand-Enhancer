@@ -84,3 +84,55 @@ registerGame({id:'beatblaster',name:'Beat Blaster',desc:'Hit the notes as they r
     this.fx.forEach(f=>{c.globalAlpha=Math.min(1,f.life*2);c.fillStyle=f.txt==='MISS'?'#ef7a85':'#ffb454';c.fillText(f.txt,x0+f.lane*lw+lw/2,hitY-50-(0.5-f.life)*60)});c.globalAlpha=1;
     c.textAlign='left';c.fillStyle='#f4ead6';c.font='28px VT323,monospace';c.fillText('Score '+this.score,24,40);c.fillText('Combo '+this.combo+(this.combo>=10?' ×'+(1+Math.min(3,Math.floor(this.combo/10))):''),24,72);
     c.font='18px VT323,monospace';c.fillStyle='#aca4cf';c.fillText(this.song?'Playing your song · chart from "'+this.trackName+'"':'Practice beat · '+this.diff,24,100);if(t<0){c.textAlign='center';c.font='60px VT323,monospace';c.fillStyle='#ffb454';c.fillText(Math.ceil(-t),W/2,H/2);c.textAlign='left'}}});
+
+/* ───────── Lo-Fi Fishing ───────── */
+const FISH=[['Minor Minnow','common',1,'any'],['Swing Sardine','common',1,'any'],['Bassline Bass','common',2,'any'],['Hi-Hat Herring','common',1,'any'],['Pentatonic Perch','uncommon',3,'any'],['Reverb Ray','uncommon',3,'rain'],
+  ['Arpeggio Eel','uncommon',4,'any'],['Vinyl Carp','rare',6,'any'],['Moonlight Sonata Koi','rare',7,'night'],['Tape-Hiss Trout','rare',6,'rain'],['Sidechain Salmon','rare',8,'day'],['Golden Groove Goldfish','epic',12,'any'],
+  ['Midnight Synthfin','epic',14,'night'],['The Legendary Lo-Fi Leviathan','legendary',30,'night']];
+const RAR={common:[0.5,'#c9c3e0'],uncommon:[0.27,'#8fcaa2'],rare:[0.14,'#79c3e0'],epic:[0.07,'#a796e8'],legendary:[0.02,'#ffb454']};
+ACHIEVEMENTS.fish10=['Angler','Catch 10 fish'];ACHIEVEMENTS.fishAll=['Aquarium','Catch every common and uncommon fish'];ACHIEVEMENTS.legend=['Legend','Catch the Lo-Fi Leviathan'];
+registerGame({id:'fishing',name:'Lo-Fi Fishing',desc:'Hold Space to cast, press Space when the float dips, then hold Space to keep the bar on the fish while it fights. Weather and time of day change as you play. Q ends the session.',
+  modes(){const n=Object.keys(ARC.prog.fish||{}).length;return [{id:'lake',label:'Moonlit lake · '+n+' of '+FISH.length+' fish discovered',short:'Go fishing'}]},
+  start(mode){this.mode=mode;this.phase='idle';this.power=0;this.t=0;this.caught=[];this.msg='Hold Space to cast';this.clock=Math.random()*24;this.weather='clear';this.wT=40;this.rain=[];this.score=0;
+    ARC.prog.fish=ARC.prog.fish||{};this.keys=newTrack('keys-tine');this.keys.vol=0.35;this.keys.rev=0.6;buildTrack(this.keys);applyMixOne(this.keys);this.nextChord=0;this.ci=0},
+  exit(){if(this.keys){disposeTrack(this.keys);this.keys=null}},pause(on){if(on&&this.keys&&this.keys._rt)[...this.keys._rt.live].forEach(h=>h.off(ctx.currentTime))},
+  night(){return this.clock<6||this.clock>20},
+  pick(){const cond=f=>f[3]==='any'||(f[3]==='night'&&this.night())||(f[3]==='day'&&!this.night())||(f[3]==='rain'&&this.weather==='rain');
+    const pool=FISH.filter(cond);let r=Math.random()*pool.reduce((a,f)=>a+RAR[f[1]][0],0);for(const f of pool){r-=RAR[f[1]][0];if(r<=0)return f}return pool[0]},
+  keyDown(k){if(k==='q'){this.finish();return true}if(k!==' ')return false;this.space=true;
+    if(this.phase==='idle'){this.phase='charge';this.power=0}else if(this.phase==='bite'){this.phase='reel';this.fish=this.pick();const hard={common:1,uncommon:1.4,rare:1.8,epic:2.3,legendary:3}[this.fish[1]];this.hard=hard;this.prog=0.3;this.bar=0.5;this.barV=0;this.fx=0.5;this.fv=0;this.msg='Hold Space to keep the bar on the fish!'}
+    else if(this.phase==='wait'){this.phase='idle';this.msg='Too early, the fish swam off. Hold Space to cast'}else if(this.phase==='show'){this.phase='idle';this.msg='Hold Space to cast'}return true},
+  keyUp(k){if(k!==' ')return false;this.space=false;if(this.phase==='charge'){this.dist=0.2+this.power*0.75;this.phase='wait';this.waitT=2+Math.random()*6;this.msg='Waiting for a bite…';this.splash(0)}return true},
+  midiNote(n,v,on){this.keyDown(on?' ':'');if(!on)this.keyUp(' ')},
+  splash(){},
+  finish(){this.exit();const n=this.caught.length,score=this.score,grade=n>=10?'S':n>=6?'A':n>=3?'B':n>=1?'C':'D',ach=[];const tot=Object.values(ARC.prog.fish).reduce((a,b)=>a+b,0);if(tot>=10)ach.push('fish10');
+    if(FISH.filter(f=>f[1]==='common'||f[1]==='uncommon').every(f=>ARC.prog.fish[f[0]]))ach.push('fishAll');if(ARC.prog.fish['The Legendary Lo-Fi Leviathan'])ach.push('legend');
+    finishGame({mode:this.mode,score,grade,maxCombo:n,perfect:n,good:0,miss:this.lost||0,ach})},
+  update(dt){this.t+=dt;this.clock=(this.clock+dt*0.2)%24;this.wT-=dt;if(this.wT<0){this.wT=30+Math.random()*40;this.weather=['clear','clear','rain','fog'][Math.floor(Math.random()*4)]}
+    // gentle lo-fi chords on the app's own electric piano
+    if(this.keys&&ctx&&ctx.currentTime>this.nextChord){const prog=[[57,60,64,67],[53,57,60,64],[55,59,62,65],[52,55,59,62]],ch=prog[this.ci++%4],t0=Math.max(ctx.currentTime+0.05,this.nextChord);ch.forEach((n,i)=>{const h=trigger(this.keys,n,0.35+Math.random()*0.1,t0+i*0.03);if(h)h.off(t0+3.8)});this.nextChord=t0+4}
+    if(this.weather==='rain'){for(let i=0;i<3;i++)this.rain.push({x:Math.random(),y:0});this.rain.forEach(r=>r.y+=dt*1.2);this.rain=this.rain.filter(r=>r.y<1)}else this.rain=[];
+    if(this.phase==='charge')this.power=Math.min(1,this.power+dt*0.7);
+    if(this.phase==='wait'){this.waitT-=dt;if(this.waitT<0){this.phase='bite';this.biteT=0.9;this.msg='!!! Press Space !!!'}}
+    if(this.phase==='bite'){this.biteT-=dt;if(this.biteT<0){this.phase='idle';this.lost=(this.lost||0)+1;this.msg='It got away. Hold Space to cast'}}
+    if(this.phase==='reel'){this.fv+=(Math.random()-0.5)*dt*8*this.hard;this.fv*=0.96;this.fx=clamp(this.fx+this.fv*dt,0.05,0.95);if(this.fx<=0.05||this.fx>=0.95)this.fv*=-0.8;
+      this.barV+=(this.space?1.6:-1.6)*dt;this.barV*=0.92;this.bar=clamp(this.bar+this.barV*dt,0.06,0.94);if(this.bar<=0.06||this.bar>=0.94)this.barV=0;
+      const on=Math.abs(this.bar-this.fx)<0.09;this.prog+=dt*(on?0.25:-0.18/this.hard*1.6);
+      if(this.prog>=1){const f=this.fish;this.caught.push(f);ARC.prog.fish[f[0]]=(ARC.prog.fish[f[0]]||0)+1;const pts=f[2]*100;this.score+=pts;ARC.prog.coins+=f[2];arcSave();this.phase='show';this.msg='Caught: '+f[0]+' ('+f[1]+') +'+f[2]+' coins · Space to continue';
+        if(f[1]==='legendary'||f[1]==='epic')toast('Wow! '+f[0]+'!')}
+      else if(this.prog<=0){this.phase='idle';this.lost=(this.lost||0)+1;this.msg='The line went slack. Hold Space to cast'}}},
+  draw(c,W,H){const night=this.night(),dusk=Math.abs(this.clock-19)<1.5||Math.abs(this.clock-6.5)<1.5;
+    c.fillStyle=night?'#141330':dusk?'#3a2a55':this.weather==='rain'?'#4a5570':'#79a6c8';c.fillRect(0,0,W,H*0.55);
+    if(night){c.fillStyle='#f4ead6';for(let i=0;i<40;i++)c.fillRect((i*137)%W,(i*71)%(H*0.4),2,2);c.beginPath();c.arc(W*0.8,H*0.15,24,0,7);c.fill()}else{c.fillStyle='#ffd27a';c.beginPath();c.arc(W*0.2,H*0.18,28,0,7);c.fill()}
+    c.fillStyle=night?'#1d2547':'#3c6e8f';c.fillRect(0,H*0.55,W,H*0.45);c.fillStyle=night?'#262f5a':'#4f86a6';for(let i=0;i<12;i++){const y=H*0.6+i*H*0.035,o=Math.sin(this.t+i)*20;c.fillRect(o+(i*53)%W,y,80,2)}
+    c.fillStyle='#2a1f1a';c.fillRect(0,H*0.5,W*0.25,H*0.06);c.fillStyle='#ffb454';c.fillRect(W*0.12,H*0.43,14,20);c.fillStyle='#6b4e3d';c.fillRect(W*0.12,H*0.4,14,10);
+    if(this.weather==='fog'){c.fillStyle='rgba(220,220,235,.25)';c.fillRect(0,H*0.3,W,H*0.4)}
+    c.strokeStyle='rgba(244,234,214,.7)';c.fillStyle='#ef7a85';c.lineWidth=1.5;const rx=W*0.13+7,ry=H*0.4;
+    if(['wait','bite','reel','show'].includes(this.phase)){const fx=W*(0.28+this.dist*0.6),bob=this.phase==='bite'?Math.sin(this.t*30)*6+6:Math.sin(this.t*2)*2,fy=H*0.6+bob;c.beginPath();c.moveTo(rx,ry);c.quadraticCurveTo((rx+fx)/2,ry-40,fx,fy);c.stroke();c.beginPath();c.arc(fx,fy,6,0,7);c.fill()}
+    c.fillStyle='rgba(180,200,255,.6)';this.rain.forEach(r=>c.fillRect(r.x*W,r.y*H,1,10));
+    if(this.phase==='charge'){c.fillStyle='#201e45';c.fillRect(W*0.1,H*0.32,160,12);c.fillStyle='#ffb454';c.fillRect(W*0.1,H*0.32,160*this.power,12)}
+    if(this.phase==='reel'){const bx=W-80,by=H*0.15,bh=H*0.6;c.fillStyle='#201e45';c.fillRect(bx,by,30,bh);c.fillStyle='rgba(143,202,162,.6)';c.fillRect(bx,by+(1-this.bar)*bh-bh*0.09,30,bh*0.18);
+      c.fillStyle=RAR[this.fish[1]][1];c.fillRect(bx+6,by+(1-this.fx)*bh-6,18,12);c.fillStyle='#ffb454';c.fillRect(bx+40,by+bh*(1-this.prog),8,bh*this.prog)}
+    c.font='26px VT323,monospace';c.fillStyle='#f4ead6';c.textAlign='center';c.fillText(this.msg,W/2,H*0.94);c.textAlign='left';
+    c.font='20px VT323,monospace';c.fillText(String(Math.floor(this.clock)).padStart(2,'0')+':00 · '+this.weather+' · caught '+this.caught.length+' · Q ends the session',16,28);
+    const last=this.caught.slice(-5);last.forEach((f,i)=>{c.fillStyle=RAR[f[1]][1];c.fillText('🐟 '+f[0],16,56+i*22)})}});
