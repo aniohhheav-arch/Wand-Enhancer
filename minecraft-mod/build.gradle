@@ -1,0 +1,13 @@
+// UNVERIFIED scaffold. Check the Loom plugin id/version for 26.x on fabricmc.net (26.x is unobfuscated, so
+// the "mappings" line below is likely not needed and the plugin id may differ).
+plugins { id 'fabric-loom' version 'TODO' ; id 'maven-publish' }
+version = project.mod_version; group = project.maven_group
+repositories { maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' } }
+dependencies {
+  minecraft "com.mojang:minecraft:${project.minecraft_version}"
+  modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+  modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+  modImplementation "software.bernie.geckolib:geckolib-fabric-${project.minecraft_version}:${project.geckolib_version}" // verify artifact name
+}
+java { sourceCompatibility = JavaVersion.VERSION_25; targetCompatibility = JavaVersion.VERSION_25 } // verify required Java version
+processResources { inputs.property 'version', project.version; filesMatching('fabric.mod.json') { expand 'version': project.version } }
