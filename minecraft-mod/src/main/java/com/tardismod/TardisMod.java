@@ -37,5 +37,15 @@ public class TardisMod implements ModInitializer {
         TARDIS_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id("tardis"),
             new BlockEntityType<>(TardisBlockEntity::new, Set.of(TARDIS_BLOCK)));
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(item));
+        // Dev command: /tardis build  — generates the interior console room (also happens automatically on first entry).
+        net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, ctx, sel) ->
+            dispatcher.register(net.minecraft.commands.Commands.literal("tardis")
+                .requires(net.minecraft.commands.Commands.hasPermission(new net.minecraft.server.permissions.PermissionCheck.Require(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)))
+                .then(net.minecraft.commands.Commands.literal("build").executes(c -> {
+                    var level = c.getSource().getServer().getLevel(Interior.KEY);
+                    if (level == null) { c.getSource().sendFailure(net.minecraft.network.chat.Component.literal("interior dimension not loaded")); return 0; }
+                    Interior.build(level);
+                    c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("TARDIS interior built: " + level.getBlockState(new net.minecraft.core.BlockPos(0, 65, 9)).getBlock()), false);
+                    return 1; }))));
     }
 }

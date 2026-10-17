@@ -1,6 +1,8 @@
 package com.tardismod.block;
 
-import com.tardismod.TardisMod;
+import com.tardismod.Interior;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -47,9 +49,14 @@ public class TardisBlock extends Block implements EntityBlock {
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) { return SHAPE; }
 
+    /** Click: open the doors; click again with the doors open to walk through; sneak-click closes them. */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof TardisBlockEntity be) be.toggleDoors();
+        if (level.isClientSide() || !(level.getBlockEntity(pos) instanceof TardisBlockEntity be) || !(player instanceof ServerPlayer sp)) return InteractionResult.SUCCESS;
+        if (!be.isOpen()) be.setOpen(true);
+        else if (player.isSecondaryUseActive()) be.setOpen(false);
+        else if (level.dimension() == Interior.KEY) Interior.leave(sp, be);
+        else Interior.enter(sp, (ServerLevel) level, pos);
         return InteractionResult.SUCCESS;
     }
 }
