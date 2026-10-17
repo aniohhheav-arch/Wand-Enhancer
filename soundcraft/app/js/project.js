@@ -106,7 +106,7 @@ function markDirty(){dirty=true;setSaveState('dirty');clearTimeout(saveTimer);sa
 function saveNow(){clearTimeout(saveTimer);const e=LIB[curId];if(!e)return false;const data=snapshot();e.data=data;if(dirty)e.edited=Date.now();e.bpm=S.bpm;e.ui=uiState();
   const lastB=e.backups&&e.backups[0];if(!lastB||Date.now()-lastB.date>120000){e.backups=[{date:Date.now(),data}].concat(e.backups||[]).slice(0,5);if(window.native)window.native.writeBackup(curId,e.title,JSON.stringify(data)).catch(err=>errLog.push('backup: '+err.message))}
   let ok=writeLib();if(!ok){e.backups=(e.backups||[]).slice(0,1);ok=writeLib()}dirty=!ok;setSaveState(ok?'saved':'err');return ok}
-function setSaveState(s){const el=$('#saveState');if(!el)return;el.classList.toggle('err',s==='err');el.textContent=s==='dirty'?'Unsaved changes…':s==='err'?'Not saved: storage blocked or full':'Saved'}
+function setSaveState(s){const el=$('#saveState');if(!el)return;el.classList.toggle('err',s==='err');el.title=s==='dirty'?'Changes are autosaved in a moment':s==='err'?'Not saved: storage blocked or full':'All changes saved';el.textContent=s==='dirty'?'Saving…':s==='err'?'Not saved: storage blocked or full':'Saved'}
 function newEntry(title,data){const id=uid('p'),now=Date.now();LIB[id]={id,title,color:TRACK_COLORS[Object.keys(LIB).length%TRACK_COLORS.length],created:now,edited:now,bpm:data.bpm,data,snapshots:[],backups:[]};return id}
 function openProject(id){const e=LIB[id];if(!e)return false;stop();
   try{loadProject(e.data)}catch(err){toast('That cassette could not be opened ('+err.message+'). It was left untouched.');return false}

@@ -389,3 +389,7 @@ body.midi-learning [data-learn],body.midi-learning .fader,body.midi-learning .th
 .arc-game{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.arc-modes{display:flex;flex-wrap:wrap;gap:6px;max-width:360px}
 #arcAch li.got b{color:#ffb454}
 .arcade .hint{color:#aca4cf}
+
+/* the save status must never change the top bar layout (it used to wrap it and move everything below) */
+.save-state{display:inline-block;width:8.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.save-state.err{width:auto;max-width:16em}
