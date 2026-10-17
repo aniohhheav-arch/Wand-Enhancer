@@ -215,7 +215,7 @@ const ok = (name, cond, info = '') => { if (!cond) failed++; const line = (cond 
   await E(() => openArcade()); await page.click('[data-g="beatblaster"][data-m="practice-easy"]');
   const bbr = await E(() => new Promise(res => { const g = ARC.cur, keys = ['d', 'f', 'j', 'k']; let i = 0; const tick = () => { if (ARC.state !== 'play') { res({ state: ARC.state, r: ARC.result, best: ARC.prog.best['beatblaster:practice-easy'] }); return } const t = g.now();
     while (i < g.chart.length && g.chart[i].t <= t + 0.005) { if (i % 4 !== 3) g.keyDown(keys[g.chart[i].lane]); i++ } setTimeout(tick, 4) }; tick() }));
-  ok('Beat Blaster judges hits and misses, scores, and saves a high score', bbr.state === 'results' && bbr.r.perfect > 0 && bbr.r.miss > 0 && bbr.r.score > 0 && bbr.best && bbr.best.score === bbr.r.score && JSON.parse(localStorage.getItem ? '{}' : '{}'), JSON.stringify({ perfect: bbr.r.perfect, good: bbr.r.good, miss: bbr.r.miss, score: bbr.r.score, grade: bbr.r.grade }));
+  ok('Beat Blaster judges hits and misses, scores, and saves a high score', bbr.state === 'results' && bbr.r.perfect > 0 && bbr.r.miss > 0 && bbr.r.score > 0 && bbr.best && bbr.best.score === bbr.r.score, JSON.stringify({ perfect: bbr.r.perfect, good: bbr.r.good, miss: bbr.r.miss, score: bbr.r.score, grade: bbr.r.grade }));
   await page.keyboard.press('Escape'); await page.keyboard.press('Escape');
   ok('the arcade will not start while recording', await E(() => { S.rec = true; $('#arcade').hidden = true; openArcade(); const blocked = $('#arcade').hidden; S.rec = false; return blocked }));
   // save, close, reopen
