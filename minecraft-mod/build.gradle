@@ -6,7 +6,7 @@ dependencies {
   // TODO: confirm whether 26.x still needs `mappings` (it is believed to ship unobfuscated). Compile to find out.
   modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
   modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-  // TODO: GeckoLib for 26.x — add once the artifact coordinates are confirmed.
+  modImplementation "com.geckolib:geckolib-fabric-${project.minecraft_version}:${project.geckolib_version}"
 }
 java { sourceCompatibility = JavaVersion.VERSION_25; targetCompatibility = JavaVersion.VERSION_25 } // Minecraft 26.3 requires Java 25 (Mojang manifest)
 processResources { inputs.property 'version', project.version; filesMatching('fabric.mod.json') { expand 'version': project.version } }
