@@ -39,18 +39,17 @@ public final class Travel {
         door.setDestination(door.destDimension(), r.nextInt(4001) - 2000, r.nextInt(4001) - 2000);
     }
 
-    /** Safe standing Y at x,z (or -1 if none). Overworld/End use the heightmap; the Nether scans downward for a pocket. */
+    /** Safe standing Y at x,z (or -1 if none): scans down from the top for solid, non-liquid ground with two blocks of air above. */
     static int safeY(ServerLevel level, int x, int z) {
-        level.getChunk(x >> 4, z >> 4);
-        if (level.dimension() == Level.NETHER) {
-            for (int y = 120; y > level.getMinY() + 8; y--) {
-                BlockPos p = new BlockPos(x, y, z);
-                if (level.getBlockState(p.below()).isSolid() && level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && level.getBlockState(p.above(2)).isAir()) return y;
-            }
-            return -1;
+        level.getChunk(x >> 4, z >> 4, net.minecraft.world.level.chunk.status.ChunkStatus.FULL, true);
+        int top = level.dimension() == Level.NETHER ? 120 : level.getMaxY() - 2;
+        for (int y = top; y > level.getMinY() + 4; y--) {
+            BlockPos p = new BlockPos(x, y, z);
+            BlockState below = level.getBlockState(p.below());
+            if (below.isSolid() && level.getFluidState(p.below()).isEmpty() && !below.is(net.minecraft.tags.BlockTags.LEAVES)
+                && level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir()) return y;
         }
-        int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        return y <= level.getMinY() ? -1 : y;
+        return -1;
     }
 
     /** Returns a human-readable result. Runs on the server thread. */
@@ -60,7 +59,8 @@ public final class Travel {
         ServerLevel target = server.getLevel(key);
         if (target == null) return "Destination dimension unavailable.";
         int x = door.destX(), z = door.destZ(), y = safeY(target, x, z);
-        if (y < 0) { // no ground (e.g. the End void or a Nether lava lake): build a small landing pad so the TARDIS is never lost
+        boolean groundless = y < 0;
+        if (groundless) { // no ground (e.g. the End void or a Nether lava lake): build a small landing pad so the TARDIS is never lost
             y = target.dimension() == Level.END ? 64 : 80;
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) target.setBlock(new BlockPos(x + dx, y - 1, z + dz), Blocks.OBSIDIAN.defaultBlockState(), 3);
             for (int dy = 0; dy < 3; dy++) for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) target.setBlock(new BlockPos(x + dx, y + dy, z + dz), Blocks.AIR.defaultBlockState(), 3);
@@ -80,6 +80,6 @@ public final class Travel {
         target.playSound(null, land, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.5f, 0.6f);
         door.setReturn(key.identifier().toString(), land);
         for (ServerPlayer p : interior.players()) p.sendSystemMessage(Component.literal("Materialized: " + describe(door) + " (y=" + y + ")"), true);
-        return "Materialized at " + describe(door) + ".";
+        return "Materialized at " + describe(door) + (groundless ? " [built a landing pad: no ground]" : ".");
     }
 }
