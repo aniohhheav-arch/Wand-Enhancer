@@ -18,7 +18,8 @@ import java.util.Set;
 public final class Interior {
     public static final ResourceKey<Level> KEY = ResourceKey.create(Registries.DIMENSION, TardisMod.id("interior"));
     private static final BlockPos CENTER = new BlockPos(0, 64, 0);
-    private static final BlockPos DOOR = new BlockPos(0, 65, 9);
+    public static final BlockPos DOOR_POS = new BlockPos(0, 65, 9);
+    private static final BlockPos DOOR = DOOR_POS;
     private static final int R = 12, H = 12;
 
     private Interior() {}
@@ -56,7 +57,7 @@ public final class Interior {
         }
         for (int y = 1; y <= 9; y++) level.setBlock(CENTER.offset(0, y, 0), y % 4 == 0 ? lamp : Blocks.GLASS.defaultBlockState(), 3); // time rotor
         level.setBlock(CENTER.offset(0, 1, 0), Blocks.POLISHED_DEEPSLATE.defaultBlockState(), 3);
-        for (int i = 0; i < 6; i++) { double a = i * Math.PI / 3; level.setBlock(CENTER.offset((int) Math.round(Math.cos(a) * 2), 1, (int) Math.round(Math.sin(a) * 2)), Blocks.LECTERN.defaultBlockState(), 3); } // console stations
+        for (int i = 0; i < 4; i++) { double a = i * Math.PI / 2 + Math.PI / 4; level.setBlock(CENTER.offset((int) Math.round(Math.cos(a) * 3), 1, (int) Math.round(Math.sin(a) * 3)), TardisMod.CONSOLE_BLOCK.defaultBlockState().setValue(com.tardismod.block.ConsoleBlock.STATION, i), 3); } // console stations
         level.setBlock(DOOR, TardisMod.TARDIS_BLOCK.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH), 3);
         level.setBlock(new BlockPos(0, y0 + 1, -R + 1), Blocks.AIR.defaultBlockState(), 3);
     }

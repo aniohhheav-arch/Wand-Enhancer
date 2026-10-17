@@ -1,0 +1,16 @@
+{
+ "variants": {
+  "station=0": {
+   "model": "tardismod:block/console_0"
+  },
+  "station=1": {
+   "model": "tardismod:block/console_1"
+  },
+  "station=2": {
+   "model": "tardismod:block/console_2"
+  },
+  "station=3": {
+   "model": "tardismod:block/console_3"
+  }
+ }
+}

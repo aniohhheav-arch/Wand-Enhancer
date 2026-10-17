@@ -27,6 +27,8 @@ public class TardisBlockEntity extends BlockEntity implements GeoBlockEntity {
     private boolean open;
     private String returnDim = "";
     private int returnX, returnY, returnZ;
+    private String destDim = "minecraft:overworld";
+    private int destX, destZ;
 
     public TardisBlockEntity(BlockPos pos, BlockState state) { super(TardisMod.TARDIS_BE, pos, state); }
 
@@ -41,18 +43,24 @@ public class TardisBlockEntity extends BlockEntity implements GeoBlockEntity {
     }
 
     public void setReturn(String dimension, BlockPos pos) { returnDim = dimension; returnX = pos.getX(); returnY = pos.getY(); returnZ = pos.getZ(); setChanged(); }
+    public String destDimension() { return destDim; }
+    public int destX() { return destX; }
+    public int destZ() { return destZ; }
+    public void setDestination(String dim, int x, int z) { destDim = dim; destX = x; destZ = z; setChanged(); }
     public String returnDimension() { return returnDim; }
     public BlockPos returnPos() { return new BlockPos(returnX, returnY, returnZ); }
 
     @Override protected void saveAdditional(ValueOutput out) {
         super.saveAdditional(out);
         out.putBoolean("open", open); out.putString("returnDim", returnDim);
+        out.putString("destDim", destDim); out.putInt("dx", destX); out.putInt("dz", destZ);
         out.putInt("rx", returnX); out.putInt("ry", returnY); out.putInt("rz", returnZ);
     }
 
     @Override protected void loadAdditional(ValueInput in) {
         super.loadAdditional(in);
         open = in.getBooleanOr("open", false); returnDim = in.getStringOr("returnDim", "");
+        destDim = in.getStringOr("destDim", "minecraft:overworld"); destX = in.getIntOr("dx", 0); destZ = in.getIntOr("dz", 0);
         returnX = in.getIntOr("rx", 0); returnY = in.getIntOr("ry", 64); returnZ = in.getIntOr("rz", 0);
     }
 

@@ -24,6 +24,7 @@ public class TardisMod implements ModInitializer {
     public static Identifier id(String path) { return Identifier.fromNamespaceAndPath(MOD_ID, path); }
 
     public static Block TARDIS_BLOCK;
+    public static Block CONSOLE_BLOCK;
     public static BlockEntityType<TardisBlockEntity> TARDIS_BE;
 
     @Override
@@ -31,12 +32,16 @@ public class TardisMod implements ModInitializer {
         ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, id("tardis"));
         TARDIS_BLOCK = Registry.register(BuiltInRegistries.BLOCK, blockKey,
             new TardisBlock(BlockBehaviour.Properties.of().setId(blockKey).strength(4.0f, 1200.0f).noOcclusion().lightLevel(s -> 8)));
+        ResourceKey<Block> consoleKey = ResourceKey.create(Registries.BLOCK, id("console"));
+        CONSOLE_BLOCK = Registry.register(BuiltInRegistries.BLOCK, consoleKey, new com.tardismod.block.ConsoleBlock(BlockBehaviour.Properties.of().setId(consoleKey).strength(3.0f, 1200.0f).lightLevel(s -> 10)));
+        ResourceKey<Item> consoleItemKey = ResourceKey.create(Registries.ITEM, id("console"));
+        Item consoleItem = Registry.register(BuiltInRegistries.ITEM, consoleItemKey, new BlockItem(CONSOLE_BLOCK, new Item.Properties().setId(consoleItemKey).useBlockDescriptionPrefix()));
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, id("tardis"));
         Item item = Registry.register(BuiltInRegistries.ITEM, itemKey,
             new BlockItem(TARDIS_BLOCK, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
         TARDIS_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id("tardis"),
             new BlockEntityType<>(TardisBlockEntity::new, Set.of(TARDIS_BLOCK)));
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(item));
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> { output.accept(item); output.accept(consoleItem); });
         // Dev command: /tardis build  — generates the interior console room (also happens automatically on first entry).
         net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, ctx, sel) ->
             dispatcher.register(net.minecraft.commands.Commands.literal("tardis")
@@ -46,6 +51,18 @@ public class TardisMod implements ModInitializer {
                     if (level == null) { c.getSource().sendFailure(net.minecraft.network.chat.Component.literal("interior dimension not loaded")); return 0; }
                     Interior.build(level);
                     c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("TARDIS interior built: " + level.getBlockState(new net.minecraft.core.BlockPos(0, 65, 9)).getBlock()), false);
-                    return 1; }))));
+                    return 1; }))
+                .then(net.minecraft.commands.Commands.literal("dest")
+                    .then(net.minecraft.commands.Commands.argument("dim", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2))
+                    .then(net.minecraft.commands.Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                    .then(net.minecraft.commands.Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer()).executes(c -> {
+                        var level = c.getSource().getServer().getLevel(Interior.KEY); Interior.build(level);
+                        var door = (TardisBlockEntity) level.getBlockEntity(Interior.DOOR_POS);
+                        door.setDestination(Travel.DIMENSIONS.get(com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "dim")), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "x"), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "z"));
+                        c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("dest: " + Travel.describe(door)), false); return 1; })))))
+                .then(net.minecraft.commands.Commands.literal("fly").executes(c -> {
+                    var level = c.getSource().getServer().getLevel(Interior.KEY); Interior.build(level);
+                    var door = (TardisBlockEntity) level.getBlockEntity(Interior.DOOR_POS);
+                    String r = Travel.fly(level, door); c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("fly: " + r + " now at " + door.returnDimension() + " " + door.returnPos().toShortString()), false); return 1; }))));
     }
 }
