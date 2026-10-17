@@ -1,0 +1,16 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "tardismod:block/tardis"
+  },
+  "facing=south": {
+   "model": "tardismod:block/tardis"
+  },
+  "facing=east": {
+   "model": "tardismod:block/tardis"
+  },
+  "facing=west": {
+   "model": "tardismod:block/tardis"
+  }
+ }
+}
