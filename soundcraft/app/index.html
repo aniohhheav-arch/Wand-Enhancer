@@ -24,6 +24,7 @@
     <div class="nav-right">
       <span class="stat" id="statVoices" title="Voices playing right now">0 voices</span>
       <span class="stat" id="statCpu" title="Process CPU (desktop app only)"></span>
+      <button class="btn" id="btnArcade" title="Minigames">🕹 Arcade</button>
       <button class="btn" id="btnHistory" title="Recent sessions and every change you made (Ctrl+H)">History</button>
       <button class="btn" id="btnLibrary">Cassettes</button>
       <button class="btn" id="btnSnapshots">Snapshots</button>
@@ -235,6 +236,10 @@
     <p class="hint" style="grid-column:1/-1;margin:0">Format: WAV. MP3 is not offered because no encoder ships with Soundcraft yet. Stems include each track's own effects and its share of the reverb and delay returns, without master inserts. Notes with a probability below 100% are rolled once for the render.</p>
     <div style="grid-column:1/-1" class="progress"><i id="expProg"></i></div><p id="expStatus" class="hint" style="grid-column:1/-1;margin:0"></p>
     <div style="grid-column:1/-1" class="row-actions"><span class="spacer"></span><button class="btn primary" id="expGo">Render</button></div></div></div></div>
+<div class="arcade" id="arcade" hidden tabindex="-1" role="dialog" aria-label="Arcade"><canvas id="arcCanvas"></canvas>
+  <div class="arc-menu" id="arcMenu"><div class="arc-head"><h2>Arcade</h2><span class="arc-coins" id="arcCoins"></span><span class="spacer"></span><button class="btn" id="arcClose">Back to the studio (Esc)</button></div>
+    <ul class="list" id="arcList"></ul><h3>Achievements</h3><ul class="list" id="arcAch"></ul>
+    <p class="hint">Coins and achievements are just for fun: nothing in Soundcraft is ever locked behind them. More games are on the way.</p></div></div>
 <div class="modal" id="histModal" hidden role="dialog" aria-modal="true" aria-labelledby="histTitle"><div class="modal-card">
   <div class="modal-head"><h2 id="histTitle">History</h2><span class="spacer"></span><button class="btn" id="histOpen">Open session file…</button><button class="btn" id="histSave">Save session as…</button><button class="btn" data-close>Close</button></div>
   <div class="modal-body hist">
@@ -280,6 +285,7 @@
 <script src="js/ui-lab.js"></script>
 <script src="js/ui-dialogs.js"></script>
 <script src="js/sessions.js"></script>
+<script src="js/arcade.js"></script>
 <script src="js/studio.js"></script>
 <script src="js/main.js"></script>
 </body>

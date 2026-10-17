@@ -29,7 +29,7 @@ function runEvents(ev,horizon,onDeferred,visual){
 function clickSound(t,acc){const o=O('square',acc?1760:1180,t,Z),g=G(0);g.gain.setValueAtTime(acc?0.22:0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.04);o.connect(F('bandpass',acc?1760:1180,4)).connect(g).connect(GR.bus);o.stop(t+0.06)}
 function play(){if(rendering||!ensureAudio()||S.playing)return;S.playing=true;step=Math.round((S.loop.on?S.loop.start:S.cursor)*16);nextT=ctx.currentTime+0.08;stepLog=[];segStep=step;stopAtStep=null;resetIntegrated();
   S.tracks.forEach(t=>{if(t._rt)buildTrackMod(t,nextT)});timer=setInterval(tick,25);tick();renderTransport();audioRecSync()}
-function stop(){if(!S.playing){if(ctx)panic();return}S.playing=false;clearInterval(timer);S.rec=false;flushOffs();stopAudioClips();audioRecSync();renderTransport()}
+function stop(){if(!S.playing){if(ctx)panic();return}S.playing=false;clearInterval(timer);S.rec=false;S.tracks.forEach(t=>t._recClip=null);flushOffs();stopAudioClips();audioRecSync();renderTransport()}
 function flushOffs(){const now=ctx?ctx.currentTime:0;pendingOffs.forEach(o=>o.h.off(now));pendingOffs=[]}
 function panic(){flushOffs();stopAudioClips();S.tracks.forEach(tr=>{if(tr._rt)[...tr._rt.live].forEach(h=>h.off(ctx.currentTime));tr._arpHeld=null});held.clear();sustained.length=0;keyCounts.clear();$$('.key.on').forEach(k=>k.classList.remove('on'))}
 function tick(){
@@ -62,10 +62,20 @@ function liveOffNow(n,src){const key=src+':'+n,e=held.get(key);if(!e)return;held
 function liveArpTick(horizon){S.tracks.forEach(tr=>{if(!tr._arpHeld||!tr._arpClock)return;const a=tr.arp,r=divBeats(a.rate)*4,sd=stepDur(),c=tr._arpClock;
   while(c.next<horizon){const notes=[...tr._arpHeld].map(([p,v])=>({p,s:0,l:1e9,v}));arpNotesAt(notes,a,c.i*r).forEach(x=>{const h=trigger(tr,x.p,x.v,c.next);if(h)h.off(c.next+x.l*sd)});c.i++;c.next+=r*sd}})}
 function setSustain(on){S.sustain=on;const l=$('#susLed');if(l)l.classList.toggle('on',on);if(!on&&ctx)sustained.splice(0).forEach(h=>h.off(ctx.currentTime))}
+/* Recorded notes keep their real position. The clip being recorded grows (with its pattern) to fit the
+   phrase instead of folding later notes back into its first bars; a new clip gets its own empty pattern
+   so recording never scrambles a pattern that other clips share. Loop recording overdubs the loop. */
 function commitRec(tr,n,v,start,end){
-  let c=clipAt(tr,Math.floor(start));if(!c){const pat=curPattern(tr),bar=Math.floor(start/16);c={id:uid('c'),pat:pat.id,start:bar,len:pat.len};
-    const nextC=tr.clips.filter(x=>x.start>bar).sort((a,b)=>a.start-b.start)[0];if(nextC)c.len=Math.max(0.25,Math.min(c.len,nextC.start-bar));tr.clips.push(c)}
-  const pat=tr.patterns.find(p=>p.id===c.pat),L=pat.len*16,q=S.quant;let s=((start-c.start*16)%L+L)%L,len=end-start;if(len<=0)len+=(S.loop.end-S.loop.start)*16;
+  const q=S.quant,inLoop=S.loop.on&&S.loop.end>S.loop.start;let len=end-start;if(len<=0)len+=(S.loop.end-S.loop.start)*16;
+  let c=tr._recClip&&tr.clips.find(x=>x.id===tr._recClip);if(c&&start<c.start*16)c=null;if(!c){c=clipAt(tr,Math.floor(start));if(c&&!inLoop&&tr.patterns.filter(()=>1)&&tr.clips.filter(x=>x.pat===c.pat).length>1)c=null}
+  if(!c){const bar=Math.floor(start/16),cur=curPattern(tr),pat=cur.notes.length?newPattern(nextPatName(tr),1):cur;if(pat!==cur){tr.patterns.push(pat);tr.curPat=pat.id}pat.len=Math.max(1,pat.len);
+    c={id:uid('c'),pat:pat.id,start:bar,len:pat.len};const nextC=tr.clips.filter(x=>x.start>bar).sort((a,b)=>a.start-b.start)[0];if(nextC)c.len=Math.max(0.25,Math.min(c.len,nextC.start-bar));tr.clips.push(c)}
+  tr._recClip=c.id;const pat=tr.patterns.find(p=>p.id===c.pat);let rel=start-c.start*16;
+  // grow the clip (and its pattern, when only this clip uses it) to fit, unless we are overdubbing a loop
+  if(!(inLoop&&start>=S.loop.start*16&&start<S.loop.end*16&&c.start+c.len>=S.loop.end)){const need=Math.min(64,Math.ceil((rel+Math.max(len,0.25))/16));
+    if(need>c.len){const nextC=tr.clips.filter(x=>x!==c&&x.start>c.start).sort((a,b)=>a.start-b.start)[0];c.len=nextC?Math.max(c.len,Math.min(need,nextC.start-c.start)):need}
+    if(pat.len<c.len&&tr.clips.filter(x=>x.pat===pat.id).length===1)pat.len=Math.min(64,c.len)}
+  const L=pat.len*16;let s=((rel%L)+L)%L;
   if(q){s=(Math.round(s/q)*q)%L;len=Math.max(q,Math.round(len/q)*q)}else len=Math.max(0.25,len);
   pat.notes.push({p:ENG[tr.engine].drum?DRUM_NOTES[padIndex(n)]:n,s:+s.toFixed(3),l:+len.toFixed(3),v:+v.toFixed(2)});markDirty();renderRoll();renderArrange();quest('record')}
 /* ───────── offline rendering ───────── */

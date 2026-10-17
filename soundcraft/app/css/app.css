@@ -379,3 +379,13 @@ body.dock-max .dock{display:none}
 /* MIDI learn */
 body.midi-learning [data-learn],body.midi-learning .fader,body.midi-learning .th input[type=range]{outline:2px dashed var(--pink);outline-offset:2px}
 #btnHold[aria-pressed="true"],#btnArp[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+
+/* arcade */
+.arcade{position:fixed;inset:0;z-index:60;background:#141330;color:#f4ead6}
+.arcade canvas{position:absolute;inset:0;width:100%;height:100%}
+.arc-menu{position:absolute;inset:0;overflow:auto;padding:24px max(16px,calc(50% - 460px));background:rgba(20,19,48,.9)}
+.arc-head{display:flex;align-items:center;gap:14px}.arc-head h2{font-family:var(--f-display);font-size:30px;margin:0}
+.arc-coins{font-family:VT323,monospace;font-size:24px;color:#ffb454}
+.arc-game{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}.arc-modes{display:flex;flex-wrap:wrap;gap:6px;max-width:360px}
+#arcAch li.got b{color:#ffb454}
+.arcade .hint{color:#aca4cf}

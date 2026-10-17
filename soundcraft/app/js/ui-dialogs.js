@@ -1,6 +1,6 @@
 'use strict';
 /* Dialogs: cassette library, snapshots, export, settings + diagnostics, help + tour, modulation overview. */
-function openModal(id){$$('.modal').forEach(m=>{if(m.id!==id)m.hidden=true});const m=$('#'+id);m.hidden=false;const f=m.querySelector('input,button,select');if(f)f.focus()}
+function openModal(id){if(typeof arcPause==='function')arcPause(true);$$('.modal').forEach(m=>{if(m.id!==id)m.hidden=true});const m=$('#'+id);m.hidden=false;const f=m.querySelector('input,button,select');if(f)f.focus()}
 /* ───────── cassette library ───────── */
 const fmtDur=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
 const fmtDate=t=>new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});

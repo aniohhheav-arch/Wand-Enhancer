@@ -24,6 +24,7 @@ function velCurve(v){const x=v/127;return PREF.velCurve==='soft'?Math.pow(x,0.5)
 function onMidi(ev,inp){
   const d=ev.data;if(!d||d.length<1)return;const st=d[0],type=st&0xf0,ch=(st&0x0f)+1,d1=d[1]||0,d2=d.length>2?d[2]:0;
   if(type<0x80||type===0xF0)return;if(S.midiCh&&ch!==S.midiCh)return;const now=performance.now();lastMidi=now;devHits[inp.id]=now;
+  if((type===0x90||type===0x80)&&arcMidiNote(d1,d2/127,type===0x90&&d2>0))return;
   if(midiMapped(type,ch,d1,d2))return;
   if(type===0x90&&d2>0){if(ev.timeStamp>0&&ev.timeStamp<=now){const lag=now-ev.timeStamp;midiLag.n++;midiLag.sum+=lag;if(lag>midiLag.max)midiLag.max=lag}liveOn(d1,velCurve(d2),'midi',ch)}
   else if(type===0x80||(type===0x90&&d2===0))liveOff(d1,'midi');

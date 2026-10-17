@@ -206,6 +206,18 @@ const ok = (name, cond, info = '') => { if (!cond) failed++; const line = (cond 
   ok('Settings has tabbed sections including General, MIDI and Recording', ['General', 'MIDI', 'Recording', 'Audio', 'Display'].every(n => tabs.names.includes(n)) && tabs.vis.every(v => v === 1), JSON.stringify(tabs));
   await page.keyboard.press('Escape');
   const hsig = await E(async () => { await persistHistory(); return undoStack.length });
+  // recording a phrase longer than the pattern keeps order and timing (no folding back into bar 1)
+  const rf = await E(() => { const t = S.tracks[0]; selectTrack(0); t.patterns = [newPattern('A', 1)]; t.curPat = t.patterns[0].id; t.clips = []; S.quant = 0; S.loop.on = false; S.rec = true; S.playing = true;
+    [[0, 60], [6, 62], [14, 64], [20, 65], [30, 67], [40, 69]].forEach(([st, n]) => commitRec(t, n, 0.8, st, st + 1.5)); S.rec = false; S.playing = false; t._recClip = null; const pat = t.patterns.find(x => x.id === t.clips[0].pat);
+    return { len: t.clips[0].len, starts: pat.notes.map(n => n.s), pitches: pat.notes.map(n => n.p) } });
+  ok('recorded notes keep their order and timing beyond the pattern length', JSON.stringify(rf.starts) === '[0,6,14,20,30,40]' && rf.len >= 3, JSON.stringify(rf));
+  // arcade: Beat Blaster plays, judges timing, scores and saves progress
+  await E(() => openArcade()); await page.click('[data-g="beatblaster"][data-m="practice-easy"]');
+  const bbr = await E(() => new Promise(res => { const g = ARC.cur, keys = ['d', 'f', 'j', 'k']; let i = 0; const tick = () => { if (ARC.state !== 'play') { res({ state: ARC.state, r: ARC.result, best: ARC.prog.best['beatblaster:practice-easy'] }); return } const t = g.now();
+    while (i < g.chart.length && g.chart[i].t <= t + 0.005) { if (i % 4 !== 3) g.keyDown(keys[g.chart[i].lane]); i++ } setTimeout(tick, 4) }; tick() }));
+  ok('Beat Blaster judges hits and misses, scores, and saves a high score', bbr.state === 'results' && bbr.r.perfect > 0 && bbr.r.miss > 0 && bbr.r.score > 0 && bbr.best && bbr.best.score === bbr.r.score && JSON.parse(localStorage.getItem ? '{}' : '{}'), JSON.stringify({ perfect: bbr.r.perfect, good: bbr.r.good, miss: bbr.r.miss, score: bbr.r.score, grade: bbr.r.grade }));
+  await page.keyboard.press('Escape'); await page.keyboard.press('Escape');
+  ok('the arcade will not start while recording', await E(() => { S.rec = true; $('#arcade').hidden = true; openArcade(); const blocked = $('#arcade').hidden; S.rec = false; return blocked }));
   // save, close, reopen
   const sig = await E(() => { saveNow(); return JSON.stringify(S.tracks.map(t => [t.engine, t.mod.routes.length, t.fx.length, t.patterns.reduce((a, p) => a + p.notes.length, 0)])) + curId });
   await page.close(); const p2 = await ctx.newPage(); p2.on('pageerror', e => errors.push(e.message)); await p2.goto(URL()); await p2.waitForTimeout(1000);
