@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 public class TardisModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(FlightPayload.TYPE, (payload, ctx) -> VortexOverlay.trigger(payload.ticks()));
+        net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.addLast(TardisMod.id("vortex"), new VortexOverlay());
         BlockEntityRendererRegistry.register(TardisMod.TARDIS_BE,
             ctx -> new GeoBlockRenderer<TardisBlockEntity, net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState>(ctx, new DefaultedBlockGeoModel<>(TardisMod.id("tardis"))));
     }

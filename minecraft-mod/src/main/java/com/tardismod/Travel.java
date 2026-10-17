@@ -23,7 +23,38 @@ public final class Travel {
     public static final List<String> DIMENSIONS = List.of("minecraft:overworld", "minecraft:the_nether", "minecraft:the_end");
     public static final String[] NAMES = {"Overworld", "The Nether", "The End"};
 
+    private static final int FLIGHT_TICKS = 160;
+    private record Pending(ServerLevel interior, BlockPos doorPos, int[] left) {}
+    private static final java.util.List<Pending> PENDING = new java.util.ArrayList<>();
+
     private Travel() {}
+
+    /** Begin a flight: the vortex plays for everyone in the interior, then the box materializes at the destination. */
+    public static String start(ServerLevel interior, TardisBlockEntity door) {
+        for (Pending p : PENDING) if (p.doorPos().equals(door.getBlockPos())) return "The TARDIS is already in flight.";
+        PENDING.add(new Pending(interior, door.getBlockPos(), new int[]{FLIGHT_TICKS}));
+        for (ServerPlayer p : interior.players()) {
+            if (Interior.idOf(p.blockPosition()) == Interior.idOf(door.getBlockPos())) net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(p, new FlightPayload(FLIGHT_TICKS));
+        }
+        interior.playSound(null, door.getBlockPos(), SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 2f, 0.5f);
+        return "Dematerializing — entering the time vortex…";
+    }
+
+    public static void tick(net.minecraft.server.MinecraftServer server) {
+        if (PENDING.isEmpty()) return;
+        for (var it = PENDING.iterator(); it.hasNext(); ) {
+            Pending p = it.next(); int n = --p.left()[0];
+            if (n % 20 == 0 && n > 0) p.interior().playSound(null, p.doorPos(), SoundEvents.PORTAL_AMBIENT, SoundSource.BLOCKS, 1.2f, 0.7f + (FLIGHT_TICKS - n) / 400f);
+            if (n <= 0) {
+                it.remove();
+                if (p.interior().getBlockEntity(p.doorPos()) instanceof TardisBlockEntity door) {
+                    String r = fly(p.interior(), door);
+                    org.slf4j.LoggerFactory.getLogger("tardismod").info("[tardis] flight finished: {} (door {})", r, p.doorPos().toShortString());
+                    for (ServerPlayer pl : p.interior().players()) if (Interior.idOf(pl.blockPosition()) == Interior.idOf(p.doorPos())) pl.sendSystemMessage(Component.literal(r), true);
+                }
+            }
+        }
+    }
 
     public static String describe(TardisBlockEntity door) {
         int i = Math.max(0, DIMENSIONS.indexOf(door.destDimension()));
@@ -76,10 +107,9 @@ public final class Travel {
         BlockPos land = new BlockPos(x, y, z);
         BlockState box = TardisMod.TARDIS_BLOCK.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH);
         target.setBlock(land, box, 3);
-        if (target.getBlockEntity(land) instanceof TardisBlockEntity ext) ext.setOpen(false);
+        if (target.getBlockEntity(land) instanceof TardisBlockEntity ext) { ext.setInterior(Interior.idOf(door.getBlockPos())); ext.setOpen(false); }
         target.playSound(null, land, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.5f, 0.6f);
         door.setReturn(key.identifier().toString(), land);
-        for (ServerPlayer p : interior.players()) p.sendSystemMessage(Component.literal("Materialized: " + describe(door) + " (y=" + y + ")"), true);
         return "Materialized at " + describe(door) + (groundless ? " [built a landing pad: no ground]" : ".");
     }
 }

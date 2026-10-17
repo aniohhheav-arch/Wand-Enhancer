@@ -33,11 +33,11 @@ public class ConsoleBlock extends Block {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide() || !(level instanceof ServerLevel sl)) return InteractionResult.SUCCESS;
-        if (!(level.getBlockEntity(Interior.DOOR_POS) instanceof TardisBlockEntity door)) { msg(player, Component.literal("The console has no door link."), false); return InteractionResult.SUCCESS; }
+        if (!(level.getBlockEntity(Interior.doorPos(Interior.idOf(pos))) instanceof TardisBlockEntity door)) { msg(player, Component.literal("The console has no door link."), false); return InteractionResult.SUCCESS; }
         switch (state.getValue(STATION)) {
             case 0 -> { Travel.cycleDimension(door); msg(player, Component.literal("Destination: " + Travel.describe(door)), true); sl.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 1f, 1.2f); }
             case 1 -> { Travel.randomise(door, level.getRandom()); msg(player, Component.literal("Destination: " + Travel.describe(door)), true); sl.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 1f, 0.8f); }
-            case 2 -> { sl.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 1f, 0.7f); msg(player, Component.literal(Travel.fly(sl, door)), true); }
+            case 2 -> { sl.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 1f, 0.7f); msg(player, Component.literal(Travel.start(sl, door)), true); }
             default -> msg(player, Component.literal("Destination: " + Travel.describe(door) + " | TARDIS now at " + (door.returnDimension().isEmpty() ? "unknown" : door.returnDimension() + " " + door.returnPos().toShortString())), false);
         }
         return InteractionResult.SUCCESS;

@@ -29,6 +29,8 @@ public class TardisMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(FlightPayload.TYPE, FlightPayload.CODEC);
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(Travel::tick);
         ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, id("tardis"));
         TARDIS_BLOCK = Registry.register(BuiltInRegistries.BLOCK, blockKey,
             new TardisBlock(BlockBehaviour.Properties.of().setId(blockKey).strength(4.0f, 1200.0f).noOcclusion().lightLevel(s -> 8)));
@@ -49,20 +51,27 @@ public class TardisMod implements ModInitializer {
                 .then(net.minecraft.commands.Commands.literal("build").executes(c -> {
                     var level = c.getSource().getServer().getLevel(Interior.KEY);
                     if (level == null) { c.getSource().sendFailure(net.minecraft.network.chat.Component.literal("interior dimension not loaded")); return 0; }
-                    Interior.build(level);
-                    c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("TARDIS interior built: " + level.getBlockState(new net.minecraft.core.BlockPos(0, 65, 9)).getBlock()), false);
+                    Interior.build(level, 0);
+                    c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("TARDIS interior built: " + level.getBlockState(Interior.doorPos(0)).getBlock()), false);
                     return 1; }))
                 .then(net.minecraft.commands.Commands.literal("dest")
                     .then(net.minecraft.commands.Commands.argument("dim", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2))
                     .then(net.minecraft.commands.Commands.argument("x", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
                     .then(net.minecraft.commands.Commands.argument("z", com.mojang.brigadier.arguments.IntegerArgumentType.integer()).executes(c -> {
-                        var level = c.getSource().getServer().getLevel(Interior.KEY); Interior.build(level);
-                        var door = (TardisBlockEntity) level.getBlockEntity(Interior.DOOR_POS);
+                        var level = c.getSource().getServer().getLevel(Interior.KEY); Interior.build(level, 0);
+                        var door = (TardisBlockEntity) level.getBlockEntity(Interior.doorPos(0));
                         door.setDestination(Travel.DIMENSIONS.get(com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "dim")), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "x"), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "z"));
                         c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("dest: " + Travel.describe(door)), false); return 1; })))))
+                .then(net.minecraft.commands.Commands.literal("slot").executes(c -> {
+                    var level = c.getSource().getServer().getLevel(Interior.KEY); int id = Interior.allocate(level);
+                    c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("allocated interior #" + id + " door at " + Interior.doorPos(id).toShortString()), false); return 1; }))
+                .then(net.minecraft.commands.Commands.literal("flight").executes(c -> {
+                    var level = c.getSource().getServer().getLevel(Interior.KEY); Interior.build(level, 0);
+                    var door = (TardisBlockEntity) level.getBlockEntity(Interior.doorPos(0));
+                    String r = Travel.start(level, door); c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("flight: " + r), false); return 1; }))
                 .then(net.minecraft.commands.Commands.literal("fly").executes(c -> {
-                    var level = c.getSource().getServer().getLevel(Interior.KEY); Interior.build(level);
-                    var door = (TardisBlockEntity) level.getBlockEntity(Interior.DOOR_POS);
+                    var level = c.getSource().getServer().getLevel(Interior.KEY); Interior.build(level, 0);
+                    var door = (TardisBlockEntity) level.getBlockEntity(Interior.doorPos(0));
                     String r = Travel.fly(level, door); c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("fly: " + r + " now at " + door.returnDimension() + " " + door.returnPos().toShortString()), false); return 1; }))));
     }
 }

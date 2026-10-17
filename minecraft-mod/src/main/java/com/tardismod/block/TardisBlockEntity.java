@@ -25,6 +25,7 @@ public class TardisBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private boolean open;
+    private int interiorId = -1;
     private String returnDim = "";
     private int returnX, returnY, returnZ;
     private String destDim = "minecraft:overworld";
@@ -43,6 +44,8 @@ public class TardisBlockEntity extends BlockEntity implements GeoBlockEntity {
     }
 
     public void setReturn(String dimension, BlockPos pos) { returnDim = dimension; returnX = pos.getX(); returnY = pos.getY(); returnZ = pos.getZ(); setChanged(); }
+    public int interiorId() { return interiorId; }
+    public void setInterior(int id) { interiorId = id; setChanged(); }
     public String destDimension() { return destDim; }
     public int destX() { return destX; }
     public int destZ() { return destZ; }
@@ -52,14 +55,14 @@ public class TardisBlockEntity extends BlockEntity implements GeoBlockEntity {
 
     @Override protected void saveAdditional(ValueOutput out) {
         super.saveAdditional(out);
-        out.putBoolean("open", open); out.putString("returnDim", returnDim);
+        out.putBoolean("open", open); out.putInt("interior", interiorId); out.putString("returnDim", returnDim);
         out.putString("destDim", destDim); out.putInt("dx", destX); out.putInt("dz", destZ);
         out.putInt("rx", returnX); out.putInt("ry", returnY); out.putInt("rz", returnZ);
     }
 
     @Override protected void loadAdditional(ValueInput in) {
         super.loadAdditional(in);
-        open = in.getBooleanOr("open", false); returnDim = in.getStringOr("returnDim", "");
+        open = in.getBooleanOr("open", false); interiorId = in.getIntOr("interior", -1); returnDim = in.getStringOr("returnDim", "");
         destDim = in.getStringOr("destDim", "minecraft:overworld"); destX = in.getIntOr("dx", 0); destZ = in.getIntOr("dz", 0);
         returnX = in.getIntOr("rx", 0); returnY = in.getIntOr("ry", 64); returnZ = in.getIntOr("rz", 0);
     }
