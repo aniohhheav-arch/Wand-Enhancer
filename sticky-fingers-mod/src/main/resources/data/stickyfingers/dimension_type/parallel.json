@@ -19,6 +19,5 @@
   "height": 384,
   "logical_height": 384,
   "infiniburn": "#minecraft:infiniburn_overworld",
-  "effects": "minecraft:overworld",
-  "creates_fire_naturally": false
+  "effects": "minecraft:overworld"
 }

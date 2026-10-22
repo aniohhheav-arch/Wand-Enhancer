@@ -9,8 +9,6 @@
         { "block": "minecraft:stone",   "height": 3 },
         { "block": "minecraft:grass_block", "height": 1 }
       ],
-      "features": false,
-      "lakes": false,
       "structure_overrides": []
     }
   }
