@@ -5,6 +5,7 @@ import com.stickyfingers.StickyFingersMod;
 import com.stickyfingers.ability.AbilityType;
 import com.stickyfingers.ability.StandType;
 import com.stickyfingers.client.fx.CameraFx;
+import com.stickyfingers.client.fx.VfxRings;
 import com.stickyfingers.client.gui.AbilityWheelScreen;
 import com.stickyfingers.network.StandActionPayload;
 import com.stickyfingers.network.UseAbilityPayload;
@@ -18,6 +19,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
@@ -32,6 +34,7 @@ public final class ClientEvents {
         Minecraft mc = Minecraft.getInstance();
         ClientState.tick();
         CameraFx.tick();
+        VfxRings.tick();
         if (mc.player == null) return;
         if (mc.screen == null && ClientState.hasStand) {
             while (Keybinds.SUMMON.consumeClick()) PacketDistributor.sendToServer(StandActionPayload.of(StandActionPayload.Action.TOGGLE_STAND));
@@ -148,6 +151,15 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onFov(ViewportEvent.ComputeFov event) {
         event.setFOV(event.getFOV() * CameraFx.fovMultiplier((float) event.getPartialTick()));
+    }
+
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+        VfxRings.render(event.getPoseStack(), mc.renderBuffers().bufferSource(),
+                event.getCamera().getPosition(), event.getPartialTick().getGameTimeDeltaPartialTick(false));
     }
 
     private ClientEvents() {}

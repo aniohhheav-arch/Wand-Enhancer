@@ -1,0 +1,17 @@
+{
+  "type": "stickyfingers:parallel",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "minecraft:the_void",
+      "layers": [
+        { "block": "minecraft:bedrock", "height": 1 },
+        { "block": "minecraft:stone",   "height": 3 },
+        { "block": "minecraft:grass_block", "height": 1 }
+      ],
+      "features": false,
+      "lakes": false,
+      "structure_overrides": []
+    }
+  }
+}

@@ -47,6 +47,10 @@ public final class StandData implements INBTSerializable<CompoundTag> {
     private int d4cPortalB = -1;
     private int d4cClone = -1;
     private boolean loveTrain;
+    // D4C parallel dimension: origin coords to return to, or NaN when not in parallel
+    private double dimOriginX = Double.NaN;
+    private double dimOriginY = Double.NaN;
+    private double dimOriginZ = Double.NaN;
 
     public static StandData get(Player player) {
         return player.getData(ModAttachments.STAND);
@@ -114,6 +118,13 @@ public final class StandData implements INBTSerializable<CompoundTag> {
     public void setClone(int id) { d4cClone = id; }
     public boolean isLoveTrain() { return loveTrain; }
     public void setLoveTrain(boolean v) { loveTrain = v; markDirty(); }
+
+    public boolean isInParallelDimension() { return !Double.isNaN(dimOriginX); }
+    public double dimOriginX() { return dimOriginX; }
+    public double dimOriginY() { return dimOriginY; }
+    public double dimOriginZ() { return dimOriginZ; }
+    public void setDimOrigin(double x, double y, double z) { dimOriginX = x; dimOriginY = y; dimOriginZ = z; }
+    public void clearDimOrigin() { dimOriginX = Double.NaN; dimOriginY = Double.NaN; dimOriginZ = Double.NaN; }
 
     public boolean consumeDirty() { boolean d = dirty; dirty = false; return d; }
     public void markDirty() { dirty = true; }

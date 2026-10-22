@@ -22,6 +22,10 @@ public final class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> PUNCH_IMPACT = reg("punch_impact");
     /** Stand-coloured afterimage streak. */
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> AFTERIMAGE = reg("afterimage");
+    /** Dimensional crack fragment. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> D4C_FRACTURE = reg("d4c_fracture");
+    /** Expanding energy ring used by portal activations and VFX. */
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> RING_PULSE = reg("ring_pulse");
 
     private static DeferredHolder<ParticleType<?>, SimpleParticleType> reg(String name) {
         return REGISTER.register(name, () -> new SimpleParticleType(true));

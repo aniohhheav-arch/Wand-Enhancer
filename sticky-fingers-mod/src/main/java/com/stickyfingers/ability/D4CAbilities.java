@@ -1,5 +1,6 @@
 package com.stickyfingers.ability;
 
+import com.stickyfingers.StickyFingersMod;
 import com.stickyfingers.config.SFConfig;
 import com.stickyfingers.data.StandData;
 import com.stickyfingers.entity.*;
@@ -8,6 +9,7 @@ import com.stickyfingers.registry.ModParticles;
 import com.stickyfingers.registry.ModSounds;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -64,25 +66,35 @@ public final class D4CAbilities {
         return true;
     }
 
-    // ─── Dimension Jump (through nearest portal) ──────────────────────────
+    // ─── Dimension Jump: travel to/from parallel dimension ────────────────
     private static boolean dimensionJump(ServerPlayer p, StandData data) {
         ServerLevel level = p.serverLevel();
-        D4CPortalEntity nearest = level.getEntitiesOfClass(D4CPortalEntity.class,
-                p.getBoundingBox().inflate(SFConfig.range(AbilityType.D4C_DIMENSION_JUMP)),
-                e -> e.ownerEntityId() == p.getId()).stream()
-                .min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(p)))
-                .orElse(null);
+        MinecraftServer server = p.getServer();
+        if (server == null) return false;
 
-        if (nearest == null) return false;
-        int linkedId = nearest.linkedEntityId();
-        Entity linked = linkedId >= 0 ? level.getEntity(linkedId) : null;
-        if (!(linked instanceof D4CPortalEntity destination)) return false;
+        Fx.particles(level, ModParticles.VOID_MOTE.get(), p.position(), 25, 1.2, 0.08);
+        Fx.sound(level, p.position(), ModSounds.PORTAL_OPEN.get(), 1.5f, 1.0f);
 
-        Vec3 dest = destination.position();
-        Fx.particles(level, ModParticles.VOID_MOTE.get(), p.position(), 20, 1.0, 0.1);
-        p.teleportTo(dest.x, dest.y + 0.1, dest.z);
-        Fx.sound(level, dest, ModSounds.DIMENSION_JUMP.get(), 1.5f, 1.0f);
-        Fx.particles(level, ModParticles.VOID_MOTE.get(), dest, 25, 1.0, 0.1);
+        // If already in parallel dimension, return to origin
+        if (data.isInParallelDimension()) {
+            ServerLevel overworld = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
+            if (overworld == null) return false;
+            double ox = data.dimOriginX(), oy = data.dimOriginY(), oz = data.dimOriginZ();
+            data.clearDimOrigin();
+            p.teleportTo(overworld, ox, oy, oz, p.getYRot(), p.getXRot());
+            Fx.sound(overworld, new Vec3(ox, oy, oz), ModSounds.DIMENSION_JUMP.get(), 1.5f, 0.9f);
+            p.displayClientMessage(Component.literal("Returned from parallel universe.").withStyle(ChatFormatting.GOLD), true);
+        } else {
+            // Travel to parallel dimension
+            ServerLevel parallel = server.getLevel(StickyFingersMod.PARALLEL_DIMENSION);
+            if (parallel == null) {
+                p.displayClientMessage(Component.literal("Parallel dimension not loaded.").withStyle(ChatFormatting.RED), true);
+                return false;
+            }
+            data.setDimOrigin(p.getX(), p.getY(), p.getZ());
+            p.teleportTo(parallel, p.getX(), 6, p.getZ(), p.getYRot(), p.getXRot());
+            p.displayClientMessage(Component.literal("Entered parallel universe!").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), true);
+        }
         StandManager.animate(p, StandAnim.SUMMON);
         return true;
     }
