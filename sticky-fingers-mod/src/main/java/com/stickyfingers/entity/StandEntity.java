@@ -31,6 +31,7 @@ public class StandEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Integer> ANIM = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> STRIKING = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> ANIM_SEQ = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(StandEntity.class, EntityDataSerializers.INT);
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int animTicks;
@@ -48,6 +49,7 @@ public class StandEntity extends Entity implements GeoEntity {
     public static StandEntity create(ServerPlayer owner) {
         StandEntity s = new StandEntity(ModEntities.STAND.get(), owner.level());
         s.entityData.set(OWNER, owner.getId());
+        s.entityData.set(VARIANT, com.stickyfingers.data.StandData.get(owner).standType().ordinal());
         Vec3 p = s.restPosition(owner);
         s.moveTo(p.x, p.y, p.z, owner.getYRot(), 0);
         s.play(StandAnim.SUMMON);
@@ -60,7 +62,12 @@ public class StandEntity extends Entity implements GeoEntity {
         b.define(ANIM, StandAnim.IDLE.ordinal());
         b.define(ANIM_SEQ, 0);
         b.define(STRIKING, false);
+        b.define(VARIANT, 0);
     }
+
+    /** 0 = Sticky Fingers, 1 = Star Platinum, 2 = D4C */
+    public int variant() { return entityData.get(VARIANT); }
+    public void setVariant(int v) { entityData.set(VARIANT, v); }
 
     @Nullable
     public Player owner() {

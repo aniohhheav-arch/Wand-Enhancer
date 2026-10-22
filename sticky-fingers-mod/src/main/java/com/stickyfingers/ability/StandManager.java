@@ -94,6 +94,17 @@ public final class StandManager {
             if (data.isSummoned() && stand(player) == null && player.isAlive()) summon(player);
             Hiding.tick(player, data);
         }
+        // Time stop auto-expiration
+        if (data.isTimeStopActive()) {
+            data.tickTimeStop();
+            if (data.timeStopTicks() <= 0) {
+                data.setTimeStop(false, 0);
+                com.stickyfingers.world.TimeStopManager.releaseAll(player.serverLevel());
+                Fx.sound(player.serverLevel(), player.position(), ModSounds.TIME_RESUME.get(), 1.5f, 1.0f);
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal("Time has resumed.")
+                        .withStyle(net.minecraft.ChatFormatting.YELLOW), true);
+            }
+        }
         Scheduler.tick(player);
         if (data.consumeDirty() || player.tickCount % 20 == 0) sync(player);
     }
@@ -104,7 +115,8 @@ public final class StandManager {
         int[] cds = new int[AbilityType.VALUES.length];
         for (AbilityType t : AbilityType.VALUES) cds[t.ordinal()] = data.cooldownRemaining(t, now);
         PacketDistributor.sendToPlayer(player, new StandSyncPayload(data.hasStand(), data.isSummoned(), data.energy(),
-                data.selected().ordinal(), data.isHidden(), data.exitZipper(), cds));
+                data.selected().ordinal(), data.isHidden(), data.exitZipper(), cds,
+                data.standType().ordinal(), data.isTimeStopActive(), data.timeStopTicks()));
     }
 
     public static void cleanup(ServerPlayer player) {

@@ -14,6 +14,11 @@ public final class AbilityExecutor {
         StandData data = StandData.get(player);
         if (!data.hasStand() || !player.isAlive() || player.isSpectator()) return;
         AbilityType type = AbilityType.byId(abilityId);
+        // Reject abilities that don't belong to the current Stand
+        if (type.stand != data.standType()) {
+            fail(player, "message.stickyfingers.wrong_stand");
+            return;
+        }
 
         // Inside zipper space: activating Escape/Ambush again emerges early; everything else is blocked.
         if (data.isHidden()) {

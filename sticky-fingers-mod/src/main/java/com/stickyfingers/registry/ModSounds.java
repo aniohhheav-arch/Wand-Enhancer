@@ -29,6 +29,22 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> WORLD_CLOSE = reg("world_close");
     public static final DeferredHolder<SoundEvent, SoundEvent> FINAL_IMPACT = reg("final_impact");
     public static final DeferredHolder<SoundEvent, SoundEvent> SLOWMO = reg("slowmo");
+    // Star Platinum
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIME_STOP = reg("time_stop");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TIME_RESUME = reg("time_resume");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SP_SUMMON = reg("sp_summon");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ORA = reg("ora");
+    public static final DeferredHolder<SoundEvent, SoundEvent> STAR_FINGER = reg("star_finger");
+    // D4C
+    public static final DeferredHolder<SoundEvent, SoundEvent> PORTAL_OPEN = reg("portal_open");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PORTAL_CLOSE = reg("portal_close");
+    public static final DeferredHolder<SoundEvent, SoundEvent> D4C_SUMMON = reg("d4c_summon");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LOVE_TRAIN = reg("love_train");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DIMENSION_JUMP = reg("dimension_jump");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REALITY_FRACTURE = reg("reality_fracture");
+    // Items
+    public static final DeferredHolder<SoundEvent, SoundEvent> SP_ARROW_USE = reg("sp_arrow_use");
+    public static final DeferredHolder<SoundEvent, SoundEvent> D4C_ARROW_USE = reg("d4c_arrow_use");
 
     private static DeferredHolder<SoundEvent, SoundEvent> reg(String name) {
         return REGISTER.register(name, () -> SoundEvent.createVariableRangeEvent(StickyFingersMod.id(name)));

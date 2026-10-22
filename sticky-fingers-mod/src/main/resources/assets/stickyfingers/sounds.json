@@ -158,5 +158,49 @@
     "name": "stickyfingers:slowmo"
    }
   ]
+ },
+ "time_stop": {
+  "subtitle": "subtitles.stickyfingers.time_stop",
+  "sounds": [{"name": "stickyfingers:slowmo"}]
+ },
+ "time_resume": {
+  "subtitle": "subtitles.stickyfingers.time_resume",
+  "sounds": [{"name": "stickyfingers:final_impact"}]
+ },
+ "sp_summon": {
+  "subtitle": "subtitles.stickyfingers.sp_summon",
+  "sounds": [{"name": "stickyfingers:stand_summon"}]
+ },
+ "ora": {
+  "subtitle": "subtitles.stickyfingers.ora",
+  "sounds": [{"name": "stickyfingers:punch_impact"}]
+ },
+ "star_finger": {
+  "subtitle": "subtitles.stickyfingers.star_finger",
+  "sounds": [{"name": "stickyfingers:final_impact"}]
+ },
+ "portal_open": {
+  "subtitle": "subtitles.stickyfingers.portal_open",
+  "sounds": [{"name": "stickyfingers:zipper_open"}]
+ },
+ "portal_close": {
+  "subtitle": "subtitles.stickyfingers.portal_close",
+  "sounds": [{"name": "stickyfingers:zipper_close"}]
+ },
+ "d4c_summon": {
+  "subtitle": "subtitles.stickyfingers.d4c_summon",
+  "sounds": [{"name": "stickyfingers:stand_summon"}]
+ },
+ "love_train": {
+  "subtitle": "subtitles.stickyfingers.love_train",
+  "sounds": [{"name": "stickyfingers:slowmo"}]
+ },
+ "dimension_jump": {
+  "subtitle": "subtitles.stickyfingers.dimension_jump",
+  "sounds": [{"name": "stickyfingers:zipper_open"}]
+ },
+ "reality_fracture": {
+  "subtitle": "subtitles.stickyfingers.reality_fracture",
+  "sounds": [{"name": "stickyfingers:final_impact"}]
  }
 }

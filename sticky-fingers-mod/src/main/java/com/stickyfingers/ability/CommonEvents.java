@@ -39,7 +39,10 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
-        if (event.getLevel() instanceof ServerLevel sl && sl.getGameTime() % 5 == 0) SeparationManager.get(sl).tick(sl);
+        if (!(event.getLevel() instanceof ServerLevel sl)) return;
+        if (sl.getGameTime() % 5 == 0) SeparationManager.get(sl).tick(sl);
+        // Time stop: hold frozen entities in place every tick
+        com.stickyfingers.world.TimeStopManager.tickFreeze(sl);
     }
 
     @SubscribeEvent

@@ -2,6 +2,7 @@ package com.stickyfingers.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.stickyfingers.ability.AbilityType;
+import com.stickyfingers.ability.StandType;
 import com.stickyfingers.client.ClientState;
 import com.stickyfingers.client.Keybinds;
 import com.stickyfingers.config.SFConfig;
@@ -18,11 +19,14 @@ import java.util.List;
 
 /**
  * Hold-to-open radial ability wheel. Inner ring: the eleven signature abilities; outer ring: advanced techniques.
- * Release the key (or click) over a slot to select it.
+ * Release the key (or click) over a slot to select it. Shows only abilities for the player's active Stand.
  */
 public class AbilityWheelScreen extends net.minecraft.client.gui.screens.Screen {
-    private static final List<AbilityType> INNER = Arrays.stream(AbilityType.VALUES).filter(t -> t.primary).toList();
-    private static final List<AbilityType> OUTER = Arrays.stream(AbilityType.VALUES).filter(t -> !t.primary).toList();
+    private final StandType standType = ClientState.standType != null ? ClientState.standType : StandType.STICKY_FINGERS;
+    private final List<AbilityType> INNER = Arrays.stream(AbilityType.VALUES)
+            .filter(t -> t.stand == standType && t.primary).toList();
+    private final List<AbilityType> OUTER = Arrays.stream(AbilityType.VALUES)
+            .filter(t -> t.stand == standType && !t.primary).toList();
     private static final int INNER_R = 72, OUTER_R = 128, SLOT = 26;
 
     private AbilityType hovered;

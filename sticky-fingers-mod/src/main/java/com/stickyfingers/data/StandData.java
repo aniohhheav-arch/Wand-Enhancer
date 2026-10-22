@@ -25,6 +25,7 @@ public final class StandData implements INBTSerializable<CompoundTag> {
     private final long[] cooldownEnd = new long[AbilityType.VALUES.length];
     private int selected;
     private final SimpleContainer storage = new SimpleContainer(STORAGE_SIZE);
+    private com.stickyfingers.ability.StandType standType = com.stickyfingers.ability.StandType.STICKY_FINGERS;
 
     // transient runtime state (not persisted)
     private int hiddenTicks;
@@ -38,6 +39,14 @@ public final class StandData implements INBTSerializable<CompoundTag> {
     private int orientation;
     private int hideOriginZipper = -1;
     private net.minecraft.world.phys.Vec3 hideOrigin = net.minecraft.world.phys.Vec3.ZERO;
+    // Star Platinum time stop
+    private boolean timeStopActive;
+    private int timeStopTicks;
+    // D4C portals / clone tracking
+    private int d4cPortalA = -1;
+    private int d4cPortalB = -1;
+    private int d4cClone = -1;
+    private boolean loveTrain;
 
     public static StandData get(Player player) {
         return player.getData(ModAttachments.STAND);
@@ -90,6 +99,22 @@ public final class StandData implements INBTSerializable<CompoundTag> {
     public net.minecraft.world.phys.Vec3 hideOrigin() { return hideOrigin; }
     public void setHideOrigin(int zipper, net.minecraft.world.phys.Vec3 pos) { hideOriginZipper = zipper; hideOrigin = pos; }
 
+    public com.stickyfingers.ability.StandType standType() { return standType; }
+    public void setStandType(com.stickyfingers.ability.StandType t) { standType = t; selected = 0; markDirty(); }
+
+    public boolean isTimeStopActive() { return timeStopActive; }
+    public int timeStopTicks() { return timeStopTicks; }
+    public void setTimeStop(boolean active, int ticks) { timeStopActive = active; timeStopTicks = ticks; markDirty(); }
+    public void tickTimeStop() { if (timeStopTicks > 0) timeStopTicks--; }
+
+    public int d4cPortalA() { return d4cPortalA; }
+    public int d4cPortalB() { return d4cPortalB; }
+    public void setPortals(int a, int b) { d4cPortalA = a; d4cPortalB = b; }
+    public int d4cClone() { return d4cClone; }
+    public void setClone(int id) { d4cClone = id; }
+    public boolean isLoveTrain() { return loveTrain; }
+    public void setLoveTrain(boolean v) { loveTrain = v; markDirty(); }
+
     public boolean consumeDirty() { boolean d = dirty; dirty = false; return d; }
     public void markDirty() { dirty = true; }
 
@@ -100,6 +125,7 @@ public final class StandData implements INBTSerializable<CompoundTag> {
         tag.putBoolean("Init", initialized);
         tag.putFloat("Energy", energy);
         tag.putInt("Selected", selected);
+        tag.putInt("StandType", standType.ordinal());
         NonNullList<ItemStack> items = NonNullList.withSize(STORAGE_SIZE, ItemStack.EMPTY);
         for (int i = 0; i < STORAGE_SIZE; i++) items.set(i, storage.getItem(i));
         tag.put("Storage", ContainerHelper.saveAllItems(new CompoundTag(), items, provider));
@@ -112,6 +138,7 @@ public final class StandData implements INBTSerializable<CompoundTag> {
         initialized = tag.getBoolean("Init");
         energy = tag.getFloat("Energy");
         selected = tag.getInt("Selected");
+        standType = com.stickyfingers.ability.StandType.byId(tag.getInt("StandType"));
         NonNullList<ItemStack> items = NonNullList.withSize(STORAGE_SIZE, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(tag.getCompound("Storage"), items, provider);
         for (int i = 0; i < STORAGE_SIZE; i++) storage.setItem(i, items.get(i));

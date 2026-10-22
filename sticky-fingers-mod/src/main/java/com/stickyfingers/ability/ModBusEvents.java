@@ -1,6 +1,7 @@
 package com.stickyfingers.ability;
 
 import com.stickyfingers.StickyFingersMod;
+import com.stickyfingers.entity.D4CCloneEntity;
 import com.stickyfingers.entity.DecoyEntity;
 import com.stickyfingers.registry.ModEntities;
 import com.stickyfingers.registry.ModItems;
@@ -15,12 +16,15 @@ public final class ModBusEvents {
     @SubscribeEvent
     public static void attributes(EntityAttributeCreationEvent event) {
         event.put(ModEntities.DECOY.get(), DecoyEntity.attributes().build());
+        event.put(ModEntities.D4C_CLONE.get(), D4CCloneEntity.attributes().build());
     }
 
     @SubscribeEvent
     public static void creativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.COMBAT || event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.STAND_ARROW.get());
+            event.accept(ModItems.SP_ARROW.get());
+            event.accept(ModItems.D4C_ARROW.get());
         }
     }
 

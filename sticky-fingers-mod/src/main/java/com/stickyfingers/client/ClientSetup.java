@@ -32,6 +32,8 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.ZIPPER.get(), ZipperRenderer::new);
         event.registerEntityRenderer(ModEntities.ZIPPER_PROJECTILE.get(), ZipperProjectileRenderer::new);
         event.registerEntityRenderer(ModEntities.DECOY.get(), DecoyRenderer::new);
+        event.registerEntityRenderer(ModEntities.D4C_CLONE.get(), D4CCloneRenderer::new);
+        event.registerEntityRenderer(ModEntities.D4C_PORTAL.get(), D4CPortalRenderer::new);
     }
 
     @SubscribeEvent
@@ -67,6 +69,7 @@ public final class ClientSetup {
         event.register(Keybinds.NETWORK);
         event.register(Keybinds.ORIENT);
         event.register(Keybinds.CLOSE_ALL);
+        event.register(Keybinds.TIME_STOP);
     }
 
     @SubscribeEvent

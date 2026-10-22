@@ -41,13 +41,28 @@ public class StandRenderer extends GeoEntityRenderer<StandEntity> {
     }
 
     @Override
+    public ResourceLocation getTextureLocation(StandEntity stand) {
+        return switch (stand.variant()) {
+            case 1 -> StickyFingersMod.id("textures/entity/star_platinum.png");
+            case 2 -> StickyFingersMod.id("textures/entity/d4c.png");
+            default -> StickyFingersMod.id("textures/entity/sticky_fingers.png");
+        };
+    }
+
+    @Override
     public Color getRenderColor(StandEntity stand, float partialTick, int packedLight) {
         float age = stand.age() + partialTick;
         float alpha = Mth.clamp(age / 8f, 0f, 1f) * 0.92f;
         if (stand.anim() == StandAnim.DISMISS) alpha *= 0.5f;
-        // the user sees their own Stand a bit fainter in first person so it never blocks the view
         var mc = Minecraft.getInstance();
         if (mc.player != null && stand.owner() == mc.player && mc.options.getCameraType().isFirstPerson()) alpha *= 0.55f;
-        return Color.ofRGBA(1f, 1f, 1f, alpha);
+        return switch (stand.variant()) {
+            // Star Platinum: purple-blue tint
+            case 1 -> Color.ofRGBA(0.65f, 0.55f, 1.0f, alpha);
+            // D4C: white-red tint
+            case 2 -> Color.ofRGBA(1.0f, 0.7f, 0.7f, alpha);
+            // Sticky Fingers: white (default)
+            default -> Color.ofRGBA(1f, 1f, 1f, alpha);
+        };
     }
 }

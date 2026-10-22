@@ -37,6 +37,9 @@ import java.util.*;
 public final class Abilities {
 
     public static boolean activate(AbilityType type, ServerPlayer p, StandData data, boolean alt) {
+        // Route SP and D4C abilities to their own handlers
+        if (type.stand == StandType.STAR_PLATINUM) return SPAbilities.activate(type, p, data, alt);
+        if (type.stand == StandType.D4C) return D4CAbilities.activate(type, p, data, alt);
         return switch (type) {
             case ZIPPER_OPEN -> zipperOpen(p, data, alt);
             case ZIPPER_DOOR -> passage(p, data, alt, ZipperKind.DOOR, 2, 3, AbilityType.ZIPPER_DOOR);
@@ -60,6 +63,7 @@ public final class Abilities {
             case ZIPPER_REPAIR -> repair(p);
             case ZIPPER_NETWORK -> { ZipperNetwork.sendSnapshot(p, true); yield true; }
             case ZIPPER_WORLD -> Sequences.zipperWorld(p);
+            default -> false;
         };
     }
 

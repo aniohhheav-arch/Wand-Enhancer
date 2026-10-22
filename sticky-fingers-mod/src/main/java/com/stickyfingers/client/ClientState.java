@@ -1,6 +1,7 @@
 package com.stickyfingers.client;
 
 import com.stickyfingers.ability.AbilityType;
+import com.stickyfingers.ability.StandType;
 import com.stickyfingers.client.gui.ZipperNetworkScreen;
 import com.stickyfingers.network.NetworkSnapshotPayload;
 import com.stickyfingers.network.StandSyncPayload;
@@ -20,6 +21,9 @@ public final class ClientState {
     public static boolean hidden;
     public static int exitZipper = -1;
     public static int orientation;
+    public static StandType standType = StandType.STICKY_FINGERS;
+    public static boolean timeStopActive;
+    public static int timeStopTicks;
     private static int[] cooldowns = new int[AbilityType.VALUES.length];
     private static long syncTick;
     public static List<NetworkSnapshotPayload.Entry> network = List.of();
@@ -36,6 +40,9 @@ public final class ClientState {
         hidden = p.hidden();
         exitZipper = p.exitZipper();
         cooldowns = p.cooldowns();
+        standType = StandType.byId(p.standTypeId());
+        timeStopActive = p.timeStopActive();
+        timeStopTicks = p.timeStopTicks();
         syncTick = clientTicks;
     }
 

@@ -23,6 +23,12 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<DecoyEntity>> DECOY = REGISTER.register("zipper_decoy",
             () -> EntityType.Builder.<DecoyEntity>of(DecoyEntity::new, MobCategory.MISC)
                     .sized(0.6f, 1.8f).clientTrackingRange(10).noSummon().noSave().build("zipper_decoy"));
+    public static final DeferredHolder<EntityType<?>, EntityType<D4CCloneEntity>> D4C_CLONE = REGISTER.register("d4c_clone",
+            () -> EntityType.Builder.<D4CCloneEntity>of(D4CCloneEntity::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.8f).clientTrackingRange(10).build("d4c_clone"));
+    public static final DeferredHolder<EntityType<?>, EntityType<D4CPortalEntity>> D4C_PORTAL = REGISTER.register("d4c_portal",
+            () -> EntityType.Builder.<D4CPortalEntity>of(D4CPortalEntity::new, MobCategory.MISC)
+                    .sized(1.5f, 2.5f).clientTrackingRange(10).updateInterval(2).noSummon().build("d4c_portal"));
 
     private ModEntities() {}
 }

@@ -2,6 +2,8 @@ package com.stickyfingers.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stickyfingers.StickyFingersMod;
+import com.stickyfingers.ability.AbilityType;
+import com.stickyfingers.ability.StandType;
 import com.stickyfingers.client.fx.CameraFx;
 import com.stickyfingers.client.gui.AbilityWheelScreen;
 import com.stickyfingers.network.StandActionPayload;
@@ -45,11 +47,18 @@ public final class ClientEvents {
                         Component.translatable("orientation.stickyfingers." + ORIENT_KEYS[ClientState.orientation])).withStyle(ChatFormatting.AQUA), true);
             }
             if (Keybinds.WHEEL.isDown()) mc.setScreen(new AbilityWheelScreen());
+            // Star Platinum: time stop toggle key (T)
+            while (Keybinds.TIME_STOP.consumeClick()) {
+                if (ClientState.standType == StandType.STAR_PLATINUM) {
+                    PacketDistributor.sendToServer(new UseAbilityPayload(AbilityType.SP_TIME_STOP.ordinal(), false));
+                }
+            }
         } else {
             // drain clicks so they don't fire when a screen closes
             while (Keybinds.SUMMON.consumeClick()) {}
             while (Keybinds.USE.consumeClick()) {}
             while (Keybinds.NETWORK.consumeClick()) {}
+            while (Keybinds.TIME_STOP.consumeClick()) {}
         }
     }
 
