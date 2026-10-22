@@ -1,6 +1,5 @@
 package com.stickyfingers.ability;
 
-import com.stickyfingers.StickyFingersMod;
 import com.stickyfingers.config.SFConfig;
 import com.stickyfingers.data.StandData;
 import com.stickyfingers.entity.*;
@@ -75,7 +74,7 @@ public final class D4CAbilities {
         Fx.particles(level, ModParticles.VOID_MOTE.get(), p.position(), 25, 1.2, 0.08);
         Fx.sound(level, p.position(), ModSounds.PORTAL_OPEN.get(), 1.5f, 1.0f);
 
-        // If already in parallel dimension, return to origin
+        // If already in the End (parallel stand-in), return to origin overworld coords
         if (data.isInParallelDimension()) {
             ServerLevel overworld = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
             if (overworld == null) return false;
@@ -85,14 +84,14 @@ public final class D4CAbilities {
             Fx.sound(overworld, new Vec3(ox, oy, oz), ModSounds.DIMENSION_JUMP.get(), 1.5f, 0.9f);
             p.displayClientMessage(Component.literal("Returned from parallel universe.").withStyle(ChatFormatting.GOLD), true);
         } else {
-            // Travel to parallel dimension
-            ServerLevel parallel = server.getLevel(StickyFingersMod.PARALLEL_DIMENSION);
+            // Travel to End as parallel dimension stand-in
+            ServerLevel parallel = server.getLevel(net.minecraft.world.level.Level.END);
             if (parallel == null) {
                 p.displayClientMessage(Component.literal("Parallel dimension not loaded.").withStyle(ChatFormatting.RED), true);
                 return false;
             }
             data.setDimOrigin(p.getX(), p.getY(), p.getZ());
-            p.teleportTo(parallel, p.getX(), 6, p.getZ(), p.getYRot(), p.getXRot());
+            p.teleportTo(parallel, p.getX(), 65, p.getZ(), p.getYRot(), p.getXRot());
             p.displayClientMessage(Component.literal("Entered parallel universe!").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), true);
         }
         StandManager.animate(p, StandAnim.SUMMON);
