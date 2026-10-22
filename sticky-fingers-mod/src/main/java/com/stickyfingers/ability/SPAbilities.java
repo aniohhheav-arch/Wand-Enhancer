@@ -198,17 +198,23 @@ public final class SPAbilities {
             data.setTimeStop(false, 0);
             TimeStopManager.releaseAll(level);
             Fx.sound(level, p.position(), ModSounds.TIME_RESUME.get(), 1.5f, 1.0f);
-            p.displayClientMessage(Component.literal("Time has resumed.").withStyle(ChatFormatting.YELLOW), true);
+            Fx.particles(level, ModParticles.VOID_MOTE.get(), p.position(), 60, 8.0, 0.2);
+            Fx.screen(p, ScreenFx.FLASH, 0.9f, 8);
+            Fx.screen(p, ScreenFx.SHAKE, 0.8f, 10);
+            Fx.screen(p, ScreenFx.SPEED_LINES, 0.7f, 20);
             StandManager.sync(p);
         } else {
             int duration = SFConfig.duration(AbilityType.SP_TIME_STOP);
             data.setTimeStop(true, duration);
             TimeStopManager.freezeArea(level, p.position(), 24.0, p.getId());
             Fx.sound(level, p.position(), ModSounds.TIME_STOP.get(), 2.0f, 1.0f);
-            Fx.particles(level, ModParticles.VOID_MOTE.get(), p.position(), 80, 8.0, 0.05);
-            Fx.screen(p, ScreenFx.SHAKE, 1.0f, 12);
-            p.displayClientMessage(Component.literal("ZA WARUDO! Time has stopped.")
-                    .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD), true);
+            Fx.particles(level, ModParticles.VOID_MOTE.get(), p.position(), 120, 10.0, 0.03);
+            // Cinematic activation: strong flash → heavy shake → slowmo letterbox → sustained vignette
+            Fx.screen(p, ScreenFx.FLASH, 1.8f, 10);
+            Fx.screen(p, ScreenFx.SHAKE, 1.2f, 18);
+            Fx.screen(p, ScreenFx.SLOWMO, 1.0f, 40);
+            Fx.screen(p, ScreenFx.VIGNETTE, 1.0f, 200);
+            Fx.screen(p, ScreenFx.FOV_PUNCH, 0.7f, 16);
             StandManager.animate(p, StandAnim.SUMMON);
             StandManager.sync(p);
         }

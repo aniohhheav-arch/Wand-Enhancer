@@ -59,6 +59,33 @@ public final class HudOverlay {
             Component text = Component.translatable("hud.stickyfingers.hidden");
             g.drawCenteredString(font, text, w / 2, h / 2 + 20, 0xFFB9A8FF);
         }
+
+        // Time Stop cinematic banner
+        if (ClientState.timeStopActive) {
+            int cx = w / 2;
+            int cy = 28;
+            // "ZA WARUDO" title
+            Component zaWarudo = Component.literal("ZA WARUDO").withColor(0xFF8FD3FF);
+            int tw = font.width(zaWarudo);
+            // dark backing pill
+            g.fill(cx - tw / 2 - 8, cy - 3, cx + tw / 2 + 8, cy + 10, 0xCC0D0924);
+            g.fill(cx - tw / 2 - 8, cy - 4, cx + tw / 2 + 8, cy - 3, 0xFF4A6BC8);
+            g.drawCenteredString(font, zaWarudo, cx, cy, 0xFF8FD3FF);
+
+            // "TIME STOPPED" subtitle with remaining ticks
+            int rem = ClientState.timeStopTicks;
+            String timeText = rem > 0
+                    ? String.format("TIME STOPPED  %.1fs", rem / 20f)
+                    : "TIME STOPPED";
+            Component sub = Component.literal(timeText).withColor(0xFFB9D8FF);
+            int sw = font.width(sub);
+            g.fill(cx - sw / 2 - 6, cy + 12, cx + sw / 2 + 6, cy + 22, 0x99000000);
+            g.pose().pushPose();
+            g.pose().translate(cx - sw * 0.5f * 0.8f, cy + 12, 0);
+            g.pose().scale(0.8f, 0.8f, 1f);
+            g.drawString(font, sub, 0, 0, 0xFFB9D8FF, false);
+            g.pose().popPose();
+        }
     }
 
     private HudOverlay() {}

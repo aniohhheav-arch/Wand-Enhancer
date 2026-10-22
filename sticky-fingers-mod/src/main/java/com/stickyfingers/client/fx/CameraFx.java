@@ -1,6 +1,7 @@
 package com.stickyfingers.client.fx;
 
 import com.mojang.math.Axis;
+import com.stickyfingers.client.ClientState;
 import com.stickyfingers.config.SFConfig;
 import com.stickyfingers.network.ScreenFx;
 import com.stickyfingers.network.ScreenFxPayload;
@@ -110,6 +111,18 @@ public final class CameraFx {
         if (active(ScreenFx.FLASH)) {
             float p = progress(ScreenFx.FLASH, partial);
             g.fill(0, 0, w, h, argb(p * p * intensity[ScreenFx.FLASH.ordinal()], 0xE8F4FF));
+        }
+
+        // Persistent time-stop state overlay: muted blue-gray desaturation tint + purple vignette
+        if (ClientState.timeStopActive) {
+            // Cold blue-gray wash over the whole screen — subtle desaturation effect
+            g.fill(0, 0, w, h, argb(0.18f, 0x3A6BB5));
+            // Deep purple vignette to frame the stopped-time world
+            vignette(g, w, h, 0.55f, 0x1A0B38);
+            // Thin silver horizontal scan-lines for stopped-time aesthetic
+            for (int sy = 0; sy < h; sy += 6) {
+                g.fill(0, sy, w, sy + 1, argb(0.04f, 0xB0C8FF));
+            }
         }
     }
 

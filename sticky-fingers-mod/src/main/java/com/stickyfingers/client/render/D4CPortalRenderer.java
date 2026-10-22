@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
@@ -33,11 +34,11 @@ public class D4CPortalRenderer extends EntityRenderer<D4CPortalEntity> {
         Matrix4f m = ps.last().pose();
         float hw = 0.75f;
         float hh = 1.25f;
-        // Draw a simple quad facing the camera
-        vc.addVertex(m, -hw, 0, 0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(0, 1).setLight(0xF000F0);
-        vc.addVertex(m, -hw, hh * 2, 0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(0, 0).setLight(0xF000F0);
-        vc.addVertex(m, hw, hh * 2, 0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(1, 0).setLight(0xF000F0);
-        vc.addVertex(m, hw, 0, 0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(1, 1).setLight(0xF000F0);
+        // Draw a simple quad facing the camera — must supply UV0, UV1(overlay), UV2(light), Normal
+        vc.addVertex(m, -hw, 0,      0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(0, 0, 1);
+        vc.addVertex(m, -hw, hh * 2, 0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(0, 0, 1);
+        vc.addVertex(m,  hw, hh * 2, 0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(0, 0, 1);
+        vc.addVertex(m,  hw, 0,      0).setColor(0.6f, 0.4f, 1.0f, alpha).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(0, 0, 1);
 
         ps.popPose();
         super.render(entity, yaw, partialTick, ps, buf, light);
