@@ -123,4 +123,50 @@ public final class SpellTests {
         settings.setCooldownsDisabled(false);
         h.succeed();
     }
+
+    /** Full Dark Clone possession: the clone hunts, the mob is removed once without drops and ash is left behind. */
+    @GameTest(timeoutTicks = 900, template = "empty", templateNamespace = WandCraft.ID)
+    public static void darkClonePossession(GameTestHelper h) {
+        ServerPlayer p = h.makeMockServerPlayerInLevel();
+        p.setGameMode(GameType.SURVIVAL);
+        Vec3 spawn = h.absoluteVec(new Vec3(11.5, 2, 3.5));
+        p.moveTo(spawn.x, spawn.y, spawn.z, 0f, 0f);
+        PlayerMagic m = Magic.of(p);
+        m.uses.put("dark_clone", 100000);
+        m.mana = m.maxMana();
+        Spell s = Spells.get("dark_clone");
+
+        // Protected targets must not be eligible: a boss-like blacklisted mob alone means the cast is refused.
+        var golem = EntityType.IRON_GOLEM.create(h.getLevel());
+        Vec3 gp = h.absoluteVec(new Vec3(11.5, 2, 8.5));
+        golem.moveTo(gp.x, gp.y, gp.z, 0f, 0f);
+        golem.setNoAi(true);
+        h.getLevel().addFreshEntity(golem);
+        p.setHealth(p.getMaxHealth());
+        if (Casting.cast(p, s, 1f)) throw new AssertionError("a blacklisted mob must not be possessable");
+        golem.discard();
+
+        var z = EntityType.ZOMBIE.create(h.getLevel());
+        Vec3 zp = h.absoluteVec(new Vec3(11.5, 2, 9.5));
+        z.moveTo(zp.x, zp.y, zp.z, 180f, 0f);
+        z.setNoAi(true);
+        h.getLevel().addFreshEntity(z);
+        p.setHealth(p.getMaxHealth());
+        m.mana = m.maxMana();
+        if (!Casting.cast(p, s, 1f)) throw new AssertionError("dark clone failed to cast: " + Casting.blocker(p, s));
+        m.cooldownEnd.clear();
+        m.mana = m.maxMana();
+        p.setHealth(p.getMaxHealth());
+        if (Casting.cast(p, s, 1f)) throw new AssertionError("only one hunting clone per caster");
+
+        h.succeedWhen(() -> {
+            h.assertTrue(!z.isAlive(), "target still alive");
+            var piles = h.getLevel().getEntitiesOfClass(com.wandcraft.entity.AshPile.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(4));
+            h.assertTrue(!piles.isEmpty(), "no ash pile");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(8)).isEmpty(), "possession must not drop loot");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(8)).isEmpty(), "possession must not drop xp");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(com.wandcraft.entity.DarkClone.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(30)).isEmpty(), "clone should be gone");
+            h.assertTrue(Math.abs(piles.get(0).getY() - zp.y) < 0.5, "ash not on ground");
+        });
+    }
 }

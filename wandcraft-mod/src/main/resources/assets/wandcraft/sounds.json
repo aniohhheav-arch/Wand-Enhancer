@@ -1,0 +1,91 @@
+{
+ "dark_clone.summon": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/summon",
+    "stream": false
+   }
+  ]
+ },
+ "dark_clone.whisper": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/whisper1",
+    "stream": false
+   },
+   {
+    "name": "wandcraft:dark/whisper2",
+    "stream": false
+   },
+   {
+    "name": "wandcraft:dark/whisper3",
+    "stream": false
+   }
+  ]
+ },
+ "dark_clone.hunt": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/hunt_rumble",
+    "stream": false
+   }
+  ]
+ },
+ "dark_clone.phase": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/phase",
+    "stream": false
+   }
+  ]
+ },
+ "dark_clone.reach": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/reach",
+    "stream": false
+   }
+  ]
+ },
+ "dark_clone.possess": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/possess",
+    "stream": false
+   }
+  ]
+ },
+ "dark_clone.disintegrate": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/disintegrate",
+    "stream": false
+   }
+  ]
+ },
+ "dark_clone.implode": {
+  "category": "hostile",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/implode",
+    "stream": false
+   }
+  ]
+ },
+ "ash.scatter": {
+  "category": "ambient",
+  "sounds": [
+   {
+    "name": "wandcraft:dark/ash_scatter",
+    "stream": false
+   }
+  ]
+ }
+}

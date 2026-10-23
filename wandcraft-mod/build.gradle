@@ -29,6 +29,7 @@ neoForge {
                 if (project.hasProperty('showlist')) systemProperty 'wandcraft.showlist', project.property('showlist')
                 if (project.hasProperty('show')) systemProperty 'wandcraft.show', 'true'
                 if (project.hasProperty('props')) systemProperty 'wandcraft.props', 'true'
+                if (project.hasProperty('dclone')) systemProperty 'wandcraft.dclone', 'true'
                 if (project.hasProperty('castall')) systemProperty 'wandcraft.castall', 'true'
                 programArguments.addAll('--quickPlaySingleplayer', 'devworld')
             }

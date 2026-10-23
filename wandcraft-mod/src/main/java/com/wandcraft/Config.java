@@ -55,7 +55,7 @@ public final class Config {
         CLIENT_FX_INTENSITY = c.comment("Scales client-side spell particles (0.1 - 1.0). Lower this for better performance.")
                 .defineInRange("fxIntensity", 1.0, 0.1, 1.0);
         REDUCED_EFFECTS = c.comment("Reduces portal and shadow ambience (streams, motes, hum particles) for low-end machines.").define("reducedEffects", false);
-        DISSOLVE_SHADER = c.comment("Use the animated dissolve shader for possession. If false, a simple shrink-and-fade is used instead.").define("dissolveShader", true);
+        DISSOLVE_SHADER = c.comment("Progressive sectional dissolve for possessed mobs (top-down crumble with shedding extremities). If false, a plain uniform shrink is used.").define("dissolveShader", true);
         SCREEN_EFFECTS = c.comment("Enable screen shake and tint effects.").define("screenEffects", true);
         CLIENT = c.build();
     }

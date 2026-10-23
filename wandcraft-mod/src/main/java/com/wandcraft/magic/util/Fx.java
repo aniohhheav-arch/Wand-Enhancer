@@ -85,6 +85,7 @@ public final class Fx {
 
     /** Client-side single particle, thinned by the client intensity setting. */
     public static void c(Level l, ParticleOptions p, double x, double y, double z, double dx, double dy, double dz) {
+        if (Config.REDUCED_EFFECTS.get() && l.random.nextBoolean()) return;
         if (l.random.nextFloat() <= Config.CLIENT_FX_INTENSITY.get()) l.addParticle(p, x, y, z, dx, dy, dz);
     }
 

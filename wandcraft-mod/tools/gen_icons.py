@@ -439,6 +439,7 @@ SPELLS = {
  "umbral_cloak": ("dark", [("cloak", FULL)]),
  "black_flame": ("dark", [("flame", BIG, {"col": (150, 70, 255)}), ("flame", (0.3, 0.3, 0.4), {"col": (30, 10, 60)})]),
  "nightfall": ("dark", [("moon", FULL), ("star", (0.64, 0.12, 0.26), {"col": (255, 245, 200)}), ("star", (0.7, 0.55, 0.18), {"col": (255, 245, 200)})]),
+ "dark_clone": ("dark", [("ghost", (0.0, 0.0, 0.98), {"col": (36, 16, 70)}), ("eye", (0.2, 0.2, 0.6), {"col": (240, 210, 255), "slit": True}), ("vine", (0.0, 0.5, 0.5), {"col": (150, 80, 255)})]),
  "shadow_clone": ("dark", [("ghost", (0.0, 0.1, 0.72), {"col": (40, 20, 80)}), ("ghost", (0.34, 0.0, 0.66), {"col": (130, 70, 210)})]),
  "curse_mark": ("dark", [("target", FULL, {"col": (160, 80, 255)}), ("skull", (0.3, 0.3, 0.4), {})]),
  "hex": ("dark", [("skull", FULL, {}), ("star", (0.0, 0.0, 0.38), {"pts": 5, "inner": .45, "col": (180, 100, 255)})]),

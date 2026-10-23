@@ -1,6 +1,8 @@
 package com.wandcraft;
 
 import com.wandcraft.entity.SpellProjectile;
+import com.wandcraft.entity.AshPile;
+import com.wandcraft.entity.DarkClone;
 import com.wandcraft.entity.DebrisEntity;
 import com.wandcraft.entity.ShadowClone;
 import com.wandcraft.entity.SpellBeam;
@@ -74,6 +76,12 @@ public class WandCraft {
     public static final Supplier<EntityType<ShadowClone>> SHADOW_CLONE = ENTITIES.register("shadow_clone",
             () -> EntityType.Builder.<ShadowClone>of(ShadowClone::new, MobCategory.MISC)
                     .sized(0.6f, 1.8f).clientTrackingRange(8).noSave().build("shadow_clone"));
+    public static final Supplier<EntityType<DarkClone>> DARK_CLONE = ENTITIES.register("dark_clone",
+            () -> EntityType.Builder.<DarkClone>of(DarkClone::new, MobCategory.MISC)
+                    .sized(0.7f, 2.2f).clientTrackingRange(10).fireImmune().noSave().build("dark_clone"));
+    public static final Supplier<EntityType<AshPile>> ASH_PILE = ENTITIES.register("ash_pile",
+            () -> EntityType.Builder.<AshPile>of(AshPile::new, MobCategory.MISC)
+                    .sized(1.2f, 0.3f).clientTrackingRange(8).updateInterval(40).fireImmune().build("ash_pile"));
     public static final Supplier<EntityType<SpellProp>> SPELL_PROP = ENTITIES.register("spell_prop",
             () -> EntityType.Builder.<SpellProp>of(SpellProp::new, MobCategory.MISC)
                     .sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(2).noSave().fireImmune().build("spell_prop"));
@@ -88,18 +96,23 @@ public class WandCraft {
     public WandCraft(IEventBus bus, ModContainer container) {
         Spells.init();
         ModParticles.PARTICLES.register(bus);
+        ModSounds.SOUNDS.register(bus);
         BLOCKS.register(bus);
         ITEMS.register(bus);
         ENTITIES.register(bus);
         ATTACHMENTS.register(bus);
         TABS.register(bus);
         bus.addListener(this::registerPayloads);
-        bus.addListener((net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent e) -> e.put(SHADOW_CLONE.get(), ShadowClone.attributes().build()));
+        bus.addListener((net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent e) -> {
+            e.put(SHADOW_CLONE.get(), ShadowClone.attributes().build());
+            e.put(DARK_CLONE.get(), DarkClone.attributes().build());
+        });
         container.registerConfig(ModConfig.Type.COMMON, Config.COMMON);
         container.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(MagicEvents.class);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.DefenseEvents.class);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.DarkEvents.class);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.Possession.class);
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent e) {
@@ -115,6 +128,8 @@ public class WandCraft {
             m.selected = s.id;
             m.dirty = true;
         });
+        r.playToClient(com.wandcraft.net.PossessionPayload.TYPE, com.wandcraft.net.PossessionPayload.CODEC, (payload, ctx) ->
+                ctx.enqueueWork(() -> com.wandcraft.magic.Possession.clientSet(payload.entityId(), payload.elapsed(), ctx.player().level().getGameTime())));
         r.playToClient(SyncMagicPayload.TYPE, SyncMagicPayload.CODEC, (payload, ctx) ->
                 ctx.enqueueWork(() -> Magic.of(ctx.player()).deserializeNBT(ctx.player().registryAccess(), payload.data())));
     }

@@ -14,6 +14,7 @@ final class DevAutomation {
     static final boolean SHOW = Boolean.getBoolean("wandcraft.show");
     static final boolean PROPS = Boolean.getBoolean("wandcraft.props");
     static final boolean CAST_ALL = Boolean.getBoolean("wandcraft.castall");
+    static final boolean DCLONE = Boolean.getBoolean("wandcraft.dclone");
     private static int tick;
 
     private DevAutomation() {}
@@ -33,6 +34,10 @@ final class DevAutomation {
         }
         if (PROPS) {
             gallery(mc);
+            return;
+        }
+        if (DCLONE) {
+            darkClone(mc);
             return;
         }
         if (CAST_ALL) {
@@ -91,6 +96,33 @@ final class DevAutomation {
             case 560 -> mc.stop();
             default -> {}
         }
+    }
+
+    private static final int[] DC_SHOTS = {14, 34, 52, 70, 90, 112, 132, 150, 166, 182, 200, 222, 244, 262, 280, 300, 330, 420};
+
+    /** Casts Dark Clone at a zombie and screenshots every stage of the hunt, possession and ash pile. */
+    private static void darkClone(Minecraft mc) {
+        if (tick == 80) {
+            cmd(mc, "gamemode creative");
+            cmd(mc, "wandcraft level 30");
+            cmd(mc, "wandcraft master all");
+            cmd(mc, "give @s wandcraft:wand");
+            cmd(mc, "time set noon");
+            cmd(mc, "gamerule doDaylightCycle false");
+            cmd(mc, "tp @s 0 -60 0 0 4");
+            cmd(mc, "kill @e[type=!player]");
+            cmd(mc, "summon zombie 0 -60 9 {NoAI:1b,PersistenceRequired:1b,ArmorItems:[{},{},{},{id:\"minecraft:iron_helmet\",count:1}]}");
+        }
+        if (tick == 130) {
+            mc.player.getInventory().selected = 0;
+            SpellView.select(Spells.get("dark_clone"));
+        }
+        int t = tick - 150;
+        if (t == 0) mc.options.keyUse.setDown(true);
+        if (t == 3) mc.options.keyUse.setDown(false);
+        if (t == 6) cmd(mc, "tp @s 4.5 -60 5 80 4");
+        for (int i = 0; i < DC_SHOTS.length; i++) if (t == DC_SHOTS[i]) shot(mc, String.format("dc_%02d_t%03d", i, t));
+        if (t > DC_SHOTS[DC_SHOTS.length - 1] + 10) mc.stop();
     }
 
     /** Casts every spell in turn, holding the button briefly, to shake out client-side effect crashes. */

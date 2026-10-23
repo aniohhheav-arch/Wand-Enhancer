@@ -44,6 +44,8 @@ public final class ClientSetup {
         e.registerEntityRenderer(WandCraft.DEBRIS.get(), DebrisRenderer::new);
         e.registerEntityRenderer(WandCraft.SHADOW_CLONE.get(), CloneRenderer::new);
         e.registerEntityRenderer(WandCraft.SPELL_PROP.get(), PropRenderer::new);
+        e.registerEntityRenderer(WandCraft.DARK_CLONE.get(), DarkCloneRenderer::new);
+        e.registerEntityRenderer(WandCraft.ASH_PILE.get(), AshRenderer::new);
     }
 
     @SubscribeEvent

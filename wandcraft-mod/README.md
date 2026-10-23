@@ -5,7 +5,7 @@ This directory is self-contained and unrelated to the Wand Enhancer patcher in t
 
 ## Status: Phase 4
 
-The framework is complete and 101 spells across all ten schools are implemented and smoke-tested. Remaining schools are added group by group on the same framework.
+The framework is complete and 102 spells across all ten schools are implemented and smoke-tested. Remaining schools are added group by group on the same framework.
 
 | School | Spells | State |
 | --- | --- | --- |
@@ -81,4 +81,7 @@ gradle runGameTestServer      # casts every spell against a field of enemies
 - **Portal magic**: Portal Pair (two-cast linked portals), Rift Gate, Blink Rift and Rift Snare, with animated swirl textures. `Reduced effects` is in the client config.
 - **Cooldown commands**: `/wandcraft cooldowns off|on|status` (world-wide, op only) and the `self` variants. The setting is applied in the casting logic, saved with the world and synced to clients.
 - **Spell icons**: each spell has its own generated icon (`tools/gen_icons.py`). The spell wheel, spellbook and HUD use them, and the wheel has a side detail panel and two rings for large schools.
-- Dark Clone possession is planned but not implemented yet.
+- **Dark Clone (Dark Arts)**: a GeckoLib shadow humanoid rises from a smoke pool, studies its target, stalks it along real paths (short phase flickers only along reachable ground, never through walls), stops in front, reaches out with an elongated arm and black tendrils, and pours itself into the target. The target's AI is frozen, it flickers with glowing eyes and spreading veins, crumbles top-down, implodes and is removed exactly once (no loot, no XP). Only one target per caster at a time; bosses, players, protected/allied mobs and the configurable blacklist are never taken. The clone retargets, or dissolves, if the target is lost or the hunt times out.
+- **Ash piles**: a persistent GeckoLib entity left where the mob stood. It sits flush on the terrain, glows with embers, drifts motes in the wind, scatters when walked through, is saved with the world (configurable) and is pruned oldest-first by per-area and per-dimension limits.
+- **Sounds**: custom layered sounds (deep summon with a reversed whisper, whispers, hunt rumble, phase crackle, reach riser, possession, disintegration, bass implosion, ash scatter) synthesized by `tools/gen_sounds.py`.
+- Config (`wandcraft-common.toml`): `darkCloneRange`, `darkCloneDurationSeconds`, `darkCloneCooldownSeconds`, `darkCloneBlacklist`, `ashDurationSeconds` (0 = until pruned), `ashPersists`, `ashMaxTotal`, `ashMaxPerArea`. Client: `reducedEffects`, `dissolveShader` (progressive crumble vs. plain shrink; no custom GLSL shader is used).

@@ -35,6 +35,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import com.wandcraft.magic.Possession;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -470,6 +472,7 @@ final class DarkSpells {
                 }));
 
         registerNovas();
+        registerPossession();
 
         Spells.add(Spell.of("void_rift", "Void Rift", DARK, INSTANT).prop("void_orb", 0.1f, 0).icon(Glyph.SWIRL).cost(30).cd(300).level(10).health(2f)
                 .desc("Tear open a dark rift that drags enemies toward its heart and gnaws at them, then collapses. Bosses are not moved.")
@@ -677,6 +680,39 @@ final class DarkSpells {
                 .onEnd(c -> {
                     SpellBeam beam = c.get("beam", null);
                     if (beam != null) beam.discard();
+                }));
+    }
+
+    private static void registerPossession() {
+        Spells.add(Spell.of("dark_clone", "Dark Clone", DARK, INSTANT).icon(Glyph.EYE).cost(55).cd(600).cdFn(() -> com.wandcraft.Config.DARK_CLONE_COOLDOWN_SECONDS.get() * 20)
+                .level(14).health(3f)
+                .desc("Open a pool of smoke and a living shadow rises to hunt your target. It stalks it, reaches out, pours into its body and takes it. The prey is torn apart into black ash. Never bosses, players or protected creatures.")
+                .onCast(c -> {
+                    if (Possession.hasClone(c.player)) {
+                        Casting.fail(c.player, "Your shadow is already hunting");
+                        return -1;
+                    }
+                    double range = com.wandcraft.Config.DARK_CLONE_RANGE.get();
+                    Mob target = null;
+                    LivingEntity aimed = Aim.entityAny(c.player, range);
+                    if (aimed instanceof Mob m && Possession.valid(c.player, m) && !Possession.claimedByOther(m, null)) target = m;
+                    if (target == null) target = Possession.pick(c.player, range, null);
+                    if (target == null) {
+                        Casting.fail(c.player, "Nothing to possess in range");
+                        return -1;
+                    }
+                    Vec3 look = c.look();
+                    Vec3 flat = new Vec3(look.x, 0, look.z);
+                    flat = flat.lengthSqr() < 1e-4 ? new Vec3(0, 0, 1) : flat.normalize();
+                    Vec3 at = c.player.position().add(flat.scale(3));
+                    Vec3 spot = Aim.floorBelow(c.level, net.minecraft.core.BlockPos.containing(at.x, c.player.getY() + 1, at.z), 6)
+                            .map(b -> new Vec3(b.getX() + 0.5, b.getY(), b.getZ() + 0.5)).orElse(c.player.position().add(flat.scale(1.5)));
+                    com.wandcraft.entity.DarkClone clone = new com.wandcraft.entity.DarkClone(WandCraft.DARK_CLONE.get(), c.level);
+                    clone.moveTo(spot.x, spot.y, spot.z, c.player.getYRot() + 180f, 0);
+                    clone.begin(c.player, target, com.wandcraft.Config.DARK_CLONE_DURATION_SECONDS.get() * 20, range);
+                    c.level.addFreshEntity(clone);
+                    com.wandcraft.entity.SpellProp.spawn(c.level, "shadow_pool", spot.add(0, 0.02, 0), 1.25f, 56);
+                    return 0;
                 }));
     }
 

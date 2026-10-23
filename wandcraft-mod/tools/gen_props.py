@@ -517,6 +517,35 @@ def phantom_wall():
     an.add("action", 0.4, {("row%d" % r): {"scale": kf({0: [1, 1, 1], 0.1: [1.04, 1.03, 1.3], 0.4: [1, 1, 1]})} for r in range(rows)}, loop=False)
     finish(g, an, "phantom_wall", [(128, 128, 132), (150, 150, 156), (190, 190, 196), (96, 96, 100)], (140, 160, 180, 150))
 
+# ------------------------------------------------------------------------------------------------ dark clone smoke pool
+def shadow_pool():
+    g = Geo("shadow_pool", bounds=(4, 3))
+    an = Anims("shadow_pool")
+    g.bone("disc", (0, 0, 0))
+    for r, h, sw in ((2.5, 0.8, 3), (5.5, 0.7, 0), (8.5, 0.6, 3), (11.5, 0.5, 0), (14.0, 0.4, 3)):
+        g.ring_at("disc", r, 0.45, 3.0 if r > 4 else 4.5, h, max(8, int(r * 1.6)), sw)
+    g.bone("rim", (0, 0, 0))
+    g.ring_at("rim", 15.5, 0.3, 1.4, 0.5, 28, 1)
+    g.ring_at("rim", 12.5, 0.5, 1.0, 0.5, 24, 2)
+    heads = g.radial("wp", 9, (0, 0, 0), yaw_offset=7)
+    bones = {}
+    for i, h in enumerate(heads):
+        rad = 5 + (i % 3) * 3.2
+        g.bone(h + "_a", (0, 0.5, -rad), h)
+        g.box_c(h + "_a", (0, 5, -rad), (2.4, 9, 2.4), 0)
+        g.bone(h + "_b", (0, 9.5, -rad), h + "_a")
+        g.box_c(h + "_b", (0, 14, -rad - 0.5), (1.7, 8, 1.7), 3, rot=(-10, 0, 0))
+        g.box_c(h + "_b", (0, 19, -rad - 1.4), (1.1, 4, 1.1), 1, rot=(-24, 0, 0))
+        ph = i * 0.9
+        bones[h + "_a"] = {"rotation": kf({0: [4 * math.sin(ph), 0, 5 * math.cos(ph)], 1.5: [-4 * math.sin(ph) + 3, 0, -5 * math.cos(ph)], 3: [4 * math.sin(ph), 0, 5 * math.cos(ph)]})}
+        bones[h + "_b"] = {"rotation": kf({0: [-6, 0, 0], 1.5: [10, 0, 7], 3: [-6, 0, 0]})}
+    bones["disc"] = {"rotation": spin(14, 1, 1)}
+    bones["rim"] = {"rotation": spin(9, 1, -1)}
+    an.add("spawn", 0.6, {"root": {"scale": kf({0: [0.05, 0.02, 0.05], 0.4: [1.1, 0.6, 1.1], 0.6: [1, 1, 1]})}}, loop=False)
+    an.add("idle", 3.0, bones)
+    an.add("despawn", 0.8, {"root": {"scale": kf({0: [1, 1, 1], 0.3: [1.15, 1.4, 1.15], 0.8: [0.05, 0.02, 0.05]})}}, loop="hold")
+    finish(g, an, "shadow_pool", [(14, 8, 26), (64, 26, 118), (150, 80, 235), (4, 2, 10)], (235, 215, 200, 255))
+
 if __name__ == "__main__":
     vine_guardian()
     sigil("rune_sigil", [(60, 96, 230), (130, 170, 255), (235, 242, 255), (30, 50, 140)])
@@ -544,4 +573,5 @@ if __name__ == "__main__":
     time_ring()
     reality_crack()
     phantom_wall()
+    shadow_pool()
     print("props ok")
