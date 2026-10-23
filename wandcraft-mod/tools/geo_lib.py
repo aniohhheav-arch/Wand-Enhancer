@@ -220,10 +220,16 @@ def texture_anim(path, pal, alphas=(255, 255, 255, 255), frames=20, frametime=2,
             hi = np.clip(val * 3 - 2, 0, 1)
             out[:, :, i] = pal[3][i] * (1 - lo) + (pal[0][i] * (1 - mid) + pal[1][i] * mid) * lo
             out[:, :, i] = out[:, :, i] * (1 - hi) + pal[2][i] * hi
-        rimglow = np.clip(1 - np.abs(r - 0.93) * 14, 0, 1)
-        out = out * (1 - rimglow[..., None]) + pal[2] * rimglow[..., None]
-        alpha = np.clip((1.0 - r) / 0.10, 0, 1) * (150 + 100 * val)
-        alpha = np.maximum(alpha, rimglow * 255)
+        # living edge: the boundary ripples with looping angular noise and flares into wisps
+        ncirc = vnoise(24 + 7 * np.cos(th) + 3 * math.cos(ang), 24 + 7 * np.sin(th) + 3 * math.sin(ang))
+        ncirc2 = vnoise(40 + 13 * np.cos(th + 1.3) - 4 * math.sin(ang), 40 + 13 * np.sin(th + 1.3) + 4 * math.cos(ang))
+        wob = (ncirc - 0.5) * 0.30 + (ncirc2 - 0.5) * 0.12
+        re = r / np.clip(1 + wob, 0.7, 1.4)
+        travel = 0.55 + 0.45 * np.sin(2 * th - 2 * ang)
+        rimglow = np.clip(1 - np.abs(re - 0.80) * 7.5, 0, 1) * (0.45 + 0.55 * travel)
+        out = out * (1 - rimglow[..., None] * 0.85) + pal[2] * rimglow[..., None] * 0.85
+        alpha = np.clip((1.0 - re) / 0.30, 0, 1) ** 1.3 * (140 + 110 * val)
+        alpha = np.maximum(alpha, rimglow * 240 * np.clip((1.0 - re) / 0.12, 0, 1))
         rgba = np.dstack([out, alpha]).clip(0, 255).astype('uint8')
         frame = Image.new('RGBA', (64, 64))
         frame.paste(base_sw, (0, 0))

@@ -419,14 +419,22 @@ final class SpaceSpells {
                 .onCast(c -> {
                     ServerPlayer p = c.player;
                     PlayerMagic m = Magic.of(p);
-                    p.openMenu(new SimpleMenuProvider((id, inv, pl) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x1, id, inv, m.pocket, 1), Component.literal("Pocket Rift")));
-                    SpellProp.spawn(c.level, "portal_violet", p.position(), 0.5f, 400).frontOf(p, 1.3, -1.1).facing(p.getYRot(), 0);
+                    SpellProp rift = SpellProp.spawn(c.level, "portal_violet", p.position(), 0.5f, 400).frontOf(p, 1.3, -1.1).facing(p.getYRot(), 0);
+                    // The portal lives exactly as long as the chest is open.
+                    Runnable onClose = () -> {
+                        if (!rift.isRemoved()) rift.dismiss();
+                        Fx.sound(c.level, p.position(), SoundEvents.ENDER_CHEST_CLOSE, 1f, 0.8f);
+                    };
+                    p.openMenu(new SimpleMenuProvider((id, inv, pl) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x1, id, inv, m.pocket, 1) {
+                        @Override
+                        public void removed(net.minecraft.world.entity.player.Player player) {
+                            super.removed(player);
+                            onClose.run();
+                        }
+                    }, Component.literal("Pocket Rift")));
                     Fx.sound(c.level, p.position(), SoundEvents.ENDER_CHEST_OPEN, 1f, 0.8f);
                     Scheduler.after(c.level, 400, () -> {
-                        if (p.containerMenu instanceof ChestMenu cm && cm.getContainer() == m.pocket) {
-                            p.closeContainer();
-                            Fx.sound(c.level, p.position(), SoundEvents.ENDER_CHEST_CLOSE, 1f, 0.8f);
-                        }
+                        if (p.containerMenu instanceof ChestMenu cm && cm.getContainer() == m.pocket) p.closeContainer();
                     });
                     return 0;
                 }));

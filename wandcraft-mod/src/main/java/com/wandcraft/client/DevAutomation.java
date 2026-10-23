@@ -98,7 +98,7 @@ final class DevAutomation {
         }
     }
 
-    private static final int[] DC_SHOTS = {14, 34, 52, 70, 90, 112, 132, 150, 166, 182, 200, 222, 244, 262, 280, 300, 330, 420};
+    private static final int[] DC_SHOTS = {96, 108, 120, 132, 140, 148, 156, 164, 172};
 
     /** Casts Dark Clone at a zombie and screenshots every stage of the hunt, possession and ash pile. */
     private static void darkClone(Minecraft mc) {

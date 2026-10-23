@@ -245,18 +245,26 @@ def build_clone_anims():
         "leg_r": {"rotation": kf({0: [-22, 0, 0], 0.5: [24, 0, 0], 1.1: [24, 0, 0]})},
         "leg_l": {"rotation": kf({0: [22, 0, 0], 0.5: [-26, 0, 0], 1.1: [-26, 0, 0]})},
     }, tend(0.7, 30), cloak(0.7, 26, 16)))
-    # --- 6. merge: the body stretches into a thin black stream and pours forward
-    A_["merge"] = (1.2, "hold_on_the_last_frame", merge({
-        "root": {"scale": kf({0: [1, 1, 1], 0.3: [0.85, 1.12, 0.85], 0.8: [0.3, 1.5, 0.3], 1.2: [0.02, 2.4, 0.02]}),
-                 "position": kf({0: zero, 1.2: [0, 0, -6]})},
-        "body": {"rotation": kf({0: [30, 0, 0], 0.6: [52, 0, 0], 1.2: [75, 0, 0]})},
-        "head": {"rotation": kf({0: [-38, 0, 0], 1.2: [-60, 0, 0]})},
-        "arm_r": {"rotation": kf({0: [-90, 0, 0], 1.2: [-95, 0, 0]})},
-        "fore_r": {"scale": kf({0: [0.7, 2.8, 0.7], 1.2: [0.4, 3.4, 0.4]})},
-        "arm_l": {"rotation": kf({0: [34, 0, -26], 1.2: [60, 0, -40]})},
-        "leg_r": {"rotation": kf({0: [24, 0, 0], 1.2: [60, 0, 0]})},
-        "leg_l": {"rotation": kf({0: [-26, 0, 0], 1.2: [60, 0, 0]})},
-    }, tend(0.5, 40), cloak(0.5, 40, 22)))
+    # --- 6. merge: the arm stays locked on the prey while the body is consumed bottom-up and drawn along the arm into it
+    def gone(t0, t1):
+        return {"scale": kf({0: [1, 1, 1], t0: [1, 1, 1], t1: [0.01, 0.01, 0.01]})}
+    mg = {
+        "body": {"rotation": kf({0: [30, 0, 0], 1.2: [38, 0, 0]})},
+        "head": {"rotation": kf({0: [-38, 0, 0], 1.2: [-46, 0, 0]}), "scale": kf({0: [1, 1, 1], 0.55: [1, 1, 1], 0.85: [0.01, 0.01, 0.01]})},
+        "arm_r": {"rotation": kf({0: [-90, 0, 0], 1.2: [-90, 0, 0]})},
+        "fore_r": {"rotation": kf({0: [-6, 0, 0]}), "scale": kf({0: [0.7, 2.8, 0.7], 0.5: [0.95, 2.8, 0.95], 1.0: [1.1, 2.8, 1.1], 1.2: [0.3, 2.8, 0.3]})},
+        "hand_r": {"scale": kf({0: [1.2, 0.4, 1.2], 0.9: [1.5, 0.5, 1.5], 1.2: [0.01, 0.01, 0.01]})},
+        "arm_l": {"rotation": kf({0: [34, 0, -26], 1.2: [60, 0, -40]}), "scale": kf({0: [1, 1, 1], 0.5: [1, 1, 1], 0.8: [0.01, 0.01, 0.01]})},
+        "leg_r": {"rotation": kf({0: [24, 0, 0], 1.2: [24, 0, 0]}), "scale": kf({0: [1, 1, 1], 0.1: [1, 1, 1], 0.45: [0.01, 0.01, 0.01]})},
+        "leg_l": {"rotation": kf({0: [-26, 0, 0], 1.2: [-26, 0, 0]}), "scale": kf({0: [1, 1, 1], 0.15: [1, 1, 1], 0.5: [0.01, 0.01, 0.01]})},
+        "root": {"position": kf({0: zero, 0.8: zero, 1.2: [0, 0.5, -26]}), "scale": kf({0: [1, 1, 1], 0.8: [1, 1, 1], 1.2: [0.02, 0.02, 0.02]})},
+    }
+    for n in ("cloak_a", "cloak_b", "cloak_c", "cloak_d"):
+        mg[n + "_b"] = gone(0.05, 0.35)
+        mg[n] = gone(0.2, 0.55)
+    for i in (1, 2, 3):
+        mg["tend%dc" % i] = gone(0.0, 0.25); mg["tend%db" % i] = gone(0.15, 0.4); mg["tend%d" % i] = gone(0.3, 0.6)
+    A_["merge"] = (1.2, "hold_on_the_last_frame", mg)
     # --- 7. dissolve: extremities (claws, head tip, feet, tendrils) crumble first, then limbs, then the core
     def vanish(t0, t1):
         return {"scale": kf({0: [1, 1, 1], t0: [1, 1, 1], t1: [0.01, 0.01, 0.01]})}

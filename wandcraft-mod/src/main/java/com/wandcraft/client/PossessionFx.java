@@ -36,46 +36,73 @@ public final class PossessionFx {
 
     private static float ease(float x) { return x * x * (3 - 2 * x); }
 
+    private static boolean inner;
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @SubscribeEvent
     public static void pre(RenderLivingEvent.Pre<?, ?> ev) {
-        float el = elapsed(ev.getEntity(), ev.getPartialTick());
+        if (inner) return;
+        Entity e = ev.getEntity();
+        float pt = ev.getPartialTick();
+        float el = elapsed(e, pt);
         if (el < 0) return;
         PoseStack ps = ev.getPoseStack();
-        ps.pushPose();
-        float sx = 1, sy = 1;
         float rnd = (float) Math.sin(el * 91.7) * 0.5f + 0.5f;
         if (el < Possession.FLICKER) {
             // uneasy flicker: the mob stutters out of existence for a frame now and then
             if (Math.sin(el * 7.3) + Math.sin(el * 3.1 + 1) > 1.55 + (1 - el / Possession.FLICKER) * 0.1) {
-                ps.popPose();
                 ev.setCanceled(true);
                 return;
             }
             float j = 0.04f * el / Possession.FLICKER;
+            ps.pushPose();
             ps.translate((rnd - 0.5f) * j, 0, (Math.sin(el * 53) * 0.5) * j);
-        } else if (el < Possession.FLICKER + Possession.DISSOLVE) {
-            float k = (el - Possession.FLICKER) / Possession.DISSOLVE;
-            if (Config.DISSOLVE_SHADER.get()) {
-                sy = 1f - 0.9f * ease(k);
-                float sway = 1f - 0.45f * k * k;
-                sx = sway;
-                ps.translate((rnd - 0.5f) * 0.05f * (1 - k), 0, 0);
-            } else {
-                sx = sy = 1f - 0.9f * k;
-            }
+            pushed.add(e.getId());
+            return;
+        }
+        float k, shrink = 1f;
+        if (el < Possession.FLICKER + Possession.DISSOLVE) {
+            k = (el - Possession.FLICKER) / Possession.DISSOLVE;
+            k = 0.82f * ease(k);
         } else {
             float u = Mth.clamp((el - Possession.FLICKER - Possession.DISSOLVE) / Possession.IMPLODE, 0, 1);
-            float f = (1f - u) * (1f - u);
-            sx = Math.max(0.01f, 0.1f * f);
-            sy = Math.max(0.01f, 0.1f * f + 0.02f);
-            ps.mulPose(com.mojang.math.Axis.YP.rotationDegrees(u * 540f));
+            k = 0.82f + 0.18f * u;
+            shrink = Math.max(0.02f, (1f - u) * (1f - u));
         }
-        ps.scale(sx, sy, sx);
+        ps.pushPose();
+        ps.translate((rnd - 0.5f) * 0.03f, 0, 0);
+        if (shrink < 1f) {
+            ps.mulPose(com.mojang.math.Axis.YP.rotationDegrees((1 - shrink) * 540f));
+            ps.scale(shrink, shrink, shrink);
+        }
+        if (Config.DISSOLVE_SHADER.get()) {
+            var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            double x = Mth.lerp(pt, e.xo, e.getX()) - cam.x, y = Mth.lerp(pt, e.yo, e.getY()) - cam.y, z = Mth.lerp(pt, e.zo, e.getZ()) - cam.z;
+            var r = (net.minecraft.client.renderer.entity.LivingEntityRenderer) ev.getRenderer();
+            inner = true;
+            try {
+                double h = e.getBbHeight() * (shrink < 1f ? shrink : 1f);
+                float yaw = Mth.rotLerp(pt, e.yRotO, e.getYRot());
+                // pass 1 lays down the noise-cut depth, pass 2 paints the surviving body on top of it
+                r.render(e, yaw, pt, ps, new DissolveBuffer(ev.getMultiBufferSource(), true, k, x, y, z, h), ev.getPackedLight());
+                r.render(e, yaw, pt, ps, new DissolveBuffer(ev.getMultiBufferSource(), false, k, x, y, z, h), ev.getPackedLight());
+            } finally {
+                inner = false;
+            }
+            ps.popPose();
+            ev.setCanceled(true);
+        } else {
+            float s = 1f - 0.9f * k;
+            ps.scale(s, s, s);
+            pushed.add(e.getId());
+        }
     }
+
+    private static final java.util.Set<Integer> pushed = new java.util.HashSet<>();
 
     @SubscribeEvent
     public static void post(RenderLivingEvent.Post<?, ?> ev) {
-        if (elapsed(ev.getEntity(), ev.getPartialTick()) >= 0) ev.getPoseStack().popPose();
+        if (pushed.remove(ev.getEntity().getId())) ev.getPoseStack().popPose();
     }
 
     @SubscribeEvent

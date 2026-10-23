@@ -269,19 +269,31 @@ public class DarkClone extends PathfinderMob implements GeoEntity {
 
     private void merge(ServerLevel l, Mob target) {
         getNavigation().stop();
-        double t = Mth.clamp(stateTicks / (double) MERGE_TICKS, 0, 1);
-        Vec3 goal = target.position().add(0, target.getBbHeight() * 0.1, 0);
-        Vec3 p = mergeFrom.lerp(goal, t * t * (3 - 2 * t));
-        setPos(p.x, p.y, p.z);
         face(target, 60f);
-        Vec3 c = position().add(0, 1.0 * (1 - t), 0);
-        ShadowFx.stream(l, c, target.position().add(0, target.getBbHeight() * 0.5, 0), 6, 0.6);
-        if (stateTicks % 4 == 0) Fx.burst(l, ShadowFx.smoke(1.1f), c, 4, 0.3, 0.02);
+        double t = Mth.clamp(stateTicks / (double) MERGE_TICKS, 0, 1);
+        Vec3 hand = handPos();
+        Vec3 chest = target.position().add(0, target.getBbHeight() * 0.6, 0);
+        // the body is consumed bottom-up: smoke is drawn along the arm and pours into the prey
+        double top = 2.0 * (1 - t);
+        for (int i = 0; i < 3; i++) {
+            Vec3 src = position().add((random.nextDouble() - .5) * 0.5, random.nextDouble() * Math.max(0.3, top), (random.nextDouble() - .5) * 0.5);
+            ShadowFx.stream(l, src, hand, 2, 0.3);
+        }
+        ShadowFx.stream(l, hand, chest, 6 + (int) (6 * t), 0.35);
+        if (stateTicks % 2 == 0) ShadowFx.tendril(l, hand, chest, stateTicks * 0.5);
+        // black tendrils wrap the prey and its eyes begin to burn violet
+        if (stateTicks % 3 == 0) {
+            double a = random.nextDouble() * Math.PI * 2;
+            Vec3 wrap = target.position().add(Math.cos(a) * target.getBbWidth() * 0.7, random.nextDouble() * target.getBbHeight(), Math.sin(a) * target.getBbWidth() * 0.7);
+            ShadowFx.tendril(l, chest, wrap, stateTicks);
+        }
+        if (stateTicks % 4 == 0) Fx.burst(l, Fx.glow(ShadowFx.BRIGHT, 0.5f), target.getEyePosition(), 2, 0.15, 0.01);
         if (stateTicks >= MERGE_TICKS) {
             ended = true;
             Possession.begin(target, l);
             cleanup();
-            ShadowFx.puff(l, target.position().add(0, target.getBbHeight() * 0.5, 0), 30, 0.5);
+            ShadowFx.puff(l, chest, 26, 0.45);
+            Fx.burst(l, Fx.spark(ShadowFx.BRIGHT, 0.6f), chest, 16, 0.4, 0.18);
             discard();
         }
     }
@@ -355,7 +367,7 @@ public class DarkClone extends PathfinderMob implements GeoEntity {
 
     private Vec3 handPos() {
         double yaw = Math.toRadians(getYRot());
-        return position().add(-Math.sin(yaw) * 1.1 - Math.cos(yaw) * 0.35, 1.45, Math.cos(yaw) * 1.1 - Math.sin(yaw) * 0.35);
+        return position().add(-Math.sin(yaw) * 1.85 - Math.cos(yaw) * 0.35, 1.5, Math.cos(yaw) * 1.85 - Math.sin(yaw) * 0.35);
     }
 
     private void face(Entity t, float maxStep) {

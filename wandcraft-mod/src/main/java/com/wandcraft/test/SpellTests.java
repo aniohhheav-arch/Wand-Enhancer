@@ -169,4 +169,27 @@ public final class SpellTests {
             h.assertTrue(Math.abs(piles.get(0).getY() - zp.y) < 0.5, "ash not on ground");
         });
     }
+
+    /** Releasing a channelled shield must remove its 3D panel. */
+    @GameTest(timeoutTicks = 120, template = "empty", templateNamespace = WandCraft.ID)
+    public static void shieldPropVanishes(GameTestHelper h) {
+        ServerPlayer p = h.makeMockServerPlayerInLevel();
+        p.setGameMode(GameType.SURVIVAL);
+        Vec3 spawn = h.absoluteVec(new Vec3(11.5, 2, 3.5));
+        p.moveTo(spawn.x, spawn.y, spawn.z, 0f, 0f);
+        PlayerMagic m = Magic.of(p);
+        m.mana = m.maxMana();
+        Spell s = Spells.get("magic_shield");
+        if (!Casting.startChannel(p, s)) throw new AssertionError("shield did not start");
+        for (int t = 0; t < 12; t++) h.runAfterDelay(t * 2L + 1, () -> Casting.tickChannel(p, s));
+        var box = new net.minecraft.world.phys.AABB(spawn, spawn).inflate(8);
+        h.runAfterDelay(26, () -> {
+            if (h.getLevel().getEntitiesOfClass(com.wandcraft.entity.SpellProp.class, box).isEmpty()) throw new AssertionError("expected a shield panel while channelling");
+            Casting.endChannel(p);
+        });
+        h.runAfterDelay(60, () -> {
+            h.assertTrue(h.getLevel().getEntitiesOfClass(com.wandcraft.entity.SpellProp.class, box).isEmpty(), "shield panel must vanish after release");
+            h.succeed();
+        });
+    }
 }

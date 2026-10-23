@@ -125,6 +125,14 @@ public class SpellZone extends Entity {
         age++;
     }
 
+    /** However the zone ends (expiry, channel release, owner death, dispel), its prop must go with it. */
+    @Override
+    public void remove(RemovalReason reason) {
+        if (prop != null && !prop.isRemoved() && !level().isClientSide) prop.dismiss();
+        prop = null;
+        super.remove(reason);
+    }
+
     @Override
     public boolean shouldBeSaved() { return false; }
 
