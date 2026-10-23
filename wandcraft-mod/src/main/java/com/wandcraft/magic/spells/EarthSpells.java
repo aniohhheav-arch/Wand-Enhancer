@@ -35,6 +35,26 @@ final class EarthSpells {
 
     static BlockParticleOption crumble(BlockState s) { return new BlockParticleOption(ParticleTypes.BLOCK, s); }
 
+    /** Throws visual copies of the ground into the air along the wave front. Nothing in the world changes. */
+    static void launchDebris(ServerLevel l, net.minecraft.server.level.ServerPlayer owner, Vec3 centre, Vec3 dir, BlockPos standing) {
+        Vec3 side = new Vec3(-dir.z, 0, dir.x);
+        int n = com.wandcraft.magic.util.Fx.scaled(3);
+        for (int i = 0; i < n; i++) {
+            double off = (l.random.nextDouble() - 0.5) * 2.6;
+            BlockPos bp = BlockPos.containing(centre.add(side.scale(off))).below();
+            BlockState st = l.getBlockState(bp);
+            if (st.isAir() || st.hasBlockEntity() || !st.getFluidState().isEmpty() || st.getRenderShape() != net.minecraft.world.level.block.RenderShape.MODEL) {
+                st = l.getBlockState(standing.below());
+                if (st.isAir() || st.hasBlockEntity() || st.getRenderShape() != net.minecraft.world.level.block.RenderShape.MODEL) continue;
+            }
+            com.wandcraft.entity.DebrisEntity d = new com.wandcraft.entity.DebrisEntity(l, st);
+            Vec3 p = centre.add(side.scale(off)).add(0, 0.6, 0);
+            d.setPos(p.x, p.y, p.z);
+            d.setDeltaMovement(dir.scale(0.12 + l.random.nextDouble() * 0.15).add(side.scale((l.random.nextDouble() - 0.5) * 0.25)).add(0, 0.45 + l.random.nextDouble() * 0.4, 0));
+            l.addFreshEntity(d);
+        }
+    }
+
     static void register() {
         Spells.add(Spell.of("stone_spike", "Stone Spike", ELEMENTAL, INSTANT).icon(Glyph.SPIKE).cost(14).cd(70).level(1)
                 .desc("Raise a stone pillar under a target or the ground you aim at. It launches and staggers, then crumbles.")
@@ -117,6 +137,7 @@ final class EarthSpells {
                             Vec3 centre = Vec3.atBottomCenterOf(g.get());
                             BlockState under = c.level.getBlockState(g.get().below());
                             Fx.burst(c.level, crumble(under), centre.add(0, 0.2, 0), 14, 0.7, 0.2);
+                            launchDebris(c.level, c.player, centre, dir, g.get());
                             if (step % 3 == 0) Fx.sound(c.level, centre, SoundEvents.STONE_BREAK, 0.5f, 0.6f);
                             for (LivingEntity e : Combat.enemiesIn(c.level, centre.add(0, 0.5, 0), 1.7, c.player)) {
                                 if (!hit.add(e)) continue;

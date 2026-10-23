@@ -1,14 +1,14 @@
 package com.wandcraft.magic.util;
 
 import com.wandcraft.Config;
-import net.minecraft.core.particles.DustParticleOptions;
+import com.wandcraft.ModParticles;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 /** Particle and sound helpers. Everything is scaled by the configured effect intensity. */
 public final class Fx {
@@ -16,9 +16,20 @@ public final class Fx {
 
     public static int scaled(int count) { return Math.max(1, (int) Math.round(count * Config.FX_INTENSITY.get())); }
 
-    public static DustParticleOptions dust(int rgb, float size) {
-        return new DustParticleOptions(new Vector3f(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f), size);
+    private static ColorParticleOption tint(net.minecraft.core.particles.ParticleType<ColorParticleOption> t, int rgb, float size, float unit) {
+        int a = Math.max(1, Math.min(255, Math.round(size * unit)));
+        return ColorParticleOption.create(t, (a << 24) | (rgb & 0xFFFFFF));
     }
+
+    /** Soft glowing orb tinted {@code rgb}; {@code size} is roughly 0.5 (tiny) to 2 (big). */
+    public static ParticleOptions dust(int rgb, float size) { return tint(ModParticles.GLOW.get(), rgb, size, 100); }
+    public static ParticleOptions glow(int rgb, float size) { return dust(rgb, size); }
+    /** Four-pointed flare that spins and shrinks. */
+    public static ParticleOptions spark(int rgb, float size) { return tint(ModParticles.SPARK.get(), rgb, size, 100); }
+    /** Drifting smoke-like curl. */
+    public static ParticleOptions wisp(int rgb, float size) { return tint(ModParticles.WISP.get(), rgb, size, 100); }
+    /** Flat rune circle lying on the ground; {@code radius} in blocks. */
+    public static ParticleOptions runeDecal(int rgb, float radius) { return tint(ModParticles.RUNE.get(), rgb, radius, 20); }
 
     public static void burst(ServerLevel l, ParticleOptions p, Vec3 at, int count, double spread, double speed) {
         l.sendParticles(p, at.x, at.y, at.z, scaled(count), spread, spread, spread, speed);
@@ -57,17 +68,14 @@ public final class Fx {
         }
     }
 
-    /** A glowing geometric rune circle: outer ring plus an inscribed star, tinted with {@code rgb}. */
+    /** A glowing rune circle on the ground: a flat spinning decal plus a ring of flares. */
     public static void rune(ServerLevel l, Vec3 c, double radius, int rgb, int points, double rotation) {
-        DustParticleOptions d = dust(rgb, 1.1f);
-        ring(l, d, c, radius, points);
-        int sides = 5;
-        for (int i = 0; i < sides; i++) {
-            double a1 = rotation + Math.PI * 2 * i * 2 / sides;
-            double a2 = rotation + Math.PI * 2 * (i + 1) * 2 / sides;
-            Vec3 p1 = c.add(Math.cos(a1) * radius * 0.92, 0, Math.sin(a1) * radius * 0.92);
-            Vec3 p2 = c.add(Math.cos(a2) * radius * 0.92, 0, Math.sin(a2) * radius * 0.92);
-            line(l, d, p1, p2, 0.4);
+        l.sendParticles(runeDecal(rgb, (float) radius), c.x, c.y, c.z, 1, 0, 0, 0, 0);
+        ParticleOptions sp = spark(rgb, 0.7f);
+        int n = Math.max(4, scaled(points) / 2);
+        for (int i = 0; i < n; i++) {
+            double a = rotation + Math.PI * 2 * i / n;
+            l.sendParticles(sp, c.x + Math.cos(a) * radius, c.y + 0.05, c.z + Math.sin(a) * radius, 1, 0, 0.02, 0, 0.01);
         }
     }
 

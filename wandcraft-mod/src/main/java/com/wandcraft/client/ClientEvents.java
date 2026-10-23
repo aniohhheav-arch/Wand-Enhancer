@@ -19,6 +19,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post e) {
         Minecraft mc = Minecraft.getInstance();
+        if (DevAutomation.ON) DevAutomation.tick(mc);
         if (mc.player == null) return;
         boolean holding = mc.player.getMainHandItem().getItem() instanceof WandItem;
 

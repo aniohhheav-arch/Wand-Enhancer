@@ -63,6 +63,7 @@ public class WandItem extends Item {
         } else if (s.mode == CastMode.CHARGE) {
             float f = Math.min(1f, used / (float) s.chargeTicks);
             ServerLevel sl = sp.serverLevel();
+            if (s.chargeFx != null && used % 4 == 0) s.chargeFx.accept(sp, f);
             if (used % 3 == 0) {
                 Vec3 tip = sp.getEyePosition().add(sp.getLookAngle().scale(0.9)).add(0, -0.25, 0);
                 Fx.burst(sl, Fx.dust(s.category.color, 0.8f + f), tip, 1 + (int) (f * 4), 0.08 + f * 0.1, 0.01);

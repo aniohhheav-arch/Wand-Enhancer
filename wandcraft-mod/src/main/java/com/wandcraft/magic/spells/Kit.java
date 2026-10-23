@@ -2,6 +2,7 @@ package com.wandcraft.magic.spells;
 
 import com.wandcraft.entity.SpellProjectile;
 import com.wandcraft.entity.SpellZone;
+import com.wandcraft.magic.CastCtx;
 import com.wandcraft.magic.ProjBehavior;
 import com.wandcraft.magic.Spell;
 import com.wandcraft.magic.util.Combat;
@@ -60,5 +61,26 @@ final class Kit {
         }
         out.sort(Comparator.comparingInt((SpellZone z) -> z.age).reversed());
         return out;
+    }
+
+    /** Furthest collision-free point along the caster's look up to {@code max} blocks, or null if blocked at once. */
+    static Vec3 dash(CastCtx c, double max) {
+        ServerPlayer p = c.player;
+        Vec3 origin = p.position();
+        Vec3 dir = c.look();
+        Vec3 best = null;
+        for (double t = 0.5; t <= max; t += 0.5) {
+            if (!c.level.noCollision(p, p.getBoundingBox().move(dir.scale(t)))) break;
+            best = origin.add(dir.scale(t));
+        }
+        return best;
+    }
+
+    /** Players, the caster and their tamed animals near a point. */
+    static java.util.List<LivingEntity> friendsIn(ServerLevel l, Vec3 c, double r, ServerPlayer owner) {
+        return l.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(c, c).inflate(r), e ->
+                e.position().distanceToSqr(c) <= r * r + 1 && e.isAlive()
+                        && (e == owner || e instanceof net.minecraft.world.entity.player.Player
+                        || (e instanceof net.minecraft.world.entity.TamableAnimal t && t.isOwnedBy(owner))));
     }
 }

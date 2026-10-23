@@ -5,6 +5,7 @@ import static com.wandcraft.magic.CastMode.CHANNEL;
 import static com.wandcraft.magic.CastMode.CHARGE;
 import static com.wandcraft.magic.CastMode.INSTANT;
 
+import com.wandcraft.entity.SpellBeam;
 import com.wandcraft.entity.SpellProjectile;
 import com.wandcraft.entity.SpellZone;
 import com.wandcraft.magic.Casting;
@@ -82,28 +83,39 @@ public final class ArcaneSpells {
                 }));
 
         Spells.add(Spell.of("arcane_beam", "Arcane Beam", ARCANE, CHANNEL).icon(Glyph.BEAM).cost(16).cd(30).level(5)
-                .desc("Channel a beam that grows more intense the longer it stays on one target.")
+                .desc("Channel a beacon-bright beam that grows more intense the longer it stays on one target.")
                 .onChannel((c, t) -> {
                     Aim.Result r = Aim.trace(c.player, 24);
-                    Vec3 start = c.eye().add(c.look().scale(0.8)).add(0, -0.25, 0);
-                    Fx.line(c.level, Fx.dust(0x7FA0FF, 0.9f), start, r.pos(), 0.9);
-                    if (t % 4 != 0) return 0;
+                    SpellBeam beam = c.get("beam", null);
+                    if (beam == null || beam.isRemoved()) {
+                        beam = new SpellBeam(c.level, c.player, 0x7FA0FF);
+                        c.level.addFreshEntity(beam);
+                        c.state.put("beam", beam);
+                        Fx.sound(c.level, c.eye(), SoundEvents.BEACON_ACTIVATE, 0.8f, 1.8f);
+                    }
                     UUID last = c.get("last", null);
                     int focus = c.get("focus", 0);
+                    if (r.hitEntity()) focus = r.entity().getUUID().equals(last) ? Math.min(40, focus + 1) : 0;
+                    else focus = Math.max(0, focus - 1);
+                    c.state.put("focus", focus);
+                    if (r.hitEntity()) c.state.put("last", r.entity().getUUID());
+                    beam.update((float) c.eye().distanceTo(r.pos()), focus / 40f);
+                    if (t % 20 == 0) Fx.sound(c.level, c.eye(), SoundEvents.BEACON_AMBIENT, 0.5f, 1.6f);
+                    if (t % 4 != 0) return 0;
                     if (r.hitEntity()) {
-                        focus = r.entity().getUUID().equals(last) ? Math.min(40, focus + 4) : 0;
-                        c.state.put("last", r.entity().getUUID());
                         float intensity = 1f + focus / 40f;
                         Combat.hurt(c.level, c.player, c.player, r.entity(), c.dmg(1.6 * intensity));
-                        Fx.burst(c.level, ParticleTypes.END_ROD, r.pos(), 3 + (int) (intensity * 2), 0.15, 0.03);
-                        c.state.put("focus", focus);
+                        Fx.burst(c.level, Fx.spark(0xFFFFFF, 0.9f), r.pos(), 3 + (int) (intensity * 2), 0.2, 0.15);
                         Fx.sound(c.level, r.pos(), SoundEvents.AMETHYST_BLOCK_RESONATE, 0.4f, 0.8f + intensity * 0.5f);
                         c.hit();
-                    } else {
-                        c.state.put("focus", Math.max(0, focus - 4));
-                        Fx.burst(c.level, ParticleTypes.ELECTRIC_SPARK, r.pos(), 2, 0.1, 0.02);
+                    } else if (r.hitBlock()) {
+                        Fx.burst(c.level, Fx.spark(0x9AB0FF, 0.7f), r.pos(), 2, 0.1, 0.1);
                     }
                     return 0;
+                })
+                .onEnd(c -> {
+                    SpellBeam beam = c.get("beam", null);
+                    if (beam != null) beam.discard();
                 }));
 
         Spells.add(Spell.of("rune_mine", "Rune Mine", ARCANE, INSTANT).icon(Glyph.RUNE).cost(20).cd(40).level(4)

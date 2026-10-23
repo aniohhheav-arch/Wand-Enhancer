@@ -24,7 +24,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder(WandCraft.ID)
 @PrefixGameTestTemplate(false)
 public final class SpellTests {
-    @GameTest(timeoutTicks = 3000, template = "empty", templateNamespace = WandCraft.ID)
+    @GameTest(timeoutTicks = 9000, template = "empty", templateNamespace = WandCraft.ID)
     public static void everySpellCasts(GameTestHelper h) {
         ServerPlayer p = h.makeMockServerPlayerInLevel();
         p.setGameMode(GameType.SURVIVAL);
@@ -54,6 +54,7 @@ public final class SpellTests {
                 for (var z : zombies) { z.setHealth(z.getMaxHealth()); z.removeAllEffects(); z.clearFire(); }
                 m.cooldownEnd.clear();
                 p.moveTo(spawn.x, spawn.y, spawn.z, 0f, 0f);
+                if (s.id.equals("cleansing_light")) p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.POISON, 200));
                 if (s.id.equals("dispel")) {
                     var foreign = new com.wandcraft.entity.SpellZone(h.getLevel(), Spells.get("rune_mine"), null, zombies.get(4).position(), 2f, 200);
                     h.getLevel().addFreshEntity(foreign);

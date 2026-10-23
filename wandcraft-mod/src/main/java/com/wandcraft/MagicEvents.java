@@ -52,6 +52,12 @@ public final class MagicEvents {
             Casting.endChannel(p);
         }
 
+        if (m.stealthUntil > now && p.tickCount % 10 == 0) {
+            ServerLevel sl0 = p.serverLevel();
+            for (net.minecraft.world.entity.Mob mob : sl0.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, p.getBoundingBox().inflate(24),
+                    mob -> mob.getTarget() == p && mob.distanceToSqr(p) > 16)) mob.setTarget(null);
+        }
+
         if (m.wingsUntil > now) {
             if (now % 5 == 0) p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 12, 0, false, false, false));
             if (!p.onGround()) {

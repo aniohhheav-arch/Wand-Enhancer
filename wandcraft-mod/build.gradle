@@ -10,7 +10,14 @@ repositories { mavenCentral() }
 neoForge {
     version = neo_version
     runs {
-        client { client(); systemProperty 'neoforge.enabledGameTestNamespaces', mod_id }
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+            if (project.hasProperty('dev')) {
+                systemProperty 'wandcraft.dev', 'true'
+                programArguments.addAll('--quickPlaySingleplayer', 'devworld')
+            }
+        }
         server { server(); programArgument '--nogui' }
         gameTestServer { type = 'gameTestServer'; systemProperty 'neoforge.enabledGameTestNamespaces', mod_id }
     }

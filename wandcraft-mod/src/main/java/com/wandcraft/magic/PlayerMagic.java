@@ -30,6 +30,16 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
     public transient Map<String, Object> channelState;
     public transient long lastWingDash;
     public transient boolean dirty = true;
+    // Defensive state (server only).
+    public transient float shieldCapacity;
+    public transient float shieldReduction;
+    public transient double shieldArc;
+    public transient long parryUntil;
+    public transient long mirrorUntil;
+    public transient long phaseUntil;
+    public transient long softFallUntil;
+    /** Mobs further than a few blocks lose track of a stealthed player. */
+    public transient long stealthUntil;
 
     public int totalUses() {
         int t = 0;

@@ -33,7 +33,8 @@ public class WheelScreen extends Screen {
     private void refresh() {
         spells = Spells.in(cats.get(catIdx));
         hovered = -1;
-        radius = Math.max(84, (int) Math.ceil(spells.size() * 38 / (Math.PI * 2)));
+        int want = Math.max(84, (int) Math.ceil(spells.size() * 38 / (Math.PI * 2)));
+        radius = Math.max(60, Math.min(want, height / 2 - 34));
     }
 
     @Override public boolean isPauseScreen() { return false; }
@@ -42,6 +43,7 @@ public class WheelScreen extends Screen {
     protected void init() {
         cx = width / 2;
         cy = height / 2;
+        refresh();
     }
 
     private float ease() {

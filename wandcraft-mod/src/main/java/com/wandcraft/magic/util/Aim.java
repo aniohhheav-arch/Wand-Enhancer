@@ -40,6 +40,17 @@ public final class Aim {
         return new Result(b.getLocation(), null, b);
     }
 
+    /** Like {@link #entity} but also picks allies and players, for beneficial or consent-based spells. */
+    public static LivingEntity entityAny(ServerPlayer p, double range) {
+        Vec3 from = p.getEyePosition();
+        Vec3 to = from.add(p.getLookAngle().scale(range));
+        BlockHitResult b = p.level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
+        double maxSqr = b.getType() == HitResult.Type.MISS ? range * range : b.getLocation().distanceToSqr(from);
+        EntityHitResult e = ProjectileUtil.getEntityHitResult(p, from, to, new AABB(from, to).inflate(1.0),
+                en -> en instanceof LivingEntity le && le.isAlive() && !le.isSpectator(), maxSqr);
+        return e != null && e.getEntity() instanceof LivingEntity le ? le : null;
+    }
+
     /** Aim entity only, or null. */
     public static LivingEntity entity(ServerPlayer p, double range) { return trace(p, range).entity(); }
 

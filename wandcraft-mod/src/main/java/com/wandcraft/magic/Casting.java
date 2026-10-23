@@ -14,6 +14,7 @@ public final class Casting {
     public static String blocker(net.minecraft.world.entity.player.Player p, Spell s) {
         if (!Magic.isUnlocked(p, s)) return "Locked — " + Magic.lockReason(p, s);
         long now = p.level().getGameTime();
+        if (s.healthCost > 0 && !Magic.infinite(p) && p.getHealth() <= s.healthCost + 1) return "Too little life force for dark magic";
         boolean recast = recasting(p, s);
         if (!recast && Magic.onCooldown(p, s, now)) return s.name + " is recharging";
         if (!Magic.infinite(p)) {
@@ -71,6 +72,11 @@ public final class Casting {
                 p.hurt(p.damageSources().magic(), s.healthCost);
             }
             if (!recast) Magic.setCooldown(p, s, s.cooldown);
+            if (m.stealthUntil > p.level().getGameTime() && !s.stealthSafe) {
+                m.stealthUntil = 0;
+                m.dirty = true;
+                p.displayClientMessage(Component.literal("Your concealment fades"), true);
+            }
             m.lastCastTick = p.level().getGameTime();
             if (m.overloadCharges > 0) {
                 m.overloadCharges--;

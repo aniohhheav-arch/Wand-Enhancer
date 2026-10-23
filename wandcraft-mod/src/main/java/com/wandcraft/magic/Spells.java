@@ -2,6 +2,7 @@ package com.wandcraft.magic;
 
 import com.wandcraft.magic.spells.ArcaneSpells;
 import com.wandcraft.magic.spells.ElementalSpells;
+import com.wandcraft.magic.spells.OtherSchools;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -19,6 +20,7 @@ public final class Spells {
         loaded = true;
         ArcaneSpells.register();
         ElementalSpells.register();
+        OtherSchools.register();
     }
 
     public static Spell add(Spell s) {

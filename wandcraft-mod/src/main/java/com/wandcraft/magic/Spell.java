@@ -28,9 +28,13 @@ public final class Spell {
     public float healthCost = 0;
     /** Eligible for Spell Echo. */
     public boolean echoable = false;
+    /** Casting this does not end stealth (the stealth spells themselves, utility). */
+    public boolean stealthSafe = false;
     /** While this returns true the spell can be recast without waiting for its cooldown, for {@link #recastCost} mana. */
     public java.util.function.Predicate<net.minecraft.world.entity.player.Player> recast;
     public int recastCost;
+    /** Optional per-few-ticks hook while a CHARGE spell is being held (e.g. warnings to bystanders). */
+    public java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, Float> chargeFx;
     public Cast cast;
     public Channel channel;
     public End end;
@@ -59,8 +63,10 @@ public final class Spell {
     public Spell evolvesFrom(String parent) { evolvesFrom = parent; return this; }
     public Spell health(float h) { healthCost = h; return this; }
     public Spell echoable() { echoable = true; return this; }
+    public Spell stealthSafe() { stealthSafe = true; return this; }
     public Spell perks(String adept, String master) { adeptPerk = adept; masterPerk = master; return this; }
     public Spell recast(java.util.function.Predicate<net.minecraft.world.entity.player.Player> when, int mana) { recast = when; recastCost = mana; return this; }
+    public Spell chargeFx(java.util.function.BiConsumer<net.minecraft.server.level.ServerPlayer, Float> f) { chargeFx = f; return this; }
     public Spell onCast(Cast c) { cast = c; return this; }
     public Spell onChannel(Channel c) { channel = c; return this; }
     public Spell onEnd(End e) { end = e; return this; }

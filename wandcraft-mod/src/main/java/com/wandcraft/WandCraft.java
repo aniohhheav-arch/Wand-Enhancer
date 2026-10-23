@@ -1,6 +1,9 @@
 package com.wandcraft;
 
 import com.wandcraft.entity.SpellProjectile;
+import com.wandcraft.entity.DebrisEntity;
+import com.wandcraft.entity.ShadowClone;
+import com.wandcraft.entity.SpellBeam;
 import com.wandcraft.entity.SpellZone;
 import com.wandcraft.item.WandItem;
 import com.wandcraft.magic.Magic;
@@ -61,6 +64,15 @@ public class WandCraft {
     public static final Supplier<EntityType<SpellZone>> SPELL_ZONE = ENTITIES.register("spell_zone",
             () -> EntityType.Builder.<SpellZone>of(SpellZone::new, MobCategory.MISC)
                     .sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(20).noSave().fireImmune().build("spell_zone"));
+    public static final Supplier<EntityType<SpellBeam>> SPELL_BEAM = ENTITIES.register("spell_beam",
+            () -> EntityType.Builder.<SpellBeam>of(SpellBeam::new, MobCategory.MISC)
+                    .sized(0.2f, 0.2f).clientTrackingRange(10).updateInterval(1).noSave().fireImmune().build("spell_beam"));
+    public static final Supplier<EntityType<DebrisEntity>> DEBRIS = ENTITIES.register("debris",
+            () -> EntityType.Builder.<DebrisEntity>of(DebrisEntity::new, MobCategory.MISC)
+                    .sized(0.5f, 0.5f).clientTrackingRange(8).updateInterval(1).noSave().build("debris"));
+    public static final Supplier<EntityType<ShadowClone>> SHADOW_CLONE = ENTITIES.register("shadow_clone",
+            () -> EntityType.Builder.<ShadowClone>of(ShadowClone::new, MobCategory.MISC)
+                    .sized(0.6f, 1.8f).clientTrackingRange(8).noSave().build("shadow_clone"));
     public static final Supplier<AttachmentType<PlayerMagic>> MAGIC = ATTACHMENTS.register("magic",
             () -> AttachmentType.serializable(PlayerMagic::new).copyOnDeath().build());
     public static final Supplier<CreativeModeTab> TAB = TABS.register("wandcraft", () -> CreativeModeTab.builder()
@@ -71,15 +83,19 @@ public class WandCraft {
 
     public WandCraft(IEventBus bus, ModContainer container) {
         Spells.init();
+        ModParticles.PARTICLES.register(bus);
         BLOCKS.register(bus);
         ITEMS.register(bus);
         ENTITIES.register(bus);
         ATTACHMENTS.register(bus);
         TABS.register(bus);
         bus.addListener(this::registerPayloads);
+        bus.addListener((net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent e) -> e.put(SHADOW_CLONE.get(), ShadowClone.attributes().build()));
         container.registerConfig(ModConfig.Type.COMMON, Config.COMMON);
         container.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(MagicEvents.class);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.DefenseEvents.class);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.DarkEvents.class);
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent e) {
