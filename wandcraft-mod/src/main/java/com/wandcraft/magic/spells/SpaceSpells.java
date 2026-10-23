@@ -102,20 +102,6 @@ final class SpaceSpells {
         return 0;
     }
 
-    record Gate(Vec3 pos, Vec3 normal) {
-        float yaw() { return (float) (Mth.atan2(-normal.x, normal.z) * Mth.RAD_TO_DEG); }
-    }
-
-    static boolean gateFree(ServerLevel l, ServerPlayer p, Vec3 base) {
-        BlockPos bp = BlockPos.containing(base);
-        if (!l.mayInteract(p, bp)) return false;
-        for (int h = 0; h < 2; h++) {
-            BlockPos q = bp.above(h);
-            if (!l.getBlockState(q).getCollisionShape(l, q).isEmpty()) return false;
-        }
-        return true;
-    }
-
     static void register() {
         Spells.add(Spell.of("blink", "Blink", SPACE, INSTANT).icon(Glyph.WINGS).cost(10).cd(40).level(0)
                 .desc("Teleport up to 12 blocks toward your crosshair, stopping at the nearest safe spot before any obstruction.")
@@ -126,77 +112,151 @@ final class SpaceSpells {
                 .desc("Blink evolved: step through a small violet rift up to 24 blocks away and leave a rippling portal afterimage.")
                 .onCast(c -> teleport(c, 24, true)));
 
-        Spells.add(Spell.of("portal_pair", "Portal Pair", SPACE, INSTANT).icon(Glyph.SWIRL).cost(36).cd(400).level(9)
-                .desc("Open two linked portals: one where you aim, one in front of you. You and other creatures can step through. They close after 15 seconds.")
-                .zone(new ZoneBehavior() {
-                    @Override public void tick(SpellZone z) {
-                        if (z.age % 2 != 0 || !(z.extra instanceof Gate[] gates)) return;
-                        ServerLevel l = (ServerLevel) z.level();
-                        long now = l.getGameTime();
-                        for (int i = 0; i < 2; i++) {
-                            Gate g = gates[i], other = gates[1 - i];
-                            Vec3 centre = g.pos().add(0, 1.2, 0);
-                            for (Entity e : l.getEntitiesOfClass(Entity.class, new AABB(centre, centre).inflate(0.9, 1.3, 0.9),
-                                    e -> (e instanceof LivingEntity le && le.isAlive() && !le.isSpectator()) || e instanceof ItemEntity)) {
-                                if (e.getPersistentData().getLong("wc_portal_t") > now) continue;
-                                Vec3 dest = other.pos().add(other.normal().scale(1.1));
-                                e.getPersistentData().putLong("wc_portal_t", now + 30);
-                                Vec3 v = e.getDeltaMovement();
-                                float yaw = other.yaw() + 180f;
-                                e.teleportTo(l, dest.x, dest.y, dest.z, Set.of(), yaw, e.getXRot());
-                                e.setDeltaMovement(other.normal().scale(Math.max(0.3, v.length())));
-                                e.hurtMarked = true;
-                                Fx.burst(l, rift(1f), dest.add(0, 1, 0), 14, 0.4, 0.1);
-                                Fx.sound(l, dest, SoundEvents.ENDERMAN_TELEPORT, 0.6f, 1.2f);
-                                if (z.prop != null) z.prop.act();
-                                if (e != z.owner()) z.credit(1);
-                            }
-                        }
-                    }
-                })
+        Spells.add(Spell.of("portal_pair", "Portal Pair", SPACE, INSTANT).icon(Glyph.PORTAL).cost(36).cd(400).level(9)
+                .desc("Cast once to open the first portal where you aim; cast again to open the linked second portal within range. Step through either one. Sneak-cast to close them. They close on their own, or if either is blocked.")
+                .recast(p -> {
+                    int st = Magic.of(p).portalState;
+                    return st == 1 || (st == 2 && p.isShiftKeyDown());
+                }, 14)
+                .zone(PortalSystem.BEHAVIOR)
                 .onCast(c -> {
                     ServerPlayer p = c.player;
-                    BlockHitResult hit = Aim.block(p, 28);
-                    if (hit.getType() != HitResult.Type.BLOCK) {
-                        Casting.fail(p, "Aim at a surface");
-                        return -1;
+                    ServerLevel l = c.level;
+                    PlayerMagic m = Magic.of(p);
+                    SpellZone zone = m.portalZone == null ? null : l.getEntity(m.portalZone) instanceof SpellZone zz && !zz.isRemoved() ? zz : null;
+                    if (zone == null && m.portalState != 0) {
+                        m.portalState = 0;
+                        m.portalZone = null;
                     }
-                    Vec3 n;
-                    Vec3 base;
-                    if (hit.getDirection().getAxis().isHorizontal()) {
-                        n = new Vec3(hit.getDirection().getStepX(), 0, hit.getDirection().getStepZ());
-                        base = hit.getLocation().add(n.scale(0.05));
-                        base = new Vec3(base.x, Math.floor(base.y), base.z);
-                    } else {
-                        Vec3 toP = p.position().subtract(hit.getLocation());
-                        n = new Vec3(toP.x, 0, toP.z).normalize();
-                        base = hit.getLocation().add(0, hit.getDirection() == net.minecraft.core.Direction.UP ? 0.02 : -2.0, 0);
+                    // Sneak-cast with a linked pair: dismiss it for free.
+                    if (zone != null && m.portalState == 2 && p.isShiftKeyDown()) {
+                        zone.discard();
+                        c.free = true;
+                        c.noCooldown = true;
+                        return 0;
                     }
-                    Vec3 look = c.look();
-                    Vec3 h = new Vec3(look.x, 0, look.z).normalize();
-                    Vec3 near = p.position().add(h.scale(2.6));
-                    var ground = Aim.stepGround(c.level, BlockPos.containing(near).below());
-                    if (ground.isEmpty()) {
-                        Casting.fail(p, "No room for the second portal");
-                        return -1;
+                    BlockHitResult hit = Aim.block(p, 30);
+                    if (zone != null && m.portalState == 1 && zone.extra instanceof PortalSystem.Link link) {
+                        PortalSystem.Gate b = PortalSystem.fromSurface(l, p, hit, "portal_magenta", 0.78f, 2);
+                        if (b == null) return -1;
+                        if (b.pos().distanceTo(link.gates[0].pos()) > com.wandcraft.Config.PORTAL_MAX_DISTANCE.get()) {
+                            Casting.fail(p, "Too far from the first portal");
+                            return -1;
+                        }
+                        if (b.pos().distanceTo(link.gates[0].pos()) < 2.0) {
+                            Casting.fail(p, "Too close to the first portal");
+                            return -1;
+                        }
+                        link.gates[1] = b;
+                        link.count = 2;
+                        link.props[1] = PortalSystem.spawnProp(l, b, 100000);
+                        link.props[1].follow(zone, b.pos().subtract(zone.position()));
+                        zone.setMaxAge(zone.age + PortalSystem.duration());
+                        m.portalState = 2;
+                        m.dirty = true;
+                        ripple(l, b.pos(), 3f);
+                        Fx.sound(l, b.pos(), SoundEvents.END_PORTAL_SPAWN, 0.5f, 1.8f);
+                        Fx.sound(l, link.gates[0].pos(), SoundEvents.AMETHYST_BLOCK_RESONATE, 0.8f, 1.9f);
+                        Magic.setCooldown(p, c.spell, c.spell.cooldownTicks());
+                        return 0;
                     }
-                    Vec3 b2 = Vec3.atBottomCenterOf(ground.get());
-                    Gate a = new Gate(base, n), b = new Gate(b2, h.scale(-1));
-                    if (!gateFree(c.level, p, a.pos()) || !gateFree(c.level, p, b.pos()) || a.pos().distanceTo(b.pos()) < 3) {
-                        Casting.fail(p, "Portals need open space");
-                        return -1;
-                    }
-                    SpellZone z = Proj.zone(c, c.spell, a.pos(), 1f, 300);
+                    if (zone != null) zone.discard();
+                    PortalSystem.Gate a = PortalSystem.fromSurface(l, p, hit, "portal_violet", 0.78f, 2);
+                    if (a == null) return -1;
+                    SpellZone z = Proj.zone(c, c.spell, a.pos(), 1f, 1200);
                     if (z == null) return -1;
-                    z.extra = new Gate[]{a, b};
-                    SpellProp pa = SpellProp.spawn(c.level, "portal_blue", a.pos(), 0.9f, 320).facing(a.yaw(), 0f);
-                    SpellProp pb = SpellProp.spawn(c.level, "portal_orange", b.pos(), 0.9f, 320).facing(b.yaw(), 0f);
-                    pa.follow(z, Vec3.ZERO);
-                    z.prop = pa;
-                    pb.follow(z, b.pos().subtract(a.pos()));
-                    ripple(c.level, a.pos(), 3f);
-                    ripple(c.level, b.pos(), 3f);
-                    Fx.sound(c.level, a.pos(), SoundEvents.END_PORTAL_SPAWN, 0.5f, 1.6f);
+                    PortalSystem.Link link = new PortalSystem.Link();
+                    link.gates[0] = a;
+                    link.count = 1;
+                    link.props[0] = PortalSystem.spawnProp(l, a, 100000);
+                    link.props[0].follow(z, Vec3.ZERO);
+                    z.prop = link.props[0];
+                    z.extra = link;
+                    m.portalZone = z.getUUID();
+                    m.portalState = 1;
+                    m.dirty = true;
+                    c.noCooldown = true;
+                    ripple(l, a.pos(), 3f);
+                    Fx.sound(l, a.pos(), SoundEvents.END_PORTAL_SPAWN, 0.5f, 1.4f);
+                    p.displayClientMessage(net.minecraft.network.chat.Component.literal("First portal open. Cast again to place its partner."), true);
+                    return 0;
+                }));
+
+        Spells.add(Spell.of("rift_gate", "Rift Gate", SPACE, INSTANT).icon(Glyph.PORTAL).cost(60).cd(1100).level(14).masters(2)
+                .desc("Tear open a huge, layered rift on the surface you aim at. Walk through it to arrive where you cast; a smaller rift there leads back. Lasts 90 seconds.")
+                .zone(PortalSystem.BEHAVIOR)
+                .onCast(c -> {
+                    ServerPlayer p = c.player;
+                    ServerLevel l = c.level;
+                    BlockHitResult hit = Aim.block(p, 30);
+                    PortalSystem.Gate big = PortalSystem.fromSurface(l, p, hit, "rift_gate", 0.68f, 3);
+                    if (big == null) return -1;
+                    Vec3 look = c.look();
+                    Vec3 h = new Vec3(look.x, 0, look.z);
+                    h = h.lengthSqr() < 1e-3 ? Vec3.directionFromRotation(0, p.getYRot()) : h.normalize();
+                    PortalSystem.Gate home = null;
+                    for (double back : new double[]{1.0, 1.6, 2.2}) {
+                        Vec3 pos = p.position().subtract(h.scale(back));
+                        var gr = Aim.stepGround(l, BlockPos.containing(pos).below());
+                        if (gr.isEmpty()) continue;
+                        PortalSystem.Gate cand = new PortalSystem.Gate(Vec3.atBottomCenterOf(gr.get()), h, "portal_magenta", 0.7f, 2, false);
+                        if (PortalSystem.stillValid(l, cand) && l.mayInteract(p, gr.get()) && cand.pos().distanceTo(big.pos()) > 3) {
+                            home = cand;
+                            break;
+                        }
+                    }
+                    if (home == null) {
+                        Casting.fail(p, "No room for the arrival rift behind you");
+                        return -1;
+                    }
+                    SpellZone z = Proj.zone(c, c.spell, big.pos(), 1f, PortalSystem.gateDuration());
+                    if (z == null) return -1;
+                    PortalSystem.Link link = new PortalSystem.Link();
+                    link.gates[0] = big;
+                    link.gates[1] = home;
+                    link.count = 2;
+                    link.props[0] = PortalSystem.spawnProp(l, big, 100000);
+                    link.props[1] = PortalSystem.spawnProp(l, home, 100000);
+                    link.props[0].follow(z, Vec3.ZERO);
+                    link.props[1].follow(z, home.pos().subtract(big.pos()));
+                    z.prop = link.props[0];
+                    z.extra = link;
+                    ripple(l, big.pos().add(0, 1, 0), 5f);
+                    ripple(l, home.pos(), 3f);
+                    Fx.sound(l, big.pos(), SoundEvents.END_PORTAL_SPAWN, 1f, 0.9f);
+                    Fx.sound(l, big.pos(), SoundEvents.WARDEN_SONIC_BOOM, 0.4f, 1.6f);
+                    return 0;
+                }));
+
+        Spells.add(Spell.of("blink_rift", "Blink Rift", SPACE, INSTANT).icon(Glyph.PORTAL).cost(18).cd(100).level(6)
+                .desc("Teleport up to 16 blocks toward your crosshair through two circular rifts: one where you leave, one where you land. Both collapse into fading violet motes.")
+                .onCast(c -> {
+                    Vec3 dest = blinkDest(c, 16);
+                    if (dest == null) {
+                        Casting.fail(c.player, "No safe place to land");
+                        return -1;
+                    }
+                    ServerLevel l = c.level;
+                    Vec3 from = c.player.position();
+                    Vec3 travel = dest.subtract(from);
+                    float yaw = (float) (Mth.atan2(-travel.x, travel.z) * Mth.RAD_TO_DEG);
+                    SpellProp a = SpellProp.spawn(l, "rift_circle", from, 0.6f, 34).facing(yaw, 0f);
+                    ripple(l, from, 2.5f);
+                    Fx.sound(l, from, SoundEvents.PORTAL_TRIGGER, 0.2f, 1.9f);
+                    c.player.teleportTo(dest.x, dest.y, dest.z);
+                    c.player.fallDistance = 0;
+                    SpellProp b = SpellProp.spawn(l, "rift_circle", dest, 0.6f, 34).facing(yaw + 180f, 0f);
+                    ripple(l, dest, 3f);
+                    Fx.line(l, Fx.spark(0xC8A0FF, 0.5f), from.add(0, 1, 0), dest.add(0, 1, 0), 0.45);
+                    Fx.sound(l, from, SoundEvents.ENDERMAN_TELEPORT, 0.7f, 1.5f);
+                    Fx.sound(l, dest, SoundEvents.ENDERMAN_TELEPORT, 0.7f, 1.1f);
+                    // The rifts collapse shortly after, leaving a few fading violet motes.
+                    Scheduler.after(l, 26, () -> {
+                        for (Vec3 at : new Vec3[]{from, dest}) {
+                            Fx.burst(l, Fx.glow(0x9A5BFF, 0.9f), at.add(0, 1, 0), 22, 0.6, 0.03);
+                            Fx.burst(l, Fx.wisp(0x2A0A55, 0.9f), at.add(0, 1, 0), 8, 0.5, 0.02);
+                        }
+                    });
                     return 0;
                 }));
 
@@ -261,7 +321,7 @@ final class SpaceSpells {
 
         Spells.add(Spell.of("rift_snare", "Rift Snare", SPACE, INSTANT).icon(Glyph.SWIRL).cost(20).cd(180).level(6)
                 .desc("Tear a small rift beneath a target. It slows and drags the target toward its centre, then collapses with a small implosion.")
-                .prop("void_orb", 0.18f, 0.9)
+                
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {
                         ServerLevel l = (ServerLevel) z.level();
@@ -277,9 +337,15 @@ final class SpaceSpells {
                             }
                         }
                         if (z.age % 6 == 0) Fx.sound(l, c, SoundEvents.PORTAL_AMBIENT, 0.3f, 1.6f);
+                        if (z.age % 3 == 0) {
+                            // shadowy tendrils reach in from the rim toward the centre
+                            double a = l.random.nextDouble() * Math.PI * 2;
+                            DarkSpells.tendril(l, c.add(Math.cos(a) * z.radius() * 0.9, 0.1, Math.sin(a) * z.radius() * 0.9), c.add(0, 0.6, 0), z.age);
+                        }
                     }
                     @Override public void end(SpellZone z) {
                         ServerLevel l = (ServerLevel) z.level();
+                        if (z.extra instanceof SpellProp rift) rift.dismiss();
                         DarkSpells.implode(l, z.position().add(0, 0.8, 0), z.radius(), 26);
                         Fx.sound(l, z.position(), SoundEvents.GENERIC_EXPLODE.value(), 0.5f, 1.4f);
                         int n = 0;
@@ -300,7 +366,11 @@ final class SpaceSpells {
                         Casting.fail(c.player, "No target");
                         return -1;
                     }
-                    if (Proj.zone(c, c.spell, t.position(), 2.6f, 55) == null) return -1;
+                    SpellZone sz = Proj.zone(c, c.spell, t.position(), 2.6f, 55);
+                    if (sz == null) return -1;
+                    SpellProp rift = SpellProp.spawn(c.level, "rift_floor", t.position().add(0, 0.05, 0), 2.1f, 58);
+                    sz.extra = rift;
+                    Scheduler.after(c.level, 12, () -> { if (!rift.isRemoved()) rift.act(); });
                     Fx.sound(c.level, t.position(), SoundEvents.END_PORTAL_FRAME_FILL, 1f, 0.6f);
                     return 0;
                 }));

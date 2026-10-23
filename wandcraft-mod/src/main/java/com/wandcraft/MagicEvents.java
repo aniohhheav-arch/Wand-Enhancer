@@ -91,7 +91,10 @@ public final class MagicEvents {
 
     @SubscribeEvent
     public static void login(PlayerEvent.PlayerLoggedInEvent e) {
-        if (e.getEntity() instanceof ServerPlayer p) Magic.sync(p);
+        if (e.getEntity() instanceof ServerPlayer p) {
+            Magic.of(p).portalState = 0;
+            Magic.sync(p);
+        }
     }
 
     @SubscribeEvent
@@ -118,10 +121,59 @@ public final class MagicEvents {
         }
     }
 
+    private static final java.util.function.Predicate<net.minecraft.commands.CommandSourceStack> OP = src -> src.hasPermission(2);
+
+    private static Component state(boolean enabled) {
+        return Component.literal(enabled ? "enabled" : "disabled").withStyle(enabled ? net.minecraft.ChatFormatting.GREEN : net.minecraft.ChatFormatting.RED);
+    }
+
+    private static void syncAll(net.minecraft.server.MinecraftServer server) {
+        for (ServerPlayer sp : server.getPlayerList().getPlayers()) Magic.sync(sp);
+    }
+
+    private static int setWorldCooldowns(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack> c, boolean off) {
+        var server = c.getSource().getServer();
+        com.wandcraft.magic.WandSettings.get(server).setCooldownsDisabled(off);
+        syncAll(server);
+        c.getSource().sendSuccess(() -> Component.literal("Spell cooldowns are now ").append(state(!off)).append(Component.literal(" for this world."
+                + (off ? " Mana costs still apply." : ""))), true);
+        return 1;
+    }
+
+    private static int setSelfCooldowns(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack> c, boolean off) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer p = c.getSource().getPlayerOrException();
+        Magic.of(p).cooldownsOff = off;
+        Magic.of(p).dirty = true;
+        Magic.sync(p);
+        c.getSource().sendSuccess(() -> Component.literal("Your personal spell cooldown override is now ").append(state(!off))
+                .append(Component.literal(off ? " (cooldowns ignored for you)." : " (normal cooldowns for you, unless the world setting is off).")), false);
+        return 1;
+    }
+
+    private static int cooldownStatus(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack> c, boolean selfOnly) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        boolean world = com.wandcraft.magic.WandSettings.get(c.getSource().getServer()).cooldownsDisabled();
+        if (selfOnly) {
+            ServerPlayer p = c.getSource().getPlayerOrException();
+            boolean selfOff = Magic.of(p).cooldownsOff;
+            c.getSource().sendSuccess(() -> Component.literal("Your personal cooldown override: ").append(state(!selfOff))
+                    .append(Component.literal(" (effective for you: ")).append(state(!(selfOff || world))).append(Component.literal(")")), false);
+        } else {
+            c.getSource().sendSuccess(() -> Component.literal("World spell cooldowns are ").append(state(!world)).append(Component.literal(".")), false);
+        }
+        return world ? 0 : 1;
+    }
+
     @SubscribeEvent
     public static void commands(RegisterCommandsEvent e) {
-        e.getDispatcher().register(Commands.literal("wandcraft").requires(s -> s.hasPermission(2))
-                .then(Commands.literal("level").then(Commands.argument("n", IntegerArgumentType.integer(0, 30)).executes(c -> {
+        e.getDispatcher().register(Commands.literal("wandcraft")
+                .then(Commands.literal("cooldowns")
+                        .then(Commands.literal("status").executes(c -> cooldownStatus(c, false))
+                                .then(Commands.literal("self").executes(c -> cooldownStatus(c, true))))
+                        .then(Commands.literal("off").requires(OP).executes(c -> setWorldCooldowns(c, true))
+                                .then(Commands.literal("self").executes(c -> setSelfCooldowns(c, true))))
+                        .then(Commands.literal("on").requires(OP).executes(c -> setWorldCooldowns(c, false))
+                                .then(Commands.literal("self").executes(c -> setSelfCooldowns(c, false)))))
+                .then(Commands.literal("level").requires(OP).then(Commands.argument("n", IntegerArgumentType.integer(0, 30)).executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     PlayerMagic m = Magic.of(p);
                     int n = IntegerArgumentType.getInteger(c, "n");
@@ -132,7 +184,7 @@ public final class MagicEvents {
                     c.getSource().sendSuccess(() -> Component.literal("Wizard level set to " + n), true);
                     return 1;
                 })))
-                .then(Commands.literal("master").then(Commands.argument("spell", StringArgumentType.word()).executes(c -> {
+                .then(Commands.literal("master").requires(OP).then(Commands.argument("spell", StringArgumentType.word()).executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     String id = StringArgumentType.getString(c, "spell");
                     Spell s = id.equals("all") ? null : Spells.get(id);
@@ -147,7 +199,7 @@ public final class MagicEvents {
                     Magic.sync(p);
                     return 1;
                 })))
-                .then(Commands.literal("prop").then(Commands.argument("kind", StringArgumentType.word()).executes(c -> {
+                .then(Commands.literal("prop").requires(OP).then(Commands.argument("kind", StringArgumentType.word()).executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     String kind = StringArgumentType.getString(c, "kind");
                     if (com.wandcraft.entity.Props.get(kind) == null) {
@@ -159,13 +211,13 @@ public final class MagicEvents {
                     pr.facing(p.getYRot() + 180f, 0f);
                     return 1;
                 })))
-                .then(Commands.literal("mana").executes(c -> {
+                .then(Commands.literal("mana").requires(OP).executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     Magic.of(p).mana = Magic.of(p).maxMana();
                     Magic.sync(p);
                     return 1;
                 }))
-                .then(Commands.literal("reset").executes(c -> {
+                .then(Commands.literal("reset").requires(OP).executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     PlayerMagic m = Magic.of(p);
                     m.uses.clear();

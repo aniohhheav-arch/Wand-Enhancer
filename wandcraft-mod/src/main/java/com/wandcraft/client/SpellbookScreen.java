@@ -70,7 +70,7 @@ public class SpellbookScreen extends Screen {
             int c = s.category.color;
             g.fill(left + 4, y, left + panelW - 4, y + ROW - 2, Draw.argb(hov ? c : 0x151625, hov ? 70 : 220));
             if (s.id.equals(sel)) g.renderOutline(left + 4, y, panelW - 8, ROW - 2, Draw.argb(0xFFFFFF, 220));
-            Draw.glyph(g, s.icon, left + 8, y + 3, 2, unlocked ? c : 0x66666E, unlocked ? 255 : 130);
+            Draw.spellIcon(g, s, left + 20, y + ROW / 2 - 1, 24, !unlocked, 1f);
             g.drawString(font, s.name, left + 38, y + 3, unlocked ? 0xFFFFFFFF : 0xFF8A8A92, false);
             String meta = s.category.display + " · " + (s.mode == CastMode.INSTANT ? "Instant" : s.mode == CastMode.CHARGE ? "Charge" : "Channel");
             g.drawString(font, meta, left + 38, y + 13, Draw.argb(c, 255), false);

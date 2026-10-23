@@ -60,4 +60,17 @@ final class Draw {
         g.fill(cx + 2, cy - 4, cx + 3, cy - 1, argb);
         g.fill(cx - 2, cy - 5, cx + 3, cy - 4, argb);
     }
+
+    private static final java.util.Map<String, net.minecraft.resources.ResourceLocation> ICONS = new java.util.HashMap<>();
+
+    static net.minecraft.resources.ResourceLocation icon(String id) {
+        return ICONS.computeIfAbsent(id, k -> net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(com.wandcraft.WandCraft.ID, "textures/gui/spell/" + k + ".png"));
+    }
+
+    /** Draws a spell's own icon centred on (cx, cy); locked spells are greyed out. */
+    static void spellIcon(GuiGraphics g, com.wandcraft.magic.Spell s, int cx, int cy, int size, boolean locked, float alpha) {
+        if (locked) g.setColor(0.42f, 0.42f, 0.5f, alpha); else g.setColor(1f, 1f, 1f, alpha);
+        g.blit(icon(s.id), cx - size / 2, cy - size / 2, size, size, 0, 0, 32, 32, 32, 32);
+        g.setColor(1f, 1f, 1f, 1f);
+    }
 }

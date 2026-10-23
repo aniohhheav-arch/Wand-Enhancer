@@ -8,6 +8,6 @@ final class PlayerHint {
 
     static void draw(GuiGraphics g, Font font, int w, int h) {
         String s = "Release to select  ·  Scroll / ← → change school  ·  [B] Spellbook";
-        g.drawCenteredString(font, s, w / 2, 6, 0xFF8890A0);
+        g.drawCenteredString(font, s, w / 2, 4, 0xFF8890A0);
     }
 }

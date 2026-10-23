@@ -24,10 +24,11 @@ final class SpellView {
     static int cost(Spell s) { return Magic.cost(player(), s); }
 
     static float cooldownFraction(Spell s) {
+        if (Magic.cooldownsDisabled(player())) return 0;
         long end = magic().cooldownEnd.getOrDefault(s.id, 0L);
         long now = player().level().getGameTime();
         if (end <= now) return 0;
-        float total = Math.max(2f, s.cooldown * rank(s).cooldownMul);
+        float total = Math.max(2f, s.cooldownTicks() * rank(s).cooldownMul);
         return Math.min(1f, (end - now) / total);
     }
 

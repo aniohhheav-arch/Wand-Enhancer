@@ -20,16 +20,16 @@ class Geo:
             self.bones[name]["rotation"] = list(rot)
         return name
 
-    def cube(self, bone, origin, size, sw=0, rot=None, pivot=None):
-        c = {"origin": [round(v, 3) for v in origin], "size": [round(v, 3) for v in size], "uv": uvs(sw)}
+    def cube(self, bone, origin, size, sw=0, rot=None, pivot=None, uv=None):
+        c = {"origin": [round(v, 3) for v in origin], "size": [round(v, 3) for v in size], "uv": uv if uv is not None else uvs(sw)}
         if rot is not None:
             c["rotation"] = list(rot)
             c["pivot"] = list(pivot if pivot is not None else [origin[0] + size[0] / 2, origin[1] + size[1] / 2, origin[2] + size[2] / 2])
         self.bones[bone]["cubes"].append(c)
 
-    def box_c(self, bone, centre, size, sw=0, rot=None):
+    def box_c(self, bone, centre, size, sw=0, rot=None, uv=None):
         o = [centre[0] - size[0] / 2, centre[1] - size[1] / 2, centre[2] - size[2] / 2]
-        self.cube(bone, o, size, sw, rot, list(centre))
+        self.cube(bone, o, size, sw, rot, list(centre), uv)
 
     def ring(self, bone, radius, y, width, height, segs, sw=0, tilt=(0, 0, 0)):
         """Ring of tangent boxes around the Y axis (pivot at the origin); tilt rotates the whole ring about its centre."""
@@ -146,3 +146,91 @@ def texture(path, pal, alphas=(255, 255, 255, 255), noise=12):
                 px[(sw % 4) * 8 + x, (sw // 4) * 8 + y] = tuple(max(0, min(255, k + v)) for k in c) + (al,)
     os.makedirs(os.path.dirname(R + 'textures/entity/prop/' + path), exist_ok=True)
     im.save(R + 'textures/entity/prop/' + path)
+
+
+def swirl_uvs(front_faces=("north", "south"), flat_faces=(), sw_other=3):
+    """UV map for a pane whose broad faces show the animated swirl region (x 32..63, y 0..63 of a 64x64 frame)."""
+    cx, cy = (sw_other % 4) * 8, (sw_other // 4) * 8
+    d = {f: {"uv": [cx, cy], "uv_size": [8, 8]} for f in ("north", "east", "south", "west", "up", "down")}
+    for f in tuple(front_faces) + tuple(flat_faces):
+        d[f] = {"uv": [32, 0], "uv_size": [32, 64]}
+    return d
+
+def _noise_grid(n, seed):
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    return rng.random((n, n))
+
+def texture_anim(path, pal, alphas=(255, 255, 255, 255), frames=20, frametime=2, seed=3, core=(1.0, 0.95, 1.0)):
+    """Animated 64x64 frames stacked vertically. Left 32x32: palette swatches (rim runes). Right 32x64: a swirling
+    vortex whose spiral arms and turbulence rotate over the loop, with a bright core and soft circular alpha edge."""
+    import numpy as np
+    pal = [np.array(c, dtype=float) for c in pal]
+    grid = _noise_grid(64, seed)
+    def vnoise(x, y):
+        x0, y0 = np.floor(x).astype(int) % 64, np.floor(y).astype(int) % 64
+        x1, y1 = (x0 + 1) % 64, (y0 + 1) % 64
+        fx, fy = x - np.floor(x), y - np.floor(y)
+        fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
+        a = grid[y0, x0] * (1 - fx) + grid[y0, x1] * fx
+        b = grid[y1, x0] * (1 - fx) + grid[y1, x1] * fx
+        return a * (1 - fy) + b * fy
+    W, H = 32, 64
+    ys, xs = np.mgrid[0:H, 0:W]
+    u = (xs / (W - 1)) * 2 - 1
+    v = (ys / (H - 1)) * 2 - 1
+    r = np.sqrt(u * u + v * v)
+    th = np.arctan2(v, u)
+    strip = Image.new('RGBA', (64, 64 * frames))
+    # rune swatches are identical on every frame except for a travelling glow
+    base_sw = Image.new('RGBA', (32, 32))
+    rng = np.random.default_rng(seed + 1)
+    for sw in range(16):
+        c = pal[sw % 4]
+        al = alphas[sw % 4]
+        tile = np.zeros((8, 8, 4))
+        for y in range(8):
+            for x in range(8):
+                tile[y, x, :3] = np.clip(c + rng.integers(-12, 12), 0, 255)
+                tile[y, x, 3] = al
+        if sw % 4 in (0, 1):   # engraved rune strokes
+            for _ in range(3):
+                x, y = rng.integers(0, 8), rng.integers(0, 8)
+                dx, dy = rng.choice([-1, 0, 1]), rng.choice([-1, 0, 1])
+                for k in range(rng.integers(3, 6)):
+                    tile[(y + dy * k) % 8, (x + dx * k) % 8, :3] = pal[2]
+        base_sw.paste(Image.fromarray(tile.astype('uint8'), 'RGBA'), ((sw % 4) * 8, (sw // 4) * 8))
+    for f in range(frames):
+        t = f / frames
+        ang = 2 * math.pi * t
+        # spiral arms (three) winding inward, rotating with time
+        arms = 0.5 + 0.5 * np.sin(3 * th + 7.0 * np.log(r + 0.08) - ang * 2)
+        # swirling turbulence: sample noise in a rotated frame whose rotation grows toward the centre
+        rot = ang + 2.2 / (r + 0.35)
+        nx = (np.cos(rot) * u - np.sin(rot) * v) * 9 + 20
+        ny = (np.sin(rot) * u + np.cos(rot) * v) * 9 + 20
+        turb = 0.6 * vnoise(nx, ny) + 0.4 * vnoise(nx * 2.1 + 7, ny * 2.1 + 3)
+        val = np.clip(0.55 * arms + 0.55 * turb, 0, 1)
+        val = np.clip(val + (1 - np.clip(r, 0, 1)) ** 2.4 * 0.9, 0, 1)
+        # colour ramp dark -> main -> accent -> bright
+        out = np.zeros((H, W, 3))
+        for i in range(3):
+            lo = np.clip(val * 3, 0, 1)
+            mid = np.clip(val * 3 - 1, 0, 1)
+            hi = np.clip(val * 3 - 2, 0, 1)
+            out[:, :, i] = pal[3][i] * (1 - lo) + (pal[0][i] * (1 - mid) + pal[1][i] * mid) * lo
+            out[:, :, i] = out[:, :, i] * (1 - hi) + pal[2][i] * hi
+        rimglow = np.clip(1 - np.abs(r - 0.93) * 14, 0, 1)
+        out = out * (1 - rimglow[..., None]) + pal[2] * rimglow[..., None]
+        alpha = np.clip((1.0 - r) / 0.10, 0, 1) * (150 + 100 * val)
+        alpha = np.maximum(alpha, rimglow * 255)
+        rgba = np.dstack([out, alpha]).clip(0, 255).astype('uint8')
+        frame = Image.new('RGBA', (64, 64))
+        frame.paste(base_sw, (0, 0))
+        frame.paste(Image.fromarray(rgba, 'RGBA'), (32, 0))
+        strip.paste(frame, (0, 64 * f))
+    full = R + 'textures/entity/prop/' + path
+    os.makedirs(os.path.dirname(full), exist_ok=True)
+    strip.save(full)
+    with open(full + '.mcmeta', 'w') as fh:
+        json.dump({"animation": {"frametime": frametime, "interpolate": True}}, fh)

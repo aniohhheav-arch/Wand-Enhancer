@@ -51,6 +51,7 @@ public final class SpellTests {
             final int idx = i++;
             h.runAfterDelay(idx * 50L + 5, () -> {
                 m.mana = m.maxMana();
+                p.setHealth(p.getMaxHealth());
                 for (var z : zombies) { z.setHealth(z.getMaxHealth()); z.removeAllEffects(); z.clearFire(); }
                 m.cooldownEnd.clear();
                 p.moveTo(spawn.x, spawn.y, spawn.z, 0f, 0f);
@@ -81,5 +82,45 @@ public final class SpellTests {
                 throw new AssertionError("no spell damaged any zombie");
             h.succeed();
         });
+    }
+
+    /** The cooldown toggle must change real casting behaviour, for every spell, without touching mana. */
+    @GameTest(timeoutTicks = 200, template = "empty", templateNamespace = WandCraft.ID)
+    public static void cooldownToggle(GameTestHelper h) {
+        ServerPlayer p = h.makeMockServerPlayerInLevel();
+        p.setGameMode(GameType.SURVIVAL);
+        Vec3 spawn = h.absoluteVec(new Vec3(11.5, 2, 3.5));
+        p.moveTo(spawn.x, spawn.y, spawn.z, 0f, 0f);
+        PlayerMagic m = Magic.of(p);
+        m.uses.put("arcane_bolt", 100000);
+        m.mana = m.maxMana();
+        Spell s = Spells.get("arcane_bolt");
+        var settings = com.wandcraft.magic.WandSettings.get(h.getLevel().getServer());
+        settings.setCooldownsDisabled(false);
+
+        if (!Casting.cast(p, s, 1f)) throw new AssertionError("first cast failed");
+        if (Casting.blocker(p, s) == null) throw new AssertionError("expected a cooldown after casting");
+
+        settings.setCooldownsDisabled(true);
+        float before = m.mana;
+        if (Casting.blocker(p, s) != null) throw new AssertionError("world cooldown toggle ignored: " + Casting.blocker(p, s));
+        if (!Casting.cast(p, s, 1f)) throw new AssertionError("could not recast with cooldowns off");
+        if (m.mana >= before) throw new AssertionError("mana cost must still apply");
+        settings.setCooldownsDisabled(false);
+        if (Casting.blocker(p, s) != null && !Casting.blocker(p, s).contains("recharging")) throw new AssertionError("unexpected blocker");
+
+        // Personal override
+        m.cooldownEnd.put("arcane_bolt", h.getLevel().getGameTime() + 100);
+        if (Casting.blocker(p, s) == null) throw new AssertionError("expected cooldown restored");
+        m.cooldownsOff = true;
+        if (Casting.blocker(p, s) != null) throw new AssertionError("personal toggle ignored");
+        m.cooldownsOff = false;
+
+        // Mana still gates casting when cooldowns are off.
+        settings.setCooldownsDisabled(true);
+        m.mana = 0;
+        if (Casting.blocker(p, s) == null) throw new AssertionError("no mana must still block");
+        settings.setCooldownsDisabled(false);
+        h.succeed();
     }
 }

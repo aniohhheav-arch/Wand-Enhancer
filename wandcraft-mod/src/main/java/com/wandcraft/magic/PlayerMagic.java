@@ -20,6 +20,10 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
     public long pactCooldownUntil;
     public int overloadCharges;
     public long overloadUntil;
+    /** Player-specific override set by /wandcraft cooldowns off self. */
+    public boolean cooldownsOff;
+    /** Client-side mirror of the world-level cooldown setting (delivered with every sync). */
+    public transient boolean worldCooldownsOff;
     /** Items stored in the Pocket Rift. Persisted, so nothing is ever lost when the rift closes. */
     public final net.minecraft.world.SimpleContainer pocket = new net.minecraft.world.SimpleContainer(9);
 
@@ -42,6 +46,10 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
     public transient long softFallUntil;
     /** Mobs further than a few blocks lose track of a stealthed player. */
     public transient long stealthUntil;
+    /** Zone entity of the caster's current Portal Pair (server only). */
+    public transient java.util.UUID portalZone;
+    /** Synced for UI/casting checks: 0 none, 1 first portal placed, 2 linked pair open. */
+    public int portalState;
     public transient net.minecraft.world.phys.Vec3 anchorPos;
     public transient net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> anchorDim;
     public transient long anchorUntil;
@@ -72,6 +80,9 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
         t.putLong("pactcd", pactCooldownUntil);
         t.putInt("ovc", overloadCharges);
         t.putLong("ovt", overloadUntil);
+        t.putInt("portalState", portalState);
+        t.putBoolean("cdOffSelf", cooldownsOff);
+        t.putBoolean("cdOffWorld", worldCooldownsOff);
         t.put("pocket", pocket.createTag(p));
         return t;
     }
@@ -91,6 +102,9 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
         pactCooldownUntil = t.getLong("pactcd");
         overloadCharges = t.getInt("ovc");
         overloadUntil = t.getLong("ovt");
+        portalState = t.getInt("portalState");
+        cooldownsOff = t.getBoolean("cdOffSelf");
+        worldCooldownsOff = t.getBoolean("cdOffWorld");
         pocket.fromTag(t.getList("pocket", Tag.TAG_COMPOUND), p);
         if (selected.isEmpty()) selected = "arcane_bolt";
         dirty = true;

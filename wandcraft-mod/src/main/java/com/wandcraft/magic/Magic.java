@@ -15,7 +15,9 @@ public final class Magic {
 
     public static PlayerMagic of(Player p) { return p.getData(WandCraft.MAGIC.get()); }
 
-    public static boolean infinite(Player p) { return p.isCreative(); }
+    public static boolean infinite(Player p) {
+        return p instanceof ServerPlayer sp ? sp.gameMode.isCreative() : p.isCreative();
+    }
 
     public static boolean isUnlocked(Player p, Spell s) {
         if (infinite(p)) return true;
@@ -38,7 +40,16 @@ public final class Magic {
         return n;
     }
 
+    /** True when cooldowns do not apply to this player: the world setting or their personal override is off. */
+    public static boolean cooldownsDisabled(Player p) {
+        PlayerMagic m = of(p);
+        if (m.cooldownsOff) return true;
+        if (p.level().isClientSide) return m.worldCooldownsOff;
+        return p.getServer() != null && WandSettings.get(p.getServer()).cooldownsDisabled();
+    }
+
     public static boolean onCooldown(Player p, Spell s, long now) {
+        if (cooldownsDisabled(p)) return false;
         return of(p).cooldownEnd.getOrDefault(s.id, 0L) > now;
     }
 
@@ -66,6 +77,7 @@ public final class Magic {
     }
 
     public static void setCooldown(ServerPlayer p, Spell s, int ticks) {
+        if (cooldownsDisabled(p)) return;
         PlayerMagic m = of(p);
         float mul = infinite(p) ? 0.25f : m.rank(s.id).cooldownMul;
         m.cooldownEnd.put(s.id, p.level().getGameTime() + Math.max(2, Math.round(ticks * mul)));
@@ -104,6 +116,7 @@ public final class Magic {
     public static void sync(ServerPlayer p) {
         PlayerMagic m = of(p);
         m.dirty = false;
+        m.worldCooldownsOff = p.getServer() != null && WandSettings.get(p.getServer()).cooldownsDisabled();
         try {
             PacketDistributor.sendToPlayer(p, new SyncMagicPayload(m.serializeNBT(p.registryAccess())));
         } catch (UnsupportedOperationException ignored) {

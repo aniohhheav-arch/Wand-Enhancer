@@ -75,3 +75,10 @@ gradle runGameTestServer      # casts every spell against a field of enemies
 * Sounds are vanilla; there is no bespoke audio yet.
 * Screen effects (config flag exists) are reserved for Forbidden magic.
 * Multiplayer was exercised with a mock player only; a real two-client session has not been run.
+
+## Recent additions
+
+- **Portal magic**: Portal Pair (two-cast linked portals), Rift Gate, Blink Rift and Rift Snare, with animated swirl textures. `Reduced effects` is in the client config.
+- **Cooldown commands**: `/wandcraft cooldowns off|on|status` (world-wide, op only) and the `self` variants. The setting is applied in the casting logic, saved with the world and synced to clients.
+- **Spell icons**: each spell has its own generated icon (`tools/gen_icons.py`). The spell wheel, spellbook and HUD use them, and the wheel has a side detail panel and two rings for large schools.
+- Dark Clone possession is planned but not implemented yet.

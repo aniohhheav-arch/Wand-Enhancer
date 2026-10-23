@@ -68,11 +68,11 @@ public final class Casting {
         if (result < 0) return false;
         if (!echo) com.wandcraft.item.WandItem.playCast(p);
         if (!echo) {
-            Magic.spend(p, cost);
+            if (!c.free) Magic.spend(p, cost);
             if (s.healthCost > 0 && !Magic.infinite(p)) {
                 p.hurt(p.damageSources().magic(), s.healthCost);
             }
-            if (!recast) Magic.setCooldown(p, s, s.cooldown);
+            if (!recast && !c.noCooldown) Magic.setCooldown(p, s, s.cooldownTicks());
             if (m.stealthUntil > p.level().getGameTime() && !s.stealthSafe) {
                 m.stealthUntil = 0;
                 m.dirty = true;
@@ -136,7 +136,7 @@ public final class Casting {
                 CastCtx c = ctx(p, s, 1f, false, 1f);
                 s.end.end(new CastCtx(p, s, 1f, c.rank, c.power, false, m.channelState));
             }
-            Magic.setCooldown(p, s, s.cooldown);
+            Magic.setCooldown(p, s, s.cooldownTicks());
         }
         m.channelSpell = null;
         m.channelState = null;

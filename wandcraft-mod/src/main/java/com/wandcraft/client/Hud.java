@@ -36,7 +36,7 @@ final class Hud {
             int c = s.category.color;
             Draw.disc(g, ix + 12, iy + 12, 14, Draw.argb(0x07080F, 220));
             Draw.ring(g, ix + 12, iy + 12, 14, Draw.argb(c, 230));
-            Draw.glyph(g, s.icon, ix, iy, 2, c, 255);
+            Draw.spellIcon(g, s, ix + 12, iy + 12, 24, false, 1f);
             float cd = SpellView.cooldownFraction(s);
             if (cd > 0) g.fill(ix + 2, iy + 24 - (int) (22 * cd), ix + 22, iy + 24, 0x99000000);
             Rank r = SpellView.rank(s);

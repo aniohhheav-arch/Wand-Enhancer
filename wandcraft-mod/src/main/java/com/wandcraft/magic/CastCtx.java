@@ -20,6 +20,10 @@ public final class CastCtx {
     /** Scratch space that survives for the duration of a channel. */
     public final Map<String, Object> state;
     int hits;
+    /** Set by a spell to skip the cooldown for this particular cast (first half of a two-step spell). */
+    public boolean noCooldown;
+    /** Set by a spell to skip the mana cost for this cast (dismissing a spell). */
+    public boolean free;
 
     public CastCtx(ServerPlayer player, Spell spell, float charge, Rank rank, float power, boolean echo, Map<String, Object> state) {
         this.player = player;

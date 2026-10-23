@@ -19,6 +19,8 @@ public final class Spell {
     /** Mana per cast (per second for channels). */
     public int cost = 10;
     public int cooldown = 20;
+    /** Optional live cooldown source (for config-driven values). */
+    public java.util.function.IntSupplier cooldownFn;
     /** Ticks to full charge for CHARGE spells. */
     public int chargeTicks = 20;
     /** Wizard level required. Ignored when {@link #evolvesFrom} is set. */
@@ -66,6 +68,8 @@ public final class Spell {
     public Spell icon(Glyph g) { icon = g; return this; }
     public Spell cost(int c) { cost = c; return this; }
     public Spell cd(int ticks) { cooldown = ticks; return this; }
+    public Spell cdFn(java.util.function.IntSupplier fn) { cooldownFn = fn; return this; }
+    public int cooldownTicks() { return cooldownFn != null ? cooldownFn.getAsInt() : cooldown; }
     public Spell charge(int ticks) { chargeTicks = ticks; return this; }
     public Spell level(int l) { level = l; return this; }
     public Spell evolvesFrom(String parent) { evolvesFrom = parent; return this; }

@@ -343,27 +343,94 @@ def sanctuary():
     finish(g, an, "sanctuary", [(255, 214, 90), (255, 240, 170), (255, 255, 235), (200, 150, 40)], (110, 100, 150, 70))
 
 # ------------------------------------------------------------------------------------------------ space: portal, slash, time, crack
-def portal(name, pal, alphas):
-    g = Geo(name, bounds=(4, 4))
+def portal(name, pal, alphas, a=15.0, b=25.0, halos=0, runes=8):
+    """Vertical portal in the XY plane (front faces -Z). a/b are the semi-axes in pixels; the base sits at y=0."""
+    cy = b
+    g = Geo(name, tex=64, bounds=(max(4, b / 8), max(4, b / 8)))
     an = Anims(name)
-    g.bone("frame", (0, 24, 0)); g.ellipse("frame", 15, 25, 25, 2.4, 2.0, 22, 0)
-    g.bone("frame2", (0, 24, 0)); g.ellipse("frame2", 13, 22.5, 25, 1.2, 1.2, 20, 1, cz=0.4)
-    g.bone("surface", (0, 25, 0)); g.box_c("surface", (0, 25, 0), (26, 46, 0.4), 3)
-    g.bone("swirl_a", (0, 25, 0.5)); g.ring_at("swirl_a", 9, 25, 1.4, 0.6, 12, 2, centre=(0, 0, 0))
-    # ring_at builds around Y; rotate it to face Z via static bone rotation
-    g.bones["swirl_a"]["rotation"] = [90, 0, 0]; g.bones["swirl_a"]["pivot"] = [0, 25, 0.5]
-    g.bone("swirl_b", (0, 25, 0.5), rot=(90, 0, 0)); g.ring_at("swirl_b", 5, 25, 1.2, 0.6, 9, 1)
-    g.bone("sparks", (0, 25, 0))
+    segs = max(18, int((a + b) * 0.6))
+    g.bone("frame", (0, cy, 0)); g.ellipse("frame", a, b, cy, 2.6, 2.2, segs, 0)
+    g.bone("frame2", (0, cy, 0)); g.ellipse("frame2", a * 0.88, b * 0.9, cy, 1.3, 1.3, segs - 2, 1, cz=0.5)
+    g.bone("surface", (0, cy, 0)); g.box_c("surface", (0, cy, 0), (2 * a * 1.02, 2 * b * 1.02, 0.4), 3, uv=swirl_uvs())
+    # swirling vortex: four spiral arms of shrinking plates
+    g.bone("vortex", (0, cy, 0.8))
+    rmax = a * 0.86
+    for arm in range(4):
+        for i in range(10):
+            t = i / 9.0
+            r = 2.0 + (rmax - 2.0) * t
+            th = arm * math.pi / 2 + t * 3.2
+            sz = 2.6 - 1.6 * t
+            g.box_c("vortex", (math.cos(th) * r, cy + math.sin(th) * r, 0.8), (sz * 1.4, sz * 0.7, 0.5), 2 if i % 3 == 0 else 1,
+                    rot=(0, 0, -math.degrees(th) - 90))
+    g.bone("swirl_a", (0, cy, 0.7)); g.ellipse("swirl_a", a * 0.6, a * 0.6, cy, 1.2, 0.8, 14, 2, cz=0.7)
+    g.bone("swirl_b", (0, cy, 0.9)); g.ellipse("swirl_b", a * 0.34, a * 0.34, cy, 1.0, 0.8, 10, 1, cz=0.9)
+    g.bone("runes", (0, cy, 1.6))
+    for k in range(runes):
+        ang = 2 * math.pi * k / runes
+        g.box_c("runes", (math.cos(ang) * a * 1.2, cy + math.sin(ang) * a * 1.2, 1.6), (2.4, 2.4, 0.5), 2, rot=(0, 0, 45))
+        g.box_c("runes", (math.cos(ang) * a * 1.2, cy + math.sin(ang) * a * 1.2, 1.6), (1.4, 1.4, 0.7), 3, rot=(0, 0, 45))
+    halo_names = []
+    for h in range(halos):
+        r = b * (0.7 + 0.15 * h)
+        hn = "halo%d" % h
+        g.bone(hn, (0, cy, -1.5 - h)); g.ellipse(hn, r, r, cy, 1.4, 1.0, max(18, int(r * 0.8)), 0 if h % 2 == 0 else 1, cz=-1.5 - h)
+        halo_names.append(hn)
+    g.bone("sparks", (0, cy, 0))
     for k in range(10):
-        a = 2 * math.pi * k / 10
-        g.box_c("sparks", (math.cos(a) * 12, 25 + math.sin(a) * 21, 1.2), (1.4, 1.4, 1.4), 2, rot=(45, 45, 0))
-    standard(an, spawn_len=0.45)
-    an.add("idle", 6.0, {"frame": {"scale": wave(3, 0.02, 0, (1, 1, 1), 4)}, "frame2": {"scale": wave(2, 0.02, 1, (1, 1, 1), 4)},
-                         "swirl_a": {"rotation": kf({0: [90, 0, 0], 3: [90, 0, 180], 6: [90, 0, 360]})},
-                         "swirl_b": {"rotation": kf({0: [90, 0, 0], 3: [90, 0, -180], 6: [90, 0, -360]})},
-                         "sparks": {"rotation": spin(4, 2, 1, 4)}, "surface": {"scale": wave(2, 0.03, 1, (1, 1, 1), 4)}})
-    an.add("action", 0.4, {"surface": {"scale": kf({0: [1, 1, 1], 0.1: [1.1, 1.05, 3], 0.4: [1, 1, 1]})}}, loop=False)
-    finish(g, an, name, pal, alphas)
+        ang = 2 * math.pi * k / 10
+        g.box_c("sparks", (math.cos(ang) * a * 0.8, cy + math.sin(ang) * b * 0.8, 1.2), (1.4, 1.4, 1.4), 2, rot=(45, 45, 0))
+    standard(an, spawn_len=0.5)
+    idle = {"frame": {"scale": wave(3, 0.02, 0, (1, 1, 1), 4)}, "frame2": {"scale": wave(2, 0.025, 1, (1, 1, 1), 4)},
+            "surface": {"scale": wave(2, 0.03, 1, (1, 1, 1), 4)},
+            "vortex": {"rotation": spin(3.5, 2, 1, 4)}, "swirl_a": {"rotation": spin(4, 2, -1, 4)}, "swirl_b": {"rotation": spin(2.4, 2, 1, 4)},
+            "runes": {"rotation": spin(9, 2, -1, 8)}, "sparks": {"rotation": spin(5, 2, 1, 4)}}
+    for i, hn in enumerate(halo_names):
+        idle[hn] = {"rotation": spin(6 + i * 3, 2, 1 if i % 2 == 0 else -1, 4)}
+    an.add("idle", 36.0, idle)
+    an.add("action", 0.45, {"surface": {"scale": kf({0: [1, 1, 1], 0.1: [1.08, 1.04, 3], 0.45: [1, 1, 1]})},
+                            "vortex": {"scale": kf({0: [1, 1, 1], 0.12: [1.2, 1.2, 1], 0.45: [1, 1, 1]})}}, loop=False)
+    g.save(name); an.save(name)
+    texture_anim(name + ".png", pal, alphas, seed=hash(name) % 1000)
+
+def rift_floor():
+    g = Geo("rift_floor", tex=64, bounds=(4, 4))
+    an = Anims("rift_floor")
+    g.bone("rim"); g.ring("rim", 20, 0.8, 2.6, 1.2, 24, 3)
+    g.bone("pane"); g.box_c("pane", (0, 0.3, 0), (40, 0.4, 40), 3, uv=swirl_uvs(front_faces=(), flat_faces=("up", "down")))
+    g.bone("disc_a")
+    for r, sw in ((16, 3), (12, 0), (8, 3), (4, 0)):
+        g.ring("disc_a", r, 0.9, 1.4, 0.4, max(10, int(r * 1.3)), sw)
+    g.bone("vortex", (0, 1, 0))
+    for arm in range(4):
+        for i in range(10):
+            t = i / 9.0
+            r = 2.0 + 15 * t
+            th = arm * math.pi / 2 + t * 3.0
+            g.box_c("vortex", (math.cos(th) * r, 1.0, math.sin(th) * r), (2.4 - 1.4 * t, 0.5, 1.2), 1 if i % 2 else 2, rot=(0, -math.degrees(th) + 90, 0))
+    heads = g.radial("tn", 7, (0, 0, 0), yaw_offset=15)
+    bones = {}
+    for i, h in enumerate(heads):
+        g.bone(h + "_a", (0, 0, -18), h); g.box_c(h + "_a", (0, 6, -18), (2.6, 12, 2.6), 3)
+        g.bone(h + "_b", (0, 12, -18), h + "_a", rot=(-20, 0, 0)); g.box_c(h + "_b", (0, 18, -18), (2.0, 12, 2.0), 3)
+        g.bone(h + "_c", (0, 24, -18), h + "_b", rot=(-35, 0, 0)); g.box_c(h + "_c", (0, 29, -18), (1.4, 10, 1.4), 0)
+        g.box_c(h + "_c", (0, 34.5, -18.5), (1.0, 2.4, 1.0), 2, rot=(-25, 0, 0))
+        ph = i * 0.9
+        bones[h + "_a"] = {"rotation": kf({0: [0, 0, 5 * math.sin(ph)], 1.5: [4, 0, -5 * math.sin(ph)], 3: [0, 0, 5 * math.sin(ph)]})}
+        bones[h + "_b"] = {"rotation": kf({0: [-2, 0, 0], 1.5: [9, 0, 6], 3: [-2, 0, 0]})}
+        bones[h + "_c"] = {"rotation": kf({0: [-3, 0, 0], 1.5: [12, 0, -8], 3: [-3, 0, 0]})}
+    an.add("spawn", 0.6, {"root": {"scale": kf({0: [0.05, 0.05, 0.05], 0.35: [1.1, 1.0, 1.1], 0.6: [1, 1, 1]})},
+                          **{h + "_a": {"scale": kf({0: [1, 0.02, 1], 0.55: [1, 1.15, 1], 0.8: [1, 1, 1]})} for h in heads}}, loop=False)
+    bones["vortex"] = {"rotation": spin(3, 1, 1, 4)}
+    bones["disc_a"] = {"rotation": spin(5, 1, -1, 4)}
+    bones["rim"] = {"scale": wave(2, 0.02, 0, (1, 1, 1), 4)}
+    an.add("idle", 3.0, bones)
+    pull = {h + "_a": {"rotation": kf({0: [0, 0, 0], 0.25: [24, 0, 0], 0.6: [0, 0, 0]})} for h in heads}
+    pull.update({h + "_b": {"rotation": kf({0: [0, 0, 0], 0.25: [30, 0, 0], 0.6: [0, 0, 0]})} for h in heads})
+    an.add("action", 0.6, pull, loop=False)
+    an.add("despawn", 0.4, {"root": {"scale": kf({0: [1, 1, 1], 0.15: [1.1, 1.2, 1.1], 0.4: [0.01, 0.01, 0.01]})}}, loop="hold")
+    g.save("rift_floor"); an.save("rift_floor")
+    texture_anim("rift_floor.png", [(24, 10, 44), (150, 70, 255), (230, 200, 255), (6, 2, 12)], (240, 255, 255, 255), seed=17)
 
 def slash_wave():
     g = Geo("slash_wave", bounds=(4, 4))
@@ -468,9 +535,11 @@ if __name__ == "__main__":
     roots()
     light_orb()
     sanctuary()
-    portal("portal_blue", [(60, 130, 255), (150, 200, 255), (240, 250, 255), (10, 30, 90)], (255, 255, 255, 190))
-    portal("portal_orange", [(255, 140, 40), (255, 200, 120), (255, 245, 220), (110, 40, 6)], (255, 255, 255, 190))
-    portal("portal_violet", [(150, 70, 255), (210, 160, 255), (250, 235, 255), (40, 10, 90)], (255, 255, 255, 190))
+    portal("portal_violet", [(140, 60, 240), (205, 150, 255), (248, 232, 255), (30, 8, 74)], (255, 255, 255, 200))
+    portal("portal_magenta", [(224, 60, 204), (255, 160, 236), (255, 236, 250), (74, 10, 64)], (255, 255, 255, 200))
+    portal("rift_gate", [(110, 70, 255), (190, 170, 255), (255, 250, 255), (20, 10, 80)], (255, 255, 255, 200), a=24.0, b=40.0, halos=3, runes=12)
+    portal("rift_circle", [(150, 70, 255), (215, 170, 255), (250, 240, 255), (40, 10, 90)], (255, 255, 255, 200), a=20.0, b=20.0, runes=6)
+    rift_floor()
     slash_wave()
     time_ring()
     reality_crack()

@@ -29,9 +29,11 @@ public final class Props {
         reg("roots", Mode.SOLID, false);
         reg("light_orb", Mode.ADDITIVE, true);
         reg("sanctuary", Mode.ADDITIVE, true);
-        reg("portal_blue", Mode.TRANSLUCENT, true);
-        reg("portal_orange", Mode.TRANSLUCENT, true);
         reg("portal_violet", Mode.TRANSLUCENT, true);
+        reg("portal_magenta", Mode.TRANSLUCENT, true);
+        reg("rift_gate", Mode.TRANSLUCENT, true);
+        reg("rift_circle", Mode.TRANSLUCENT, true);
+        reg("rift_floor", Mode.TRANSLUCENT, true);
         reg("slash_wave", Mode.ADDITIVE, true);
         reg("time_ring", Mode.ADDITIVE, true);
         reg("reality_crack", Mode.ADDITIVE, true);
