@@ -8,6 +8,18 @@ import com.wandcraft.magic.Spell;
 import com.wandcraft.magic.Spells;
 import com.wandcraft.magic.util.Fx;
 import java.util.List;
+import java.util.function.Consumer;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import software.bernie.geckolib.animatable.GeoItem;
+import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
+import software.bernie.geckolib.animatable.client.GeoRenderProvider;
+import software.bernie.geckolib.animation.Animation;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,9 +35,44 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class WandItem extends Item {
+public class WandItem extends Item implements GeoItem {
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.wand.idle");
+    private static final RawAnimation CAST = RawAnimation.begin().then("animation.wand.cast", Animation.LoopType.PLAY_ONCE);
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
     public WandItem(Properties p) {
         super(p.stacksTo(1).fireResistant());
+        SingletonGeoAnimatable.registerSyncedAnimatable(this);
+    }
+
+    @Override
+    public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
+        consumer.accept(new GeoRenderProvider() {
+            private com.wandcraft.client.WandRenderer renderer;
+
+            @Override
+            public BlockEntityWithoutLevelRenderer getGeoItemRenderer() {
+                if (renderer == null) renderer = new com.wandcraft.client.WandRenderer();
+                return renderer;
+            }
+        });
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "idle", 0, state -> state.setAndContinue(IDLE)));
+        controllers.add(new AnimationController<>(this, "cast", 0, state -> PlayState.STOP).triggerableAnim("cast", CAST));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; }
+
+    /** Plays the wand's recoil-and-flare animation on every client that can see the caster's wand. */
+    public static void playCast(ServerPlayer p) {
+        ItemStack stack = p.getMainHandItem();
+        if (stack.getItem() instanceof WandItem wand) {
+            wand.triggerAnim(p, GeoItem.getOrAssignId(stack, p.serverLevel()), "cast", "cast");
+        }
     }
 
     @Override

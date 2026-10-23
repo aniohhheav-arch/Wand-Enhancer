@@ -6,7 +6,18 @@ version = mod_version
 group = 'com.wandcraft'
 base { archivesName = mod_id }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-repositories { mavenCentral() }
+repositories {
+    mavenCentral()
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content { includeGroup 'software.bernie.geckolib' }
+    }
+}
+
+dependencies {
+    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+}
 neoForge {
     version = neo_version
     runs {
@@ -15,6 +26,7 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
             if (project.hasProperty('dev')) {
                 systemProperty 'wandcraft.dev', 'true'
+                if (project.hasProperty('castall')) systemProperty 'wandcraft.castall', 'true'
                 programArguments.addAll('--quickPlaySingleplayer', 'devworld')
             }
         }

@@ -51,7 +51,7 @@ final class DefenseSpells {
                         if (z.remaining() < 1) z.discard();
                     }
                     @Override public void fx(SpellZone z) {
-                        var o = z.level().getPlayerByUUID(z.ownerId);
+                        var o = z.clientOwner();
                         if (o == null) return;
                         Vec3 look = o.getLookAngle();
                         Vec3 centre = o.getEyePosition().add(look.scale(1.5)).add(0, -0.2, 0);
@@ -191,7 +191,7 @@ final class DefenseSpells {
                         }
                     }
                     @Override public void fx(SpellZone z) {
-                        var o = z.level().getPlayerByUUID(z.ownerId);
+                        var o = z.clientOwner();
                         if (o == null) return;
                         Vec3 look = o.getLookAngle();
                         Vec3 centre = o.getEyePosition().add(look.scale(1.6)).add(0, -0.2, 0);
@@ -228,7 +228,7 @@ final class DefenseSpells {
                         if (o == null || Magic.of(o).phaseUntil <= z.level().getGameTime()) z.discard();
                     }
                     @Override public void fx(SpellZone z) {
-                        var o = z.level().getPlayerByUUID(z.ownerId);
+                        var o = z.clientOwner();
                         if (o == null) return;
                         var rnd = z.level().random;
                         for (int i = 0; i < 3; i++) {

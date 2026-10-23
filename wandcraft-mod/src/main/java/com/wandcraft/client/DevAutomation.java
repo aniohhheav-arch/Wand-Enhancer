@@ -11,6 +11,7 @@ import net.minecraft.client.Screenshot;
  */
 final class DevAutomation {
     static final boolean ON = Boolean.getBoolean("wandcraft.dev");
+    static final boolean CAST_ALL = Boolean.getBoolean("wandcraft.castall");
     private static int tick;
 
     private DevAutomation() {}
@@ -24,6 +25,10 @@ final class DevAutomation {
     static void tick(Minecraft mc) {
         if (mc.player == null || mc.level == null) return;
         tick++;
+        if (CAST_ALL) {
+            castAll(mc);
+            return;
+        }
         switch (tick) {
             case 80 -> {
                 cmd(mc, "gamemode creative");
@@ -61,6 +66,9 @@ final class DevAutomation {
             case 430 -> SpellView.select(Spells.get("shadow_clone"));
             case 432 -> mc.options.keyUse.setDown(true);
             case 434 -> mc.options.keyUse.setDown(false);
+            case 438 -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            case 446 -> shot(mc, "09a_clone_third_person");
+            case 449 -> mc.options.setCameraType(CameraType.FIRST_PERSON);
             case 450 -> SpellView.select(Spells.get("eclipsing_beam"));
             case 455 -> mc.options.keyUse.setDown(true);
             case 480 -> shot(mc, "09_eclipsing_beam");
@@ -73,5 +81,32 @@ final class DevAutomation {
             case 560 -> mc.stop();
             default -> {}
         }
+    }
+
+    /** Casts every spell in turn, holding the button briefly, to shake out client-side effect crashes. */
+    private static void castAll(Minecraft mc) {
+        if (tick == 80) {
+            cmd(mc, "gamemode creative");
+            cmd(mc, "wandcraft level 30");
+            cmd(mc, "wandcraft master all");
+            cmd(mc, "give @s wandcraft:wand");
+            cmd(mc, "tp @s 0 -60 0 0 4");
+            cmd(mc, "summon zombie 0 -60 9 {NoAI:1b,PersistenceRequired:1b}");
+            cmd(mc, "summon zombie 3 -60 11 {NoAI:1b,PersistenceRequired:1b}");
+        }
+        if (tick < 140) return;
+        if (tick == 140) mc.player.getInventory().selected = 0;
+        var all = new java.util.ArrayList<>(Spells.all());
+        int idx = (tick - 150) / 45, phase = (tick - 150) % 45;
+        if (tick < 150) return;
+        if (idx >= all.size()) {
+            System.out.println("WANDCRAFT castall finished without a crash: " + all.size());
+            mc.stop();
+            return;
+        }
+        var s = all.get(idx);
+        if (phase == 0) { SpellView.select(s); System.out.println("WANDCRAFT castall " + s.id); }
+        if (phase == 3) mc.options.keyUse.setDown(true);
+        if (phase == 14) mc.options.keyUse.setDown(false);
     }
 }

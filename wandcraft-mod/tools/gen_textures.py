@@ -127,6 +127,16 @@ def skin(base, accent, eye):
     for y in range(20, 32):
         px[22, y] = accent + (255,); px[23, y] = accent + (255,)
     return im
+def glowmask(img_path, out):
+    im = Image.open(A + img_path).convert('RGBA'); m = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    src, dst = im.load(), m.load()
+    for (x, y) in [(10, 12), (11, 12), (13, 12), (14, 12), (10, 13), (14, 13)]:
+        dst[x, y] = src[x, y]
+    for y in range(20, 32):
+        dst[22, y] = src[22, y]; dst[23, y] = src[23, y]
+    m.save(A + out)
 save(skin((14, 8, 24), (90, 40, 160), (205, 130, 255)), 'entity/shadow_clone.png')
 save(skin((170, 215, 235), (230, 250, 255), (255, 255, 255)), 'entity/spectral_warrior.png')
+glowmask('entity/shadow_clone.png', 'entity/shadow_clone_glowing.png')
+glowmask('entity/spectral_warrior.png', 'entity/spectral_warrior_glowing.png')
 print('ok')

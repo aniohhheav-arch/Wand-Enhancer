@@ -66,6 +66,7 @@ public final class Casting {
         CastCtx c = ctx(p, s, charge, echo, extraPower);
         int result = s.cast.cast(c);
         if (result < 0) return false;
+        if (!echo) com.wandcraft.item.WandItem.playCast(p);
         if (!echo) {
             Magic.spend(p, cost);
             if (s.healthCost > 0 && !Magic.infinite(p)) {
@@ -101,6 +102,7 @@ public final class Casting {
         }
         PlayerMagic m = Magic.of(p);
         m.channelSpell = s.id;
+        com.wandcraft.item.WandItem.playCast(p);
         m.channelTicks = 0;
         m.channelState = new java.util.HashMap<>();
         return true;

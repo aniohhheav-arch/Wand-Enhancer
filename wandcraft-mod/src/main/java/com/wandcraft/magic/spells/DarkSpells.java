@@ -243,7 +243,7 @@ final class DarkSpells {
                         if (o == null || Magic.of(o).stealthUntil <= z.level().getGameTime()) z.discard();
                     }
                     @Override public void fx(SpellZone z) {
-                        var o = z.level().getPlayerByUUID(z.ownerId);
+                        var o = z.clientOwner();
                         if (o == null) return;
                         var rnd = z.level().random;
                         for (int i = 0; i < 2; i++) {

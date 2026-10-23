@@ -4,6 +4,14 @@ import com.wandcraft.WandCraft;
 import com.wandcraft.magic.util.Combat;
 import com.wandcraft.magic.util.Fx;
 import java.util.EnumSet;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.Animation;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +39,8 @@ import net.minecraft.world.level.Level;
  * A short-lived summoned fighter (Shadow Clone, Mirror Image decoy, Spectral Legion). It is owned by a player, never
  * attacks its owner or allies, cannot cast, and removes itself when its time runs out.
  */
-public class ShadowClone extends PathfinderMob {
+public class ShadowClone extends PathfinderMob implements GeoEntity {
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(ShadowClone.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Integer> STYLE = SynchedEntityData.defineId(ShadowClone.class, EntityDataSerializers.INT);
 
@@ -51,6 +60,20 @@ public class ShadowClone extends PathfinderMob {
         return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH, 14).add(Attributes.MOVEMENT_SPEED, 0.34)
                 .add(Attributes.ATTACK_DAMAGE, 3).add(Attributes.FOLLOW_RANGE, 24).add(Attributes.KNOCKBACK_RESISTANCE, 0.3);
     }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "move", 4, state -> state.setAndContinue(state.isMoving()
+                ? RawAnimation.begin().thenLoop("animation.shadow_clone.walk")
+                : RawAnimation.begin().thenLoop("animation.shadow_clone.idle"))));
+        controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
+                .triggerableAnim("attack", RawAnimation.begin().then("animation.shadow_clone.attack", Animation.LoopType.PLAY_ONCE)));
+        controllers.add(new AnimationController<>(this, "spawn", 0, state -> PlayState.STOP)
+                .triggerableAnim("spawn", RawAnimation.begin().then("animation.shadow_clone.spawn", Animation.LoopType.PLAY_ONCE)));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder b) {
@@ -84,6 +107,7 @@ public class ShadowClone extends PathfinderMob {
     @Override
     public void tick() {
         super.tick();
+        if (!level().isClientSide && tickCount == 1) triggerAnim("spawn", "spawn");
         if (level().isClientSide) {
             int rgb = style() == STYLE_MIRROR ? 0xD27BFF : style() == STYLE_SPECTRAL ? 0x9FE4FF : 0x7A2BD6;
             if (tickCount % 2 == 0) {
@@ -109,7 +133,7 @@ public class ShadowClone extends PathfinderMob {
     @Override
     public boolean doHurtTarget(Entity target) {
         boolean ok = target instanceof LivingEntity le && Combat.hurt((ServerLevel) level(), owner(), this, le, damage);
-        if (ok) swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+        if (ok) triggerAnim("attack", "attack");
         return ok;
     }
 

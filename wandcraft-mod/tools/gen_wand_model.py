@@ -60,9 +60,10 @@ box((10.6, 17.2, c - 0.3), (11.3, 18.4, c + 0.3), GEM, rot=(45, "z", (10.95, 17.
 box((4.7, 19.0, c - 0.3), (5.4, 20.0, c + 0.3), SGEM, rot=(-45, "z", (5.05, 19.5, c)), glow=True, name="shard_l")
 box((c - 0.3, 15.0, 10.4), (c + 0.3, 16.0, 11.0), CORE, rot=(45, "x", (c, 15.5, 10.7)), glow=True, name="shard_f")
 
+# The item itself is rendered by GeckoLib (geo/item/wand.geo.json); this JSON only supplies display transforms.
 model = {
-    "textures": {"0": "wandcraft:item/wand", "particle": "wandcraft:item/wand"},
-    "elements": elements,
+    "parent": "minecraft:builtin/entity",
+    "textures": {"particle": "wandcraft:item/wand_geo"},
     "display": {
         "gui": {"rotation": [30, 45, -45], "translation": [0.5, -1.5, 0], "scale": [0.62, 0.62, 0.62]},
         "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.5, 0.5, 0.5]},
@@ -74,6 +75,11 @@ model = {
         "firstperson_lefthand": {"rotation": [-35, -12, -8], "translation": [-2, 1.5, 1], "scale": [0.65, 0.65, 0.65]},
     },
 }
-with open("src/main/resources/assets/wandcraft/models/item/wand.json", "w") as f:
-    json.dump(model, f, indent=1)
-print(len(elements), "elements")
+def write():
+    with open("src/main/resources/assets/wandcraft/models/item/wand.json", "w") as f:
+        json.dump(model, f, indent=1)
+
+
+if __name__ == "__main__":
+    write()
+    print(len(elements), "elements")

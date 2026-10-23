@@ -242,7 +242,7 @@ final class ForceSpells {
                         z.credit(hits);
                     }
                     @Override public void fx(SpellZone z) {
-                        var o = z.level().getPlayerByUUID(z.ownerId);
+                        var o = z.clientOwner();
                         if (o == null) return;
                         Fx.cSphere(z.level(), Fx.spark(FORCE_C, 0.6f), o.position().add(0, 1, 0), z.radius() * (0.85 + 0.15 * Math.sin(z.age * 0.5)), 5);
                     }
@@ -335,7 +335,7 @@ final class ForceSpells {
                         }
                     }
                     @Override public void fx(SpellZone z) {
-                        var o = z.level().getPlayerByUUID(z.ownerId);
+                        var o = z.clientOwner();
                         if (o == null) return;
                         Vec3 look = o.getLookAngle();
                         Vec3 centre = o.getEyePosition().add(look.scale(1.8));

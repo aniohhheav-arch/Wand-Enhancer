@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 public class SpellZone extends Entity {
     private static final EntityDataAccessor<String> SPELL = SynchedEntityData.defineId(SpellZone.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Float> RADIUS = SynchedEntityData.defineId(SpellZone.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<java.util.Optional<UUID>> OWNER = SynchedEntityData.defineId(SpellZone.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Integer> MAX_AGE = SynchedEntityData.defineId(SpellZone.class, EntityDataSerializers.INT);
 
     public UUID ownerId;
@@ -42,7 +43,10 @@ public class SpellZone extends Entity {
         entityData.set(SPELL, spell.id);
         entityData.set(RADIUS, radius);
         entityData.set(MAX_AGE, duration);
-        if (owner != null) ownerId = owner.getUUID();
+        if (owner != null) {
+            ownerId = owner.getUUID();
+            entityData.set(OWNER, java.util.Optional.of(ownerId));
+        }
         setPos(pos);
     }
 
@@ -51,6 +55,7 @@ public class SpellZone extends Entity {
         b.define(SPELL, "");
         b.define(RADIUS, 3f);
         b.define(MAX_AGE, 100);
+        b.define(OWNER, java.util.Optional.empty());
     }
 
     public Spell spell() { return Spells.get(entityData.get(SPELL)); }
@@ -59,6 +64,12 @@ public class SpellZone extends Entity {
     public int maxAge() { return entityData.get(MAX_AGE); }
     public void setMaxAge(int a) { entityData.set(MAX_AGE, a); }
     public int remaining() { return maxAge() - age; }
+
+    /** Owner as seen from either side. On the client only the synced id is available, so effects must use this. */
+    public net.minecraft.world.entity.player.Player clientOwner() {
+        UUID id = ownerId != null ? ownerId : entityData.get(OWNER).orElse(null);
+        return id == null ? null : level().getPlayerByUUID(id);
+    }
 
     public ServerPlayer owner() {
         if (ownerId == null || !(level() instanceof ServerLevel sl)) return null;

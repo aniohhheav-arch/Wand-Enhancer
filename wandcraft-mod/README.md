@@ -35,13 +35,19 @@ The framework is complete and 73 spells across six schools are implemented and s
 
 `/wandcraft level <0-30>`, `/wandcraft master <spell_id|all>`, `/wandcraft mana`, `/wandcraft reset`.
 
+## Requirements
+
+* NeoForge 1.21.1 and **GeckoLib 4.8 or newer** (`geckolib-neoforge-1.21.1`) must both be installed.
+* The wand and summoned fighters are GeckoLib models: `geo/*.geo.json` and `animations/*.animation.json` use the standard Blockbench (Bedrock geo) format, so you can open and edit them in Blockbench and export over the files. `tools/gen_geo.py` regenerates the defaults.
+* BBS (Blockbuster Studio) is an in-game cinematic and model-authoring mod with its own runtime formats rather than a library, so Wandcraft does not depend on it. It is useful for filming the mod; models made in Blockbench work here through GeckoLib.
+
 ## Visuals
 
 * **Custom particles** (`ModParticles`, `client/particle/MagicParticle`): tinted fullbright `glow`, `spark`, `wisp` and a flat spinning `rune` decal. `Fx.glow/spark/wisp/runeDecal` are the entry points; colour and size travel in the ARGB value.
 * **Beam shaft** (`SpellBeam` + `client/BeamRenderer`): Arcane Beam, Soul Drain and Eclipsing Beam draw rotating, layered octagonal tubes that follow the wand tip, with a bright core, tinted sheath and end-point sparks. Width and brightness follow beam intensity.
 * **Seismic Wave** throws visual block copies (`DebrisEntity`) into the air along the wave; the real terrain is never changed.
-* **3D wand** (`tools/gen_wand_model.py`): a 38-element model with a wrapped handle, gold collar, twisting shaft, prong cradle, faceted fullbright crystal and orbiting shards on an animated atlas. Regenerate textures with `python3 tools/gen_textures.py` and the model with `python3 tools/gen_wand_model.py`.
-* **Summons** (`ShadowClone`) use the player model with a generated shadow skin.
+* **3D wand** (GeckoLib; `tools/gen_wand_model.py` + `tools/gen_geo.py`; idle float, orbiting shards and cast recoil animations): a 38-element model with a wrapped handle, gold collar, twisting shaft, prong cradle, faceted fullbright crystal and orbiting shards on an animated atlas. Regenerate textures with `python3 tools/gen_textures.py` and the model with `python3 tools/gen_wand_model.py`.
+* **Summons** (`ShadowClone`, GeckoLib) have idle, walk, attack and spawn animations and a swaying cloak.
 * `gradle runClient -Pdev` runs a scripted session (`client/DevAutomation`) that joins `run/saves/devworld`, casts several spells and writes screenshots to `run/screenshots`.
 
 ## Design notes
