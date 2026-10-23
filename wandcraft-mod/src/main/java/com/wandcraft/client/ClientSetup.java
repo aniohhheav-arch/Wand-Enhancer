@@ -43,6 +43,7 @@ public final class ClientSetup {
         e.registerEntityRenderer(WandCraft.SPELL_BEAM.get(), BeamRenderer::new);
         e.registerEntityRenderer(WandCraft.DEBRIS.get(), DebrisRenderer::new);
         e.registerEntityRenderer(WandCraft.SHADOW_CLONE.get(), CloneRenderer::new);
+        e.registerEntityRenderer(WandCraft.SPELL_PROP.get(), PropRenderer::new);
     }
 
     @SubscribeEvent

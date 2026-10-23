@@ -4,6 +4,7 @@ import com.wandcraft.entity.SpellProjectile;
 import com.wandcraft.entity.DebrisEntity;
 import com.wandcraft.entity.ShadowClone;
 import com.wandcraft.entity.SpellBeam;
+import com.wandcraft.entity.SpellProp;
 import com.wandcraft.entity.SpellZone;
 import com.wandcraft.item.WandItem;
 import com.wandcraft.magic.Magic;
@@ -73,6 +74,9 @@ public class WandCraft {
     public static final Supplier<EntityType<ShadowClone>> SHADOW_CLONE = ENTITIES.register("shadow_clone",
             () -> EntityType.Builder.<ShadowClone>of(ShadowClone::new, MobCategory.MISC)
                     .sized(0.6f, 1.8f).clientTrackingRange(8).noSave().build("shadow_clone"));
+    public static final Supplier<EntityType<SpellProp>> SPELL_PROP = ENTITIES.register("spell_prop",
+            () -> EntityType.Builder.<SpellProp>of(SpellProp::new, MobCategory.MISC)
+                    .sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(2).noSave().fireImmune().build("spell_prop"));
     public static final Supplier<AttachmentType<PlayerMagic>> MAGIC = ATTACHMENTS.register("magic",
             () -> AttachmentType.serializable(PlayerMagic::new).copyOnDeath().build());
     public static final Supplier<CreativeModeTab> TAB = TABS.register("wandcraft", () -> CreativeModeTab.builder()

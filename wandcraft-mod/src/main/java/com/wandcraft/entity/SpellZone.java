@@ -32,6 +32,8 @@ public class SpellZone extends Entity {
     public Vec3 vec = Vec3.ZERO;
     public boolean followOwner;
     public Object extra;
+    /** Optional animated 3D prop that follows this zone (see {@link com.wandcraft.magic.Spell#prop}). */
+    public SpellProp prop;
 
     public SpellZone(EntityType<? extends SpellZone> type, Level level) {
         super(type, level);
@@ -101,7 +103,17 @@ public class SpellZone extends Entity {
                 }
                 setPos(o.getX(), o.getY(), o.getZ());
             }
-            if (age == 0) s.zone.start(this);
+            if (age == 0) {
+                s.zone.start(this);
+                if (s.propKind != null && com.wandcraft.entity.Props.get(s.propKind) != null) {
+                    if (s.propFront && o != null) {
+                        prop = SpellProp.spawn((ServerLevel) level(), s.propKind, o.getEyePosition(), s.propScale, 100000).frontOf(o, s.propDist, s.propDy);
+                    } else {
+                        prop = SpellProp.spawn((ServerLevel) level(), s.propKind, position().add(0, s.propDy, 0), s.propScale * radius(), 100000)
+                                .follow(this, new Vec3(0, s.propDy, 0));
+                    }
+                }
+            }
             if (isRemoved()) return;
             s.zone.tick(this);
             if (age >= maxAge()) {

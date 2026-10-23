@@ -26,6 +26,14 @@ public final class Spell {
     /** Spell id whose Master rank unlocks this spell. */
     public String evolvesFrom;
     public float healthCost = 0;
+    /** Additional unlock requirement: number of spells already at Master rank (Forbidden magic). */
+    public int masters = 0;
+    /** Optional GeckoLib prop attached to this spell's zone: kind, scale per zone radius, height offset. */
+    public String propKind;
+    public float propScale = 1f;
+    public double propDy;
+    public boolean propFront;
+    public double propDist = 1.6;
     /** Eligible for Spell Echo. */
     public boolean echoable = false;
     /** Casting this does not end stealth (the stealth spells themselves, utility). */
@@ -62,6 +70,11 @@ public final class Spell {
     public Spell level(int l) { level = l; return this; }
     public Spell evolvesFrom(String parent) { evolvesFrom = parent; return this; }
     public Spell health(float h) { healthCost = h; return this; }
+    public Spell masters(int n) { masters = n; return this; }
+    /** Attach a prop to each zone this spell creates. Its scale is {@code scalePerRadius * zone radius}. */
+    public Spell prop(String kind, float scalePerRadius, double dy) { propKind = kind; propScale = scalePerRadius; propDy = dy; return this; }
+    /** Attach a prop that hovers in front of the caster's eyes (fixed scale). */
+    public Spell propFront(String kind, float scale, double dist, double dy) { propKind = kind; propScale = scale; propFront = true; propDist = dist; propDy = dy; return this; }
     public Spell echoable() { echoable = true; return this; }
     public Spell stealthSafe() { stealthSafe = true; return this; }
     public Spell perks(String adept, String master) { adeptPerk = adept; masterPerk = master; return this; }

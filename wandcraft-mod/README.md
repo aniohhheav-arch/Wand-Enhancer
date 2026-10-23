@@ -3,9 +3,9 @@
 A NeoForge 1.21.1 magic mod: a wand, a radial spell wheel, mana, mastery ranks and evolving spells.
 This directory is self-contained and unrelated to the Wand Enhancer patcher in the repository root.
 
-## Status: Phase 3
+## Status: Phase 4
 
-The framework is complete and 73 spells across six schools are implemented and smoke-tested. Remaining schools are added group by group on the same framework.
+The framework is complete and 101 spells across all ten schools are implemented and smoke-tested. Remaining schools are added group by group on the same framework.
 
 | School | Spells | State |
 | --- | --- | --- |
@@ -15,7 +15,10 @@ The framework is complete and 73 spells across six schools are implemented and s
 | Nature | Vine Lash, Thorn Lash, Root Snare, Thorn Volley, Healing Bloom, Guardian Vine, Pollen Veil, Nature's Step, Blooming Ground | done |
 | Defense | Magic Shield, Aegis Shield, Aegis Dome, Counterspell, Mirror Ward, Phase Guard, Cleansing Light, Rescue Blink | done |
 | Dark Arts | Shadow Bolt, Void Bolt, Shadow Grasp, Abyssal Chains, Soul Drain, Umbral Cloak, Black Flame, Nightfall, Shadow Clone, Curse Mark, Hex, Withering Wave, Shadowstep, Dark Nova, Eclipse Nova, Void Rift, Corruption Orb, Devouring Shadow, Dark Pact, Eclipsing Beam | done (strong spells cost life force) |
-| Illusion, Space, Light, Forbidden | | not started; the wheel only lists schools that contain spells |
+| Illusion | Mirror Image, Phantom Double, Veil of Shadows, False Footsteps, Hall of Mirrors, Phantom Wall, Dread Vision | done |
+| Space | Blink, Rift Step, Portal Pair, Spatial Anchor, Gravity Swap, Rift Snare, Dimensional Slash, Pocket Rift | done |
+| Light | Radiant Bolt, Radiant Lance, Sunburst, Holy Chains, Beacon, Sanctuary | done |
+| Forbidden | Arcane Overload, Black Hole, Time Fracture, Reality Tear, Spectral Legion, Cataclysm, Void Collapse | done (needs a high wizard level and several Master spells) |
 
 ## Playing
 
@@ -47,6 +50,7 @@ The framework is complete and 73 spells across six schools are implemented and s
 * **Beam shaft** (`SpellBeam` + `client/BeamRenderer`): Arcane Beam, Soul Drain and Eclipsing Beam draw rotating, layered octagonal tubes that follow the wand tip, with a bright core, tinted sheath and end-point sparks. Width and brightness follow beam intensity.
 * **Seismic Wave** throws visual block copies (`DebrisEntity`) into the air along the wave; the real terrain is never changed.
 * **3D wand** (GeckoLib; `tools/gen_wand_model.py` + `tools/gen_geo.py`; idle float, orbiting shards and cast recoil animations): a 38-element model with a wrapped handle, gold collar, twisting shaft, prong cradle, faceted fullbright crystal and orbiting shards on an animated atlas. Regenerate textures with `python3 tools/gen_textures.py` and the model with `python3 tools/gen_wand_model.py`.
+* **Animated 3D props** (`SpellProp`, `Props`, `tools/gen_props.py`): 24 GeckoLib models with spawn, idle, despawn and action animations. Guardian Vine (lunging jaws), Rune Mine/Cataclysm sigils, Gravity Well/Void Rift/Black Hole orbs, Healing Bloom (opens and closes), Mirror Ward (shatters), shields and domes, Firestorm fire pillars, Sand Vortex tornado, Root Snare roots, Beacon/Sunburst light orbs, Sanctuary pillars, Portal Pair, Dimensional Slash crescent, Time Fracture clock, Reality Tear crack and Phantom Wall. `/wandcraft prop <kind>` spawns one for inspection.
 * **Summons** (`ShadowClone`, GeckoLib) have idle, walk, attack and spawn animations and a swaying cloak.
 * `gradle runClient -Pdev` runs a scripted session (`client/DevAutomation`) that joins `run/saves/devworld`, casts several spells and writes screenshots to `run/screenshots`.
 

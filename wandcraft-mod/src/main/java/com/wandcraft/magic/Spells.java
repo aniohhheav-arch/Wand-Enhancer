@@ -21,6 +21,7 @@ public final class Spells {
         ArcaneSpells.register();
         ElementalSpells.register();
         OtherSchools.register();
+        Icons.apply();
     }
 
     public static Spell add(Spell s) {

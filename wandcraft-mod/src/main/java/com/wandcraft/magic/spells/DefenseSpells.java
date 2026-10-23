@@ -43,34 +43,14 @@ final class DefenseSpells {
     private DefenseSpells() {}
 
     private static Spell shield(String id, String name, int cost, float capacity, float reduction, double arcDeg, int rgb) {
-        return Spell.of(id, name, DEFENSE, CHANNEL).icon(Glyph.SHIELD).cost(cost).cd(80)
+        return Spell.of(id, name, DEFENSE, CHANNEL).propFront(arcDeg > 70 ? "shield_panel_gold" : "shield_panel", arcDeg > 70 ? 1.2f : 0.9f, 1.6, -0.9).icon(Glyph.SHIELD).cost(cost).cd(80)
                 .zone(new ZoneBehavior() {
                     @Override public void start(SpellZone z) { z.followOwner = true; }
                     @Override public void tick(SpellZone z) {
                         // Kept alive by the channel; vanishes a few ticks after it stops.
                         if (z.remaining() < 1) z.discard();
                     }
-                    @Override public void fx(SpellZone z) {
-                        var o = z.clientOwner();
-                        if (o == null) return;
-                        Vec3 look = o.getLookAngle();
-                        Vec3 centre = o.getEyePosition().add(look.scale(1.5)).add(0, -0.2, 0);
-                        Vec3 right = look.cross(new Vec3(0, 1, 0));
-                        right = right.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : right.normalize();
-                        Vec3 up = right.cross(look).normalize();
-                        var rnd = z.level().random;
-                        double w = arcDeg > 70 ? 1.5 : 1.1, h = 1.3;
-                        for (int i = 0; i < 6; i++) {
-                            double a = rnd.nextDouble() * Math.PI * 2, r = Math.sqrt(rnd.nextDouble());
-                            Vec3 q = centre.add(right.scale(Math.cos(a) * r * w)).add(up.scale(Math.sin(a) * r * h));
-                            Fx.c(z.level(), Fx.glow(rgb, 0.8f), q.x, q.y, q.z, 0, 0, 0);
-                        }
-                        for (int i = 0; i < 12; i++) {
-                            double a = Math.PI * 2 * i / 12 + z.age * 0.05;
-                            Vec3 q = centre.add(right.scale(Math.cos(a) * w)).add(up.scale(Math.sin(a) * h));
-                            Fx.c(z.level(), Fx.spark(0xFFFFFF, 0.5f), q.x, q.y, q.z, 0, 0, 0);
-                        }
-                    }
+                    @Override public void fx(SpellZone z) { /* the 3D prop provides the visuals */ }
                 })
                 .onChannel((c, t) -> {
                     PlayerMagic m = Magic.of(c.player);
@@ -106,7 +86,7 @@ final class DefenseSpells {
         Spells.add(shield("aegis_shield", "Aegis Shield", 9, 50f, 0.8f, 80, 0xFFE08A).evolvesFrom("magic_shield")
                 .desc("A wider, far more durable barrier with stronger damage reduction."));
 
-        Spells.add(Spell.of("aegis_dome", "Aegis Dome", DEFENSE, INSTANT).icon(Glyph.SHIELD).cost(32).cd(400).level(9)
+        Spells.add(Spell.of("aegis_dome", "Aegis Dome", DEFENSE, INSTANT).prop("dome_gold", 1.0f, 0).icon(Glyph.SHIELD).cost(32).cd(400).level(9)
                 .desc("Raise a dome that eats incoming projectiles and shelters allies inside. Enemies can walk in.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {
@@ -136,16 +116,7 @@ final class DefenseSpells {
                             z.discard();
                         }
                     }
-                    @Override public void fx(SpellZone z) {
-                        var rnd = z.level().random;
-                        double r = z.radius();
-                        Vec3 c = z.position();
-                        for (int i = 0; i < 8; i++) {
-                            double u = rnd.nextDouble(), a = rnd.nextDouble() * Math.PI * 2;
-                            double y = Math.sqrt(u) * r, rr = Math.sqrt(Math.max(0, r * r - y * y));
-                            Fx.c(z.level(), Fx.glow(0xFFE08A, 0.7f), c.x + Math.cos(a) * rr, c.y + y, c.z + Math.sin(a) * rr, 0, 0, 0);
-                        }
-                    }
+                    @Override public void fx(SpellZone z) { /* the 3D prop provides the visuals */ }
                 })
                 .onCast(c -> {
                     Vec3 g = Aim.ground(c.player, 8);
@@ -167,7 +138,7 @@ final class DefenseSpells {
                     return 0;
                 }));
 
-        Spells.add(Spell.of("mirror_ward", "Mirror Ward", DEFENSE, INSTANT).icon(Glyph.EYE).cost(20).cd(200).level(8)
+        Spells.add(Spell.of("mirror_ward", "Mirror Ward", DEFENSE, INSTANT).propFront("mirror", 0.9f, 1.6, -1.0).icon(Glyph.EYE).cost(20).cd(200).level(8)
                 .desc("Conjure a mirror ahead. The first projectile to touch it is thrown back at a nearby enemy, and the mirror shatters.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {
@@ -190,26 +161,7 @@ final class DefenseSpells {
                             return;
                         }
                     }
-                    @Override public void fx(SpellZone z) {
-                        var o = z.clientOwner();
-                        if (o == null) return;
-                        Vec3 look = o.getLookAngle();
-                        Vec3 centre = o.getEyePosition().add(look.scale(1.6)).add(0, -0.2, 0);
-                        Vec3 right = look.cross(new Vec3(0, 1, 0));
-                        right = right.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : right.normalize();
-                        Vec3 up = right.cross(look).normalize();
-                        var rnd = z.level().random;
-                        for (int i = 0; i < 14; i++) {
-                            double a = Math.PI * 2 * i / 14;
-                            Vec3 q = centre.add(right.scale(Math.cos(a) * 0.8)).add(up.scale(Math.sin(a) * 1.2));
-                            Fx.c(z.level(), Fx.spark(0xE8F4FF, 0.55f), q.x, q.y, q.z, 0, 0, 0);
-                        }
-                        for (int i = 0; i < 4; i++) {
-                            double x = (rnd.nextDouble() - .5) * 1.4, y = (rnd.nextDouble() - .5) * 2.2;
-                            Vec3 q = centre.add(right.scale(x)).add(up.scale(y));
-                            Fx.c(z.level(), Fx.glow(0xB8E0FF, 0.6f), q.x, q.y, q.z, 0, 0, 0);
-                        }
-                    }
+                    @Override public void fx(SpellZone z) { /* the 3D prop provides the visuals */ }
                 })
                 .onCast(c -> {
                     Magic.of(c.player).mirrorUntil = c.level.getGameTime() + 160;

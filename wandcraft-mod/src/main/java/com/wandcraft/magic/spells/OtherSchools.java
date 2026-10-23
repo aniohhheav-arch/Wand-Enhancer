@@ -1,6 +1,6 @@
 package com.wandcraft.magic.spells;
 
-/** Registers the Force, Nature, Defense and Dark Arts schools (package-private classes live next to it). */
+/** Registers the Force, Nature, Defense, Dark Arts, Illusion, Space, Light and Forbidden schools (package-private classes live next to it). */
 public final class OtherSchools {
     private OtherSchools() {}
 
@@ -9,5 +9,9 @@ public final class OtherSchools {
         NatureSpells.register();
         DefenseSpells.register();
         DarkSpells.register();
+        IllusionSpells.register();
+        SpaceSpells.register();
+        LightSpells.register();
+        ForbiddenSpells.register();
     }
 }

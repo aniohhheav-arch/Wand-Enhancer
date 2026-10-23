@@ -14,6 +14,7 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -50,6 +51,14 @@ public class ShadowClone extends PathfinderMob implements GeoEntity {
     public float damage = 3f;
     /** Decoys draw attention instead of fighting. */
     public boolean decoy;
+    /** Copies the owner's movement, facing and arm swings (Phantom Double). */
+    public boolean mimic;
+    /** Pops the moment anything hits it (Hall of Mirrors copies). */
+    public boolean oneHit;
+    /** Sideways offset (blocks) from the owner while mimicking. */
+    public double mimicSide = 2.4;
+    /** When set, hostile mobs nearby keep trying to target this instead of the owner. */
+    public boolean drawsAggro;
 
     public ShadowClone(EntityType<? extends ShadowClone> type, Level level) {
         super(type, level);
@@ -120,6 +129,32 @@ public class ShadowClone extends PathfinderMob implements GeoEntity {
             fade();
             return;
         }
+        Player o = owner();
+        if (mimic && o != null) mimicOwner(o);
+        if (drawsAggro && tickCount % 15 == 0) {
+            for (net.minecraft.world.entity.Mob m : level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, getBoundingBox().inflate(14),
+                    m -> m instanceof net.minecraft.world.entity.monster.Enemy && !Combat.isBoss(m))) {
+                if ((m.getTarget() == null || m.getTarget() == o) && random.nextInt(3) != 0 && m.hasLineOfSight(this)) m.setTarget(this);
+            }
+        }
+    }
+
+    private void mimicOwner(Player o) {
+        double yaw = Math.toRadians(o.getYRot());
+        Vec3 right = new Vec3(-Math.cos(yaw), 0, -Math.sin(yaw));
+        Vec3 want = o.position().add(right.scale(-mimicSide));
+        Vec3 delta = want.subtract(position());
+        Vec3 step = delta.lengthSqr() > 9 ? delta : delta.scale(0.6);
+        if (level().noCollision(this, getBoundingBox().move(step))) setPos(getX() + step.x, getY() + step.y, getZ() + step.z);
+        setYRot(o.getYRot());
+        yHeadRot = o.yHeadRot;
+        yBodyRot = o.yBodyRot;
+        setXRot(o.getXRot());
+        getNavigation().stop();
+        if (o.swinging && !swinging) {
+            swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            triggerAnim("attack", "attack");
+        }
     }
 
     public void fade() {
@@ -147,6 +182,10 @@ public class ShadowClone extends PathfinderMob implements GeoEntity {
     @Override
     public boolean hurt(DamageSource src, float amount) {
         if (src.getEntity() == owner() && owner() != null) return false;
+        if (oneHit) {
+            fade();
+            return true;
+        }
         return super.hurt(src, amount);
     }
 

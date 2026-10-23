@@ -38,6 +38,7 @@ import net.minecraft.world.phys.Vec3;
 public class WandItem extends Item implements GeoItem {
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.wand.idle");
     private static final RawAnimation CAST = RawAnimation.begin().then("animation.wand.cast", Animation.LoopType.PLAY_ONCE);
+    private static final RawAnimation CHARGE = RawAnimation.begin().thenLoop("animation.wand.charge");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public WandItem(Properties p) {
@@ -62,10 +63,20 @@ public class WandItem extends Item implements GeoItem {
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "idle", 0, state -> state.setAndContinue(IDLE)));
         controllers.add(new AnimationController<>(this, "cast", 0, state -> PlayState.STOP).triggerableAnim("cast", CAST));
+        controllers.add(new AnimationController<>(this, "hold", 0, state -> PlayState.STOP).triggerableAnim("charge", CHARGE));
     }
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; }
+
+    /** Starts or stops the looping charge-up animation while a charge or channel spell is held. */
+    public static void hold(ServerPlayer p, boolean on) {
+        ItemStack stack = p.getMainHandItem();
+        if (!(stack.getItem() instanceof WandItem wand)) return;
+        long id = GeoItem.getOrAssignId(stack, p.serverLevel());
+        if (on) wand.triggerAnim(p, id, "hold", "charge");
+        else wand.stopTriggeredAnim(p, id, "hold", "charge");
+    }
 
     /** Plays the wand's recoil-and-flare animation on every client that can see the caster's wand. */
     public static void playCast(ServerPlayer p) {
@@ -91,6 +102,7 @@ public class WandItem extends Item implements GeoItem {
             return InteractionResultHolder.success(stack);
         }
         player.startUsingItem(hand);
+        if (player instanceof ServerPlayer hp) hold(hp, true);
         if (player instanceof ServerPlayer sp && s.mode == CastMode.CHANNEL && !Casting.startChannel(sp, s)) {
             player.stopUsingItem();
             return InteractionResultHolder.fail(stack);
@@ -128,6 +140,7 @@ public class WandItem extends Item implements GeoItem {
     @Override
     public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (!(entity instanceof ServerPlayer sp)) return;
+        hold(sp, false);
         PlayerMagic m = Magic.of(sp);
         boolean stillHeld = sp.getMainHandItem() == stack;
         if (m.channelSpell != null) {

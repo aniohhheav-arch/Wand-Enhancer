@@ -151,7 +151,7 @@ final class EarthSpells {
                     return 0;
                 }));
 
-        Spells.add(Spell.of("sand_vortex", "Sand Vortex", ELEMENTAL, INSTANT).icon(Glyph.SWIRL).cost(28).cd(260).level(8)
+        Spells.add(Spell.of("sand_vortex", "Sand Vortex", ELEMENTAL, INSTANT).prop("tornado_sand", 0.27f, 0).icon(Glyph.SWIRL).cost(28).cd(260).level(8)
                 .desc("A spinning column of sand drags nearby enemies inward and lifts them. A control spell; strong foes resist.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {

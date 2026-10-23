@@ -21,7 +21,7 @@ public final class Magic {
         if (infinite(p)) return true;
         PlayerMagic m = of(p);
         if (s.evolvesFrom != null) return m.rank(s.evolvesFrom) == Rank.MASTER;
-        return m.level() >= s.level;
+        return m.level() >= s.level && masterCount(m) >= s.masters;
     }
 
     public static String lockReason(Player p, Spell s) {
@@ -29,7 +29,13 @@ public final class Magic {
             Spell parent = Spells.get(s.evolvesFrom);
             return "Reach Master rank with " + (parent == null ? s.evolvesFrom : parent.name);
         }
-        return "Reach wizard level " + s.level;
+        return s.masters > 0 ? "Reach wizard level " + s.level + " and master " + s.masters + " spells" : "Reach wizard level " + s.level;
+    }
+
+    public static int masterCount(PlayerMagic m) {
+        int n = 0;
+        for (Spell sp : Spells.all()) if (m.rank(sp.id) == Rank.MASTER) n++;
+        return n;
     }
 
     public static boolean onCooldown(Player p, Spell s, long now) {

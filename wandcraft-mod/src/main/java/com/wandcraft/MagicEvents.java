@@ -147,6 +147,18 @@ public final class MagicEvents {
                     Magic.sync(p);
                     return 1;
                 })))
+                .then(Commands.literal("prop").then(Commands.argument("kind", StringArgumentType.word()).executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    String kind = StringArgumentType.getString(c, "kind");
+                    if (com.wandcraft.entity.Props.get(kind) == null) {
+                        c.getSource().sendFailure(Component.literal("Unknown prop " + kind));
+                        return 0;
+                    }
+                    net.minecraft.world.phys.Vec3 at = p.position().add(p.getLookAngle().multiply(1, 0, 1).normalize().scale(4));
+                    com.wandcraft.entity.SpellProp pr = com.wandcraft.entity.SpellProp.spawn(p.serverLevel(), kind, at, 1f, 400);
+                    pr.facing(p.getYRot() + 180f, 0f);
+                    return 1;
+                })))
                 .then(Commands.literal("mana").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     Magic.of(p).mana = Magic.of(p).maxMana();

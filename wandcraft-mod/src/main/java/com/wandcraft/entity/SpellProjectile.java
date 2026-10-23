@@ -42,6 +42,8 @@ public class SpellProjectile extends Projectile {
     public UUID homingTarget;
     public double homingStrength = 0.25;
     public boolean hitCredited;
+    /** Scratch slot for behaviours that carry a companion object (for example a visual prop). */
+    public Object extra;
 
     public SpellProjectile(EntityType<? extends SpellProjectile> type, Level level) {
         super(type, level);

@@ -471,7 +471,7 @@ final class DarkSpells {
 
         registerNovas();
 
-        Spells.add(Spell.of("void_rift", "Void Rift", DARK, INSTANT).icon(Glyph.SWIRL).cost(30).cd(300).level(10).health(2f)
+        Spells.add(Spell.of("void_rift", "Void Rift", DARK, INSTANT).prop("void_orb", 0.1f, 0).icon(Glyph.SWIRL).cost(30).cd(300).level(10).health(2f)
                 .desc("Tear open a dark rift that drags enemies toward its heart and gnaws at them, then collapses. Bosses are not moved.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {

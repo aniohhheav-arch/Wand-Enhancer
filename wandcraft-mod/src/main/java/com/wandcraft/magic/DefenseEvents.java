@@ -49,6 +49,9 @@ public final class DefenseEvents {
         DamageSource src = e.getSource();
         ServerLevel l = p.serverLevel();
 
+        // Sanctuary: allies inside take less magical and projectile damage.
+        if (p.getPersistentData().getLong("wc_sanct") > now && magical(src)) e.setAmount(e.getAmount() * 0.6f);
+
         // Counterspell: cancel the first magical hit and answer with a counterblast.
         if (m.parryUntil > now && magical(src)) {
             m.parryUntil = 0;

@@ -20,6 +20,8 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
     public long pactCooldownUntil;
     public int overloadCharges;
     public long overloadUntil;
+    /** Items stored in the Pocket Rift. Persisted, so nothing is ever lost when the rift closes. */
+    public final net.minecraft.world.SimpleContainer pocket = new net.minecraft.world.SimpleContainer(9);
 
     // Transient server-side state, never saved or synced.
     public transient long lastCastTick;
@@ -40,6 +42,9 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
     public transient long softFallUntil;
     /** Mobs further than a few blocks lose track of a stealthed player. */
     public transient long stealthUntil;
+    public transient net.minecraft.world.phys.Vec3 anchorPos;
+    public transient net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> anchorDim;
+    public transient long anchorUntil;
 
     public int totalUses() {
         int t = 0;
@@ -67,6 +72,7 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
         t.putLong("pactcd", pactCooldownUntil);
         t.putInt("ovc", overloadCharges);
         t.putLong("ovt", overloadUntil);
+        t.put("pocket", pocket.createTag(p));
         return t;
     }
 
@@ -85,6 +91,7 @@ public class PlayerMagic implements INBTSerializable<CompoundTag> {
         pactCooldownUntil = t.getLong("pactcd");
         overloadCharges = t.getInt("ovc");
         overloadUntil = t.getLong("ovt");
+        pocket.fromTag(t.getList("pocket", Tag.TAG_COMPOUND), p);
         if (selected.isEmpty()) selected = "arcane_bolt";
         dirty = true;
     }

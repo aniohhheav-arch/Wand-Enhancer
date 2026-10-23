@@ -161,7 +161,7 @@ final class ForceSpells {
                     return enemy ? 1 : 0;
                 }));
 
-        Spells.add(Spell.of("gravity_well", "Gravity Well", FORCE, INSTANT).icon(Glyph.SWIRL).cost(30).cd(300).level(7)
+        Spells.add(Spell.of("gravity_well", "Gravity Well", FORCE, INSTANT).prop("gravity_orb", 0.08f, 0).icon(Glyph.SWIRL).cost(30).cd(300).level(7)
                 .desc("Plant a sphere of gravity that drags enemies in and bends passing projectiles, then collapses.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {
@@ -217,7 +217,7 @@ final class ForceSpells {
                     return 0;
                 }));
 
-        Spells.add(Spell.of("repulsion_field", "Repulsion Field", FORCE, INSTANT).icon(Glyph.RING).cost(16).cd(100).level(3)
+        Spells.add(Spell.of("repulsion_field", "Repulsion Field", FORCE, INSTANT).prop("dome_blue", 1.0f, 0).icon(Glyph.RING).cost(16).cd(100).level(3)
                 .desc("A brief force bubble around you pushes away enemies and stray projectiles.")
                 .zone(new ZoneBehavior() {
                     @Override public void start(SpellZone z) { z.followOwner = true; }
@@ -314,7 +314,7 @@ final class ForceSpells {
                     return 0;
                 }));
 
-        Spells.add(Spell.of("kinetic_catch", "Kinetic Catch", FORCE, INSTANT).icon(Glyph.SHIELD).cost(10).cd(100).level(5)
+        Spells.add(Spell.of("kinetic_catch", "Kinetic Catch", FORCE, INSTANT).propFront("shield_panel", 0.8f, 1.8, -0.9).icon(Glyph.SHIELD).cost(10).cd(100).level(5)
                 .desc("A brief field in front of you catches incoming projectiles and turns them into a little mana.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {

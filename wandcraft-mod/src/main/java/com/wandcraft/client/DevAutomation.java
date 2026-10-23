@@ -11,6 +11,8 @@ import net.minecraft.client.Screenshot;
  */
 final class DevAutomation {
     static final boolean ON = Boolean.getBoolean("wandcraft.dev");
+    static final boolean SHOW = Boolean.getBoolean("wandcraft.show");
+    static final boolean PROPS = Boolean.getBoolean("wandcraft.props");
     static final boolean CAST_ALL = Boolean.getBoolean("wandcraft.castall");
     private static int tick;
 
@@ -25,6 +27,14 @@ final class DevAutomation {
     static void tick(Minecraft mc) {
         if (mc.player == null || mc.level == null) return;
         tick++;
+        if (SHOW) {
+            showcase(mc);
+            return;
+        }
+        if (PROPS) {
+            gallery(mc);
+            return;
+        }
         if (CAST_ALL) {
             castAll(mc);
             return;
@@ -97,7 +107,7 @@ final class DevAutomation {
         if (tick < 140) return;
         if (tick == 140) mc.player.getInventory().selected = 0;
         var all = new java.util.ArrayList<>(Spells.all());
-        int idx = (tick - 150) / 45, phase = (tick - 150) % 45;
+        int idx = (tick - 150) / 50, phase = (tick - 150) % 50;
         if (tick < 150) return;
         if (idx >= all.size()) {
             System.out.println("WANDCRAFT castall finished without a crash: " + all.size());
@@ -108,5 +118,66 @@ final class DevAutomation {
         if (phase == 0) { SpellView.select(s); System.out.println("WANDCRAFT castall " + s.id); }
         if (phase == 3) mc.options.keyUse.setDown(true);
         if (phase == 14) mc.options.keyUse.setDown(false);
+    }
+
+    /** Spawns each prop kind in front of the camera and screenshots it. */
+    private static void gallery(Minecraft mc) {
+        var kinds = new java.util.ArrayList<String>();
+        com.wandcraft.entity.Props.ids().forEach(kinds::add);
+        if (tick == 80) {
+            cmd(mc, "gamemode creative");
+            cmd(mc, "time set noon");
+            cmd(mc, "tp @s 0 -60 0 0 8");
+            cmd(mc, "gamerule doDaylightCycle false");
+        }
+        if (tick < 100) return;
+        int idx = (tick - 100) / 50, phase = (tick - 100) % 50;
+        if (idx >= kinds.size()) {
+            mc.stop();
+            return;
+        }
+        String k = kinds.get(idx);
+        if (phase == 0) {
+            cmd(mc, "kill @e[type=wandcraft:spell_prop]");
+            cmd(mc, "wandcraft prop " + k);
+        }
+        if (phase == 34) shot(mc, String.format("prop_%02d_%s", idx, k));
+    }
+
+    private static final String[] SHOWCASE = System.getProperty("wandcraft.showlist") != null ? System.getProperty("wandcraft.showlist").split(",") : new String[]{"guardian_vine", "portal_pair", "black_hole", "cataclysm", "mirror_ward", "magic_shield", "aegis_dome",
+            "phantom_wall", "sanctuary", "gravity_well", "time_fracture", "reality_tear", "spectral_legion", "mirror_image", "dimensional_slash",
+            "root_snare", "healing_bloom", "firestorm", "sand_vortex", "void_rift", "void_collapse", "radiant_lance", "beacon", "phantom_double"};
+
+    /** Casts a curated set of prop-heavy spells and screenshots each one in action. */
+    private static void showcase(Minecraft mc) {
+        if (tick == 80) {
+            cmd(mc, "gamemode creative");
+            cmd(mc, "wandcraft level 30");
+            cmd(mc, "wandcraft master all");
+            cmd(mc, "give @s wandcraft:wand");
+            cmd(mc, "time set noon");
+            cmd(mc, "gamerule doDaylightCycle false");
+        }
+        if (tick < 120) return;
+        if (tick == 120) mc.player.getInventory().selected = 0;
+        int per = 270;
+        int idx = (tick - 130) / per, phase = (tick - 130) % per;
+        if (tick < 130) return;
+        if (idx >= SHOWCASE.length) { mc.stop(); return; }
+        var spell = Spells.get(SHOWCASE[idx]);
+        if (phase == 0) {
+            cmd(mc, "tp @s 0 -60 0 0 6");
+            cmd(mc, "kill @e[type=!player]");
+            cmd(mc, "summon zombie 0 -60 9 {NoAI:1b,PersistenceRequired:1b}");
+            cmd(mc, "summon zombie 3 -60 11 {NoAI:1b,PersistenceRequired:1b}");
+            cmd(mc, "summon zombie -3 -60 10 {NoAI:1b,PersistenceRequired:1b}");
+            cmd(mc, "summon zombie 1 -60 13 {NoAI:1b,PersistenceRequired:1b}");
+        }
+        if (phase == 20) SpellView.select(spell);
+        int hold = spell.mode == com.wandcraft.magic.CastMode.INSTANT ? 3 : spell.mode == com.wandcraft.magic.CastMode.CHARGE ? spell.chargeTicks + 3 : 40;
+        if (phase == 30) mc.options.keyUse.setDown(true);
+        if (phase == 30 + hold) mc.options.keyUse.setDown(false);
+        int shotAt = spell.mode == com.wandcraft.magic.CastMode.CHANNEL ? 30 + hold - 4 : 30 + hold + (spell.id.equals("cataclysm") ? 105 : spell.id.equals("void_collapse") ? 35 : 22);
+        if (phase == Math.min(shotAt, per - 2)) shot(mc, String.format("show_%02d_%s", idx, spell.id));
     }
 }

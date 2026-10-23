@@ -108,7 +108,7 @@ final class FireSpells {
                     return hits;
                 }));
 
-        Spells.add(Spell.of("firestorm", "Firestorm", ELEMENTAL, CHARGE).icon(Glyph.BURST).cost(40).cd(240).charge(60).level(8)
+        Spells.add(Spell.of("firestorm", "Firestorm", ELEMENTAL, CHARGE).prop("rune_sigil_red", 1.1f, 0.05).icon(Glyph.BURST).cost(40).cd(240).charge(60).level(8)
                 .desc("Mark the ground with a rune. After a warning, fire pillars erupt in sequence. Charging widens the area.")
                 .zone(new ZoneBehavior() {
                     @SuppressWarnings("unchecked")
@@ -146,6 +146,7 @@ final class FireSpells {
                             l.sendParticles(ParticleTypes.FLAME, at.x, at.y + h * 0.8, at.z, Fx.scaled(8), 0.35, 0.1, 0.35, 0.05);
                         }
                         Fx.burst(l, ParticleTypes.LAVA, at.add(0, 1, 0), 3, 0.3, 0);
+                        com.wandcraft.entity.SpellProp.spawn(l, "fire_pillar", at, 0.42f, 18);
                         Fx.sound(l, at, SoundEvents.GENERIC_EXPLODE.value(), 0.35f, 1.6f);
                         int hits = 0;
                         for (LivingEntity e : l.getEntitiesOfClass(LivingEntity.class, new AABB(at.x - 1.3, at.y, at.z - 1.3, at.x + 1.3, at.y + 4, at.z + 1.3),

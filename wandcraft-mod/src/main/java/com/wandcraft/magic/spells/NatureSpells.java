@@ -130,7 +130,7 @@ final class NatureSpells {
                     return 1;
                 }));
 
-        Spells.add(Spell.of("root_snare", "Root Snare", NATURE, INSTANT).icon(Glyph.WAVE).cost(18).cd(140).level(3)
+        Spells.add(Spell.of("root_snare", "Root Snare", NATURE, INSTANT).prop("roots", 0.62f, 0).icon(Glyph.WAVE).cost(18).cd(140).level(3)
                 .desc("Roots surface where you aim, showing a warning, then clamp nearby enemies in place for a few seconds.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {
@@ -185,7 +185,7 @@ final class NatureSpells {
                     return 0;
                 }));
 
-        Spells.add(Spell.of("healing_bloom", "Healing Bloom", NATURE, INSTANT).icon(Glyph.LEAF).cost(24).cd(400).level(2)
+        Spells.add(Spell.of("healing_bloom", "Healing Bloom", NATURE, INSTANT).prop("bloom", 0.42f, 0).icon(Glyph.LEAF).cost(24).cd(400).level(2)
                 .desc("A glowing flower blossoms at your feet, healing you and allies near it over eight seconds. Step too far away and it fades.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {
@@ -232,7 +232,7 @@ final class NatureSpells {
                     return 0;
                 }));
 
-        Spells.add(Spell.of("guardian_vine", "Guardian Vine", NATURE, INSTANT).icon(Glyph.LEAF).cost(28).cd(300).level(5)
+        Spells.add(Spell.of("guardian_vine", "Guardian Vine", NATURE, INSTANT).prop("vine_guardian", 0.7f, 0).icon(Glyph.LEAF).cost(28).cd(300).level(5)
                 .desc("Grow a vine sentinel that slowly lashes nearby enemies. Fragile and short-lived; only one at a time.")
                 .zone(new ZoneBehavior() {
                     @Override public void tick(SpellZone z) {
@@ -257,6 +257,11 @@ final class NatureSpells {
                             if (d < bd) { bd = d; target = e; }
                         }
                         if (target == null) return;
+                        if (z.prop != null) {
+                            Vec3 to = target.position().subtract(z.position());
+                            z.prop.facing((float) (net.minecraft.util.Mth.atan2(-to.x, to.z) * net.minecraft.util.Mth.RAD_TO_DEG) + 180f, 0f);
+                            z.prop.act();
+                        }
                         vine(l, head, target.position().add(0, target.getBbHeight() / 2, 0));
                         Combat.hurt(l, owner, owner, target, 5 * z.power);
                         Combat.slow(target, 30, 0);

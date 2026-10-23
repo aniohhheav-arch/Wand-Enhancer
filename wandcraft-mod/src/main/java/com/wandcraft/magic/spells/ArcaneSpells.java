@@ -118,7 +118,7 @@ public final class ArcaneSpells {
                     if (beam != null) beam.discard();
                 }));
 
-        Spells.add(Spell.of("rune_mine", "Rune Mine", ARCANE, INSTANT).icon(Glyph.RUNE).cost(20).cd(40).level(4)
+        Spells.add(Spell.of("rune_mine", "Rune Mine", ARCANE, INSTANT).prop("rune_sigil", 1.1f, 0.05).icon(Glyph.RUNE).cost(20).cd(40).level(4)
                 .desc("Plant a hidden rune that blasts the first enemy to approach. Up to three at once.")
                 .zone(new ZoneBehavior() {
                     @Override public void fx(SpellZone z) {
@@ -148,6 +148,7 @@ public final class ArcaneSpells {
                             hits++;
                         }
                         z.credit(hits);
+                        if (z.prop != null) z.prop.act();
                         z.discard();
                     }
                 })
