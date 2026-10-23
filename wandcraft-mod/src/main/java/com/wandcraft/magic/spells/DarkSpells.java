@@ -686,7 +686,7 @@ final class DarkSpells {
     private static void registerPossession() {
         Spells.add(Spell.of("dark_clone", "Dark Clone", DARK, INSTANT).icon(Glyph.EYE).cost(55).cd(600).cdFn(() -> com.wandcraft.Config.DARK_CLONE_COOLDOWN_SECONDS.get() * 20)
                 .level(14).health(3f)
-                .desc("Open a pool of smoke and a living shadow rises to hunt your target. It stalks it, reaches out, pours into its body and takes it. The prey is torn apart into black ash. Never bosses, players or protected creatures.")
+                .desc("Open a pool of smoke and a living shadow rises to hunt the nearest creature. It stalks it, reaches out, pours into its body and takes it. The prey is torn apart and vanishes. Never bosses, players or protected creatures.")
                 .onCast(c -> {
                     if (Possession.hasClone(c.player)) {
                         Casting.fail(c.player, "Your shadow is already hunting");
@@ -694,9 +694,7 @@ final class DarkSpells {
                     }
                     double range = com.wandcraft.Config.DARK_CLONE_RANGE.get();
                     Mob target = null;
-                    LivingEntity aimed = Aim.entityAny(c.player, range);
-                    if (aimed instanceof Mob m && Possession.valid(c.player, m) && !Possession.claimedByOther(m, null)) target = m;
-                    if (target == null) target = Possession.pick(c.player, range, null);
+                    target = Possession.pick(c.player, range, null);
                     if (target == null) {
                         Casting.fail(c.player, "Nothing to possess in range");
                         return -1;

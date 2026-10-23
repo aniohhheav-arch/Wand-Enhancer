@@ -83,14 +83,12 @@ public final class Possession {
 
     /** Nearest mob around {@code from} that could be taken, preferring ones the owner is looking at. */
     public static Mob pick(ServerPlayer owner, double range, Mob exclude) {
-        Vec3 look = owner.getLookAngle();
         Mob best = null;
         double bestScore = Double.MAX_VALUE;
         for (Mob m : owner.level().getEntitiesOfClass(Mob.class, owner.getBoundingBox().inflate(range), m -> m != exclude && valid(owner, m) && !claimedByOther(m, null))) {
             double d = m.distanceTo(owner);
             if (d > range) continue;
-            Vec3 to = m.position().subtract(owner.position()).normalize();
-            double score = d * (1.6 - Math.max(0, look.dot(to)));
+            double score = d;
             if (score < bestScore) {
                 bestScore = score;
                 best = m;
@@ -208,7 +206,6 @@ public final class Possession {
         ShadowFx.puff(l, at.add(0, h * 0.4, 0), 40, 0.6);
         Fx.burst(l, ShadowFx.ash(1.2f), at.add(0, h * 0.4, 0), 36, 0.5, 0.18);
         Fx.shockwave(l, ShadowFx.smoke(0.8f), at.add(0, 0.15, 0), 3.5, 8);
-        AshPile.spawn(l, at, Math.max(0.9f, Math.min(2.8f, width * 1.6f)));
     }
 
     /** Anything left locked when the server stops is released, and mobs that were saved while possessed are restored on load. */

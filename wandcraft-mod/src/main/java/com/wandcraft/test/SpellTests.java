@@ -163,11 +163,10 @@ public final class SpellTests {
         h.succeedWhen(() -> {
             h.assertTrue(!z.isAlive(), "target still alive");
             var piles = h.getLevel().getEntitiesOfClass(com.wandcraft.entity.AshPile.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(4));
-            h.assertTrue(!piles.isEmpty(), "no ash pile");
+            h.assertTrue(piles.isEmpty(), "ash piles are disabled");
             h.assertTrue(h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(8)).isEmpty(), "possession must not drop loot");
             h.assertTrue(h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(8)).isEmpty(), "possession must not drop xp");
             h.assertTrue(h.getLevel().getEntitiesOfClass(com.wandcraft.entity.DarkClone.class, new net.minecraft.world.phys.AABB(zp, zp).inflate(30)).isEmpty(), "clone should be gone");
-            h.assertTrue(Math.abs(piles.get(0).getY() - zp.y) < 0.5, "ash not on ground");
         });
     }
 

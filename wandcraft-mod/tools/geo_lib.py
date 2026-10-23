@@ -175,13 +175,14 @@ def texture_anim(path, pal, alphas=(255, 255, 255, 255), frames=20, frametime=2,
         a = grid[y0, x0] * (1 - fx) + grid[y0, x1] * fx
         b = grid[y1, x0] * (1 - fx) + grid[y1, x1] * fx
         return a * (1 - fy) + b * fy
-    W, H = 32, 64
+    S = 4  # texture resolution multiplier: the model UVs are normalised, so detail is free
+    W, H = 32 * S, 64 * S
     ys, xs = np.mgrid[0:H, 0:W]
     u = (xs / (W - 1)) * 2 - 1
     v = (ys / (H - 1)) * 2 - 1
     r = np.sqrt(u * u + v * v)
     th = np.arctan2(v, u)
-    strip = Image.new('RGBA', (64, 64 * frames))
+    strip = Image.new('RGBA', (64 * S, 64 * S * frames))
     # rune swatches are identical on every frame except for a travelling glow
     base_sw = Image.new('RGBA', (32, 32))
     rng = np.random.default_rng(seed + 1)
@@ -210,7 +211,7 @@ def texture_anim(path, pal, alphas=(255, 255, 255, 255), frames=20, frametime=2,
         nx = (np.cos(rot) * u - np.sin(rot) * v) * 9 + 20
         ny = (np.sin(rot) * u + np.cos(rot) * v) * 9 + 20
         turb = 0.6 * vnoise(nx, ny) + 0.4 * vnoise(nx * 2.1 + 7, ny * 2.1 + 3)
-        val = np.clip(0.55 * arms + 0.55 * turb, 0, 1)
+        val = np.clip(0.62 * arms ** 1.4 + 0.5 * turb, 0, 1)
         val = np.clip(val + (1 - np.clip(r, 0, 1)) ** 2.4 * 0.9, 0, 1)
         # colour ramp dark -> main -> accent -> bright
         out = np.zeros((H, W, 3))
@@ -223,18 +224,18 @@ def texture_anim(path, pal, alphas=(255, 255, 255, 255), frames=20, frametime=2,
         # living edge: the boundary ripples with looping angular noise and flares into wisps
         ncirc = vnoise(24 + 7 * np.cos(th) + 3 * math.cos(ang), 24 + 7 * np.sin(th) + 3 * math.sin(ang))
         ncirc2 = vnoise(40 + 13 * np.cos(th + 1.3) - 4 * math.sin(ang), 40 + 13 * np.sin(th + 1.3) + 4 * math.cos(ang))
-        wob = (ncirc - 0.5) * 0.30 + (ncirc2 - 0.5) * 0.12
+        wob = (ncirc - 0.5) * 0.13 + (ncirc2 - 0.5) * 0.05
         re = r / np.clip(1 + wob, 0.7, 1.4)
         travel = 0.55 + 0.45 * np.sin(2 * th - 2 * ang)
         rimglow = np.clip(1 - np.abs(re - 0.80) * 7.5, 0, 1) * (0.45 + 0.55 * travel)
         out = out * (1 - rimglow[..., None] * 0.85) + pal[2] * rimglow[..., None] * 0.85
-        alpha = np.clip((1.0 - re) / 0.30, 0, 1) ** 1.3 * (140 + 110 * val)
+        alpha = np.clip((1.0 - re) / 0.34, 0, 1) ** 1.6 * (165 + 90 * val)
         alpha = np.maximum(alpha, rimglow * 240 * np.clip((1.0 - re) / 0.12, 0, 1))
         rgba = np.dstack([out, alpha]).clip(0, 255).astype('uint8')
-        frame = Image.new('RGBA', (64, 64))
-        frame.paste(base_sw, (0, 0))
-        frame.paste(Image.fromarray(rgba, 'RGBA'), (32, 0))
-        strip.paste(frame, (0, 64 * f))
+        frame = Image.new('RGBA', (64 * S, 64 * S))
+        frame.paste(base_sw.resize((32 * S, 32 * S), Image.NEAREST), (0, 0))
+        frame.paste(Image.fromarray(rgba, 'RGBA'), (32 * S, 0))
+        strip.paste(frame, (0, 64 * S * f))
     full = R + 'textures/entity/prop/' + path
     os.makedirs(os.path.dirname(full), exist_ok=True)
     strip.save(full)
