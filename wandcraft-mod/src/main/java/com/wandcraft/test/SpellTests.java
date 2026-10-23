@@ -60,6 +60,7 @@ public final class SpellTests {
                     var foreign = new com.wandcraft.entity.SpellZone(h.getLevel(), Spells.get("rune_mine"), null, zombies.get(4).position(), 2f, 200);
                     h.getLevel().addFreshEntity(foreign);
                 }
+                if (s.id.equals("rewind")) { com.wandcraft.magic.TimeEvents.seed(p, 80); p.moveTo(spawn.x + 4, spawn.y, spawn.z, 0f, 0f); }
                 String why = Casting.blocker(p, s);
                 if (why != null) System.out.println("WANDCRAFT blocker " + s.id + ": " + why);
                 boolean ok;

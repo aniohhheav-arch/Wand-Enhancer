@@ -14,7 +14,7 @@ def light(c, t=0.5): return mix(c, (255, 255, 255), t)
 def dark(c, t=0.55): return mix(c, (0, 0, 0), t)
 
 CAT = {"arcane": 0x6C8BFF, "fire": 0xFF7A1A, "ice": 0x7FD8FF, "storm": 0xFFE45A, "earth": 0xB08A58, "force": 0xC9D6E8, "nature": 0x57C84D,
-       "defense": 0x4FB3FF, "illusion": 0xD27BFF, "space": 0x8A3CFF, "light": 0xFFD84A, "dark": 0x7A2BD6, "forbidden": 0xE02450}
+       "defense": 0x4FB3FF, "illusion": 0xD27BFF, "space": 0x8A3CFF, "light": 0xFFD84A, "dark": 0x7A2BD6, "time": 0x3DE0C8, "forbidden": 0xE02450}
 
 class Ctx:
     def __init__(self, col):
@@ -439,6 +439,13 @@ SPELLS = {
  "umbral_cloak": ("dark", [("cloak", FULL)]),
  "black_flame": ("dark", [("flame", BIG, {"col": (150, 70, 255)}), ("flame", (0.3, 0.3, 0.4), {"col": (30, 10, 60)})]),
  "nightfall": ("dark", [("moon", FULL), ("star", (0.64, 0.12, 0.26), {"col": (255, 245, 200)}), ("star", (0.7, 0.55, 0.18), {"col": (255, 245, 200)})]),
+ "slow_field": ("time", [("ring", FULL, {"double": True}), ("hourglass", (0.3, 0.3, 0.4), {"col": (255, 214, 120)})]),
+ "quicken": ("time", [("wings", FULL, {"col": (150, 255, 235)}), ("hourglass", (0.3, 0.2, 0.4), {"col": (255, 214, 120)})]),
+ "rewind": ("time", [("swirl", FULL, {"col": (120, 240, 220)}), ("hourglass", (0.34, 0.3, 0.32), {"col": (255, 214, 120)})]),
+ "stasis": ("time", [("hourglass", BIG, {"col": (255, 214, 120)}), ("ring", FULL, {"col": (61, 224, 200)})]),
+ "chrono_bubble": ("time", [("dome", FULL, {"col": (61, 224, 200)}), ("hourglass", (0.3, 0.38, 0.4), {"col": (255, 255, 255)})]),
+ "accelerate": ("time", [("leaf", FULL, {"col": (110, 220, 120)}), ("hourglass", (0.5, 0.45, 0.4), {"col": (255, 214, 120)})]),
+ "entropy": ("time", [("hourglass", FULL, {"col": (216, 176, 112)}), ("crack", (0.2, 0.15, 0.6), {"col": (255, 255, 255)})]),
  "dark_clone": ("dark", [("ghost", (0.0, 0.0, 0.98), {"col": (36, 16, 70)}), ("eye", (0.2, 0.2, 0.6), {"col": (240, 210, 255), "slit": True}), ("vine", (0.0, 0.5, 0.5), {"col": (150, 80, 255)})]),
  "shadow_clone": ("dark", [("ghost", (0.0, 0.1, 0.72), {"col": (40, 20, 80)}), ("ghost", (0.34, 0.0, 0.66), {"col": (130, 70, 210)})]),
  "curse_mark": ("dark", [("target", FULL, {"col": (160, 80, 255)}), ("skull", (0.3, 0.3, 0.4), {})]),

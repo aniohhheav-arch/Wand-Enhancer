@@ -9,6 +9,7 @@ public enum Category {
     DEFENSE("Defense", 0x4FB3FF, Glyph.SHIELD),
     ILLUSION("Illusion", 0xD27BFF, Glyph.MIRROR),
     SPACE("Space", 0x8A3CFF, Glyph.PORTAL),
+    TIME("Time", 0x3DE0C8, Glyph.HOURGLASS),
     LIGHT("Light", 0xFFE06B, Glyph.SUN),
     DARK("Dark Arts", 0x7A2BD6, Glyph.SKULL),
     FORBIDDEN("Forbidden", 0xE02450, Glyph.FORBID);

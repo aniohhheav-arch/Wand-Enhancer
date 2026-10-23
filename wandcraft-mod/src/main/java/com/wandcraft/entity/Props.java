@@ -39,6 +39,7 @@ public final class Props {
         reg("reality_crack", Mode.ADDITIVE, true);
         reg("phantom_wall", Mode.TRANSLUCENT, true);
         reg("shadow_pool", Mode.TRANSLUCENT, true);
+        reg("chrono_dial", Mode.ADDITIVE, true);
     }
 
     private Props() {}

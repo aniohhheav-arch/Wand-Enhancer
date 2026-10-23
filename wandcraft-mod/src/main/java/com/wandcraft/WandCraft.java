@@ -113,6 +113,7 @@ public class WandCraft {
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.DefenseEvents.class);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.DarkEvents.class);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.Possession.class);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.register(com.wandcraft.magic.TimeEvents.class);
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent e) {

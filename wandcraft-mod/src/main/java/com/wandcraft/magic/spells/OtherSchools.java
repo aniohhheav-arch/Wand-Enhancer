@@ -12,6 +12,7 @@ public final class OtherSchools {
         IllusionSpells.register();
         SpaceSpells.register();
         LightSpells.register();
+        TimeSpells.register();
         ForbiddenSpells.register();
     }
 }

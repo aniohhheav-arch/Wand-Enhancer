@@ -5,7 +5,7 @@ This directory is self-contained and unrelated to the Wand Enhancer patcher in t
 
 ## Status: Phase 4
 
-The framework is complete and 102 spells across all ten schools are implemented and smoke-tested. Remaining schools are added group by group on the same framework.
+The framework is complete and 109 spells across eleven schools are implemented and smoke-tested. Remaining schools are added group by group on the same framework.
 
 | School | Spells | State |
 | --- | --- | --- |
@@ -85,3 +85,5 @@ gradle runGameTestServer      # casts every spell against a field of enemies
 - **Ash piles**: a persistent GeckoLib entity left where the mob stood. It sits flush on the terrain, glows with embers, drifts motes in the wind, scatters when walked through, is saved with the world (configurable) and is pruned oldest-first by per-area and per-dimension limits.
 - **Sounds**: custom layered sounds (deep summon with a reversed whisper, whispers, hunt rumble, phase crackle, reach riser, possession, disintegration, bass implosion, ash scatter) synthesized by `tools/gen_sounds.py`.
 - Config (`wandcraft-common.toml`): `darkCloneRange`, `darkCloneDurationSeconds`, `darkCloneCooldownSeconds`, `darkCloneBlacklist`, `ashDurationSeconds` (0 = until pruned), `ashPersists`, `ashMaxTotal`, `ashMaxPerArea`. Client: `reducedEffects`, `dissolveShader` (progressive crumble vs. plain shrink; no custom GLSL shader is used).
+- **Time school (new)**: Slow Field (clock-face zone), Quicken, Rewind (back to where you stood four seconds ago), Stasis (freeze a creature and bank all damage, released with interest), Chrono Bubble (stops hostile projectiles mid-air, then releases them), Accelerate (crops, saplings and baby animals grow) and Entropy (delayed ageing damage).
+- **Fixes and rework**: Pocket Rift's portal closes with the chest; channelled shield panels now always vanish on release; portals are soft, rippling vortex panes instead of rigid frames; Dark Clone's merge consumes the body along its arm into the target; possession uses a real noise-cut dissolve (the ender dragon death technique, extremities first, darkening to ash) via a small access transformer.

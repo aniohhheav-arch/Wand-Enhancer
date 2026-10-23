@@ -511,6 +511,39 @@ def shadow_pool():
     an.add("despawn", 0.8, {"root": {"scale": kf({0: [1, 1, 1], 0.3: [1.15, 1.4, 1.15], 0.8: [0.05, 0.02, 0.05]})}}, loop="hold")
     finish(g, an, "shadow_pool", [(14, 8, 26), (64, 26, 118), (150, 80, 235), (4, 2, 10)], (235, 215, 200, 255))
 
+# ------------------------------------------------------------------------------------------------ chrono dial (Time school)
+def chrono_dial():
+    g = Geo("chrono_dial", bounds=(4, 3))
+    an = Anims("chrono_dial")
+    g.bone("face")
+    g.ring("face", 15.5, 0.4, 1.6, 0.5, 44, 1)
+    g.ring("face", 12.0, 0.3, 0.8, 0.4, 36, 0)
+    g.bone("ticks")
+    for k in range(12):
+        a = 2 * math.pi * k / 12
+        big = k % 3 == 0
+        r = 13.6
+        ln = 3.4 if big else 1.8
+        g.cube("ticks", [math.cos(a) * r - ln / 2, 0.1, math.sin(a) * r - (0.9 if big else 0.5)], [ln, 0.7, 1.8 if big else 1.0], 2 if big else 1,
+               rot=[0, -math.degrees(a) + 90, 0], pivot=[math.cos(a) * r, 0.4, math.sin(a) * r])
+    g.bone("motes")
+    for k in range(10):
+        a = 2 * math.pi * k / 10
+        g.box_c("motes", (math.cos(a) * 17.5, 1.4, math.sin(a) * 17.5), (1.2, 1.2, 1.2), 2, rot=(0, 45 * k, 0))
+    g.bone("hand_h", (0, 0.8, 0)); g.box_c("hand_h", (0, 0.8, -3.6), (1.6, 0.7, 7.5), 2)
+    g.bone("hand_m", (0, 1.1, 0)); g.box_c("hand_m", (0, 1.1, -5.6), (1.1, 0.7, 11.5), 1)
+    g.bone("hand_s", (0, 1.4, 0)); g.box_c("hand_s", (0, 1.4, -6.4), (0.5, 0.5, 13.0), 2); g.box_c("hand_s", (0, 1.4, 2.4), (0.9, 0.5, 3.0), 2)
+    g.bone("hub", (0, 1, 0)); g.box_c("hub", (0, 1.2, 0), (2.4, 1.2, 2.4), 3)
+    standard(an, spawn_len=0.6)
+    an.add("idle", 6.0, {
+        "hand_h": {"rotation": spin(6, 1, -1, 8)},
+        "hand_m": {"rotation": kf({0: [0, 0, 0], 3: [0, -360, 0], 6: [0, -720, 0]})},
+        "hand_s": {"rotation": kf({0: [0, 0, 0], 1.5: [0, -720, 0], 3: [0, -1440, 0], 4.5: [0, -2160, 0], 6: [0, -2880, 0]})},
+        "motes": {"rotation": spin(12, 1, 1, 8)},
+        "ticks": {"scale": kf({0: [1, 1, 1], 1.5: [1.03, 1, 1.03], 3: [1, 1, 1], 4.5: [0.97, 1, 0.97], 6: [1, 1, 1]})},
+        "face": {"scale": kf({0: [1, 1, 1], 3: [1.02, 1, 1.02], 6: [1, 1, 1]})}})
+    finish(g, an, "chrono_dial", [(60, 205, 190), (255, 214, 120), (235, 255, 250), (20, 70, 80)], (210, 235, 255, 170))
+
 if __name__ == "__main__":
     vine_guardian()
     sigil("rune_sigil", [(60, 96, 230), (130, 170, 255), (235, 242, 255), (30, 50, 140)])
@@ -539,4 +572,5 @@ if __name__ == "__main__":
     reality_crack()
     phantom_wall()
     shadow_pool()
+    chrono_dial()
     print("props ok")
