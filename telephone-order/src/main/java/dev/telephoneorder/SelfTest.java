@@ -251,7 +251,7 @@ final class SelfTest {
     private static int dcur;
 
     private static void deliveryTest() {
-        if (dcur >= DELIVERIES.length) { finish(); return; }
+        if (dcur >= DELIVERIES.length) { strikeTest(); return; }
         String[] d = DELIVERIES[dcur++];
         Listing li = Listing.BY_ID.get(d[1]);
         int before = countItems();
@@ -271,6 +271,27 @@ final class SelfTest {
 
     private static int countItems() {
         return level.getEntitiesOfClass(ItemEntity.class, new AABB(-80, -64, -80, 80, 320, 80)).size();
+    }
+
+    private static void strikeTest() {
+        String[] ids = {"strike_meteor_precision", "strike_meteor_random", "strike_orbital", "strike_lance", "strike_strategic"};
+        int[] k = {0};
+        Runnable[] next = new Runnable[1];
+        next[0] = () -> {
+            if (k[0] >= ids.length) { Sched.later(60, SelfTest::finish); return; }
+            String id = ids[k[0]++];
+            try {
+                fake.setPos(0.5, 64, 0.5);
+                var item = ModItems.ALL.get(id);
+                check(item instanceof dev.telephoneorder.strike.StrikeBeaconItem, id + " beacon item missing");
+                boolean ok = dev.telephoneorder.strike.StrikeDirector.launch(fake, id, new Vec3(0.5, 64, 30.5));
+                check(ok, id + " launch refused");
+                log("strike " + id + " launched");
+                dev.telephoneorder.strike.StrikeDirector.resetCooldowns();
+            } catch (Throwable ex) { check(false, id + " threw " + ex); ex.printStackTrace(); }
+            Sched.later(700, next[0]);
+        };
+        next[0].run();
     }
 
     private static void finish() {

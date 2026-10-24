@@ -36,6 +36,8 @@ public final class StrikeDirector {
     private static final Map<UUID, Long> COOLDOWN = new HashMap<>();
     private static boolean weatherLocked;
 
+    public static void resetCooldowns() { COOLDOWN.clear(); }
+
     public static int cooldownTicks(String id) {
         return switch (id) { case "strike_strategic" -> 20 * 120; case "strike_lance" -> 20 * 90; case "strike_orbital" -> 20 * 45; default -> 20 * 20; };
     }

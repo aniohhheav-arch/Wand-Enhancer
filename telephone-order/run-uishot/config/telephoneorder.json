@@ -8,6 +8,8 @@
   "allowFriendlyDamage": true,
   "deliveryTimeMultiplier": 1.0,
   "clueLoot": true,
+  "strikeTerrainDamage": false,
+  "strategicDemoMode": true,
   "screenShake": true,
   "shakeIntensity": 1.0,
   "reduceCameraMotion": false,
