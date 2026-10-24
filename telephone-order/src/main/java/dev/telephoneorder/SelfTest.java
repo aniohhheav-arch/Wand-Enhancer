@@ -62,6 +62,7 @@ final class SelfTest {
         int y = 64;
         log("test platform built, standing y=" + y);
         fake.setPos(0.5, y, 0.5);
+        for (var stray : level.getEntitiesOfClass(IronGolem.class, new AABB(-60, 0, -60, 60, 200, 60))) stray.discard();   // golems persisted by earlier runs
         golem = new IronGolem(EntityTypes.IRON_GOLEM, level);
         golem.setPos(0.5, y, 12.5);
         golem.setNoAi(true);
@@ -78,6 +79,7 @@ final class SelfTest {
     }
 
     private static void gunStep() {
+        if (Boolean.getBoolean("telephoneorder.gunsonly") && cursor >= 4) { finish(); return; }
         if (cursor >= Catalog.GUNS.size()) { workbenchTest(); return; }
         GunDef def = Catalog.GUNS.get(cursor++);
         GunItem item = ModItems.GUNS.get(def.id());
