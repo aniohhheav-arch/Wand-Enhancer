@@ -16,7 +16,7 @@
   "crate": 10,
   "drone": 25,
   "pod": 45,
-  "teleport": 60,
-  "case": 90
+  "case": 90,
+  "teleport": 750
  }
 }

@@ -34,7 +34,6 @@ public class DeliveryActor extends Entity implements GeoEntity {
     public DeliveryActor(EntityType<?> type, Level level) {
         super(type, level);
         this.noPhysics = true;
-        this.noCulling = true;
     }
 
     @Override

@@ -1,0 +1,60 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.crate.idle": {
+   "loop": true,
+   "animation_length": 2,
+   "bones": {
+    "lid": {
+     "position": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "1": [
+       0,
+       0.15,
+       0
+      ],
+      "2": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.crate.open": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 1.2,
+   "bones": {
+    "lid": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       -14,
+       0,
+       0
+      ],
+      "0.9": [
+       -100,
+       0,
+       0
+      ],
+      "1.2": [
+       -92,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,74 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.case.idle": {
+   "loop": true,
+   "animation_length": 2,
+   "bones": {
+    "latch": {
+     "scale": {
+      "0": [
+       1,
+       1,
+       1
+      ],
+      "1": [
+       1.15,
+       1.15,
+       1.15
+      ],
+      "2": [
+       1,
+       1,
+       1
+      ]
+     }
+    }
+   }
+  },
+  "animation.case.open": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 1.0,
+   "bones": {
+    "lid": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       -125,
+       0,
+       0
+      ],
+      "0.8": [
+       -112,
+       0,
+       0
+      ],
+      "1.0": [
+       -118,
+       0,
+       0
+      ]
+     }
+    },
+    "latch": {
+     "position": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       0,
+       0,
+       -2
+      ]
+     }
+    }
+   }
+  }
+ }
+}
