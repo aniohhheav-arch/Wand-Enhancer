@@ -417,18 +417,6 @@ public final class DeliveryDirector {
             double f = 1 - Math.pow(1 - t / (double) approach, 2);
             return v(sx * (1 - f), Mth.lerp(f, startY, hover) + 0.34 * s, sz * (1 - f));
         }, t -> yaw((float) Math.toDegrees(ang) + 90 + (t < approach ? 0 : 0)), null);
-        // spin rotors separately (they ignore body rotation)
-        for (int t = 0; t < approach + lower + hold + leave + 6; t += 2) {
-            int tt = t;
-            Sched.later(t, () -> {
-                for (int i = 1; i < props.size(); i++) {
-                    Prop r = props.get(i);
-                    r.d.setTransformation(new Transformation(new Vector3f(r.pos), new Quaternionf().rotateY((float) Math.toRadians((tt * 60) % 360)), new Vector3f(s), new Quaternionf()));
-                    r.d.setTransformationInterpolationDuration(2);
-                    r.d.setTransformationInterpolationDelay(0);
-                }
-            });
-        }
         // lower the cargo on a winch
         Sched.later(approach, () -> {
             float cs = 1.0f;
