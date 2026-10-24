@@ -57,6 +57,7 @@ final class SelfTest {
         ModConfig.get().deliveryTimeMultiplier = 0.05f;
         fake = FakePlayer.get(level);
         BlockPos base = new BlockPos(0, 0, 0);
+        for (int cx = -4; cx <= 4; cx++) for (int cz = -4; cz <= 4; cz++) level.setChunkForced(cx, cz, true);
         for (int x = -48; x <= 48; x++) for (int z = -48; z <= 48; z++) level.setBlock(new BlockPos(x, 63, z), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 2);
         int y = 64;
         log("test platform built, standing y=" + y);
