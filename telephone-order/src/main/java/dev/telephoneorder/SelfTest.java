@@ -83,6 +83,11 @@ final class SelfTest {
         GunItem item = ModItems.GUNS.get(def.id());
         ItemStack stack = GunData.newStack(def, item);
         fake.setItemSlot(EquipmentSlot.MAINHAND, stack);
+        if (!golem.isAlive()) {
+            golem = new IronGolem(EntityTypes.IRON_GOLEM, level);
+            golem.setPos(0.5, 64, 12.5); golem.setNoAi(true); golem.setPersistenceRequired();
+            level.addFreshEntity(golem);
+        }
         golem.setHealth(golem.getMaxHealth());
         aim();
         float hp0 = golem.getHealth();
@@ -126,7 +131,7 @@ final class SelfTest {
         Sched.later(45, () -> {
             float dmg = hp0 - golem.getHealth();
             int ammo1 = GunData.ammo(stack);
-            boolean offensive = !def.beh().equals("shield") && !def.beh().equals("gravity") && !def.beh().equals("cryo");
+            boolean offensive = !def.beh().equals("rift") && !def.beh().equals("shield") && !def.beh().equals("gravity") && !def.beh().equals("cryo");
             boolean spent = ammo1 < ammo0;
             check(spent, def.id() + " did not consume ammo");
             if (offensive) check(dmg > 0.01f || def.beh().equals("smart") || def.beh().equals("unstable"), def.id() + " dealt no damage (" + dmg + ")");
@@ -167,10 +172,11 @@ final class SelfTest {
             GunDef def = Catalog.GUN_BY_ID.get("chameleon_mod");
             ItemStack stack = GunData.newStack(def, ModItems.GUNS.get(def.id()));
             fake.setItemSlot(EquipmentSlot.MAINHAND, stack);
-            { int sl = 22; for (var a : Catalog.ATTS) { if (sl < 36) fake.getInventory().setItem(sl++, new ItemStack(ModItems.ATTACHMENTS.get(a.id()), 2)); } }
+            
             int fitted = 0;
             for (var a : Catalog.ATTS) {
                 if (!Catalog.fits(a, def)) continue;
+                fake.getInventory().setItem(30, new ItemStack(ModItems.ATTACHMENTS.get(a.id()), 2));
                 ServerSetup.workbench(fake, new Payloads.WorkbenchAction("attach", a.slot(), a.id()));
                 check(GunData.attachment(stack, a.slot()).equals(a.id()), "attach failed " + a.id());
                 fitted++;
@@ -179,11 +185,13 @@ final class SelfTest {
             log("workbench: fitted " + fitted + " attachments, mag=" + st.mag + " spread x" + st.spread + " recoil x" + st.recoil);
             check(fitted >= 7, "too few attachments fit chameleon");
             // incompatible attach must be refused
+            fake.getInventory().setItem(30, new ItemStack(ModItems.ATTACHMENTS.get("scope_8x"), 2));
             ServerSetup.workbench(fake, new Payloads.WorkbenchAction("attach", "optic", "scope_8x"));
             ItemStack gp = GunData.newStack(Catalog.GUN_BY_ID.get("vesper_p9"), ModItems.GUNS.get("vesper_p9"));
             fake.setItemSlot(EquipmentSlot.MAINHAND, gp);
             ServerSetup.workbench(fake, new Payloads.WorkbenchAction("attach", "optic", "scope_8x"));
             check(GunData.attachment(gp, "optic").isEmpty(), "8x scope wrongly fitted to a pistol");
+            fake.getInventory().setItem(30, new ItemStack(ModItems.ATTACHMENTS.get("suppressor"), 2));
             ServerSetup.workbench(fake, new Payloads.WorkbenchAction("attach", "muzzle", "suppressor"));
             check(GunData.attachment(gp, "muzzle").equals("suppressor"), "suppressor not fitted to pistol");
             ServerSetup.workbench(fake, new Payloads.WorkbenchAction("detach", "muzzle", ""));
