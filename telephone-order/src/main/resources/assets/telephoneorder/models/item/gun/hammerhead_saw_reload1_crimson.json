@@ -1,0 +1,6 @@
+{
+ "parent": "telephoneorder:item/gun_base",
+ "textures": {
+  "layer0": "telephoneorder:item/gun/hammerhead_saw_reload1_crimson"
+ }
+}

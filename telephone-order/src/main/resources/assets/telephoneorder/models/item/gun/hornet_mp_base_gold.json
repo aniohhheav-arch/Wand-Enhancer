@@ -1,0 +1,6 @@
+{
+ "parent": "telephoneorder:item/gun_base",
+ "textures": {
+  "layer0": "telephoneorder:item/gun/hornet_mp_base_gold"
+ }
+}

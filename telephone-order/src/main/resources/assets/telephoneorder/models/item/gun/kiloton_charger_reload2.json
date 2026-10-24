@@ -1,0 +1,6 @@
+{
+ "parent": "telephoneorder:item/gun_base",
+ "textures": {
+  "layer0": "telephoneorder:item/gun/kiloton_charger_reload2"
+ }
+}

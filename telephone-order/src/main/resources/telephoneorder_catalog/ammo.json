@@ -1,0 +1,166 @@
+[
+ {
+  "id": "ammo_9mm",
+  "name": "9mm Rounds",
+  "per": 30,
+  "price": 6,
+  "color": [
+   214,
+   170,
+   70
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_357",
+  "name": ".357 Magnum Rounds",
+  "per": 18,
+  "price": 8,
+  "color": [
+   226,
+   140,
+   60
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_556",
+  "name": "5.56 Rounds",
+  "per": 40,
+  "price": 9,
+  "color": [
+   120,
+   150,
+   90
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_762",
+  "name": "7.62 Rounds",
+  "per": 30,
+  "price": 10,
+  "color": [
+   150,
+   120,
+   80
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_12g",
+  "name": "12 Gauge Shells",
+  "per": 16,
+  "price": 9,
+  "color": [
+   200,
+   60,
+   50
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_50bmg",
+  "name": ".50 BMG Rounds",
+  "per": 10,
+  "price": 16,
+  "color": [
+   190,
+   190,
+   200
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_rocket",
+  "name": "Rocket Pack",
+  "per": 2,
+  "price": 40,
+  "color": [
+   220,
+   90,
+   40
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_cell",
+  "name": "Energy Cell",
+  "per": 60,
+  "price": 14,
+  "color": [
+   80,
+   230,
+   255
+  ],
+  "special": false
+ },
+ {
+  "id": "ammo_core",
+  "name": "Fusion Core",
+  "per": 6,
+  "price": 60,
+  "color": [
+   255,
+   120,
+   230
+  ],
+  "special": false
+ },
+ {
+  "id": "rounds_incendiary",
+  "name": "Incendiary Rounds",
+  "per": 15,
+  "price": 30,
+  "mod": "incendiary",
+  "color": [
+   255,
+   120,
+   30
+  ],
+  "desc": "Sets targets ablaze. Slightly reduced damage.",
+  "special": true
+ },
+ {
+  "id": "rounds_ap",
+  "name": "Armor-Piercing Rounds",
+  "per": 15,
+  "price": 36,
+  "mod": "ap",
+  "color": [
+   190,
+   200,
+   215
+  ],
+  "desc": "Ignores 55% of armor. Lower stopping power.",
+  "special": true
+ },
+ {
+  "id": "rounds_explosive",
+  "name": "Explosive Rounds",
+  "per": 10,
+  "price": 48,
+  "mod": "explosive",
+  "color": [
+   255,
+   70,
+   50
+  ],
+  "desc": "Tiny detonation on impact. Does not break blocks.",
+  "special": true
+ },
+ {
+  "id": "rounds_frost",
+  "name": "Frost Rounds",
+  "per": 15,
+  "price": 34,
+  "mod": "frost",
+  "color": [
+   150,
+   220,
+   255
+  ],
+  "desc": "Chills targets: heavy slowness and freezing.",
+  "special": true
+ }
+]

@@ -1,0 +1,6 @@
+{
+ "parent": "telephoneorder:item/gun_base",
+ "textures": {
+  "layer0": "telephoneorder:item/gun/longshot_l96_base_crimson"
+ }
+}

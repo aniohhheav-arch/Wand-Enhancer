@@ -1,0 +1,6 @@
+{
+ "parent": "telephoneorder:item/gun_base",
+ "textures": {
+  "layer0": "telephoneorder:item/gun/rattler_smg_reload2_crimson"
+ }
+}

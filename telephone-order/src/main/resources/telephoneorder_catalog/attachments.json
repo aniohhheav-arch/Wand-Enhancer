@@ -1,0 +1,423 @@
+[
+ {
+  "id": "red_dot",
+  "name": "Red Dot Sight",
+  "slot": "optic",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "shotgun",
+   "lmg",
+   "energy"
+  ],
+  "price": 40,
+  "tier": "standard",
+  "mods": {
+   "spread": 0.9,
+   "zoom": 0.9
+  },
+  "desc": "Clean sight picture. Slightly tighter spread, mild zoom."
+ },
+ {
+  "id": "holo_sight",
+  "name": "Holographic Sight",
+  "slot": "optic",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "shotgun",
+   "lmg",
+   "energy"
+  ],
+  "price": 90,
+  "tier": "advanced",
+  "mods": {
+   "spread": 0.82,
+   "zoom": 0.8
+  },
+  "desc": "Wide, bright reticle. Better close-quarters aim."
+ },
+ {
+  "id": "scope_4x",
+  "name": "4x Combat Scope",
+  "slot": "optic",
+  "fits": [
+   "rifle",
+   "sniper",
+   "lmg",
+   "energy",
+   "launcher"
+  ],
+  "price": 120,
+  "tier": "advanced",
+  "mods": {
+   "spread": 0.78,
+   "zoom": 0.4,
+   "range": 1.2
+  },
+  "desc": "4x magnification and extended effective range."
+ },
+ {
+  "id": "scope_8x",
+  "name": "8x Sniper Scope",
+  "slot": "optic",
+  "fits": [
+   "sniper",
+   "rifle"
+  ],
+  "price": 220,
+  "tier": "experimental",
+  "mods": {
+   "spread": 0.65,
+   "zoom": 0.17,
+   "range": 1.45
+  },
+  "desc": "Extreme magnification for long range work."
+ },
+ {
+  "id": "suppressor",
+  "name": "Suppressor",
+  "slot": "muzzle",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "sniper",
+   "shotgun"
+  ],
+  "price": 110,
+  "tier": "advanced",
+  "mods": {
+   "dmg": 0.92,
+   "noise": 0.12,
+   "range": 0.94,
+   "flash": 0
+  },
+  "desc": "Cuts the report and kills the muzzle flash."
+ },
+ {
+  "id": "muzzle_brake",
+  "name": "Muzzle Brake",
+  "slot": "muzzle",
+  "fits": [
+   "smg",
+   "rifle",
+   "sniper",
+   "lmg",
+   "shotgun"
+  ],
+  "price": 70,
+  "tier": "standard",
+  "mods": {
+   "recoil": 0.68,
+   "spread": 1.06
+  },
+  "desc": "Vents gas to soak up recoil."
+ },
+ {
+  "id": "focus_lens",
+  "name": "Focusing Lens",
+  "slot": "muzzle",
+  "fits": [
+   "energy"
+  ],
+  "price": 140,
+  "tier": "experimental",
+  "mods": {
+   "range": 1.3,
+   "spread": 0.8,
+   "dmg": 1.05,
+   "heat": 1.12
+  },
+  "desc": "Collimates the emitter. Tighter, longer, a bit hotter."
+ },
+ {
+  "id": "extended_mag",
+  "name": "Extended Magazine",
+  "slot": "mag",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "lmg"
+  ],
+  "price": 60,
+  "tier": "standard",
+  "mods": {
+   "mag": 1.5,
+   "reload": 1.12
+  },
+  "desc": "+50% capacity, slightly slower reload."
+ },
+ {
+  "id": "drum_mag",
+  "name": "Drum Magazine",
+  "slot": "mag",
+  "fits": [
+   "smg",
+   "rifle",
+   "lmg"
+  ],
+  "price": 130,
+  "tier": "advanced",
+  "mods": {
+   "mag": 2.2,
+   "reload": 1.4,
+   "spread": 1.08
+  },
+  "desc": "More than double the capacity. Heavy and slow to seat."
+ },
+ {
+  "id": "quickdraw_mag",
+  "name": "Quickdraw Magazine",
+  "slot": "mag",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle"
+  ],
+  "price": 75,
+  "tier": "standard",
+  "mods": {
+   "mag": 0.9,
+   "reload": 0.65
+  },
+  "desc": "Flared well and tuned springs for a fast reload."
+ },
+ {
+  "id": "foregrip",
+  "name": "Vertical Foregrip",
+  "slot": "grip",
+  "fits": [
+   "smg",
+   "rifle",
+   "lmg",
+   "shotgun"
+  ],
+  "price": 55,
+  "tier": "standard",
+  "mods": {
+   "recoil": 0.75,
+   "spread": 0.92
+  },
+  "desc": "Steadies the weapon under sustained fire."
+ },
+ {
+  "id": "stabilizer",
+  "name": "Gyro Stabilizer",
+  "slot": "grip",
+  "fits": [
+   "lmg",
+   "launcher"
+  ],
+  "price": 150,
+  "tier": "experimental",
+  "mods": {
+   "recoil": 0.5,
+   "spread": 0.8,
+   "reload": 1.1
+  },
+  "desc": "Gyroscopic grip for heavy weapons."
+ },
+ {
+  "id": "heavy_stock",
+  "name": "Heavy Stock",
+  "slot": "stock",
+  "fits": [
+   "smg",
+   "rifle",
+   "sniper",
+   "shotgun"
+  ],
+  "price": 65,
+  "tier": "standard",
+  "mods": {
+   "recoil": 0.8,
+   "spread": 0.85
+  },
+  "desc": "Solid shoulder weld. Less kick, tighter groups."
+ },
+ {
+  "id": "skeleton_stock",
+  "name": "Skeleton Stock",
+  "slot": "stock",
+  "fits": [
+   "smg",
+   "rifle",
+   "shotgun"
+  ],
+  "price": 60,
+  "tier": "standard",
+  "mods": {
+   "reload": 0.88,
+   "spread": 1.1
+  },
+  "desc": "Light and nimble, a bit twitchy."
+ },
+ {
+  "id": "laser_sight",
+  "name": "Laser Sight",
+  "slot": "under",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "shotgun",
+   "lmg",
+   "sniper"
+  ],
+  "price": 80,
+  "tier": "advanced",
+  "mods": {
+   "spread": 0.88
+  },
+  "laser": 1,
+  "desc": "Projects a visible dot. Tighter hip-fire."
+ },
+ {
+  "id": "flashlight",
+  "name": "Tactical Flashlight",
+  "slot": "under",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "shotgun",
+   "lmg",
+   "sniper"
+  ],
+  "price": 45,
+  "tier": "standard",
+  "mods": {},
+  "light": 1,
+  "desc": "Illuminates what you hit: targets glow briefly."
+ },
+ {
+  "id": "amp_module",
+  "name": "Energy Amplifier",
+  "slot": "module",
+  "fits": [
+   "energy",
+   "heavy"
+  ],
+  "price": 170,
+  "tier": "experimental",
+  "mods": {
+   "dmg": 1.2,
+   "heat": 1.3
+  },
+  "desc": "+20% output at the cost of more heat."
+ },
+ {
+  "id": "overclock",
+  "name": "Overclock Capacitor",
+  "slot": "module",
+  "fits": [
+   "energy",
+   "heavy"
+  ],
+  "price": 190,
+  "tier": "experimental",
+  "mods": {
+   "delay": 0.8,
+   "heat": 1.4
+  },
+  "desc": "Faster cycling. Runs hot."
+ },
+ {
+  "id": "heatsink",
+  "name": "Heatsink Fins",
+  "slot": "module",
+  "fits": [
+   "energy",
+   "heavy"
+  ],
+  "price": 120,
+  "tier": "advanced",
+  "mods": {
+   "heat": 0.6,
+   "cool": 1.6
+  },
+  "desc": "Dumps heat much faster."
+ },
+ {
+  "id": "cell_extender",
+  "name": "Cell Extender",
+  "slot": "module",
+  "fits": [
+   "energy",
+   "heavy"
+  ],
+  "price": 140,
+  "tier": "advanced",
+  "mods": {
+   "mag": 1.6
+  },
+  "desc": "+60% energy capacity."
+ },
+ {
+  "id": "finish_gold",
+  "name": "Gilded Finish",
+  "slot": "finish",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "sniper",
+   "shotgun",
+   "lmg",
+   "energy",
+   "heavy",
+   "launcher"
+  ],
+  "price": 150,
+  "tier": "standard",
+  "mods": {},
+  "finish": "gold",
+  "desc": "Cosmetic. 24-karat, entirely unnecessary."
+ },
+ {
+  "id": "finish_arctic",
+  "name": "Arctic Finish",
+  "slot": "finish",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "sniper",
+   "shotgun",
+   "lmg",
+   "energy",
+   "heavy",
+   "launcher"
+  ],
+  "price": 60,
+  "tier": "standard",
+  "mods": {},
+  "finish": "arctic",
+  "desc": "Cosmetic. Pale frost camouflage."
+ },
+ {
+  "id": "finish_crimson",
+  "name": "Crimson Finish",
+  "slot": "finish",
+  "fits": [
+   "pistol",
+   "smg",
+   "rifle",
+   "sniper",
+   "shotgun",
+   "lmg",
+   "energy",
+   "heavy",
+   "launcher"
+  ],
+  "price": 60,
+  "tier": "standard",
+  "mods": {},
+  "finish": "crimson",
+  "desc": "Cosmetic. Corporate red."
+ }
+]

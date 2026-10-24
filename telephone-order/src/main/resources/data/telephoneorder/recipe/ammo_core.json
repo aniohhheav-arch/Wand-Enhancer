@@ -1,0 +1,13 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "equipment",
+ "ingredients": [
+  "minecraft:diamond",
+  "minecraft:glowstone_dust",
+  "minecraft:redstone_block"
+ ],
+ "result": {
+  "id": "telephoneorder:ammo_core",
+  "count": 1
+ }
+}

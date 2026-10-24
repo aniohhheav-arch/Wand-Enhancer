@@ -1,0 +1,6 @@
+{
+ "model": {
+  "type": "minecraft:model",
+  "model": "telephoneorder:block/phone_terminal_idle"
+ }
+}

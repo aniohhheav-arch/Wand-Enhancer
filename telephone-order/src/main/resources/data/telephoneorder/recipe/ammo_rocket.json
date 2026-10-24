@@ -1,0 +1,13 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "equipment",
+ "ingredients": [
+  "minecraft:firework_rocket",
+  "minecraft:gunpowder",
+  "minecraft:iron_ingot"
+ ],
+ "result": {
+  "id": "telephoneorder:ammo_rocket",
+  "count": 1
+ }
+}

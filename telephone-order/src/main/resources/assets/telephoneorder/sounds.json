@@ -1,0 +1,518 @@
+{
+ "fire_pistol": {
+  "sounds": [
+   "telephoneorder:fire_pistol"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_pistol"
+ },
+ "fire_revolver": {
+  "sounds": [
+   "telephoneorder:fire_revolver"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_revolver"
+ },
+ "fire_smg": {
+  "sounds": [
+   "telephoneorder:fire_smg"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_smg"
+ },
+ "fire_rifle": {
+  "sounds": [
+   "telephoneorder:fire_rifle"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_rifle"
+ },
+ "fire_rifle2": {
+  "sounds": [
+   "telephoneorder:fire_rifle2"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_rifle2"
+ },
+ "fire_battle": {
+  "sounds": [
+   "telephoneorder:fire_battle"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_battle"
+ },
+ "fire_dmr": {
+  "sounds": [
+   "telephoneorder:fire_dmr"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_dmr"
+ },
+ "fire_sniper": {
+  "sounds": [
+   "telephoneorder:fire_sniper"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_sniper"
+ },
+ "fire_anti_material": {
+  "sounds": [
+   "telephoneorder:fire_anti_material"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_anti_material"
+ },
+ "fire_shotgun": {
+  "sounds": [
+   "telephoneorder:fire_shotgun"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_shotgun"
+ },
+ "fire_shotgun2": {
+  "sounds": [
+   "telephoneorder:fire_shotgun2"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_shotgun2"
+ },
+ "fire_lmg": {
+  "sounds": [
+   "telephoneorder:fire_lmg"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_lmg"
+ },
+ "fire_saw": {
+  "sounds": [
+   "telephoneorder:fire_saw"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_saw"
+ },
+ "fire_pdw": {
+  "sounds": [
+   "telephoneorder:fire_pdw"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_pdw"
+ },
+ "fire_machinepistol": {
+  "sounds": [
+   "telephoneorder:fire_machinepistol"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_machinepistol"
+ },
+ "fire_burst": {
+  "sounds": [
+   "telephoneorder:fire_burst"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_burst"
+ },
+ "fire_suppressed": {
+  "sounds": [
+   "telephoneorder:fire_suppressed"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_suppressed"
+ },
+ "fire_paradox": {
+  "sounds": [
+   "telephoneorder:fire_paradox"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_paradox"
+ },
+ "fire_void": {
+  "sounds": [
+   "telephoneorder:fire_void"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_void"
+ },
+ "fire_ember": {
+  "sounds": [
+   "telephoneorder:fire_ember"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_ember"
+ },
+ "fire_ledger": {
+  "sounds": [
+   "telephoneorder:fire_ledger"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_ledger"
+ },
+ "fire_plasma": {
+  "sounds": [
+   "telephoneorder:fire_plasma"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_plasma"
+ },
+ "fire_laser": {
+  "sounds": [
+   "telephoneorder:fire_laser"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_laser"
+ },
+ "fire_rail": {
+  "sounds": [
+   "telephoneorder:fire_rail"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_rail"
+ },
+ "fire_pulse": {
+  "sounds": [
+   "telephoneorder:fire_pulse"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_pulse"
+ },
+ "fire_arc": {
+  "sounds": [
+   "telephoneorder:fire_arc"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_arc"
+ },
+ "fire_cryo": {
+  "sounds": [
+   "telephoneorder:fire_cryo"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_cryo"
+ },
+ "fire_gravity": {
+  "sounds": [
+   "telephoneorder:fire_gravity"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_gravity"
+ },
+ "fire_smart": {
+  "sounds": [
+   "telephoneorder:fire_smart"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_smart"
+ },
+ "fire_eshotgun": {
+  "sounds": [
+   "telephoneorder:fire_eshotgun"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_eshotgun"
+ },
+ "fire_charge": {
+  "sounds": [
+   "telephoneorder:fire_charge"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_charge"
+ },
+ "charge_up": {
+  "sounds": [
+   "telephoneorder:charge_up"
+  ],
+  "subtitle": "subtitles.telephoneorder.charge_up"
+ },
+ "fire_shield": {
+  "sounds": [
+   "telephoneorder:fire_shield"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_shield"
+ },
+ "fire_rift": {
+  "sounds": [
+   "telephoneorder:fire_rift"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_rift"
+ },
+ "fire_cannon": {
+  "sounds": [
+   "telephoneorder:fire_cannon"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_cannon"
+ },
+ "fire_mortar": {
+  "sounds": [
+   "telephoneorder:fire_mortar"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_mortar"
+ },
+ "fire_beam": {
+  "sounds": [
+   "telephoneorder:fire_beam"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_beam"
+ },
+ "fire_turret": {
+  "sounds": [
+   "telephoneorder:fire_turret"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_turret"
+ },
+ "fire_unstable": {
+  "sounds": [
+   "telephoneorder:fire_unstable"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_unstable"
+ },
+ "fire_rocket": {
+  "sounds": [
+   "telephoneorder:fire_rocket"
+  ],
+  "subtitle": "subtitles.telephoneorder.fire_rocket"
+ },
+ "reload_mag": {
+  "sounds": [
+   "telephoneorder:reload_mag"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_mag"
+ },
+ "reload_bolt": {
+  "sounds": [
+   "telephoneorder:reload_bolt"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_bolt"
+ },
+ "reload_pump": {
+  "sounds": [
+   "telephoneorder:reload_pump"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_pump"
+ },
+ "reload_revolver": {
+  "sounds": [
+   "telephoneorder:reload_revolver"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_revolver"
+ },
+ "reload_belt": {
+  "sounds": [
+   "telephoneorder:reload_belt"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_belt"
+ },
+ "reload_cell": {
+  "sounds": [
+   "telephoneorder:reload_cell"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_cell"
+ },
+ "reload_core": {
+  "sounds": [
+   "telephoneorder:reload_core"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_core"
+ },
+ "reload_rocket_reload": {
+  "sounds": [
+   "telephoneorder:reload_rocket_reload"
+  ],
+  "subtitle": "subtitles.telephoneorder.reload_rocket_reload"
+ },
+ "empty_click": {
+  "sounds": [
+   "telephoneorder:empty_click"
+  ],
+  "subtitle": "subtitles.telephoneorder.empty_click"
+ },
+ "overheat": {
+  "sounds": [
+   "telephoneorder:overheat"
+  ],
+  "subtitle": "subtitles.telephoneorder.overheat"
+ },
+ "lock_beep": {
+  "sounds": [
+   "telephoneorder:lock_beep"
+  ],
+  "subtitle": "subtitles.telephoneorder.lock_beep"
+ },
+ "lock_done": {
+  "sounds": [
+   "telephoneorder:lock_done"
+  ],
+  "subtitle": "subtitles.telephoneorder.lock_done"
+ },
+ "impact_bullet": {
+  "sounds": [
+   "telephoneorder:impact_bullet"
+  ],
+  "subtitle": "subtitles.telephoneorder.impact_bullet"
+ },
+ "impact_energy": {
+  "sounds": [
+   "telephoneorder:impact_energy"
+  ],
+  "subtitle": "subtitles.telephoneorder.impact_energy"
+ },
+ "explosion_small": {
+  "sounds": [
+   "telephoneorder:explosion_small"
+  ],
+  "subtitle": "subtitles.telephoneorder.explosion_small"
+ },
+ "emp_burst": {
+  "sounds": [
+   "telephoneorder:emp_burst"
+  ],
+  "subtitle": "subtitles.telephoneorder.emp_burst"
+ },
+ "impact_flesh": {
+  "sounds": [
+   "telephoneorder:impact_flesh"
+  ],
+  "subtitle": "subtitles.telephoneorder.impact_flesh"
+ },
+ "ring_classic": {
+  "sounds": [
+   "telephoneorder:ring_classic"
+  ],
+  "subtitle": "subtitles.telephoneorder.ring_classic"
+ },
+ "ring_digital": {
+  "sounds": [
+   "telephoneorder:ring_digital"
+  ],
+  "subtitle": "subtitles.telephoneorder.ring_digital"
+ },
+ "ring_satellite": {
+  "sounds": [
+   "telephoneorder:ring_satellite"
+  ],
+  "subtitle": "subtitles.telephoneorder.ring_satellite"
+ },
+ "ring_retro": {
+  "sounds": [
+   "telephoneorder:ring_retro"
+  ],
+  "subtitle": "subtitles.telephoneorder.ring_retro"
+ },
+ "phone_pickup": {
+  "sounds": [
+   "telephoneorder:phone_pickup"
+  ],
+  "subtitle": "subtitles.telephoneorder.phone_pickup"
+ },
+ "phone_hangup": {
+  "sounds": [
+   "telephoneorder:phone_hangup"
+  ],
+  "subtitle": "subtitles.telephoneorder.phone_hangup"
+ },
+ "dial_tone": {
+  "sounds": [
+   "telephoneorder:dial_tone"
+  ],
+  "subtitle": "subtitles.telephoneorder.dial_tone"
+ },
+ "key_beep": {
+  "sounds": [
+   "telephoneorder:key_beep"
+  ],
+  "subtitle": "subtitles.telephoneorder.key_beep"
+ },
+ "phone_connect": {
+  "sounds": [
+   "telephoneorder:phone_connect"
+  ],
+  "subtitle": "subtitles.telephoneorder.phone_connect"
+ },
+ "phone_disconnected": {
+  "sounds": [
+   "telephoneorder:phone_disconnected"
+  ],
+  "subtitle": "subtitles.telephoneorder.phone_disconnected"
+ },
+ "static_burst": {
+  "sounds": [
+   "telephoneorder:static_burst"
+  ],
+  "subtitle": "subtitles.telephoneorder.static_burst"
+ },
+ "whisper": {
+  "sounds": [
+   "telephoneorder:whisper"
+  ],
+  "subtitle": "subtitles.telephoneorder.whisper"
+ },
+ "order_confirm": {
+  "sounds": [
+   "telephoneorder:order_confirm"
+  ],
+  "subtitle": "subtitles.telephoneorder.order_confirm"
+ },
+ "order_denied": {
+  "sounds": [
+   "telephoneorder:order_denied"
+  ],
+  "subtitle": "subtitles.telephoneorder.order_denied"
+ },
+ "ui_click": {
+  "sounds": [
+   "telephoneorder:ui_click"
+  ],
+  "subtitle": "subtitles.telephoneorder.ui_click"
+ },
+ "ui_tab": {
+  "sounds": [
+   "telephoneorder:ui_tab"
+  ],
+  "subtitle": "subtitles.telephoneorder.ui_tab"
+ },
+ "ui_error": {
+  "sounds": [
+   "telephoneorder:ui_error"
+  ],
+  "subtitle": "subtitles.telephoneorder.ui_error"
+ },
+ "incoming_whistle": {
+  "sounds": [
+   "telephoneorder:incoming_whistle"
+  ],
+  "subtitle": "subtitles.telephoneorder.incoming_whistle"
+ },
+ "crate_impact": {
+  "sounds": [
+   "telephoneorder:crate_impact"
+  ],
+  "subtitle": "subtitles.telephoneorder.crate_impact"
+ },
+ "pod_impact": {
+  "sounds": [
+   "telephoneorder:pod_impact"
+  ],
+  "subtitle": "subtitles.telephoneorder.pod_impact"
+ },
+ "pod_hiss": {
+  "sounds": [
+   "telephoneorder:pod_hiss"
+  ],
+  "subtitle": "subtitles.telephoneorder.pod_hiss"
+ },
+ "drone_buzz": {
+  "sounds": [
+   "telephoneorder:drone_buzz"
+  ],
+  "subtitle": "subtitles.telephoneorder.drone_buzz"
+ },
+ "teleport_zap": {
+  "sounds": [
+   "telephoneorder:teleport_zap"
+  ],
+  "subtitle": "subtitles.telephoneorder.teleport_zap"
+ },
+ "rift_open": {
+  "sounds": [
+   "telephoneorder:rift_open"
+  ],
+  "subtitle": "subtitles.telephoneorder.rift_open"
+ },
+ "case_latch": {
+  "sounds": [
+   "telephoneorder:case_latch"
+  ],
+  "subtitle": "subtitles.telephoneorder.case_latch"
+ },
+ "flash_whoosh": {
+  "sounds": [
+   "telephoneorder:flash_whoosh"
+  ],
+  "subtitle": "subtitles.telephoneorder.flash_whoosh"
+ },
+ "item_ready": {
+  "sounds": [
+   "telephoneorder:item_ready"
+  ],
+  "subtitle": "subtitles.telephoneorder.item_ready"
+ },
+ "eerie_drone": {
+  "sounds": [
+   "telephoneorder:eerie_drone"
+  ],
+  "subtitle": "subtitles.telephoneorder.eerie_drone"
+ },
+ "turret_deploy": {
+  "sounds": [
+   "telephoneorder:turret_deploy"
+  ],
+  "subtitle": "subtitles.telephoneorder.turret_deploy"
+ }
+}

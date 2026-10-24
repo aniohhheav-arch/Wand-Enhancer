@@ -1,0 +1,11 @@
+{
+ "values": [
+  "telephoneorder:bullet",
+  "telephoneorder:energy",
+  "telephoneorder:armor_piercing",
+  "telephoneorder:explosion_gun",
+  "telephoneorder:emp",
+  "telephoneorder:turret",
+  "telephoneorder:paradox_echo"
+ ]
+}

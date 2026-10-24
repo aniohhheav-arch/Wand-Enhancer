@@ -1,0 +1,526 @@
+{
+ "model": {
+  "type": "minecraft:select",
+  "property": "minecraft:custom_model_data",
+  "index": 0,
+  "cases": [
+   {
+    "when": "gold",
+    "model": {
+     "type": "minecraft:composite",
+     "models": [
+      {
+       "type": "minecraft:range_dispatch",
+       "property": "minecraft:custom_model_data",
+       "index": 0,
+       "entries": [
+        {
+         "threshold": 0.5,
+         "model": {
+          "type": "minecraft:model",
+          "model": "telephoneorder:item/gun/vesper_p9_reload1_gold"
+         }
+        },
+        {
+         "threshold": 1.5,
+         "model": {
+          "type": "minecraft:model",
+          "model": "telephoneorder:item/gun/vesper_p9_reload2_gold"
+         }
+        }
+       ],
+       "fallback": {
+        "type": "minecraft:range_dispatch",
+        "property": "minecraft:cooldown",
+        "entries": [
+         {
+          "threshold": 0.72,
+          "model": {
+           "type": "minecraft:model",
+           "model": "telephoneorder:item/gun/vesper_p9_fire_gold"
+          }
+         }
+        ],
+        "fallback": {
+         "type": "minecraft:model",
+         "model": "telephoneorder:item/gun/vesper_p9_base_gold"
+        }
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 0,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_red_dot"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 1,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_holo_sight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 4,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_suppressor"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 7,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_extended_mag"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 9,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_quickdraw_mag"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 14,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_laser_sight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 15,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_flashlight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      }
+     ]
+    }
+   },
+   {
+    "when": "arctic",
+    "model": {
+     "type": "minecraft:composite",
+     "models": [
+      {
+       "type": "minecraft:range_dispatch",
+       "property": "minecraft:custom_model_data",
+       "index": 0,
+       "entries": [
+        {
+         "threshold": 0.5,
+         "model": {
+          "type": "minecraft:model",
+          "model": "telephoneorder:item/gun/vesper_p9_reload1_arctic"
+         }
+        },
+        {
+         "threshold": 1.5,
+         "model": {
+          "type": "minecraft:model",
+          "model": "telephoneorder:item/gun/vesper_p9_reload2_arctic"
+         }
+        }
+       ],
+       "fallback": {
+        "type": "minecraft:range_dispatch",
+        "property": "minecraft:cooldown",
+        "entries": [
+         {
+          "threshold": 0.72,
+          "model": {
+           "type": "minecraft:model",
+           "model": "telephoneorder:item/gun/vesper_p9_fire_arctic"
+          }
+         }
+        ],
+        "fallback": {
+         "type": "minecraft:model",
+         "model": "telephoneorder:item/gun/vesper_p9_base_arctic"
+        }
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 0,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_red_dot"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 1,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_holo_sight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 4,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_suppressor"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 7,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_extended_mag"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 9,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_quickdraw_mag"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 14,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_laser_sight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 15,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_flashlight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      }
+     ]
+    }
+   },
+   {
+    "when": "crimson",
+    "model": {
+     "type": "minecraft:composite",
+     "models": [
+      {
+       "type": "minecraft:range_dispatch",
+       "property": "minecraft:custom_model_data",
+       "index": 0,
+       "entries": [
+        {
+         "threshold": 0.5,
+         "model": {
+          "type": "minecraft:model",
+          "model": "telephoneorder:item/gun/vesper_p9_reload1_crimson"
+         }
+        },
+        {
+         "threshold": 1.5,
+         "model": {
+          "type": "minecraft:model",
+          "model": "telephoneorder:item/gun/vesper_p9_reload2_crimson"
+         }
+        }
+       ],
+       "fallback": {
+        "type": "minecraft:range_dispatch",
+        "property": "minecraft:cooldown",
+        "entries": [
+         {
+          "threshold": 0.72,
+          "model": {
+           "type": "minecraft:model",
+           "model": "telephoneorder:item/gun/vesper_p9_fire_crimson"
+          }
+         }
+        ],
+        "fallback": {
+         "type": "minecraft:model",
+         "model": "telephoneorder:item/gun/vesper_p9_base_crimson"
+        }
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 0,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_red_dot"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 1,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_holo_sight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 4,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_suppressor"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 7,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_extended_mag"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 9,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_quickdraw_mag"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 14,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_laser_sight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      },
+      {
+       "type": "minecraft:condition",
+       "property": "minecraft:custom_model_data",
+       "index": 15,
+       "on_true": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_att_flashlight"
+       },
+       "on_false": {
+        "type": "minecraft:empty"
+       }
+      }
+     ]
+    }
+   }
+  ],
+  "fallback": {
+   "type": "minecraft:composite",
+   "models": [
+    {
+     "type": "minecraft:range_dispatch",
+     "property": "minecraft:custom_model_data",
+     "index": 0,
+     "entries": [
+      {
+       "threshold": 0.5,
+       "model": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_reload1"
+       }
+      },
+      {
+       "threshold": 1.5,
+       "model": {
+        "type": "minecraft:model",
+        "model": "telephoneorder:item/gun/vesper_p9_reload2"
+       }
+      }
+     ],
+     "fallback": {
+      "type": "minecraft:range_dispatch",
+      "property": "minecraft:cooldown",
+      "entries": [
+       {
+        "threshold": 0.72,
+        "model": {
+         "type": "minecraft:model",
+         "model": "telephoneorder:item/gun/vesper_p9_fire"
+        }
+       }
+      ],
+      "fallback": {
+       "type": "minecraft:model",
+       "model": "telephoneorder:item/gun/vesper_p9_base"
+      }
+     }
+    },
+    {
+     "type": "minecraft:condition",
+     "property": "minecraft:custom_model_data",
+     "index": 0,
+     "on_true": {
+      "type": "minecraft:model",
+      "model": "telephoneorder:item/gun/vesper_p9_att_red_dot"
+     },
+     "on_false": {
+      "type": "minecraft:empty"
+     }
+    },
+    {
+     "type": "minecraft:condition",
+     "property": "minecraft:custom_model_data",
+     "index": 1,
+     "on_true": {
+      "type": "minecraft:model",
+      "model": "telephoneorder:item/gun/vesper_p9_att_holo_sight"
+     },
+     "on_false": {
+      "type": "minecraft:empty"
+     }
+    },
+    {
+     "type": "minecraft:condition",
+     "property": "minecraft:custom_model_data",
+     "index": 4,
+     "on_true": {
+      "type": "minecraft:model",
+      "model": "telephoneorder:item/gun/vesper_p9_att_suppressor"
+     },
+     "on_false": {
+      "type": "minecraft:empty"
+     }
+    },
+    {
+     "type": "minecraft:condition",
+     "property": "minecraft:custom_model_data",
+     "index": 7,
+     "on_true": {
+      "type": "minecraft:model",
+      "model": "telephoneorder:item/gun/vesper_p9_att_extended_mag"
+     },
+     "on_false": {
+      "type": "minecraft:empty"
+     }
+    },
+    {
+     "type": "minecraft:condition",
+     "property": "minecraft:custom_model_data",
+     "index": 9,
+     "on_true": {
+      "type": "minecraft:model",
+      "model": "telephoneorder:item/gun/vesper_p9_att_quickdraw_mag"
+     },
+     "on_false": {
+      "type": "minecraft:empty"
+     }
+    },
+    {
+     "type": "minecraft:condition",
+     "property": "minecraft:custom_model_data",
+     "index": 14,
+     "on_true": {
+      "type": "minecraft:model",
+      "model": "telephoneorder:item/gun/vesper_p9_att_laser_sight"
+     },
+     "on_false": {
+      "type": "minecraft:empty"
+     }
+    },
+    {
+     "type": "minecraft:condition",
+     "property": "minecraft:custom_model_data",
+     "index": 15,
+     "on_true": {
+      "type": "minecraft:model",
+      "model": "telephoneorder:item/gun/vesper_p9_att_flashlight"
+     },
+     "on_false": {
+      "type": "minecraft:empty"
+     }
+    }
+   ]
+  }
+ }
+}

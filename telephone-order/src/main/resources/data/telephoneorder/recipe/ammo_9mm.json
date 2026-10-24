@@ -1,0 +1,12 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "equipment",
+ "ingredients": [
+  "minecraft:copper_ingot",
+  "minecraft:gunpowder"
+ ],
+ "result": {
+  "id": "telephoneorder:ammo_9mm",
+  "count": 1
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "IRI",
+  "LCL",
+  "IEI"
+ ],
+ "key": {
+  "I": "minecraft:iron_ingot",
+  "R": "minecraft:lightning_rod",
+  "L": "minecraft:lapis_lazuli",
+  "C": "minecraft:comparator",
+  "E": "minecraft:ender_pearl"
+ },
+ "result": {
+  "id": "telephoneorder:telephone_uplink",
+  "count": 1
+ }
+}

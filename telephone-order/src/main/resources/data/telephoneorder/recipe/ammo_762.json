@@ -1,0 +1,13 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "equipment",
+ "ingredients": [
+  "minecraft:iron_ingot",
+  "minecraft:gunpowder",
+  "minecraft:gold_nugget"
+ ],
+ "result": {
+  "id": "telephoneorder:ammo_762",
+  "count": 1
+ }
+}

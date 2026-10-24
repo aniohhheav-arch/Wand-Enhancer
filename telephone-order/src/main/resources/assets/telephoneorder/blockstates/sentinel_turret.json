@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "telephoneorder:block/sentinel_turret"
+  },
+  "facing=east": {
+   "model": "telephoneorder:block/sentinel_turret",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "telephoneorder:block/sentinel_turret",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "telephoneorder:block/sentinel_turret",
+   "y": 270
+  }
+ }
+}

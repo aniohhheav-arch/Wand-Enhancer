@@ -1,0 +1,13 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "equipment",
+ "ingredients": [
+  "minecraft:redstone",
+  "minecraft:copper_ingot",
+  "minecraft:glowstone_dust"
+ ],
+ "result": {
+  "id": "telephoneorder:ammo_cell",
+  "count": 1
+ }
+}

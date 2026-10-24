@@ -1,0 +1,109 @@
+{
+ "variants": {
+  "facing=north,phone=idle": {
+   "model": "telephoneorder:block/phone_uplink_idle"
+  },
+  "facing=north,phone=ring_a": {
+   "model": "telephoneorder:block/phone_uplink_ring_a"
+  },
+  "facing=north,phone=ring_b": {
+   "model": "telephoneorder:block/phone_uplink_ring_b"
+  },
+  "facing=north,phone=off_hook": {
+   "model": "telephoneorder:block/phone_uplink_off_hook"
+  },
+  "facing=north,phone=dial_a": {
+   "model": "telephoneorder:block/phone_uplink_dial_a"
+  },
+  "facing=north,phone=dial_b": {
+   "model": "telephoneorder:block/phone_uplink_dial_b"
+  },
+  "facing=north,phone=dial_c": {
+   "model": "telephoneorder:block/phone_uplink_dial_c"
+  },
+  "facing=east,phone=idle": {
+   "model": "telephoneorder:block/phone_uplink_idle",
+   "y": 90
+  },
+  "facing=east,phone=ring_a": {
+   "model": "telephoneorder:block/phone_uplink_ring_a",
+   "y": 90
+  },
+  "facing=east,phone=ring_b": {
+   "model": "telephoneorder:block/phone_uplink_ring_b",
+   "y": 90
+  },
+  "facing=east,phone=off_hook": {
+   "model": "telephoneorder:block/phone_uplink_off_hook",
+   "y": 90
+  },
+  "facing=east,phone=dial_a": {
+   "model": "telephoneorder:block/phone_uplink_dial_a",
+   "y": 90
+  },
+  "facing=east,phone=dial_b": {
+   "model": "telephoneorder:block/phone_uplink_dial_b",
+   "y": 90
+  },
+  "facing=east,phone=dial_c": {
+   "model": "telephoneorder:block/phone_uplink_dial_c",
+   "y": 90
+  },
+  "facing=south,phone=idle": {
+   "model": "telephoneorder:block/phone_uplink_idle",
+   "y": 180
+  },
+  "facing=south,phone=ring_a": {
+   "model": "telephoneorder:block/phone_uplink_ring_a",
+   "y": 180
+  },
+  "facing=south,phone=ring_b": {
+   "model": "telephoneorder:block/phone_uplink_ring_b",
+   "y": 180
+  },
+  "facing=south,phone=off_hook": {
+   "model": "telephoneorder:block/phone_uplink_off_hook",
+   "y": 180
+  },
+  "facing=south,phone=dial_a": {
+   "model": "telephoneorder:block/phone_uplink_dial_a",
+   "y": 180
+  },
+  "facing=south,phone=dial_b": {
+   "model": "telephoneorder:block/phone_uplink_dial_b",
+   "y": 180
+  },
+  "facing=south,phone=dial_c": {
+   "model": "telephoneorder:block/phone_uplink_dial_c",
+   "y": 180
+  },
+  "facing=west,phone=idle": {
+   "model": "telephoneorder:block/phone_uplink_idle",
+   "y": 270
+  },
+  "facing=west,phone=ring_a": {
+   "model": "telephoneorder:block/phone_uplink_ring_a",
+   "y": 270
+  },
+  "facing=west,phone=ring_b": {
+   "model": "telephoneorder:block/phone_uplink_ring_b",
+   "y": 270
+  },
+  "facing=west,phone=off_hook": {
+   "model": "telephoneorder:block/phone_uplink_off_hook",
+   "y": 270
+  },
+  "facing=west,phone=dial_a": {
+   "model": "telephoneorder:block/phone_uplink_dial_a",
+   "y": 270
+  },
+  "facing=west,phone=dial_b": {
+   "model": "telephoneorder:block/phone_uplink_dial_b",
+   "y": 270
+  },
+  "facing=west,phone=dial_c": {
+   "model": "telephoneorder:block/phone_uplink_dial_c",
+   "y": 270
+  }
+ }
+}

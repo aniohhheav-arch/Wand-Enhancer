@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "III",
+  "TCT",
+  "P P"
+ ],
+ "key": {
+  "I": "minecraft:iron_ingot",
+  "T": "minecraft:smooth_stone",
+  "C": "minecraft:crafting_table",
+  "P": "minecraft:oak_planks"
+ },
+ "result": {
+  "id": "telephoneorder:weapons_workbench",
+  "count": 1
+ }
+}

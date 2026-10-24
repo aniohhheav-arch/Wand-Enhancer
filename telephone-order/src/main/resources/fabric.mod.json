@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "telephoneorder",
+  "version": "${version}",
+  "name": "Telephone Order",
+  "description": "A mysterious weapons corporation takes orders over the telephone. 40 distinct firearms, deep attachments, cinematic deliveries and secrets.",
+  "authors": ["Telephone Order"],
+  "license": "MIT",
+  "icon": "assets/telephoneorder/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.telephoneorder.TelephoneOrder"],
+    "client": ["dev.telephoneorder.client.TelephoneOrderClient"]
+  },
+  "mixins": ["telephoneorder.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.20.0",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

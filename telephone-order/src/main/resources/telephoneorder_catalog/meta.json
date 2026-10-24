@@ -1,0 +1,22 @@
+{
+ "tiers": [
+  "standard",
+  "advanced",
+  "experimental",
+  "prototype",
+  "classified"
+ ],
+ "thresholds": [
+  0,
+  400,
+  2000,
+  6000
+ ],
+ "fees": {
+  "crate": 10,
+  "drone": 25,
+  "pod": 45,
+  "teleport": 60,
+  "case": 90
+ }
+}
