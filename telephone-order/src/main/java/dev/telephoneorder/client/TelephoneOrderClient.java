@@ -65,5 +65,12 @@ public class TelephoneOrderClient implements ClientModInitializer {
 
         if (System.getProperty("telephoneorder.uishot") != null) UiShot.install();
         HudElementRegistry.addLast(ModItems.id("hud"), new GunHud());
+        // the gun HUD draws its own crosshair; hide vanilla's while a gun is held
+        HudElementRegistry.replaceElement(net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.CROSSHAIR, orig -> (g, dt) -> {
+            var mc = net.minecraft.client.Minecraft.getInstance();
+            if (mc.player != null && mc.player.getMainHandItem().getItem() instanceof dev.telephoneorder.weapon.GunItem
+                    && dev.telephoneorder.ModConfig.get().hud) return;
+            orig.extractRenderState(g, dt);
+        });
     }
 }

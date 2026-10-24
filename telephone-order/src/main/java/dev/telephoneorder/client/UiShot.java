@@ -38,6 +38,7 @@ final class UiShot {
             int phase = (t - 400) / 90;
             String[][] shots = {{"call", "grid", "vesper_p9", "ALL"}, {"dial", "grid", "vesper_p9", "ALL"}, {"catalog", "grid", "vesper_p9", "ALL"}, {"catalog", "product", "warden_ar4", "ALL"},
                     {"catalog", "cart", "vesper_p9", "ALL"}, {"orders", "grid", "vesper_p9", "ALL"}, {"account", "grid", "vesper_p9", "ALL"}};
+            if ((t - 400) % 90 == 70 && phase < shots.length) net.minecraft.client.Screenshot.grab(mc, false);
             if ((t - 400) % 90 == 0 && phase < shots.length) screen.debugGo(shots[phase][0], shots[phase][1], shots[phase][2], shots[phase][3]);
         });
     }

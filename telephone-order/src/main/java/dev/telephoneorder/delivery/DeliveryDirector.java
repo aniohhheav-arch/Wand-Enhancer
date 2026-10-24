@@ -133,7 +133,7 @@ public final class DeliveryDirector {
         Vec3 base = p.position();
         for (int attempt = 0; attempt < 24; attempt++) {
             double a = RNG.nextDouble() * Math.PI * 2;
-            double d = attempt < 14 ? 6 + RNG.nextDouble() * 5 : 3 + RNG.nextDouble() * 3;
+            double d = attempt < 14 ? 3.5 + RNG.nextDouble() * 1.5 : 2.5 + RNG.nextDouble() * 1.5;
             int x = Mth.floor(base.x + Math.cos(a) * d), z = Mth.floor(base.z + Math.sin(a) * d);
             for (int y = Mth.floor(base.y) + 6; y >= Mth.floor(base.y) - 10; y--) {
                 BlockPos bp = new BlockPos(x, y, z);
