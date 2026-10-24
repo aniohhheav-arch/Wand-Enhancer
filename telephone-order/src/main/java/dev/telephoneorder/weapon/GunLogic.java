@@ -325,8 +325,7 @@ public final class GunLogic {
         String snd = "fire_" + def.sound();
         if (!beh.equals("shield")) Fx.sound(l, mz, snd, SoundSource.PLAYERS, vol, pitch);
         if (!def.energy() && !def.fam().equals("launcher") && !st.flashHidden && !silent && !beh.equals("emp")) {
-            Fx.p(l, ParticleTypes.FLAME, mz.add(view.scale(0.2)), 1, 0.02, 0.02, 0.02, 0.02);
-            Fx.p(l, ParticleTypes.SMOKE, mz.add(view.scale(0.3)), def.fam().equals("shotgun") ? 5 : 2, 0.04, 0.04, 0.04, 0.02);
+            Fx.muzzle(l, mz, view, def.fam().equals("shotgun") || def.fam().equals("sniper") ? 1.6f : 1f);
             // shell casing, thrown out of the ejection port
             Vec3 right = view.cross(new Vec3(0, 1, 0)).normalize();
             Vec3 ej = p.getEyePosition().add(view.scale(0.5)).add(right.scale(0.35)).add(0, -0.15, 0);

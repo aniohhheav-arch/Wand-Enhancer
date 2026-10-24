@@ -1,5 +1,6 @@
 package dev.telephoneorder.strike;
 
+import dev.telephoneorder.Blast;
 import dev.telephoneorder.Fx;
 import dev.telephoneorder.ModItems;
 import dev.telephoneorder.delivery.DeliveryDirector;
@@ -188,25 +189,18 @@ public final class StrikeDirector {
                         l.sendParticles(Fx.dust(0xFFEEDD, 3.0f), t.x, y, t.z, 1, r * 0.3, 0, r * 0.3, 0);
                         if (((int) y) % 3 == 0) l.sendParticles(ParticleTypes.END_ROD, t.x, y, t.z, 1, r * 0.4, 0, r * 0.4, 0.01);
                     }
-                    Fx.ring(l, Fx.dust(0xFF8A40, 2.0f), t, 3 + (kk % 10) * 0.4, 24, 0.1);
-                    Fx.p(l, ParticleTypes.FLAME, t, 6, 1.5, 0.3, 1.5, 0.15);
-                    Fx.p(l, ParticleTypes.LARGE_SMOKE, t, 3, 1.5, 0.3, 1.5, 0.1);
+                    Blast.beamImpact(l, t, 5, kk, 0xFF8A40);
+                    if (kk % 12 == 0) Blast.explosion(l, t, 3.5f);
                     if (kk % 5 == 0) { damageZone(l, p, t, 9, 18f, DamageKind.EXPLOSION); Fx.shake(l, t, 70, 0.9f, 8); }
                 });
             }
-            Sched.later(8, () -> shockwave(l, t, 26, 5));
+            Sched.later(8, () -> { shockwave(l, t, 26, 5); Blast.explosion(l, t, 8f); });
             Sched.later(8, () -> crater(l, t, 7, true));
         });
     }
 
     private static void shockwave(ServerLevel l, Vec3 c, int maxR, int step) {
-        for (int r = step; r <= maxR; r += step) {
-            int rr = r;
-            Sched.later(r / 2, () -> {
-                Fx.ring(l, ParticleTypes.CLOUD, c, rr, 12 + rr * 3, 0.2);
-                Fx.ring(l, ParticleTypes.POOF, c, rr * 0.8, 8 + rr, 0.5);
-            });
-        }
+        Blast.shockwave(l, c, maxR);
         Fx.sound(l, c, "mushroom_boom", SoundSource.AMBIENT, 8.0f, 1.2f);
     }
 
@@ -233,9 +227,7 @@ public final class StrikeDirector {
                 Sched.later(delay - fall + k, () -> {
                     double f = 1.0 - kk / (double) fall;
                     Vec3 pos = impact.add(dir.scale(f)).add(0, 70 * f * f + 1, 0);
-                    Fx.p(l, ParticleTypes.FLAME, pos, 8, 0.4, 0.4, 0.4, 0.05);
-                    Fx.p(l, ParticleTypes.LARGE_SMOKE, pos, 4, 0.6, 0.6, 0.6, 0.02);
-                    l.sendParticles(Fx.dust(0xFFA040, 3.2f), pos.x, pos.y, pos.z, 4, 0.3, 0.3, 0.3, 0);
+                    Blast.trail(l, pos, new Vec3(dir.x * 0.03, 0.7, dir.z * 0.03), 2.2, kk);
                 });
             }
             Sched.later(delay, () -> {
@@ -288,9 +280,8 @@ public final class StrikeDirector {
                         l.sendParticles(Fx.dust(0xE8D0FF, 4.0f), c.x, y, c.z, 2, 1.0, 0, 1.0, 0);
                         if (((int) y) % 4 == 0) l.sendParticles(ParticleTypes.END_ROD, c.x, y, c.z, 1, 1.2, 0, 1.2, 0.02);
                     }
-                    Fx.ring(l, Fx.dust(0xB070FF, 2.5f), c, 5 + (kk % 12), 36, 0.1);
-                    Fx.p(l, ParticleTypes.FLAME, c, 10, 3, 0.3, 3, 0.2);
-                    Fx.p(l, ParticleTypes.EXPLOSION, c.add(0, 1, 0), 1, 2, 0.2, 2, 0);
+                    Blast.beamImpact(l, c, 7 + (kk % 6), kk, 0xB070FF);
+                    if (kk % 8 == 0) Blast.explosion(l, c, 5f);
                     if (kk % 4 == 0) { damageZone(l, p, c, 14, 26f, DamageKind.ENERGY); Fx.shake(l, c, 100, 1.2f, 10); if (kk % 8 == 0) crater(l, c, 8, true); }
                 });
             }
@@ -315,8 +306,7 @@ public final class StrikeDirector {
                 int kk = k;
                 Sched.later(1 + k, () -> {
                     Vec3 p0 = t.add(0, 160 * Math.pow(1.0 - kk / 78.0, 1.3) + 12, 0);
-                    Fx.p(l, ParticleTypes.FLAME, p0, 6, 0.6, 1.5, 0.6, 0.05);
-                    Fx.p(l, ParticleTypes.LARGE_SMOKE, p0.add(0, 4, 0), 3, 0.5, 1.5, 0.5, 0.02);
+                    Blast.trail(l, p0, new Vec3(0, 1, 0), 3.5, kk);
                 });
             }
             Sched.later(80, wh::kill);
@@ -327,34 +317,7 @@ public final class StrikeDirector {
             Fx.shake(l, t, 160, 1.4f, 60);
             if (!demo) { damageZone(l, p, t, 36, 80f, DamageKind.EXPLOSION); crater(l, t, 16, true); }
             else crater(l, t, 10, false);
-            // fireball
-            for (int k = 0; k < 20; k++) {
-                int kk = k;
-                Sched.later(k * 2, () -> {
-                    double r = 3 + kk * 0.8;
-                    Fx.p(l, ParticleTypes.FLAME, t.add(0, r * 0.6, 0), 30, r * 0.5, r * 0.4, r * 0.5, 0.08);
-                    Fx.p(l, ParticleTypes.EXPLOSION, t.add(0, r * 0.5, 0), 1, r * 0.5, r * 0.3, r * 0.5, 0);
-                    l.sendParticles(Fx.dust(0xFFC060, 4.0f), t.x, t.y + r * 0.6, t.z, 10, r * 0.5, r * 0.4, r * 0.5, 0);
-                });
-            }
-            // rising stem + spreading cap (mushroom-shaped cloud), kept cheap
-            int rise = 110;
-            for (int k = 0; k < rise; k += 2) {
-                int kk = k;
-                Sched.later(20 + k, () -> {
-                    double h = 4 + kk * 0.65;
-                    Fx.p(l, ParticleTypes.LARGE_SMOKE, t.add(0, h, 0), 6, 2.2, 0.8, 2.2, 0.01);
-                    Fx.p(l, ParticleTypes.CAMPFIRE_COSY_SMOKE, t.add(0, h * 0.7, 0), 2, 1.5, 0.8, 1.5, 0.005);
-                    l.sendParticles(Fx.dust(0x6A5040, 3.5f), t.x, t.y + h, t.z, 6, 1.8, 0.8, 1.8, 0);
-                    if (kk > 60) {
-                        double capR = Math.min(20, (kk - 60) * 0.5);
-                        Vec3 cap = t.add(0, 4 + 60 * 0.65 + (kk - 60) * 0.55, 0);
-                        Fx.ring(l, ParticleTypes.LARGE_SMOKE, cap, capR, 30, 0);
-                        Fx.ring(l, Fx.dust(0xFF9040, 3.0f), cap.add(0, -1.5, 0), capR * 0.8, 24, 0);
-                        Fx.p(l, ParticleTypes.CLOUD, cap, 8, capR * 0.5, 2, capR * 0.5, 0.01);
-                    }
-                });
-            }
+            Blast.mushroom(l, t, 2.3f);
             Sched.later(10, () -> shockwave(l, t, 60, 6));
         });
     }

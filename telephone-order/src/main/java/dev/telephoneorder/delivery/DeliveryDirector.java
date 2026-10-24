@@ -270,9 +270,9 @@ public final class DeliveryDirector {
         Fx.sound(l, c.g, sound, SoundSource.AMBIENT, vol, pitch);
         Fx.shake(l, c.g, shakeRadius, shake, 14);
         Fx.blockImpact(l, BlockPos.containing(c.g).below(), c.g.add(0, 0.2, 0), dustCount);
-        Fx.p(l, ParticleTypes.EXPLOSION, c.g.add(0, 0.6, 0), 1, 0, 0, 0, 0);
-        Fx.p(l, ParticleTypes.POOF, c.g.add(0, 0.4, 0), 18, 1.1, 0.2, 1.1, 0.08);
-        Fx.ring(l, ParticleTypes.CLOUD, c.g, 2.4, 28, 0.15);
+        dev.telephoneorder.Blast.shockwave(l, c.g, 5.0);
+        dev.telephoneorder.Blast.burst(l, new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, l.getBlockState(BlockPos.containing(c.g).below())), c.g.add(0, 0.3, 0), 16 + dustCount / 2, 0.35, 0.9);
+        dev.telephoneorder.Blast.burst(l, ParticleTypes.POOF, c.g.add(0, 0.4, 0), 10, 0.18, 0.1);
         for (Entity e : l.getEntities(c.p, new AABB(c.g, c.g).inflate(4.5), x -> x.isAlive() && !x.isSpectator() && !(x instanceof Display))) {
             Vec3 away = e.position().subtract(c.g).multiply(1, 0, 1);
             if (away.lengthSqr() < 0.01) away = new Vec3(0.1, 0, 0);
@@ -575,6 +575,8 @@ public final class DeliveryDirector {
                     l.sendParticles(Fx.dust(0xB050FF, 1.4f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
                 }
                 Fx.p(l, ParticleTypes.PORTAL, rc, 6, r * 0.5, r * 0.4, r * 0.5, 0.8);
+                dev.telephoneorder.Blast.burst(l, Fx.dust(0xC070FF, 1.3f), rc, 3, 0.22, 0);
+                if (tt % 3 == 0) dev.telephoneorder.Blast.burst(l, ParticleTypes.ELECTRIC_SPARK, rc.add(Math.cos(tt) * r, 0, Math.sin(tt) * r), 2, 0.5, 0);
                 if (tt % 10 == 0 && tt > 10) Fx.p(l, ParticleTypes.ELECTRIC_SPARK, rc, 10, r * 0.6, r * 0.5, r * 0.6, 0.2);
             });
         }

@@ -14,6 +14,7 @@ import net.minecraft.world.phys.Vec3;
 
 /** Server-side effect helpers (particles + positional sound). All sounds are real positional audio. */
 public final class Fx {
+    private static final java.util.Random RNG = new java.util.Random();
     private Fx() {}
 
     public static void sound(ServerLevel level, Vec3 pos, String name, SoundSource src, float vol, float pitch) {
@@ -40,6 +41,21 @@ public final class Fx {
 
     public static void p(ServerLevel l, ParticleOptions o, Vec3 at, int count, double dx, double dy, double dz, double speed) {
         l.sendParticles(o, at.x, at.y, at.z, scaled(count), dx, dy, dz, speed);
+    }
+
+    /** Small, directional muzzle flash: hot sparks, a short orange cone and a thin smoke puff (no big sprites in the shooter's face). */
+    public static void muzzle(ServerLevel l, Vec3 mz, Vec3 view, float power) {
+        Vec3 o = mz.add(view.scale(0.4));
+        l.sendParticles(ParticleTypes.ELECTRIC_SPARK, o.x, o.y, o.z, 0, view.x, view.y, view.z, 0.35 * power);
+        for (int i = 0; i < 5; i++) {
+            double j = 0.10;
+            Vec3 d = view.add((RNG.nextDouble() - 0.5) * j * 2, (RNG.nextDouble() - 0.5) * j * 2, (RNG.nextDouble() - 0.5) * j * 2);
+            int c = i % 2 == 0 ? 0xFFE08A : 0xFF8A2A;
+            l.sendParticles(dust(c, 0.45f * power), o.x, o.y, o.z, 0, d.x, d.y, d.z, 0.28 * power);
+        }
+        Vec3 sm = mz.add(view.scale(0.8));
+        l.sendParticles(dust(0x9A9A9A, 0.8f * power), sm.x, sm.y, sm.z, 0, view.x, view.y + 0.05, view.z, 0.04);
+        l.sendParticles(dust(0x6A6A6A, 1.0f * power), sm.x, sm.y, sm.z, 0, view.x, view.y + 0.08, view.z, 0.02);
     }
 
     public static DustParticleOptions dust(int rgb, float size) {

@@ -20,14 +20,15 @@ A = os.path.join(RES, "assets", NS)
 D = os.path.join(RES, "data", NS)
 CAT = os.path.join(RES, "telephoneorder_catalog")
 
-# Display transforms for the GeckoLib gun models.  Barrel points to -Z in model space; the hand frame calibrated on vanilla
-# swords (rotY -90 sends model +X forward) therefore needs rotY 180 so that -Z goes forward.  GUI shows the left side with the
-# barrel pointing right.  `/to orient` (client command) can nudge these live if a particular build disagrees.
+# Display transforms for the GeckoLib gun models (barrel points to -Z in model space, +Y is the gun's top).
+# Calibrated with vanilla's own ItemTransform maths and a screenshot: in the hand frame the item's +Z shows as "up" on screen and
+# +Y as "away from the player", so rotating X by ~100 deg sends the barrel (-Z) forward and the gun's top up.
+# The GUI frame is the screen itself: rotY -90 puts the muzzle on the right.  `/toorient` nudges these live in game.
 GUN_DISPLAY = {
-    "thirdperson_righthand": {"rotation": [0, 180, 0], "translation": [0, 3.0, 2.0], "scale": [0.5, 0.5, 0.5]},
-    "thirdperson_lefthand": {"rotation": [0, 180, 0], "translation": [0, 3.0, 2.0], "scale": [0.5, 0.5, 0.5]},
-    "firstperson_righthand": {"rotation": [0, 180, 0], "translation": [0, 2.0, 1.0], "scale": [0.55, 0.55, 0.55]},
-    "firstperson_lefthand": {"rotation": [0, 180, 0], "translation": [0, 2.0, 1.0], "scale": [0.55, 0.55, 0.55]},
+    "thirdperson_righthand": {"rotation": [95, 0, 0], "translation": [0, 3.0, 1.0], "scale": [0.5, 0.5, 0.5]},
+    "thirdperson_lefthand": {"rotation": [95, 0, 0], "translation": [0, 3.0, 1.0], "scale": [0.5, 0.5, 0.5]},
+    "firstperson_righthand": {"rotation": [100, 0, 0], "translation": [0, 1.0, 0.5], "scale": [0.5, 0.5, 0.5]},
+    "firstperson_lefthand": {"rotation": [100, 0, 0], "translation": [0, 1.0, 0.5], "scale": [0.5, 0.5, 0.5]},
     "gui": {"rotation": [12, -90, 0], "translation": [-5, 1, 0], "scale": [0.52, 0.52, 0.52]},
     "ground": {"rotation": [0, -90, 0], "translation": [0, 2, 0], "scale": [0.4, 0.4, 0.4]},
     "fixed": {"rotation": [0, -90, 0], "translation": [-3, 0, 0], "scale": [0.5, 0.5, 0.5]},

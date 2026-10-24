@@ -17,14 +17,7 @@ public final class Boom {
     private Boom() {}
 
     public static void explode(ServerLevel l, Vec3 at, float radius, float damage, ServerPlayer owner, DamageKind kind, Entity skip, float knock, boolean fancy) {
-        if (fancy) {
-            Fx.p(l, ParticleTypes.EXPLOSION_EMITTER, at, 1, 0, 0, 0, 0);
-            Fx.p(l, ParticleTypes.FLAME, at, 18, radius * 0.25, radius * 0.25, radius * 0.25, 0.06);
-            Fx.p(l, ParticleTypes.LARGE_SMOKE, at, 14, radius * 0.3, radius * 0.3, radius * 0.3, 0.03);
-        } else {
-            Fx.p(l, ParticleTypes.EXPLOSION, at, 1, 0, 0, 0, 0);
-            Fx.p(l, ParticleTypes.SMOKE, at, 8, radius * 0.2, radius * 0.2, radius * 0.2, 0.03);
-        }
+        dev.telephoneorder.Blast.explosion(l, at, fancy ? radius : Math.max(1f, radius * 0.6f));
         Fx.sound(l, at, "explosion_small", SoundSource.PLAYERS, 0.9f + radius * 0.12f, 0.9f + l.getRandom().nextFloat() * 0.2f);
         Fx.shake(l, at, 20 + radius * 2, Math.min(1.2f, 0.25f + radius * 0.12f), 8 + (int) radius * 2);
         AABB box = new AABB(at, at).inflate(radius);
