@@ -204,7 +204,88 @@ def container():
     g.anim("open", 1.0, {"flap_n": {"rotation": {"0": [0, 0, 0], "0.8": [-115, 0, 0]}}, "flap_s": {"rotation": {"0": [0, 0, 0], "0.8": [115, 0, 0]}}}, loop="hold")
     return g
 
-MODELS = {"rift": rift, "case": case, "drone": drone, "crate": crate, "pod": pod, "container": container}
+def satellite():
+    g = Geo("satellite", [(150, 156, 168), (44, 48, 58), (255, 190, 60), (255, 240, 170)])
+    for b in ("bus", "panel_l", "panel_r", "dish", "emitter", "ring"):
+        g.bone(b, "root", (0, 0, 0))
+    g.cube("bus", 0, (-10, -7, -7), (10, 7, 7)); g.cube("bus", 1, (-10.6, -3, -7.6), (10.6, -1.5, 7.6)); g.cube("bus", 2, (-10.4, 2, -7.4), (10.4, 3, 7.4))
+    g.cube("bus", 1, (-6, 7, -6), (6, 9, 6)); g.cube("bus", 3, (-2, 9, -2), (2, 10, 2))
+    g.cube("emitter", 1, (-5, -11, -5), (5, -7, 5)); g.cube("emitter", 3, (-3, -13, -3), (3, -11, 3)); g.cube("emitter", 2, (-4, -12, -4), (4, -11, 4))
+    for sx, bone in ((-1, "panel_l"), (1, "panel_r")):
+        g.cube(bone, 1, (sx * 10, -1, -1.5), (sx * 22, 1, 1.5))                       # boom
+        for i in range(3):
+            x0 = sx * (22 + i * 14)
+            g.cube(bone, 1, (min(x0, x0 + sx * 13), -0.6, -9), (max(x0, x0 + sx * 13), 0.6, 9))
+            g.cube(bone, 2, (min(x0 + sx * 0.5, x0 + sx * 12.5), 0.6, -8.5), (max(x0 + sx * 0.5, x0 + sx * 12.5), 0.9, 8.5))
+            g.cube(bone, 0, (min(x0 + sx * 6, x0 + sx * 7), 0.6, -8.5), (max(x0 + sx * 6, x0 + sx * 7), 1.0, 8.5))
+    g.cube("dish", 1, (-1, 9, -1), (1, 17, 1)); g.ring("dish", 0, 6, 12, 3, 1.2, 2, y=17); g.cube("dish", 3, (-1.2, 17, -1.2), (1.2, 21, 1.2))
+    g.ring("ring", 2, 13, 14, 3, 1.5, 3, y=-0.7)
+    g.pivot_fix = {"panel_l": (-10, 0, 0), "panel_r": (10, 0, 0), "dish": (0, 9, 0)}
+    g.bones["panel_l"]["pivot"] = [10, 0, 0]; g.bones["panel_r"]["pivot"] = [-10, 0, 0]; g.bones["dish"]["pivot"] = [0, 9, 0]
+    g.anim("idle", 8, {
+        "panel_l": {"rotation": {"0": [0, 0, 0], "4": [6, 0, 0], "8": [0, 0, 0]}},
+        "panel_r": {"rotation": {"0": [0, 0, 0], "4": [-6, 0, 0], "8": [0, 0, 0]}},
+        "dish": {"rotation": {"0": [0, 0, 0], "8": [0, 360, 0]}},
+        "ring": {"rotation": {"0": [0, 0, 0], "8": [0, 360, 0]}},
+        "emitter": {"scale": {"0": [1, 1, 1], "1": [1.08, 1.2, 1.08], "2": [1, 1, 1], "3": [1.1, 1.3, 1.1], "4": [1, 1, 1]}},
+    }, loop=True)
+    return g
+
+def meteor():
+    g = Geo("meteor", [(70, 60, 56), (30, 26, 26), (255, 110, 30), (255, 190, 80)])
+    g.bone("rock", "root", (0, 0, 0)); g.bone("magma", "root", (0, 0, 0)); g.bone("trail", "root", (0, 0, 0))
+    rnd = random.Random(7)
+    g.cube("rock", 0, (-12, -10, -12), (12, 12, 12))
+    for i in range(14):
+        a = i * 2.399
+        r = 11 + rnd.random() * 4; y = rnd.uniform(-9, 9); w = rnd.uniform(5, 9)
+        g.cube("rock", 0 if i % 3 else 1, (math.cos(a) * r - w / 2, y - w / 2, math.sin(a) * r - w / 2), (math.cos(a) * r + w / 2, y + w / 2, math.sin(a) * r + w / 2),
+               rot=(rnd.uniform(-30, 30), rnd.uniform(0, 90), rnd.uniform(-30, 30)))
+    for i in range(10):
+        a = i * 0.9
+        g.cube("magma", 2 if i % 2 else 3, (math.cos(a) * 12.4 - 1, rnd.uniform(-8, 8), math.sin(a) * 12.4 - 1), (math.cos(a) * 12.4 + 1.2, rnd.uniform(-8, 8) + 6, math.sin(a) * 12.4 + 1.2))
+    g.cube("magma", 3, (-6, 11.5, -6), (6, 12.5, 6))
+    for i in range(6):
+        g.cube("trail", 3 if i % 2 else 2, (-4 + i * 0.5, 12 + i * 9, -4), (4 - i * 0.5, 20 + i * 9, 4))
+    g.anim("idle", 6, {"rock": {"rotation": {"0": [0, 0, 0], "6": [360, 180, 90]}},
+                       "magma": {"rotation": {"0": [0, 0, 0], "6": [360, 180, 90]}, "scale": {"0": [1, 1, 1], "1.5": [1.06, 1.06, 1.06], "3": [1, 1, 1], "4.5": [1.06, 1.06, 1.06], "6": [1, 1, 1]}},
+                       "trail": {"scale": {"0": [1, 1, 1], "0.5": [1, 1.25, 1], "1": [1, 0.85, 1], "1.5": [1, 1.2, 1], "2": [1, 1, 1]}}}, loop=True)
+    return g
+
+def lance():
+    g = Geo("lance", [(200, 206, 218), (40, 44, 56), (140, 200, 255), (200, 240, 255)])
+    for b in ("hull", "ring_a", "ring_b", "core", "barrel"):
+        g.bone(b, "root", (0, 0, 0))
+    g.cube("hull", 0, (-8, -4, -8), (8, 4, 8)); g.cube("hull", 1, (-9, -1, -9), (9, 1, 9)); g.cube("hull", 2, (-6, 4, -6), (6, 5, 6))
+    g.ring("ring_a", 1, 14, 16, 8, 2, 3, y=-1); g.ring("ring_a", 3, 14, 16, 3, 1, 3, y=1)
+    g.ring("ring_b", 1, 20, 18, 8, 2, 3, y=-1.5); g.ring("ring_b", 2, 20, 6, 4, 2.5, 4, y=-2)
+    g.cube("barrel", 1, (-3, -34, -3), (3, -4, 3)); g.cube("barrel", 0, (-4, -22, -4), (4, -14, 4)); g.cube("barrel", 2, (-4.5, -30, -4.5), (4.5, -28, 4.5))
+    g.cube("core", 3, (-4, -2, -4), (4, 6, 4)); g.cube("core", 3, (-1.5, -42, -1.5), (1.5, -34, 1.5))
+    g.anim("idle", 6, {"ring_a": {"rotation": {"0": [0, 0, 0], "6": [0, 360, 0]}}, "ring_b": {"rotation": {"0": [0, 0, 0], "6": [0, -360, 0]}},
+                       "core": {"scale": {"0": [1, 1, 1], "1": [1.2, 1.2, 1.2], "2": [1, 1, 1], "3": [1.3, 1.3, 1.3], "4": [1, 1, 1], "6": [1, 1, 1]}}}, loop=True)
+    return g
+
+def warhead():
+    g = Geo("warhead", [(190, 194, 200), (50, 54, 62), (210, 40, 40), (255, 190, 80)])
+    for b in ("body", "fins", "flame"):
+        g.bone(b, "root", (0, 0, 0))
+    for k in range(8):                                   # octagonal tube built from stacked rings
+        g.ring("body", 0 if k % 3 else 1, 5.2, 8, 4.6, 6, 3.4, y=-24 + k * 6)
+    g.cube("body", 0, (-4, -24, -4), (4, 24, 4))
+    for k, r in enumerate((4.6, 3.6, 2.4, 1.2)):
+        g.cube("body", 2, (-r, 24 + k * 3, -r), (r, 27 + k * 3, r))
+    g.cube("body", 2, (-5.4, 6, -5.4), (5.4, 9, 5.4)); g.cube("body", 1, (-5.4, -4, -5.4), (5.4, -2, 5.4))
+    for i in range(4):
+        a = i * math.pi / 2
+        g.cube("fins", 1, (math.cos(a) * 8 - 1, -26, math.sin(a) * 8 - 1), (math.cos(a) * 8 + 1, -10, math.sin(a) * 8 + 1), rot=(0, 0, 0))
+        g.cube("fins", 2, (math.cos(a) * 11 - 0.8, -26, math.sin(a) * 11 - 0.8), (math.cos(a) * 11 + 0.8, -18, math.sin(a) * 11 + 0.8))
+    g.cube("flame", 3, (-4, -40, -4), (4, -26, 4)); g.cube("flame", 2, (-2.5, -54, -2.5), (2.5, -40, 2.5)); g.cube("flame", 3, (-1.2, -66, -1.2), (1.2, -54, 1.2))
+    g.anim("idle", 1, {"flame": {"scale": {"0": [1, 1, 1], "0.15": [1.15, 1.25, 1.15], "0.3": [0.9, 0.85, 0.9], "0.45": [1.1, 1.3, 1.1], "0.6": [0.95, 0.9, 0.95], "1": [1, 1, 1]}},
+                       "body": {"rotation": {"0": [0, 0, 0], "1": [0, 360, 0]}}}, loop=True)
+    return g
+
+MODELS = {"rift": rift, "case": case, "drone": drone, "crate": crate, "pod": pod, "container": container,
+          "satellite": satellite, "meteor": meteor, "lance": lance, "warhead": warhead}
 
 def build_all():
     out = {}

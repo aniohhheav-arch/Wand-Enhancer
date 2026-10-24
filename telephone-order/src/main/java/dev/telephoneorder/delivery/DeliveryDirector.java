@@ -68,7 +68,10 @@ public final class DeliveryDirector {
 
     // ------------------------------------------------------------------------------------------------ props
     /** Natural size of each GeckoLib model in blocks; props are scaled so `scale` keeps its old "blocks wide" meaning. */
-    private static final Map<String, Float> GEO_BLOCKS = Map.of("crate", 1.5f, "case", 1.75f, "drone", 3.0f, "pod", 2.5f, "container", 1.4f, "rift", 7.0f);
+    private static final Map<String, Float> GEO_BLOCKS = Map.of("crate", 1.5f, "case", 1.75f, "drone", 3.0f, "pod", 2.5f, "container", 1.4f, "rift", 7.0f,
+            "satellite", 5.0f, "meteor", 1.75f, "lance", 3.0f, "warhead", 5.0f);
+    /** Models whose origin is their centre (everything else stands on its origin). */
+    private static final java.util.Set<String> CENTERED = java.util.Set.of("rift", "satellite", "meteor", "lance", "warhead");
 
     /**
      * A delivery prop.  Crates, drones, pods, containers, cases and the rift are animated GeckoLib {@link DeliveryActor}s;
@@ -88,6 +91,10 @@ public final class DeliveryDirector {
             if (item == ModItems.PROP_POD || item == ModItems.PROP_POD_OPEN) return "pod";
             if (item == ModItems.PROP_CONTAINER || item == ModItems.PROP_CONTAINER_OPEN) return "container";
             if (item == ModItems.PROP_CASE || item == ModItems.PROP_CASE_OPEN) return "case";
+            if (item == ModItems.ALL.get("prop_strike_satellite")) return "satellite";
+            if (item == ModItems.ALL.get("prop_strike_meteor")) return "meteor";
+            if (item == ModItems.ALL.get("prop_strike_lance")) return "lance";
+            if (item == ModItems.ALL.get("prop_strike_warhead")) return "warhead";
             return null;
         }
 
@@ -153,7 +160,7 @@ public final class DeliveryDirector {
 
         /** Models stand on their origin; item displays were centred, so drop by half a block-height. */
         private void place(Vector3f t, float s) {
-            float lift = kind.equals("rift") ? 0f : 0.5f * s;
+            float lift = CENTERED.contains(kind) ? 0f : 0.5f * s;
             a.setPos(anchor.x + t.x, anchor.y + t.y - lift, anchor.z + t.z);
         }
 
