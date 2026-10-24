@@ -45,6 +45,7 @@ public class TelephoneOrder implements ModInitializer {
             }
         });
         SelfTest.init();
+        ToCommand.init();
         ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> { GunLogic.forget(h.getPlayer().getUUID()); PhoneService.forget(h.getPlayer().getUUID()); });
         ServerLifecycleEvents.SERVER_STOPPED.register(s -> { Sched.clear(); GunLogic.clearAll(); PhoneService.clear(); DistortionField.clear(); ShieldField.clear(); });
         LOGGER.info("Telephone Order loaded: {} weapons, {} attachments, {} ammo types, {} sounds", Catalog.GUNS.size(), Catalog.ATTS.size(), Catalog.AMMO.size(), Catalog.SOUNDS.size());

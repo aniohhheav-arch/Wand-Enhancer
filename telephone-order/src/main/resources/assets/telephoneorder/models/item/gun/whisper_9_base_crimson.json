@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/whisper_9_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/whisper_9_base_crimson"
+  "t": "telephoneorder:item/gun/whisper_9_base_crimson",
+  "particle": "telephoneorder:item/gun/whisper_9_base_crimson"
  }
 }

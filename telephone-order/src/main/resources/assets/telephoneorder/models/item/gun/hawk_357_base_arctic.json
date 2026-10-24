@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/hawk_357_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/hawk_357_base_arctic"
+  "t": "telephoneorder:item/gun/hawk_357_base_arctic",
+  "particle": "telephoneorder:item/gun/hawk_357_base_arctic"
  }
 }

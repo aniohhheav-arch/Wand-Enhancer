@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/hammerhead_saw_reload2",
  "textures": {
-  "layer0": "telephoneorder:item/gun/hammerhead_saw_reload2_gold"
+  "t": "telephoneorder:item/gun/hammerhead_saw_reload2_gold",
+  "particle": "telephoneorder:item/gun/hammerhead_saw_reload2_gold"
  }
 }

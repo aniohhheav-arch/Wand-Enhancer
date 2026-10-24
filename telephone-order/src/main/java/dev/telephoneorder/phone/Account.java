@@ -77,6 +77,16 @@ public final class Account {
         t.put("unlocks", n);
     }
 
+    public static void lock(ServerPlayer p, String key) {
+        CompoundTag t = of(p);
+        ListTag n = new ListTag();
+        for (Tag x : t.getListOrEmpty("unlocks")) if (!(x instanceof StringTag s && s.value().equals(key))) n.add(x);
+        t.put("unlocks", n);
+    }
+
+    public static void setSpent(ServerPlayer p, int v) { of(p).putInt("spent", Math.max(0, v)); }
+    public static void setCredits(ServerPlayer p, int v) { of(p).putInt("credits", Math.max(0, v)); }
+
     public static List<String> unlocks(ServerPlayer p) {
         List<String> out = new ArrayList<>();
         for (Tag t : of(p).getListOrEmpty("unlocks")) if (t instanceof StringTag s) out.add(s.value());

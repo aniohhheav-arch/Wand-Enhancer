@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/aegis_emitter_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/aegis_emitter_base_crimson"
+  "t": "telephoneorder:item/gun/aegis_emitter_base_crimson",
+  "particle": "telephoneorder:item/gun/aegis_emitter_base_crimson"
  }
 }

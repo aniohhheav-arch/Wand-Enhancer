@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/rift_gun_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/rift_gun_base_crimson"
+  "t": "telephoneorder:item/gun/rift_gun_base_crimson",
+  "particle": "telephoneorder:item/gun/rift_gun_base_crimson"
  }
 }

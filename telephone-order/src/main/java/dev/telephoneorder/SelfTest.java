@@ -93,7 +93,7 @@ final class SelfTest {
         float hp0 = golem.getHealth();
         int ammo0 = GunData.ammo(stack);
         GunLogic.PS ps = GunLogic.ps(fake);
-        ps.nextFire = 0;
+        ps.nextFire = 0; ps.aiming = true;
         try {
             if (def.beh().equals("turret")) { runTurretTest(def, stack); return; }
             var res = GunLogic.onUse(fake, stack, item, InteractionHand.MAIN_HAND);

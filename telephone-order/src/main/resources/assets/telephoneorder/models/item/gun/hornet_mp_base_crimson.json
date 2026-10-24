@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/hornet_mp_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/hornet_mp_base_crimson"
+  "t": "telephoneorder:item/gun/hornet_mp_base_crimson",
+  "particle": "telephoneorder:item/gun/hornet_mp_base_crimson"
  }
 }

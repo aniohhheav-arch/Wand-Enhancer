@@ -64,11 +64,11 @@ public final class DeliveryDirector {
     }
 
     // ------------------------------------------------------------------------------------------------ props
-    static final class Prop {
+    public static final class Prop {
         final Display.ItemDisplay d;
         final float scale;
-        Vector3f pos;
-        Prop(ServerLevel l, Vec3 anchor, Item item, Vector3f t, float scale, Quaternionf rot) {
+        public Vector3f pos;
+        public Prop(ServerLevel l, Vec3 anchor, Item item, Vector3f t, float scale, Quaternionf rot) {
             this.scale = scale;
             this.pos = new Vector3f(t);
             d = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, l);
@@ -85,14 +85,14 @@ public final class DeliveryDirector {
             LIVE.add(d.getUUID());
             l.addFreshEntity(d);
         }
-        void to(Vector3f t, float s, Quaternionf rot, int ticks) {
+        public void to(Vector3f t, float s, Quaternionf rot, int ticks) {
             pos = new Vector3f(t);
             d.setTransformation(new Transformation(new Vector3f(t), new Quaternionf(rot), new Vector3f(s), new Quaternionf()));
             d.setTransformationInterpolationDuration(Math.max(1, ticks));
             d.setTransformationInterpolationDelay(0);
         }
-        void item(Item item) { d.setItemStack(new ItemStack(item)); }
-        void kill() { LIVE.remove(d.getUUID()); d.discard(); }
+        public void item(Item item) { d.setItemStack(new ItemStack(item)); }
+        public void kill() { LIVE.remove(d.getUUID()); d.discard(); }
     }
 
     private static Quaternionf yaw(float deg) { return new Quaternionf().rotateY((float) Math.toRadians(deg)); }

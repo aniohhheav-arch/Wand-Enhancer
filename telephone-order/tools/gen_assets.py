@@ -9,6 +9,7 @@ import catalog_data as cd
 import gen_art as art
 import gen_blocks as gb
 import gen_sounds as gs
+import voxel3d
 
 ROOT = os.path.dirname(HERE)
 RES = os.path.join(ROOT, "src", "main", "resources")
@@ -73,21 +74,30 @@ def gen_catalog():
 def gen_guns():
     att_index = {a["id"]: i for i, a in enumerate(cd.ATT)}
     # shared base model
-    wj(os.path.join(A, "models", "item", "gun_base.json"), {"parent": "minecraft:item/generated", "display": GUN_DISPLAY})
+    disp = json.loads(json.dumps(GUN_DISPLAY))
+    disp["gui"] = {"rotation": [18, -38, 0], "translation": [0, 0, 0], "scale": [1.05, 1.05, 1.05]}
+    wj(os.path.join(A, "models", "item", "gun_base.json"), {"gui_light": "front", "display": disp})
     for g in cd.GUNS:
         frames, anchors = art.build_gun_frames(g)
         for name, img in frames.items():
             save_png(img, f"item/gun/{g['id']}_{name}")
-            wj(os.path.join(A, "models", "item", "gun", f"{g['id']}_{name}.json"),
-               {"parent": f"{NS}:item/gun_base", "textures": {"layer0": f"{NS}:item/gun/{g['id']}_{name}"}})
+            tex = f"{NS}:item/gun/{g['id']}_{name}"
+            base_name, _, fin = name.partition("_")
+            if fin:   # finish variant: same 3D geometry, different texture
+                wj(os.path.join(A, "models", "item", "gun", f"{g['id']}_{name}.json"),
+                   {"parent": f"{NS}:item/gun/{g['id']}_{base_name}", "textures": {"t": tex, "particle": tex}})
+            else:
+                wj(os.path.join(A, "models", "item", "gun", f"{g['id']}_{name}.json"),
+                   {"parent": f"{NS}:item/gun_base", "textures": {"t": tex, "particle": tex}, "elements": voxel3d.elements(img)})
         overlays = []
         for a in cd.ATT:
             if a["slot"] == "finish" or a["slot"] not in g["slots"] or g["fam"] not in a["fits"]:
                 continue
             ov = art.att_overlay(a["id"], anchors, g)
             save_png(ov, f"item/gun/{g['id']}_att_{a['id']}")
+            t_ = f"{NS}:item/gun/{g['id']}_att_{a['id']}"
             wj(os.path.join(A, "models", "item", "gun", f"{g['id']}_att_{a['id']}.json"),
-               {"parent": f"{NS}:item/gun_base", "textures": {"layer0": f"{NS}:item/gun/{g['id']}_att_{a['id']}"}})
+               {"parent": f"{NS}:item/gun_base", "textures": {"t": t_, "particle": t_}, "elements": voxel3d.elements(ov)})
             overlays.append(a["id"])
 
         def mdl(n): return {"type": "minecraft:model", "model": f"{NS}:item/gun/{g['id']}_{n}"}
@@ -180,6 +190,13 @@ def gen_props():
     save_png(tex, "item/prop/delivery_case"); put_model("delivery_case", m); put_model("delivery_case_open", m2)
     item_def("prop_case", f"{NS}:item/prop/delivery_case"); item_def("prop_case_open", f"{NS}:item/prop/delivery_case_open")
 
+def gen_strike_props():
+    for key, fn in (("satellite", gb.prop_satellite), ("meteor", gb.prop_meteor), ("lance", gb.prop_lance), ("warhead", gb.prop_warhead)):
+        tex, m = fn()
+        save_png(tex, f"item/prop/strike_{key}")
+        wj(os.path.join(A, "models", "item", "prop", f"strike_{key}.json"), m)
+        item_def(f"prop_strike_{key}", f"{NS}:item/prop/strike_{key}")
+
 def gen_sounds():
     odir = os.path.join(A, "sounds")
     names = gs.write_all(odir)
@@ -234,6 +251,8 @@ def gen_lang(subtitles):
     lang[f"block.{NS}.sentinel_turret"] = "Sentinel Turret"
     lang.update({f"item.{NS}.clue_slip": "Torn Order Slip", f"item.{NS}.order_receipt": "Order Receipt", f"item.{NS}.credit_chip": "Credit Chip", f"item.{NS}.handheld_phone": "Pocket Handset"})
     for k, v in STRIKE_NAMES.items(): lang[f"item.{NS}.{k}"] = v
+    for n in ("strike_satellite", "strike_meteor", "strike_lance", "strike_warhead"):
+        lang[f"item.{NS}.prop_{n}"] = "Strike Prop"
     for n in ("crate", "crate_open", "drone", "rotor", "pod", "pod_open", "container", "container_open", "case", "case_open"):
         lang[f"item.{NS}.prop_{n}"] = "Delivery Prop"
     for n in ("plasma", "shard", "charge", "heavy", "rift", "emp", "missile", "rocket"):
@@ -272,6 +291,7 @@ def main():
     gen_items()
     gen_blocks()
     gen_props()
+    gen_strike_props()
     subs = gen_sounds()
     gen_data()
     gen_lang(subs)

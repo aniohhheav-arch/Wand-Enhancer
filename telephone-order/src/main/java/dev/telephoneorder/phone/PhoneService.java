@@ -408,27 +408,30 @@ public final class PhoneService {
         return li.tier() <= Account.tier(p) || li.secret() != null;
     }
 
-    private static void order(ServerPlayer p, ServerLevel l, Session s, String id) {
+    private static void order(ServerPlayer p, ServerLevel l, Session s, String arg) {
+        String[] parts = arg.split("\\|");
+        String id = parts[0];
         Listing li = Listing.BY_ID.get(id);
         if (li == null) return;
+        String method = parts.length > 1 && Catalog.DELIVERY_FEE.containsKey(parts[1]) ? parts[1] : li.delivery();
         Vec3 c = Vec3.atCenterOf(s.pos);
         if (!available(p, li)) { deny(l, c, s, "CLEARANCE INSUFFICIENT"); return; }
         List<CompoundTag> orders = Account.list(p, "orders");
         if (orders.size() >= 6) { deny(l, c, s, "TOO MANY ACTIVE ORDERS (6)"); return; }
-        int fee = (int) Math.round(Catalog.DELIVERY_FEE.getOrDefault(li.delivery(), 10) * feeMult(s.model));
+        int fee = (int) Math.round(Catalog.DELIVERY_FEE.getOrDefault(method, 10) * feeMult(s.model));
         int cost = li.price() + fee;
         if (Account.credits(p) < cost) { deny(l, c, s, "INSUFFICIENT CREDITS  (need " + cost + ")"); return; }
         Account.pay(p, cost);
         long now = l.getServer().overworld().getGameTime();
         int stock = stock(li, now / 24000L);
-        double eta = li.etaSec() * 20.0 * etaMult(s.model) * ModConfig.get().deliveryTimeMultiplier * (stock == 2 ? 2.0 : 1.0);
+        double eta = li.etaSec() / Catalog.ETA_MULT.getOrDefault(li.delivery(), 1f) * Catalog.ETA_MULT.getOrDefault(method, 1f) * 20.0 * etaMult(s.model) * ModConfig.get().deliveryTimeMultiplier * (stock == 2 ? 2.0 : 1.0);
         CompoundTag t = Account.of(p);
         int oid = t.getIntOr("nextOid", 1);
         t.putInt("nextOid", oid + 1);
         CompoundTag o = new CompoundTag();
         o.putInt("oid", oid);
         o.putString("listing", li.id());
-        o.putString("method", li.delivery());
+        o.putString("method", method);
         o.putLong("placed", now);
         o.putInt("eta", Math.max(40, (int) eta));
         o.putInt("cost", cost);

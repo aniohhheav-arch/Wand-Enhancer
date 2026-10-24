@@ -45,6 +45,9 @@ public final class Catalog {
     public static final List<String> SOUNDS;
     public static final int[] TIER_THRESHOLDS;
     public static final Map<String, Integer> DELIVERY_FEE = new HashMap<>();
+    /** shipping methods in display order, and how their delivery time scales (lower = faster). */
+    public static final List<String> SHIP_METHODS = List.of("crate", "drone", "pod", "teleport", "case");
+    public static final Map<String, Float> ETA_MULT = Map.of("crate", 1.4f, "drone", 1.0f, "pod", 0.85f, "teleport", 0.55f, "case", 0.7f);
 
     static {
         try {

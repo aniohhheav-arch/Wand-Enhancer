@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/triad_burst_reload1",
  "textures": {
-  "layer0": "telephoneorder:item/gun/triad_burst_reload1_arctic"
+  "t": "telephoneorder:item/gun/triad_burst_reload1_arctic",
+  "particle": "telephoneorder:item/gun/triad_burst_reload1_arctic"
  }
 }

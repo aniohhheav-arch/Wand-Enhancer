@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/paradox_revolver_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/paradox_revolver_base_gold"
+  "t": "telephoneorder:item/gun/paradox_revolver_base_gold",
+  "particle": "telephoneorder:item/gun/paradox_revolver_base_gold"
  }
 }

@@ -1,5 +1,5 @@
 {
- "parent": "minecraft:item/generated",
+ "gui_light": "front",
  "display": {
   "thirdperson_righthand": {
    "rotation": [
@@ -71,8 +71,8 @@
   },
   "gui": {
    "rotation": [
-    0,
-    0,
+    18,
+    -38,
     0
    ],
    "translation": [
@@ -81,9 +81,9 @@
     0
    ],
    "scale": [
-    1,
-    1,
-    1
+    1.05,
+    1.05,
+    1.05
    ]
   },
   "ground": {

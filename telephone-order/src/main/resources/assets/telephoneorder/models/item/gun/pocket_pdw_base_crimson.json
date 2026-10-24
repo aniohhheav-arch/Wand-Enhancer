@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/pocket_pdw_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/pocket_pdw_base_crimson"
+  "t": "telephoneorder:item/gun/pocket_pdw_base_crimson",
+  "particle": "telephoneorder:item/gun/pocket_pdw_base_crimson"
  }
 }

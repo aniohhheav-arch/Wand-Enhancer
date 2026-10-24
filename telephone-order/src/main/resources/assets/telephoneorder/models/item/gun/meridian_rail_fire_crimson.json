@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/meridian_rail_fire",
  "textures": {
-  "layer0": "telephoneorder:item/gun/meridian_rail_fire_crimson"
+  "t": "telephoneorder:item/gun/meridian_rail_fire_crimson",
+  "particle": "telephoneorder:item/gun/meridian_rail_fire_crimson"
  }
 }

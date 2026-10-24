@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/prism_lance_fire",
  "textures": {
-  "layer0": "telephoneorder:item/gun/prism_lance_fire_crimson"
+  "t": "telephoneorder:item/gun/prism_lance_fire_crimson",
+  "particle": "telephoneorder:item/gun/prism_lance_fire_crimson"
  }
 }

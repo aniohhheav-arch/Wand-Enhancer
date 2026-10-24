@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/vesper_p9_fire",
  "textures": {
-  "layer0": "telephoneorder:item/gun/vesper_p9_fire_arctic"
+  "t": "telephoneorder:item/gun/vesper_p9_fire_arctic",
+  "particle": "telephoneorder:item/gun/vesper_p9_fire_arctic"
  }
 }

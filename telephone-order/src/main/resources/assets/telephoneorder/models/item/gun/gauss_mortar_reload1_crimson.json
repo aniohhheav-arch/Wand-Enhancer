@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/gauss_mortar_reload1",
  "textures": {
-  "layer0": "telephoneorder:item/gun/gauss_mortar_reload1_crimson"
+  "t": "telephoneorder:item/gun/gauss_mortar_reload1_crimson",
+  "particle": "telephoneorder:item/gun/gauss_mortar_reload1_crimson"
  }
 }

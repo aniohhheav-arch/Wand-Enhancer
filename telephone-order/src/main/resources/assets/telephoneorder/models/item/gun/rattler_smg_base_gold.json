@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/rattler_smg_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/rattler_smg_base_gold"
+  "t": "telephoneorder:item/gun/rattler_smg_base_gold",
+  "particle": "telephoneorder:item/gun/rattler_smg_base_gold"
  }
 }

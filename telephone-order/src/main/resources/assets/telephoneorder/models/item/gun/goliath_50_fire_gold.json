@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/goliath_50_fire",
  "textures": {
-  "layer0": "telephoneorder:item/gun/goliath_50_fire_gold"
+  "t": "telephoneorder:item/gun/goliath_50_fire_gold",
+  "particle": "telephoneorder:item/gun/goliath_50_fire_gold"
  }
 }

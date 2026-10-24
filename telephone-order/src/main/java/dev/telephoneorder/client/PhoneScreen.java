@@ -439,6 +439,8 @@ public class PhoneScreen extends Screen {
 
     // ---- storefront state
     private String view = "grid";
+    private String ship = "crate";
+    private static final String[] SHIP_LABEL = {"CRATE", "DRONE", "POD", "TELEPORT", "CASE"};
     private final List<String> cart = new ArrayList<>();
     private int gridScroll;
     private static final int RED = 0xFFFF4747, ORANGE = 0xFFFF8A00;
@@ -564,7 +566,7 @@ public class PhoneScreen extends Screen {
         txt(g, stars(rating(li)) + String.format(" %.1f", rating(li)), x + 6, MY + 41, 0xFFFFB400);
         txt(g, kfmt(sold(li)) + " sold  •  " + kfmt(sold(li) / 7) + " reviews", x + 62, MY + 41, 0xFF777777);
         int disc = discount(li);
-        int fee = Math.round(Catalog.DELIVERY_FEE.getOrDefault(li.delivery(), 10) * (model == 1 ? 0.8f : 1f));
+        int fee = Math.round(Catalog.DELIVERY_FEE.getOrDefault(ship, 10) * (model == 1 ? 0.8f : 1f));
         g.fill(x + 4, MY + 52, x + w - 4, MY + 74, 0xFFFFF0F0);
         txtScaled(g, li.price() + " cr", x + 8, MY + 56, RED, 1.7f);
         String lp = listPrice(li) + " cr";
@@ -572,37 +574,53 @@ public class PhoneScreen extends Screen {
         txt(g, lp, lx, MY + 58, 0xFF999999);
         g.fill(lx - 1, MY + 62, lx + font.width(lp), MY + 63, 0xFF999999);
         g.fill(lx, MY + 65, lx + 30, MY + 73, RED);
-        txt(g, "-" + disc + "%", lx + 3, MY + 65, 0xFFFFFFFF);
+        txt(g, "-" + discount(li) + "%", lx + 3, MY + 65, 0xFFFFFFFF);
         long day = st().getLongOr("day", 0L);
         String stock = stockOf(li, day);
-        int eta = Math.round(li.etaSec() * (model == 2 ? 0.85f : 1f) * (stock.startsWith("BACKORDER") ? 2 : 1) * ModConfig.get().deliveryTimeMultiplier);
-        txt(g, "✈ " + methodName(li.delivery()), x + 6, MY + 79, 0xFF333333);
-        txt(g, "Delivery fee " + fee + " cr  •  ETA " + eta + "s", x + 6, MY + 89, 0xFF2E8B57);
-        txt(g, stock, x + 6, MY + 99, stock.startsWith("IN") ? 0xFF2E8B57 : 0xFFCC7A00);
+        int eta = etaFor(li, ship, stock);
+        txt(g, "Shipping method (choose at checkout)", x + 6, MY + 77, 0xFF333333);
+        int bw = (w - 12) / 5;
+        for (int i = 0; i < Catalog.SHIP_METHODS.size(); i++) {
+            String m = Catalog.SHIP_METHODS.get(i);
+            boolean sel = m.equals(ship);
+            int bx = x + 6 + i * bw;
+            Region br = new Region(bx, MY + 87, bw - 1, 13, "ship:" + m);
+            regions.add(br);
+            boolean bh = hover(br, mx, my);
+            g.fill(bx, MY + 87, bx + bw - 1, MY + 100, sel ? ORANGE : (bh ? 0xFFFFE0B0 : 0xFFEAEAEA));
+            g.outline(bx, MY + 87, bw - 1, 13, sel ? RED : 0xFFCCCCCC);
+            String lb = SHIP_LABEL[i].length() > 6 && bw < 36 ? SHIP_LABEL[i].substring(0, 5) : SHIP_LABEL[i];
+            txt(g, lb, bx + (bw - 1 - font.width(lb)) / 2, MY + 90, sel ? 0xFFFFFFFF : 0xFF444444);
+        }
+        txt(g, methodName(ship) + ": fee " + fee + " cr, ETA " + eta + "s", x + 6, MY + 103, 0xFF2E8B57);
+        txt(g, stock, x + 6, MY + 113, stock.startsWith("IN") ? 0xFF2E8B57 : 0xFFCC7A00);
         var wrapped = font.split(Component.literal(li.desc()), w - 12);
-        int dy = MY + 111;
-        for (var wl : wrapped) { if (dy > MY + 128) break; g.text(font, wl, x + 6, dy, 0xFF555555, false); dy += 9; }
+        int dy = MY + 123;
+        for (var wl : wrapped) { if (dy > MY + MH - 36) break; g.text(font, wl, x + 6, dy, 0xFF555555, false); dy += 9; }
         int total = li.price() + fee;
         boolean afford = credits() >= total;
-        boolean inCart = cart.contains(li.id());
+        boolean inCart = cart.stream().anyMatch(c -> c.split("\\|")[0].equals(li.id()));
         button(g, "addcart", inCart ? "✓ IN CART" : "ADD TO CART", x + 4, MY + MH - 28, (w - 12) / 2, 20, !lock && !inCart && cart.size() < 6, ORANGE, mx, my);
         button(g, "order", lock ? "LOCKED" : (afford ? "BUY NOW" : "NEED " + total), x + 8 + (w - 12) / 2, MY + MH - 28, (w - 12) / 2, 20, !lock && afford, RED, mx, my);
     }
 
     private void cartView(GuiGraphicsExtractor g, int mx, int my) {
         button(g, "back", "< Back", MX + 4, MY + 4, 44, 13, true, ORANGE, mx, my);
-        txtS(g, "SHOPPING CART (" + cart.size() + "/6)", MX + 56, MY + 7, ORANGE);
+        txtS(g, "SHOPPING CART (" + cart.size() + "/6)  \u2022  tap the shipping method to change it", MX + 56, MY + 7, ORANGE);
         int y = MY + 24, total = 0, fees = 0;
         for (int i = 0; i < cart.size(); i++) {
-            Listing li = Listing.BY_ID.get(cart.get(i));
+            String[] pr = cart.get(i).split("\\|");
+            Listing li = Listing.BY_ID.get(pr[0]);
             if (li == null) continue;
-            int fee = Math.round(Catalog.DELIVERY_FEE.getOrDefault(li.delivery(), 10) * (model == 1 ? 0.8f : 1f));
+            String m = pr.length > 1 ? pr[1] : li.delivery();
+            int fee = Math.round(Catalog.DELIVERY_FEE.getOrDefault(m, 10) * (model == 1 ? 0.8f : 1f));
             total += li.price(); fees += fee;
             g.fill(MX + 4, y, MX + MW - 4, y + 20, 0xFFF7F7F7);
             g.pose().pushMatrix(); g.pose().translate(MX + 8, y + 2); g.item(iconFor(li), 0, 0); g.pose().popMatrix();
             txt(g, li.name(), MX + 30, y + 3, 0xFF222222);
-            txt(g, methodName(li.delivery()) + "  +" + fee + " cr", MX + 30, y + 12, 0xFF2E8B57);
-            txtS(g, li.price() + " cr", MX + MW - 110, y + 6, RED);
+            txt(g, "+" + fee + " cr  ETA " + etaFor(li, m, "IN") + "s", MX + 30, y + 12, 0xFF2E8B57);
+            button(g, "cship:" + i, methodName(m).replace(" CONTAINER", "").replace("COURIER ", "").replace("REINFORCED ", "").replace("STANDARD ", "").replace("CONTAINMENT ", ""), MX + MW - 160, y + 3, 56, 14, true, ORANGE, mx, my);
+            txtS(g, li.price() + " cr", MX + MW - 100, y + 6, RED);
             button(g, "rm:" + i, "REMOVE", MX + MW - 56, y + 3, 48, 14, true, 0xFF777777, mx, my);
             y += 22;
         }
@@ -621,6 +639,10 @@ public class PhoneScreen extends Screen {
 
     private static String methodName(String m) {
         return switch (m) { case "drone" -> "COURIER DRONE"; case "pod" -> "REINFORCED POD"; case "teleport" -> "TELEPORT CONTAINER"; case "case" -> "CONTAINMENT CASE"; default -> "STANDARD CRATE"; };
+    }
+
+    private int etaFor(Listing li, String method, String stock) {
+        return Math.round(li.etaSec() / Catalog.ETA_MULT.getOrDefault(li.delivery(), 1f) * Catalog.ETA_MULT.getOrDefault(method, 1f) * (model == 2 ? 0.85f : 1f) * (stock.startsWith("BACKORDER") ? 2 : 1) * ModConfig.get().deliveryTimeMultiplier);
     }
 
     private static String stockOf(Listing li, long day) {
@@ -893,7 +915,9 @@ public class PhoneScreen extends Screen {
         if (id.startsWith("choice:")) { send("choice", id.substring(7)); return; }
         if (id.startsWith("dep:")) { send("deposit", id.substring(4)); return; }
         if (id.startsWith("ring:")) { send("ringtone", id.substring(5)); return; }
-        if (id.startsWith("card:")) { selected = id.substring(5); spin = 0; view = "product"; return; }
+        if (id.startsWith("card:")) { selected = id.substring(5); spin = 0; view = "product"; Listing cl = Listing.BY_ID.get(selected); ship = cl == null ? "crate" : cl.delivery(); return; }
+        if (id.startsWith("ship:")) { ship = id.substring(5); return; }
+        if (id.startsWith("cship:")) { int i = Integer.parseInt(id.substring(6)); if (i >= 0 && i < cart.size()) { String[] pr = cart.get(i).split("\\|"); int k = (Catalog.SHIP_METHODS.indexOf(pr.length > 1 ? pr[1] : "crate") + 1) % Catalog.SHIP_METHODS.size(); cart.set(i, pr[0] + "|" + Catalog.SHIP_METHODS.get(k)); } return; }
         if (id.startsWith("rm:")) { int i = Integer.parseInt(id.substring(3)); if (i >= 0 && i < cart.size()) cart.remove(i); return; }
         if (id.startsWith("sec:")) {
             int d = Integer.parseInt(id.substring(4));
@@ -906,10 +930,10 @@ public class PhoneScreen extends Screen {
             case "dial" -> { if (!dial.isEmpty()) { send("dial", dial); tab = "call"; dial = ""; } }
             case "bksp" -> { if (!dial.isEmpty()) dial = dial.substring(0, dial.length() - 1); }
             case "clr" -> dial = "";
-            case "order" -> { send("order", selected); }
+            case "order" -> { send("order", selected + "|" + ship); }
             case "back" -> view = "grid";
             case "cartview" -> view = "cart";
-            case "addcart" -> { if (!cart.contains(selected) && cart.size() < 6) cart.add(selected); }
+            case "addcart" -> { if (cart.stream().noneMatch(c -> c.split("\\|")[0].equals(selected)) && cart.size() < 6) cart.add(selected + "|" + ship); }
             case "checkout" -> { for (String cid : new ArrayList<>(cart)) send("order", cid); cart.clear(); view = "grid"; tab = "orders"; }
             default -> { }
         }

@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/mesa_dmr_base",
  "textures": {
-  "layer0": "telephoneorder:item/gun/mesa_dmr_base_arctic"
+  "t": "telephoneorder:item/gun/mesa_dmr_base_arctic",
+  "particle": "telephoneorder:item/gun/mesa_dmr_base_arctic"
  }
 }

@@ -1,6 +1,7 @@
 {
- "parent": "telephoneorder:item/gun_base",
+ "parent": "telephoneorder:item/gun/vesper_p9_reload1",
  "textures": {
-  "layer0": "telephoneorder:item/gun/vesper_p9_reload1_gold"
+  "t": "telephoneorder:item/gun/vesper_p9_reload1_gold",
+  "particle": "telephoneorder:item/gun/vesper_p9_reload1_gold"
  }
 }

@@ -85,6 +85,7 @@ public final class ModItems {
         PROP_CONTAINER_OPEN = reg("prop_container_open", Item::new, plain());
         PROP_CASE = reg("prop_case", Item::new, plain());
         PROP_CASE_OPEN = reg("prop_case_open", Item::new, plain());
+        for (String sp : new String[]{"strike_satellite", "strike_meteor", "strike_lance", "strike_warhead"}) reg("prop_" + sp, Item::new, plain());
         for (GunProjectile.Kind k : GunProjectile.Kind.values()) PROJ.put(k, reg("proj_" + k.name().toLowerCase(java.util.Locale.ROOT), Item::new, plain()));
     }
 

@@ -1,6 +1,11 @@
 package dev.telephoneorder.strike;
 
 import dev.telephoneorder.Fx;
+import dev.telephoneorder.ModItems;
+import dev.telephoneorder.delivery.DeliveryDirector;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import java.util.function.IntFunction;
 import dev.telephoneorder.ModConfig;
 import dev.telephoneorder.Sched;
 import dev.telephoneorder.net.Payloads;
@@ -27,7 +32,7 @@ import java.util.UUID;
 
 /**
  * Cinematic support strikes launched from a Strike Beacon: orbital strike, meteor barrages, planetary lance and the strategic
- * superweapon (demo-mode by default). Every sequence = radio call, siren, darkening sky, charge, impact, shockwave, aftermath.
+ * superweapon (demo-mode by default). Every sequence = radio call, darkening sky, charge, impact, shockwave, aftermath.
  */
 public final class StrikeDirector {
     private StrikeDirector() {}
@@ -69,6 +74,22 @@ public final class StrikeDirector {
         return true;
     }
 
+    // ------------------------------------------------------------------------------------------------ 3D props
+    private static DeliveryDirector.Prop prop(ServerLevel l, Vec3 anchor, String item, Vec3 off, float scale) {
+        return new DeliveryDirector.Prop(l, anchor, ModItems.ALL.get(item), new Vector3f((float) off.x, (float) off.y, (float) off.z), scale, new Quaternionf());
+    }
+
+    /** moves + spins a prop every 2 ticks along a path (ticks relative to now). */
+    private static void fly(DeliveryDirector.Prop pr, int delay, int duration, float scale, IntFunction<Vec3> at, float yawPerTick, float tilt) {
+        for (int t = 0; t < duration; t += 2) {
+            int tt = Math.min(duration, t + 2);
+            Sched.later(delay + t, () -> {
+                Vec3 v = at.apply(tt);
+                pr.to(new Vector3f((float) v.x, (float) v.y, (float) v.z), scale, new Quaternionf().rotateYXZ((float) Math.toRadians(tt * yawPerTick), (float) Math.toRadians(tilt), 0f), 2);
+            });
+        }
+    }
+
     // ------------------------------------------------------------------------------------------------ shared
     private static void radio(ServerPlayer p, ServerLevel l, Vec3 t, String id) {
         String name = switch (id) { case "strike_orbital" -> "ORBITAL STRIKE"; case "strike_lance" -> "PLANETARY LANCE"; case "strike_strategic" -> "STRATEGIC ASSET";
@@ -88,9 +109,6 @@ public final class StrikeDirector {
         }
     }
 
-    private static void siren(ServerLevel l, Vec3 t, int ticks) {
-        for (int i = 0; i < ticks; i += 110) Sched.later(i, () -> Fx.sound(l, t, "siren", SoundSource.AMBIENT, 6.0f, 1f));
-    }
 
     /** darken the sky with a thunderstorm for a while; restored afterwards. */
     private static void storm(ServerLevel l, int ticks) {
@@ -138,9 +156,15 @@ public final class StrikeDirector {
 
     // ------------------------------------------------------------------------------------------------ orbital strike
     private static void orbital(ServerPlayer p, ServerLevel l, Vec3 t) {
-        siren(l, t, 160);
         storm(l, 360);
         Fx.sound(l, t, "orbital_charge", SoundSource.AMBIENT, 6.0f, 1f);
+        // the orbital platform glides in, turns to face the target, fires and withdraws
+        Sched.later(30, () -> {
+            DeliveryDirector.Prop plat = prop(l, t, "prop_strike_satellite", new Vec3(-140, 85, 40), 4.0f);
+            fly(plat, 1, 100, 4.0f, k -> new Vec3(-140 + 140 * (k / 100.0), 85 + 4 * Math.sin(k * 0.1), 40 - 40 * (k / 100.0)), 1.2f, 6);
+            Sched.later(104, () -> fly(plat, 0, 80, 4.0f, k -> new Vec3(0 + k * 2.2, 85 + k * 0.5, k * -0.5), 2.5f, 10));
+            Sched.later(200, plat::kill);
+        });
         // platform glints overhead, clouds light up
         for (int i = 0; i < 80; i += 4) {
             int ii = i;
@@ -188,7 +212,6 @@ public final class StrikeDirector {
 
     // ------------------------------------------------------------------------------------------------ meteors
     private static void meteors(ServerPlayer p, ServerLevel l, Vec3 t, int count, double spread, int window) {
-        siren(l, t, 120);
         storm(l, window + 120);
         for (int i = 0; i < count; i++) {
             int delay = 100 + RNG.nextInt(window);
@@ -199,6 +222,12 @@ public final class StrikeDirector {
             int fall = 36;
             Sched.later(delay - fall, () -> Fx.sound(l, impact.add(0, 40, 0), "incoming_whistle", SoundSource.AMBIENT, 4.0f, 1.3f));
             Vec3 dir = new Vec3(RNG.nextDouble() - 0.5, 0, RNG.nextDouble() - 0.5).normalize().scale(10);
+            Sched.later(Math.max(1, delay - fall), () -> {
+                float sz = 1.4f + RNG.nextFloat() * 1.6f;
+                DeliveryDirector.Prop rock = prop(l, impact, "prop_strike_meteor", dir.add(0, 72, 0), sz);
+                fly(rock, 1, fall, sz, k -> { double f = 1.0 - k / (double) fall; return dir.scale(f).add(0, 70 * f * f + sz * 0.4, 0); }, 14f, 25);
+                Sched.later(fall + 3, rock::kill);
+            });
             for (int k = 0; k <= fall; k += 2) {
                 int kk = k;
                 Sched.later(delay - fall + k, () -> {
@@ -220,10 +249,16 @@ public final class StrikeDirector {
 
     // ------------------------------------------------------------------------------------------------ planetary lance
     private static void lance(ServerPlayer p, ServerLevel l, Vec3 t) {
-        siren(l, t, 300);
         storm(l, 520);
         Fx.sound(l, t, "orbital_charge", SoundSource.AMBIENT, 8.0f, 0.6f);
         int charge = 200;
+        Sched.later(10, () -> {
+            DeliveryDirector.Prop em = prop(l, t, "prop_strike_lance", new Vec3(0, 140, 0), 0.5f);
+            fly(em, 1, 60, 6.0f, k -> new Vec3(0, 140 - 50 * (k / 60.0), 0), 3f, 0);
+            Sched.later(62, () -> fly(em, 0, 200, 6.0f, k -> new Vec3(0, 90 + Math.sin(k * 0.2) * 1.5, 0), 4f + 0.12f * 200 * 0.0f, 0));
+            Sched.later(270, () -> fly(em, 0, 60, 6.0f, k -> new Vec3(0, 90 + k * 2.5, 0), 10f, 0));
+            Sched.later(335, em::kill);
+        });
         for (int i = 0; i < charge; i += 2) {
             int ii = i;
             Sched.later(i, () -> {
@@ -267,12 +302,25 @@ public final class StrikeDirector {
     private static void strategic(ServerPlayer p, ServerLevel l, Vec3 t) {
         boolean demo = ModConfig.get().strategicDemoMode;
         ServerPlayNetworking.send(p, new Payloads.Notify(demo ? "DEMONSTRATION MODE: visual only, no damage" : "LIVE FIRE: STRATEGIC ASSET RELEASED", demo ? 0x7CFFB0 : 0xFF4040));
-        siren(l, t, 440);
         storm(l, 800);
         for (int i = 0; i < 400; i += 20) {
             int ii = i;
             Sched.later(i, () -> { Fx.flash(l, t, 200, 0x300000, 10); if (ii % 40 == 0) Fx.p(l, ParticleTypes.ELECTRIC_SPARK, t.add(0, 60, 0), 20, 8, 4, 8, 0.4); });
         }
+        Sched.later(340, () -> {
+            DeliveryDirector.Prop wh = prop(l, t, "prop_strike_warhead", new Vec3(0, 160, 0), 5.0f);
+            Fx.sound(l, t.add(0, 150, 0), "incoming_whistle", SoundSource.AMBIENT, 8.0f, 0.7f);
+            fly(wh, 1, 78, 5.0f, k -> new Vec3(0, 160 * Math.pow(1.0 - k / 78.0, 1.3) + 5, 0), 6f, 180);
+            for (int k = 0; k < 78; k += 2) {
+                int kk = k;
+                Sched.later(1 + k, () -> {
+                    Vec3 p0 = t.add(0, 160 * Math.pow(1.0 - kk / 78.0, 1.3) + 12, 0);
+                    Fx.p(l, ParticleTypes.FLAME, p0, 6, 0.6, 1.5, 0.6, 0.05);
+                    Fx.p(l, ParticleTypes.LARGE_SMOKE, p0.add(0, 4, 0), 3, 0.5, 1.5, 0.5, 0.02);
+                });
+            }
+            Sched.later(80, wh::kill);
+        });
         Sched.later(420, () -> {
             Fx.sound(l, t, "mushroom_boom", SoundSource.AMBIENT, 12.0f, 0.8f);
             Fx.flash(l, t, 300, 0xFFFFFF, 50);
