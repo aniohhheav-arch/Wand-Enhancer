@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/hornet_mp_reload2",
- "textures": {
-  "t": "telephoneorder:item/gun/hornet_mp_reload2_gold",
-  "particle": "telephoneorder:item/gun/hornet_mp_reload2_gold"
- }
-}

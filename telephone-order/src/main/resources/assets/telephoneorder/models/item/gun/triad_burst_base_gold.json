@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/triad_burst_base",
- "textures": {
-  "t": "telephoneorder:item/gun/triad_burst_base_gold",
-  "particle": "telephoneorder:item/gun/triad_burst_base_gold"
- }
-}

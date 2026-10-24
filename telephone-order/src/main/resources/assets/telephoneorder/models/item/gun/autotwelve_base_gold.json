@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/autotwelve_base",
- "textures": {
-  "t": "telephoneorder:item/gun/autotwelve_base_gold",
-  "particle": "telephoneorder:item/gun/autotwelve_base_gold"
- }
-}

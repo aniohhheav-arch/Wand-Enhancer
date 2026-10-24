@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/black_ledger_reload2",
- "textures": {
-  "t": "telephoneorder:item/gun/black_ledger_reload2_crimson",
-  "particle": "telephoneorder:item/gun/black_ledger_reload2_crimson"
- }
-}

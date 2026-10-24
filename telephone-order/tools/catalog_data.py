@@ -211,13 +211,13 @@ G(id="chameleon_mod", name="Chameleon Carbine", cat="tactical", fam="rifle", beh
 # ============ C. SCI-FI ============
 G(id="sunder_pr", name="Sunder PR-1", cat="scifi", fam="energy", beh="plasma", ammo="ammo_cell",
   price=720, dmg=6.5, spread=1.0, range=70, delay=5, mag=36, reload=48, rp=1.0, ry=0.3, hs=1.2, modes=["auto","semi"],
-  tier="experimental", rarity="uncommon", sound="plasma", rsound="cell", heat=5.5, cool=0.9, eta=40, delivery="teleport",
+  tier="experimental", rarity="uncommon", sound="plasma", rsound="cell", heat=5.5, cool=0.9, eta=40, delivery="case",
   p=dict(speed=1.7, splash=2.0, splash_dmg=2.5, gravity=0.0, glow=(80,255,200)),
   desc="Plasma rifle. Fast bright bolts that splash on impact.",
   vis=dict(style="plasma", body=(60,70,90), glow=(80,255,200)))
 G(id="lance_l1", name="Lance L-1", cat="scifi", fam="energy", beh="laser", ammo="ammo_cell",
   price=640, dmg=3.8, spread=0.25, range=110, delay=3, mag=60, reload=48, rp=0.5, ry=0.15, hs=1.6, modes=["auto","semi"],
-  tier="experimental", rarity="uncommon", sound="laser", rsound="cell", heat=3.6, cool=1.0, eta=40, delivery="teleport",
+  tier="experimental", rarity="uncommon", sound="laser", rsound="cell", heat=3.6, cool=1.0, eta=40, delivery="case",
   p=dict(glow=(255,70,70)),
   desc="Pulsed laser. Instant, dead-straight beam. Watch the heat.",
   vis=dict(style="laser", body=(200,205,215), glow=(255,70,70)))
@@ -229,7 +229,7 @@ G(id="meridian_rail", name="Meridian Railgun", cat="scifi", fam="energy", beh="r
   vis=dict(style="rail", body=(40,44,60), glow=(150,200,255)))
 G(id="pulse_carbine", name="Pulse Carbine", cat="scifi", fam="energy", beh="pulse", ammo="ammo_cell",
   price=700, dmg=4.6, spread=0.9, range=75, delay=12, mag=48, reload=44, rp=1.3, ry=0.2, hs=1.4, modes=["burst"],
-  tier="experimental", rarity="uncommon", sound="pulse", rsound="cell", heat=7.0, cool=1.1, eta=40, delivery="teleport",
+  tier="experimental", rarity="uncommon", sound="pulse", rsound="cell", heat=7.0, cool=1.1, eta=40, delivery="case",
   p=dict(burst=4, burst_gap=2, glow=(255,170,50)),
   desc="Four-pulse burst of concussive energy rings. Stagger and shred.",
   vis=dict(style="pulse", body=(88,70,50), glow=(255,170,50)))
@@ -241,7 +241,7 @@ G(id="tesla_arc", name="Tesla Arc", cat="scifi", fam="energy", beh="arc", ammo="
   vis=dict(style="arc", body=(70,60,86), glow=(160,200,255)))
 G(id="frostbite", name="Frostbite Projector", cat="scifi", fam="energy", beh="cryo", ammo="ammo_cell",
   price=800, dmg=0.9, spread=0.0, range=9, delay=1, mag=120, reload=52, rp=0.0, ry=0.0, hs=1.0, modes=["auto"],
-  tier="experimental", rarity="uncommon", sound="cryo", rsound="cell", heat=0.0, cool=0.0, eta=45, delivery="teleport",
+  tier="experimental", rarity="uncommon", sound="cryo", rsound="cell", heat=0.0, cool=0.0, eta=45, delivery="case",
   p=dict(cone=22.0, slow=3, freeze=60, cost_every=2, glow=(170,230,255)),
   desc="Cryogenic cone projector. Slows, chills and eventually freezes.",
   vis=dict(style="cryo", body=(120,160,190), glow=(170,230,255)))
@@ -259,7 +259,7 @@ G(id="seeker_sw", name="Seeker SW", cat="scifi", fam="energy", beh="smart", ammo
   vis=dict(style="smart", body=(54,56,66), glow=(255,90,200)))
 G(id="scatterbolt", name="Scatterbolt", cat="scifi", fam="energy", beh="eshotgun", ammo="ammo_cell",
   price=900, dmg=2.6, pellets=7, spread=7.0, range=30, delay=22, mag=42, reload=56, rp=4.0, ry=0.7, hs=1.1,
-  tier="experimental", rarity="uncommon", sound="eshotgun", rsound="cell", heat=14.0, cool=0.9, eta=45, delivery="teleport",
+  tier="experimental", rarity="uncommon", sound="eshotgun", rsound="cell", heat=14.0, cool=0.9, eta=45, delivery="case",
   p=dict(speed=1.35, bounces=1, cost=6, glow=(255,150,60)),
   desc="Fan of plasma shards that ricochet once off walls.",
   vis=dict(style="eshotgun", body=(96,60,44), glow=(255,150,60)))
@@ -356,4 +356,5 @@ SUPPLY_LISTING_DELIVERY = "crate"
 
 TIERS = ["standard", "advanced", "experimental", "prototype", "classified"]
 TIER_THRESHOLDS = [0, 400, 2000, 6000]   # total credits spent to unlock tiers 0..3 (classified is by secrets only)
-DELIVERY_FEE = dict(crate=10, drone=25, pod=45, teleport=60, case=90)
+# teleport = instant rift: fastest (fixed 5 s) and ruinously expensive
+DELIVERY_FEE = dict(crate=10, drone=25, pod=45, case=90, teleport=750)

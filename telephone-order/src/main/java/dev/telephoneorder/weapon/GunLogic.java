@@ -352,6 +352,7 @@ public final class GunLogic {
         p.getCooldowns().addCooldown(stack, cd);
         p.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
         GunData.syncModel(stack, GunData.stage(stack));
+        if (stack.getItem() instanceof GunItem gi) gi.playAnim(p, stack, "fire");
     }
 
     private static void addHeat(ItemStack stack, GunDef def, GunStats st, float amount) {
@@ -829,6 +830,7 @@ public final class GunLogic {
         GunData.edit(stack, t -> { t.putLong("rend", now + dur); t.putLong("rstart", now); t.putLong("rtot", dur); });
         Fx.sound(p, "reload_" + def.rsound(), SoundSource.PLAYERS, 1.0f, 1.0f);
         GunData.syncModel(stack, 1);
+        if (stack.getItem() instanceof GunItem gi) gi.playAnim(p, stack, "reload");
         PS s = ps(p);
         s.nextFire = Math.max(s.nextFire, now + dur);
     }

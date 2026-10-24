@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/pumpjack_12_reload1",
- "textures": {
-  "t": "telephoneorder:item/gun/pumpjack_12_reload1_crimson",
-  "particle": "telephoneorder:item/gun/pumpjack_12_reload1_crimson"
- }
-}

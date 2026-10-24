@@ -5,6 +5,8 @@ import dev.telephoneorder.Catalog;
 import dev.telephoneorder.Catalog.GunDef;
 import dev.telephoneorder.Fx;
 import dev.telephoneorder.ModItems;
+import dev.telephoneorder.ModEntities;
+import dev.telephoneorder.entity.DeliveryActor;
 import dev.telephoneorder.Sched;
 import dev.telephoneorder.net.Payloads;
 import dev.telephoneorder.phone.Listing;
@@ -40,6 +42,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -64,13 +67,71 @@ public final class DeliveryDirector {
     }
 
     // ------------------------------------------------------------------------------------------------ props
+    /** Natural size of each GeckoLib model in blocks; props are scaled so `scale` keeps its old "blocks wide" meaning. */
+    private static final Map<String, Float> GEO_BLOCKS = Map.of("crate", 1.5f, "case", 1.75f, "drone", 3.0f, "pod", 2.5f, "container", 1.4f, "rift", 7.0f);
+
+    /**
+     * A delivery prop.  Crates, drones, pods, containers, cases and the rift are animated GeckoLib {@link DeliveryActor}s;
+     * anything else (strike props) is still a lightweight item display.
+     */
     public static final class Prop {
         final Display.ItemDisplay d;
-        final float scale;
+        final DeliveryActor a;
+        final String kind;
+        final Vec3 anchor;
+        float scale;
         public Vector3f pos;
+
+        private static String kindOf(Item item) {
+            if (item == ModItems.PROP_CRATE || item == ModItems.PROP_CRATE_OPEN) return "crate";
+            if (item == ModItems.PROP_DRONE) return "drone";
+            if (item == ModItems.PROP_POD || item == ModItems.PROP_POD_OPEN) return "pod";
+            if (item == ModItems.PROP_CONTAINER || item == ModItems.PROP_CONTAINER_OPEN) return "container";
+            if (item == ModItems.PROP_CASE || item == ModItems.PROP_CASE_OPEN) return "case";
+            return null;
+        }
+
+        /** An animated rift portal. `scale` = diameter in blocks. */
+        public static Prop rift(ServerLevel l, Vec3 anchor, Vector3f t, float diameter) {
+            return new Prop(l, anchor, "rift", t, diameter, 0f);
+        }
+
+        private Prop(ServerLevel l, Vec3 anchor, String kind, Vector3f t, float scale, float yawDeg) {
+            this.anchor = anchor; this.kind = kind; this.scale = scale; this.pos = new Vector3f(t); this.d = null;
+            a = new DeliveryActor(ModEntities.DELIVERY_ACTOR, l);
+            a.setKind(kind);
+            a.setModelYaw(yawDeg);
+            a.setTargetScale(geoScale(scale));
+            place(t, scale);
+            a.addTag("tod_prop");
+            LIVE.add(a.getUUID());
+            l.addFreshEntity(a);
+        }
+
         public Prop(ServerLevel l, Vec3 anchor, Item item, Vector3f t, float scale, Quaternionf rot) {
+            this.anchor = anchor;
             this.scale = scale;
             this.pos = new Vector3f(t);
+            String k = item == ModItems.PROP_ROTOR ? "none" : kindOf(item);
+            this.kind = k;
+            if (k != null) {
+                this.d = null;
+                if (k.equals("none")) {          // rotors are part of the drone model now
+                    a = null;
+                    return;
+                }
+                a = new DeliveryActor(ModEntities.DELIVERY_ACTOR, l);
+                a.setKind(k);
+                a.setModelYaw(yawOf(rot));
+                a.setTargetScale(geoScale(scale));
+                place(t, scale);
+                a.addTag("tod_prop");
+                LIVE.add(a.getUUID());
+                l.addFreshEntity(a);
+                if (isOpen(item)) open();
+                return;
+            }
+            a = null;
             d = new Display.ItemDisplay(EntityTypes.ITEM_DISPLAY, l);
             d.setPos(anchor.x, anchor.y, anchor.z);
             d.setItemStack(new ItemStack(item));
@@ -85,14 +146,45 @@ public final class DeliveryDirector {
             LIVE.add(d.getUUID());
             l.addFreshEntity(d);
         }
+
+        private static boolean isOpen(Item i) { return i == ModItems.PROP_CRATE_OPEN || i == ModItems.PROP_POD_OPEN || i == ModItems.PROP_CONTAINER_OPEN || i == ModItems.PROP_CASE_OPEN; }
+        private float geoScale(float blocks) { return blocks <= 0.011f ? 0.01f : blocks / GEO_BLOCKS.getOrDefault(kind, 1.5f); }
+        private static float yawOf(Quaternionf q) { return (float) Math.toDegrees(q.getEulerAnglesYXZ(new Vector3f()).y); }
+
+        /** Models stand on their origin; item displays were centred, so drop by half a block-height. */
+        private void place(Vector3f t, float s) {
+            float lift = kind.equals("rift") ? 0f : 0.5f * s;
+            a.setPos(anchor.x + t.x, anchor.y + t.y - lift, anchor.z + t.z);
+        }
+
         public void to(Vector3f t, float s, Quaternionf rot, int ticks) {
             pos = new Vector3f(t);
-            d.setTransformation(new Transformation(new Vector3f(t), new Quaternionf(rot), new Vector3f(s), new Quaternionf()));
-            d.setTransformationInterpolationDuration(Math.max(1, ticks));
-            d.setTransformationInterpolationDelay(0);
+            scale = s;
+            if (a == null) {
+                if (d != null) {
+                    d.setTransformation(new Transformation(new Vector3f(t), new Quaternionf(rot), new Vector3f(s), new Quaternionf()));
+                    d.setTransformationInterpolationDuration(Math.max(1, ticks));
+                    d.setTransformationInterpolationDelay(0);
+                }
+                return;
+            }
+            a.setTargetScale(geoScale(s));
+            a.setModelYaw(yawOf(rot));
+            place(t, s);
         }
-        public void item(Item item) { d.setItemStack(new ItemStack(item)); }
-        public void kill() { LIVE.remove(d.getUUID()); d.discard(); }
+
+        public void item(Item item) {
+            if (a == null) { if (d != null) d.setItemStack(new ItemStack(item)); return; }
+            if (isOpen(item)) open();
+        }
+
+        public void open() { if (a != null && !kind.equals("rift") && !kind.equals("drone")) a.triggerAnim("main", kind + "_open"); }
+        public void closeRift() { if (a != null && kind.equals("rift")) a.triggerAnim("main", "rift_close"); }
+
+        public void kill() {
+            if (a != null) { LIVE.remove(a.getUUID()); a.discard(); }
+            else if (d != null) { LIVE.remove(d.getUUID()); d.discard(); }
+        }
     }
 
     private static Quaternionf yaw(float deg) { return new Quaternionf().rotateY((float) Math.toRadians(deg)); }
@@ -118,8 +210,8 @@ public final class DeliveryDirector {
             switch (method) {
                 case "drone" -> drone(c);
                 case "pod" -> pod(c);
-                case "teleport" -> teleport(c);
-                case "case" -> caseRift(c, li.secret() != null || (li.gun() != null && li.gun().tier() >= 4));
+                case "case" -> teleport(c);
+                case "teleport" -> caseRift(c, true);
                 default -> crate(c);
             }
         } catch (RuntimeException e) {
@@ -476,6 +568,7 @@ public final class DeliveryDirector {
             Sched.later(10, () -> bolt(l, c.g.add(-2, 0, -3)));
         }
         double maxR = dramatic ? 3.2 : 2.2;
+        Prop rift = Prop.rift(l, c.g, v(0, riftY, 0), (float) (maxR * 2.3));
         for (int t = 0; t < 60; t++) {
             int tt = t;
             Sched.later(t, () -> {
@@ -492,7 +585,7 @@ public final class DeliveryDirector {
         }
         int fall = 46;
         Prop box = new Prop(l, c.g, ModItems.PROP_CASE, v(0, 0.5 * s + riftY, 0), 0.01f, new Quaternionf());
-        Sched.later(46, () -> {
+        Sched.later(32, () -> {
             box.to(v(0, 0.5 * s + riftY, 0), s, euler(20, 0, 40), 3);
             Fx.sound(l, rc, "flash_whoosh", SoundSource.AMBIENT, 2.0f, 0.7f);
             Sched.later(4, () -> animate(0, fall, List.of(box), List.of(new Vector3f()), s,
@@ -503,25 +596,27 @@ public final class DeliveryDirector {
                         Fx.p(l, ParticleTypes.REVERSE_PORTAL, p, 2, 0.2, 0.2, 0.2, 0.05);
                     }));
         });
-        Sched.later(76, () -> {   // rift collapses
+        Sched.later(62, () -> {   // rift collapses
             Fx.sound(l, rc, "emp_burst", SoundSource.AMBIENT, 2.5f, 0.6f);
             Fx.p(l, ParticleTypes.SONIC_BOOM, rc, 1, 0, 0, 0, 0);
             Fx.p(l, ParticleTypes.REVERSE_PORTAL, rc, 50, 0.4, 0.4, 0.4, 0.6);
             Fx.ring(l, Fx.dust(0xC070FF, 1.8f), rc, maxR, 40, 0);
+            rift.closeRift();
+            Sched.later(24, rift::kill);
             Fx.shake(l, c.g, 24, dramatic ? 0.7f : 0.4f, 14);
             if (dramatic) Fx.flash(l, c.g, 30, 0xE0C0FF, 10);
         });
-        Sched.later(46 + 4 + fall + 2, () -> {
+        Sched.later(32 + 4 + fall + 2, () -> {
             impactFx(c, 0.35f, 16, 12, "crate_impact", 1.3f, 1.4f);
             box.to(v(0, 0.5 * s, 0), s, euler(0, 30, 0), 2);
         });
-        Sched.later(46 + 4 + fall + 22, () -> {
+        Sched.later(32 + 4 + fall + 22, () -> {
             box.item(ModItems.PROP_CASE_OPEN);
             Fx.sound(l, c.g, "case_latch", SoundSource.AMBIENT, 1.6f, 1.0f);
             Fx.p(l, ParticleTypes.GLOW, c.g.add(0, 0.9, 0), 16, 0.3, 0.2, 0.3, 0.06);
             release(c);
         });
-        Sched.later(46 + 4 + fall + 240, () -> {
+        Sched.later(32 + 4 + fall + 240, () -> {
             Fx.p(l, ParticleTypes.END_ROD, c.g.add(0, 0.8, 0), 20, 0.4, 0.3, 0.4, 0.1);
             fade(box, 12);
         });

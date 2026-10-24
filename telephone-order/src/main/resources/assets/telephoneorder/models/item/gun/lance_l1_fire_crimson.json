@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/lance_l1_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/lance_l1_fire_crimson",
-  "particle": "telephoneorder:item/gun/lance_l1_fire_crimson"
- }
-}

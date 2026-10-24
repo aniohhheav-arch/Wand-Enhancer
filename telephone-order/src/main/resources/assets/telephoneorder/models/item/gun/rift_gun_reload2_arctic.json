@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/rift_gun_reload2",
- "textures": {
-  "t": "telephoneorder:item/gun/rift_gun_reload2_arctic",
-  "particle": "telephoneorder:item/gun/rift_gun_reload2_arctic"
- }
-}

@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/daybreak_lance_reload1",
- "textures": {
-  "t": "telephoneorder:item/gun/daybreak_lance_reload1_gold",
-  "particle": "telephoneorder:item/gun/daybreak_lance_reload1_gold"
- }
-}

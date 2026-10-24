@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/tesla_arc_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/tesla_arc_fire_crimson",
-  "particle": "telephoneorder:item/gun/tesla_arc_fire_crimson"
- }
-}

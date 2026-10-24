@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/warden_ar4_base",
- "textures": {
-  "t": "telephoneorder:item/gun/warden_ar4_base_crimson",
-  "particle": "telephoneorder:item/gun/warden_ar4_base_crimson"
- }
-}

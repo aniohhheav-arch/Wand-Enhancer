@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/vesper_p9_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/vesper_p9_fire_crimson",
-  "particle": "telephoneorder:item/gun/vesper_p9_fire_crimson"
- }
-}

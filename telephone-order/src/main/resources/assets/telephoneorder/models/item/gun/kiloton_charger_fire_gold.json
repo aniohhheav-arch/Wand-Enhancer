@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/kiloton_charger_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/kiloton_charger_fire_gold",
-  "particle": "telephoneorder:item/gun/kiloton_charger_fire_gold"
- }
-}

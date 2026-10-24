@@ -451,7 +451,7 @@ public class PhoneScreen extends Screen {
     // ---- storefront state
     private String view = "grid";
     private String ship = "crate";
-    private static final String[] SHIP_LABEL = {"CRATE", "DRONE", "POD", "TELEPORT", "CASE"};
+    private static final String[] SHIP_LABEL = {"CRATE", "DRONE", "POD", "CASE", "RIFT"};
     private final List<String> cart = new ArrayList<>();
     private int gridScroll;
     private static final int RED = 0xFFFF4747, ORANGE = 0xFFFF8A00;
@@ -649,10 +649,11 @@ public class PhoneScreen extends Screen {
     }
 
     private static String methodName(String m) {
-        return switch (m) { case "drone" -> "COURIER DRONE"; case "pod" -> "REINFORCED POD"; case "teleport" -> "TELEPORT CONTAINER"; case "case" -> "CONTAINMENT CASE"; default -> "STANDARD CRATE"; };
+        return switch (m) { case "drone" -> "COURIER DRONE"; case "pod" -> "REINFORCED POD"; case "teleport" -> "RIFT TELEPORT (5s)"; case "case" -> "CONTAINMENT CASE"; default -> "STANDARD CRATE"; };
     }
 
     private int etaFor(Listing li, String method, String stock) {
+        if (method.equals("teleport")) return Catalog.TELEPORT_ETA_SEC;
         return Math.round(li.etaSec() / Catalog.ETA_MULT.getOrDefault(li.delivery(), 1f) * Catalog.ETA_MULT.getOrDefault(method, 1f) * (model == 2 ? 0.85f : 1f) * (stock.startsWith("BACKORDER") ? 2 : 1) * ModConfig.get().deliveryTimeMultiplier);
     }
 

@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/chameleon_mod_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/chameleon_mod_fire_arctic",
-  "particle": "telephoneorder:item/gun/chameleon_mod_fire_arctic"
- }
-}

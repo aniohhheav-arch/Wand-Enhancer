@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/seeker_sw_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/seeker_sw_fire_gold",
-  "particle": "telephoneorder:item/gun/seeker_sw_fire_gold"
- }
-}

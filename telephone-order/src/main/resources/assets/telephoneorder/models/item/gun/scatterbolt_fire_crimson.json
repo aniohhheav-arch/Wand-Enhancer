@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/scatterbolt_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/scatterbolt_fire_crimson",
-  "particle": "telephoneorder:item/gun/scatterbolt_fire_crimson"
- }
-}

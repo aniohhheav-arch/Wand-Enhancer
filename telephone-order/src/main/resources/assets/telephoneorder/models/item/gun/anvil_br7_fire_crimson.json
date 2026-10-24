@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/anvil_br7_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/anvil_br7_fire_crimson",
-  "particle": "telephoneorder:item/gun/anvil_br7_fire_crimson"
- }
-}

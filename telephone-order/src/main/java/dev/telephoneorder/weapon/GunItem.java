@@ -34,12 +34,37 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /** One class for every gun; behaviour comes from the catalog definition ({@link GunDef}) and {@link GunLogic}. */
-public class GunItem extends Item {
+public class GunItem extends Item implements com.geckolib.animatable.GeoItem {
     public final GunDef def;
+    private final com.geckolib.animatable.instance.AnimatableInstanceCache geoCache = com.geckolib.util.GeckoLibUtil.createInstanceCache(this);
 
     public GunItem(Item.Properties props, GunDef def) {
         super(init(props, def));
         this.def = def;
+        com.geckolib.animatable.GeoItem.registerSyncedAnimatable(this);
+    }
+
+    // ---- GeckoLib ----
+    @Override
+    public void registerControllers(com.geckolib.animatable.manager.AnimatableManager.ControllerRegistrar controllers) {
+        String pre = "animation." + def.id() + ".";
+        controllers.add(new com.geckolib.animation.AnimationController<GunItem>("main", 2,
+                test -> test.setAndContinue(com.geckolib.animation.RawAnimation.begin().thenLoop(pre + "idle")))
+                .triggerableAnim("fire", com.geckolib.animation.RawAnimation.begin().thenPlay(pre + "fire").thenLoop(pre + "idle"))
+                .triggerableAnim("reload", com.geckolib.animation.RawAnimation.begin().thenPlay(pre + "reload").thenLoop(pre + "idle")));
+    }
+
+    @Override
+    public com.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache() { return geoCache; }
+
+    @Override
+    public void createGeoRenderer(Consumer<com.geckolib.animatable.client.GeoRenderProvider> consumer) {
+        dev.telephoneorder.client.GunRenderProvider.provide(this, consumer);
+    }
+
+    /** Plays "fire" or "reload" on the held model for the owning player and everybody tracking them. */
+    public void playAnim(ServerPlayer p, ItemStack stack, String anim) {
+        if (p.level() instanceof ServerLevel sl) triggerAnim(p, com.geckolib.animatable.GeoItem.getOrAssignId(stack, sl), "main", anim);
     }
 
     private static Item.Properties init(Item.Properties p, GunDef def) {

@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/aegis_emitter_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/aegis_emitter_fire_gold",
-  "particle": "telephoneorder:item/gun/aegis_emitter_fire_gold"
- }
-}

@@ -13,8 +13,10 @@ dead lines and a certain Operator keep the catalogue interesting.
 ## Install
 
 1. Install Java 25, [Fabric Loader](https://fabricmc.net/use/installer/) for Minecraft **26.3**, and **Fabric API** `0.165.0+26.3` (or newer for 26.3).
-2. Drop `telephone-order-<version>.jar` into your `mods/` folder (client **and** server — it is a normal client/server mod).
-3. Launch. A **Telephone Order** creative tab contains every weapon, attachment, ammo type and block.
+2. Install **GeckoLib 5.5.7** for 26.3 (`geckolib-fabric-26.3-5.5.7.jar`) — guns and delivery props are GeckoLib models with real keyframe animations. A copy is in `libs/`.
+3. Drop `telephone-order-<version>.jar` into your `mods/` folder next to GeckoLib (client **and** server — it is a normal client/server mod).
+4. Launch. Weapons are **not** in the creative tab: order them from a telephone (admins can use `/to give`).
+5. If a gun looks mis-rotated on your setup, tune it live with `/toorient` (client command): `/toorient first yaw 180`, `/toorient gui pitch 10`, `/toorient show`, `/toorient reset`. Views: `first third gui ground fixed`; fields: `yaw pitch roll x y z scale`.
 
 ## Build from source
 
@@ -100,8 +102,15 @@ Clearance is earned by **credits spent**: *Standard* (0) → *Advanced* (400) �
 Special events: classified orders may arrive with **corrupted confirmations**, and the phone may **ring after you hang up** — the Operator would like a word.
 
 ### Cinematic deliveries
-Crate (free-fall with smoke trail and impact shockwave) · Courier drone (hovers and winches the cargo down) · Reinforced supply pod (fiery re-entry, sonic boom, crater shockwave) ·
-Teleportation container (scan lines, flicker, flash) · Containment case through a dimensional rift (lightning, collapsing portal, camera pulses).
+You choose the **shipping method at checkout** (all land within ~5 blocks of you):
+
+| Method | Fee | Speed | What you see |
+|---|---|---|---|
+| Crate | 10 cr | slowest | free-fall with smoke trail and impact shockwave |
+| Courier drone | 25 cr | medium | animated quad-rotor winches the cargo down |
+| Reinforced pod | 45 cr | fast | fiery re-entry, sonic boom, crater shockwave, opening hatch |
+| Containment case | 90 cr | faster | teleport-in flicker and flash, container flaps open |
+| **Rift teleport** | **750 cr** | **always 5 s** | a GeckoLib rift tears open right above you, the case drops out, the rift collapses |
 Every delivery uses real **positional audio**, particle effects, **camera shake** and screen flashes, then drops the actual items (weapon, starter ammo and a **collectable Order Receipt**).
 Items glow and are reserved for you for five minutes.
 

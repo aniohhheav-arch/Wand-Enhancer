@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/unstable_x13_base",
- "textures": {
-  "t": "telephoneorder:item/gun/unstable_x13_base_arctic",
-  "particle": "telephoneorder:item/gun/unstable_x13_base_arctic"
- }
-}

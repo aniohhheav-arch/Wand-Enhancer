@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/lance_l1_reload2",
- "textures": {
-  "t": "telephoneorder:item/gun/lance_l1_reload2_gold",
-  "particle": "telephoneorder:item/gun/lance_l1_reload2_gold"
- }
-}

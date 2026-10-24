@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/gauss_mortar_base",
- "textures": {
-  "t": "telephoneorder:item/gun/gauss_mortar_base_gold",
-  "particle": "telephoneorder:item/gun/gauss_mortar_base_gold"
- }
-}

@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/meridian_rail_reload2",
- "textures": {
-  "t": "telephoneorder:item/gun/meridian_rail_reload2_arctic",
-  "particle": "telephoneorder:item/gun/meridian_rail_reload2_arctic"
- }
-}

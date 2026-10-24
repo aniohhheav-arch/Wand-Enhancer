@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/stormcaller_rl_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/stormcaller_rl_fire_arctic",
-  "particle": "telephoneorder:item/gun/stormcaller_rl_fire_arctic"
- }
-}

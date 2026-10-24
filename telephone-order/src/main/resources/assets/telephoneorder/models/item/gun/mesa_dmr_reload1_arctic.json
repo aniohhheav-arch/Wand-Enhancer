@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/mesa_dmr_reload1",
- "textures": {
-  "t": "telephoneorder:item/gun/mesa_dmr_reload1_arctic",
-  "particle": "telephoneorder:item/gun/mesa_dmr_reload1_arctic"
- }
-}

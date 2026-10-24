@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/ember_judgment_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/ember_judgment_fire_crimson",
-  "particle": "telephoneorder:item/gun/ember_judgment_fire_crimson"
- }
-}

@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/sentinel_kit_base",
- "textures": {
-  "t": "telephoneorder:item/gun/sentinel_kit_base_arctic",
-  "particle": "telephoneorder:item/gun/sentinel_kit_base_arctic"
- }
-}

@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/longshot_l96_base",
- "textures": {
-  "t": "telephoneorder:item/gun/longshot_l96_base_gold",
-  "particle": "telephoneorder:item/gun/longshot_l96_base_gold"
- }
-}

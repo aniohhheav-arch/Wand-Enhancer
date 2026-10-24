@@ -10,6 +10,7 @@ import net.minecraft.world.entity.MobCategory;
 
 public final class ModEntities {
     public static EntityType<GunProjectile> GUN_PROJECTILE;
+    public static EntityType<dev.telephoneorder.entity.DeliveryActor> DELIVERY_ACTOR;
 
     private ModEntities() {}
 
@@ -18,5 +19,9 @@ public final class ModEntities {
         GUN_PROJECTILE = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
                 EntityType.Builder.<GunProjectile>of(GunProjectile::new, MobCategory.MISC).noLootTable().sized(0.3f, 0.3f)
                         .clientTrackingRange(10).updateInterval(1).noSave().build(key));
+        ResourceKey<EntityType<?>> akey = ResourceKey.create(Registries.ENTITY_TYPE, ModItems.id("delivery_actor"));
+        DELIVERY_ACTOR = Registry.register(BuiltInRegistries.ENTITY_TYPE, akey,
+                EntityType.Builder.<dev.telephoneorder.entity.DeliveryActor>of(dev.telephoneorder.entity.DeliveryActor::new, MobCategory.MISC)
+                        .noLootTable().sized(3.0f, 3.0f).fireImmune().clientTrackingRange(12).updateInterval(1).noSave().build(akey));
     }
 }

@@ -425,6 +425,7 @@ public final class PhoneService {
         long now = l.getServer().overworld().getGameTime();
         int stock = stock(li, now / 24000L);
         double eta = li.etaSec() / Catalog.ETA_MULT.getOrDefault(li.delivery(), 1f) * Catalog.ETA_MULT.getOrDefault(method, 1f) * 20.0 * etaMult(s.model) * ModConfig.get().deliveryTimeMultiplier * (stock == 2 ? 2.0 : 1.0);
+        if (method.equals("teleport")) eta = Catalog.TELEPORT_ETA_SEC * 20.0;
         CompoundTag t = Account.of(p);
         int oid = t.getIntOr("nextOid", 1);
         t.putInt("nextOid", oid + 1);

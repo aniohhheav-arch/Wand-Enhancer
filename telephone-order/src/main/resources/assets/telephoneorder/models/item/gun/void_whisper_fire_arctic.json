@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/void_whisper_fire",
- "textures": {
-  "t": "telephoneorder:item/gun/void_whisper_fire_arctic",
-  "particle": "telephoneorder:item/gun/void_whisper_fire_arctic"
- }
-}

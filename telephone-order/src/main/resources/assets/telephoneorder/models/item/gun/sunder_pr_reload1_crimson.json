@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/sunder_pr_reload1",
- "textures": {
-  "t": "telephoneorder:item/gun/sunder_pr_reload1_crimson",
-  "particle": "telephoneorder:item/gun/sunder_pr_reload1_crimson"
- }
-}

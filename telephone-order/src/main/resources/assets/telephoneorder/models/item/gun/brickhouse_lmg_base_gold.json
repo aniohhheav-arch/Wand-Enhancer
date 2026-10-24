@@ -1,7 +1,0 @@
-{
- "parent": "telephoneorder:item/gun/brickhouse_lmg_base",
- "textures": {
-  "t": "telephoneorder:item/gun/brickhouse_lmg_base_gold",
-  "particle": "telephoneorder:item/gun/brickhouse_lmg_base_gold"
- }
-}

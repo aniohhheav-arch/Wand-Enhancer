@@ -29,6 +29,7 @@ public class TelephoneOrderClient implements ClientModInitializer {
         FIRE_MODE = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.telephoneorder.firemode", InputConstants.KEY_B, cat));
         AIM = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.telephoneorder.aim", InputConstants.KEY_LALT, cat));
 
+        EntityRendererRegistry.register(ModEntities.DELIVERY_ACTOR, DeliveryActorRenderer::new);
         EntityRendererRegistry.register(ModEntities.GUN_PROJECTILE, ctx -> new ThrownItemRenderer<>(ctx, 1.5f, true));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
@@ -64,6 +65,7 @@ public class TelephoneOrderClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(Payloads.WorkbenchOpen.TYPE, (p, ctx) -> Minecraft.getInstance().gui.setScreen(new WorkbenchScreen()));
 
         if (System.getProperty("telephoneorder.uishot") != null) UiShot.install();
+        net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> GunOrientCommand.register(dispatcher));
         HudElementRegistry.addLast(ModItems.id("hud"), new GunHud());
         // the gun HUD draws its own crosshair; hide vanilla's while a gun is held
         HudElementRegistry.replaceElement(net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.CROSSHAIR, orig -> (g, dt) -> {

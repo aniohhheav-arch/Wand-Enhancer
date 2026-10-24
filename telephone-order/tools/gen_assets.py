@@ -10,6 +10,8 @@ import gen_art as art
 import gen_blocks as gb
 import gen_sounds as gs
 import voxel3d
+import gen_gun_geo as ggg
+import gen_geo as ggeo
 
 ROOT = os.path.dirname(HERE)
 RES = os.path.join(ROOT, "src", "main", "resources")
@@ -18,16 +20,18 @@ A = os.path.join(RES, "assets", NS)
 D = os.path.join(RES, "data", NS)
 CAT = os.path.join(RES, "telephoneorder_catalog")
 
-# Item display transforms for gun sprites (muzzle pointing right in the texture).
+# Display transforms for the GeckoLib gun models.  Barrel points to -Z in model space; the hand frame calibrated on vanilla
+# swords (rotY -90 sends model +X forward) therefore needs rotY 180 so that -Z goes forward.  GUI shows the left side with the
+# barrel pointing right.  `/to orient` (client command) can nudge these live if a particular build disagrees.
 GUN_DISPLAY = {
-    "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 3.5, 1.5], "scale": [0.85, 0.85, 0.85]},
-    "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 3.5, 1.5], "scale": [0.85, 0.85, 0.85]},
-    "firstperson_righthand": {"rotation": [0, -90, 25], "translation": [1.1, 3.0, 1.3], "scale": [1.0, 1.0, 1.0]},
-    "firstperson_lefthand": {"rotation": [0, 90, -25], "translation": [1.1, 3.0, 1.3], "scale": [1.0, 1.0, 1.0]},
-    "gui": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
-    "ground": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},
-    "fixed": {"rotation": [0, 180, 0], "translation": [0, 0, 0], "scale": [1, 1, 1]},
-    "head": {"rotation": [0, 180, 0], "translation": [0, 13, 7], "scale": [1, 1, 1]},
+    "thirdperson_righthand": {"rotation": [0, 180, 0], "translation": [0, 3.0, 2.0], "scale": [0.5, 0.5, 0.5]},
+    "thirdperson_lefthand": {"rotation": [0, 180, 0], "translation": [0, 3.0, 2.0], "scale": [0.5, 0.5, 0.5]},
+    "firstperson_righthand": {"rotation": [0, 180, 0], "translation": [0, 2.0, 1.0], "scale": [0.55, 0.55, 0.55]},
+    "firstperson_lefthand": {"rotation": [0, 180, 0], "translation": [0, 2.0, 1.0], "scale": [0.55, 0.55, 0.55]},
+    "gui": {"rotation": [12, -90, 0], "translation": [-5, 1, 0], "scale": [0.52, 0.52, 0.52]},
+    "ground": {"rotation": [0, -90, 0], "translation": [0, 2, 0], "scale": [0.4, 0.4, 0.4]},
+    "fixed": {"rotation": [0, -90, 0], "translation": [-3, 0, 0], "scale": [0.5, 0.5, 0.5]},
+    "head": {"rotation": [0, 180, 0], "translation": [0, 13, 7], "scale": [0.5, 0.5, 0.5]},
 }
 
 def wr(path, data):
@@ -75,49 +79,28 @@ def gen_guns():
     att_index = {a["id"]: i for i, a in enumerate(cd.ATT)}
     # shared base model
     disp = json.loads(json.dumps(GUN_DISPLAY))
-    disp["gui"] = {"rotation": [18, -38, 0], "translation": [0, 0, 0], "scale": [1.05, 1.05, 1.05]}
     wj(os.path.join(A, "models", "item", "gun_base.json"), {"gui_light": "front", "display": disp})
+    # guns are fully modelled GeckoLib items: geo + animation + atlas (+ glow mask) per finish
+    gl = os.path.join(A, "geckolib")
     for g in cd.GUNS:
-        frames, anchors = art.build_gun_frames(g)
-        for name, img in frames.items():
-            save_png(img, f"item/gun/{g['id']}_{name}")
-            tex = f"{NS}:item/gun/{g['id']}_{name}"
-            base_name, _, fin = name.partition("_")
-            if fin:   # finish variant: same 3D geometry, different texture
-                wj(os.path.join(A, "models", "item", "gun", f"{g['id']}_{name}.json"),
-                   {"parent": f"{NS}:item/gun/{g['id']}_{base_name}", "textures": {"t": tex, "particle": tex}})
-            else:
-                wj(os.path.join(A, "models", "item", "gun", f"{g['id']}_{name}.json"),
-                   {"parent": f"{NS}:item/gun_base", "textures": {"t": tex, "particle": tex}, "elements": voxel3d.elements(img)})
-        overlays = []
-        for a in cd.ATT:
-            if a["slot"] == "finish" or a["slot"] not in g["slots"] or g["fam"] not in a["fits"]:
-                continue
-            ov = art.att_overlay(a["id"], anchors, g)
-            save_png(ov, f"item/gun/{g['id']}_att_{a['id']}")
-            t_ = f"{NS}:item/gun/{g['id']}_att_{a['id']}"
-            wj(os.path.join(A, "models", "item", "gun", f"{g['id']}_att_{a['id']}.json"),
-               {"parent": f"{NS}:item/gun_base", "textures": {"t": t_, "particle": t_}, "elements": voxel3d.elements(ov)})
-            overlays.append(a["id"])
+        gg = ggg.build(g, cd.ATT)
+        wj(os.path.join(gl, "models", "item", g["id"] + ".geo.json"), gg.geo_json())
+        wj(os.path.join(gl, "animations", "item", g["id"] + ".animation.json"), gg.anim_json())
+        for fin in (None, "gold", "arctic", "crimson"):
+            suffix = "" if fin is None else "_" + fin
+            img, glow = ggg.textures(g["vis"], fin)
+            save_png(img, f"item/{g['id']}{suffix}")
+            save_png(glow, f"item/{g['id']}{suffix}_glowmask")
+        wj(os.path.join(A, "items", g["id"] + ".json"),
+           {"model": {"type": "minecraft:special", "base": f"{NS}:item/gun_base", "model": {"type": "geckolib:geckolib"}}})
 
-        def mdl(n): return {"type": "minecraft:model", "model": f"{NS}:item/gun/{g['id']}_{n}"}
-        def comp(suffix):
-            frames_model = {
-                "type": "minecraft:range_dispatch", "property": "minecraft:custom_model_data", "index": 0,
-                "entries": [{"threshold": 0.5, "model": mdl("reload1" + suffix)}, {"threshold": 1.5, "model": mdl("reload2" + suffix)}],
-                "fallback": {
-                    "type": "minecraft:range_dispatch", "property": "minecraft:cooldown",
-                    "entries": [{"threshold": 0.72, "model": mdl("fire" + suffix)}],
-                    "fallback": mdl("base" + suffix)}}
-            models = [frames_model]
-            for aid in overlays:
-                models.append({"type": "minecraft:condition", "property": "minecraft:custom_model_data", "index": att_index[aid],
-                               "on_true": {"type": "minecraft:model", "model": f"{NS}:item/gun/{g['id']}_att_{aid}"},
-                               "on_false": {"type": "minecraft:empty"}})
-            return {"type": "minecraft:composite", "models": models}
-        sel = {"type": "minecraft:select", "property": "minecraft:custom_model_data", "index": 0,
-               "cases": [{"when": f, "model": comp("_" + f)} for f in ("gold", "arctic", "crimson")], "fallback": comp("")}
-        wj(os.path.join(A, "items", g["id"] + ".json"), {"model": sel})
+def gen_actors():
+    gl = os.path.join(A, "geckolib")
+    for kind, (geo, anim, tex, glow) in ggeo.build_all().items():
+        wj(os.path.join(gl, "models", "entity", f"delivery_{kind}.geo.json"), geo)
+        wj(os.path.join(gl, "animations", "entity", f"delivery_{kind}.animation.json"), anim)
+        save_png(tex, f"entity/delivery_{kind}")
+        save_png(glow, f"entity/delivery_{kind}_glowmask")
 
 def gen_items():
     for a in cd.ATT:
@@ -288,6 +271,7 @@ def main():
     if os.path.isdir(CAT): shutil.rmtree(CAT)
     gen_catalog()
     gen_guns()
+    gen_actors()
     gen_items()
     gen_blocks()
     gen_props()
