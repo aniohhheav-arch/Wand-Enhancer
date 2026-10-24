@@ -74,6 +74,17 @@ public class PhoneScreen extends Screen {
         super(Component.literal("Telephone Order"));
         this.model = Math.max(0, Math.min(3, model));
         this.accent = THEME_ACCENT[this.model];
+        // the boot/connecting sequence (and its sound) only plays the very first time the phone is used
+        if (bootSeen()) this.tick = 44;
+        else markBootSeen();
+    }
+
+    private static java.nio.file.Path bootMarker() {
+        return net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("telephoneorder_boot_seen");
+    }
+    private static boolean bootSeen() { return java.nio.file.Files.exists(bootMarker()); }
+    private static void markBootSeen() {
+        try { java.nio.file.Files.writeString(bootMarker(), "1"); } catch (java.io.IOException ignored) { }
     }
 
     // ---------------------------------------------------------------------------------------------- state access
