@@ -659,6 +659,12 @@ def misc_icons():
     for y in (9, 12, 15, 18): l.rect(11, y, 22, y + 1, (120, 100, 70))
     l.rect(11, 21, 16, 22, (180, 40, 40)); l.p(24, 6, (0, 0, 0)); l.p(23, 7, (0, 0, 0)); l.p(7, 27, (0, 0, 0)); l.p(8, 26, (0, 0, 0))
     out["clue_slip"] = l.shaded(outline=True)
+    # pocket handset
+    l = Layer(); l.rect(10, 8, 22, 28, (46, 50, 58)); l.rect(11, 9, 21, 27, (60, 66, 76)); l.rect(12, 11, 20, 17, (20, 60, 44)); l.rect(13, 12, 19, 13, (110, 255, 190)); l.rect(13, 14, 17, 15, (110, 255, 190))
+    for ky in range(3):
+        for kx in range(3): l.rect(12 + kx * 3, 19 + ky * 3, 14 + kx * 3, 21 + ky * 3, (200, 204, 212))
+    l.rect(19, 3, 21, 8, (46, 50, 58)); l.p(20, 2, (255, 70, 60))
+    out["handheld_phone"] = l.shaded()
     # receipt
     l = Layer(); l.rect(8, 4, 24, 28, (240, 238, 228)); 
     for i in range(0, 16, 2): l.p(8 + i, 28, (240, 238, 228)); l.p(9 + i, 29, (0, 0, 0, 0)[:3] if False else (240, 238, 228))

@@ -52,7 +52,7 @@ public final class PhoneService {
     private static final Random RNG = new Random();
 
     static final class Session {
-        BlockPos pos; ResourceKey<Level> dim; int model;
+        BlockPos pos; ResourceKey<Level> dim; int model; boolean handheld;
         String node = "welcome"; String toast = ""; int toastColor = 0xFFFFFF; String go = ""; String toastStyle = "normal"; boolean dialing;
     }
 
@@ -80,8 +80,9 @@ public final class PhoneService {
                 Session s = SESSIONS.get(id);
                 if (p == null) { SESSIONS.remove(id); continue; }
                 ServerLevel l = p.level() instanceof ServerLevel sl ? sl : null;
-                boolean bad = l == null || !l.dimension().equals(s.dim) || p.position().distanceToSqr(Vec3.atCenterOf(s.pos)) > 64 || p.isDeadOrDying()
-                        || !(l.getBlockState(s.pos).getBlock() instanceof TelephoneBlock);
+                boolean bad = l == null || !l.dimension().equals(s.dim) || p.isDeadOrDying()
+                        || (s.handheld ? !(p.getMainHandItem().getItem() instanceof dev.telephoneorder.weapon.HandheldPhoneItem || p.getOffhandItem().getItem() instanceof dev.telephoneorder.weapon.HandheldPhoneItem)
+                        : (p.position().distanceToSqr(Vec3.atCenterOf(s.pos)) > 64 || !(l.getBlockState(s.pos).getBlock() instanceof TelephoneBlock)));
                 if (bad) { hangUp(p, true); }
             }
         }
@@ -155,11 +156,29 @@ public final class PhoneService {
         sendState(p);
     }
 
+    /** Pocket telephone: no block needed, works anywhere. */
+    public static void openHandheld(ServerPlayer p, ServerLevel l) {
+        if (SESSIONS.containsKey(p.getUUID())) return;
+        Account.of(p);
+        Session s = new Session();
+        s.pos = p.blockPosition(); s.dim = l.dimension(); s.model = 3; s.handheld = true;
+        s.node = Account.flag(p, "operator_pending") && !Account.has(p, "operator") ? "operator" : "welcome";
+        if (s.node.equals("operator")) Account.setFlag(p, "operator_pending", false);
+        SESSIONS.put(p.getUUID(), s);
+        Vec3 c = p.position().add(0, 1, 0);
+        Fx.sound(l, c, "phone_pickup", SoundSource.PLAYERS, 0.8f, 1.4f);
+        Sched.later(8, () -> { if (SESSIONS.get(p.getUUID()) == s) Fx.sound(l, c, "phone_connect", SoundSource.PLAYERS, 0.5f, 1.2f); });
+        ServerPlayNetworking.send(p, new Payloads.PhoneOpen(s.pos, 3));
+        sendState(p);
+    }
+
     public static void hangUp(ServerPlayer p, boolean notifyClient) {
         Session s = SESSIONS.remove(p.getUUID());
         if (s == null) return;
         MinecraftServer server = p.level().getServer();
-        if (server != null) {
+        if (server != null && s.handheld) {
+            if (p.level() instanceof ServerLevel pl) Fx.sound(pl, p.position().add(0, 1, 0), "phone_hangup", SoundSource.PLAYERS, 0.6f, 1.4f);
+        } else if (server != null) {
             ServerLevel l = server.getLevel(s.dim);
             if (l != null) {
                 String k = key(l, s.pos);

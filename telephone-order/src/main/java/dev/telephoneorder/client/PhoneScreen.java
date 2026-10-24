@@ -44,7 +44,7 @@ public class PhoneScreen extends Screen {
 
     // ---- palette
     static final int BG = 0xFF0C0E12, PANEL = 0xFF151A21, PANEL2 = 0xFF1D242D, BRASS = 0xFFCDA03E, DIM = 0xFF6F7A86;
-    static final int[] THEME_ACCENT = {0xFFFFB84A, 0xFF6BFFB4, 0xFFC8D860};
+    static final int[] THEME_ACCENT = {0xFFFFB84A, 0xFF6BFFB4, 0xFFC8D860, 0xFF5CE1FF};
     static final int[] TIER_COL = {0xFF9BD6A0, 0xFF78BEFF, 0xFFFFC95A, 0xFFFF78C8, 0xFFBE78FF};
     static final String[] TIER_NAME = {"STANDARD", "ADVANCED", "EXPERIMENTAL", "PROTOTYPE", "CLASSIFIED"};
 
@@ -72,7 +72,7 @@ public class PhoneScreen extends Screen {
 
     public PhoneScreen(int model) {
         super(Component.literal("Telephone Order"));
-        this.model = Math.max(0, Math.min(2, model));
+        this.model = Math.max(0, Math.min(3, model));
         this.accent = THEME_ACCENT[this.model];
     }
 
@@ -105,7 +105,7 @@ public class PhoneScreen extends Screen {
         toastAge++;
         callReveal += 3;
         if (!dragging) { spin += spinVel; }
-        if (tick % 40 == 0) ClientPlayNetworking.send(new Payloads.PhoneAction("refresh", ""));
+        if (tick % 40 == 0) send("refresh", "");
         if (tick == 6) playSound("phone_connect", 1.0f);
     }
 
@@ -124,14 +124,17 @@ public class PhoneScreen extends Screen {
     private void sendHangup() {
         if (closedSent) return;
         closedSent = true;
-        if (ClientPlayNetworking.canSend(Payloads.PhoneAction.TYPE)) ClientPlayNetworking.send(new Payloads.PhoneAction("hangup", ""));
+        send("hangup", "");
     }
 
     private void playSound(String name, float pitch) {
         if (ModSounds.has(name)) Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.get(name), pitch, 0.7f));
     }
 
-    private void send(String action, String arg) { ClientPlayNetworking.send(new Payloads.PhoneAction(action, arg)); }
+    private void send(String action, String arg) { try { ClientPlayNetworking.send(new Payloads.PhoneAction(action, arg)); } catch (RuntimeException ignored) { } }
+
+    /** dev screenshot hook */
+    public void debugGo(String tab, String view, String sel, String section) { this.tab = tab; this.view = view; this.selected = sel; this.section = section; this.tick = 100; }
 
     // ---------------------------------------------------------------------------------------------- drawing primitives
     private int ox() { return (width - W) / 2; }
@@ -293,8 +296,8 @@ public class PhoneScreen extends Screen {
         // phone model card
         int cy = y + 4;
         panel(g, 6, cy, 64, 26, PANEL, 0xFF262C34);
-        String[] names = {"ROTARY", "TERMINAL", "UPLINK"};
-        String[] perk = {"CLASSIC", "-20% FEES", "-15% ETA"};
+        String[] names = {"ROTARY", "TERMINAL", "UPLINK", "HANDSET"};
+        String[] perk = {"CLASSIC", "-20% FEES", "-15% ETA", "ANYWHERE"};
         txt(g, names[model], 10, cy + 4, accent);
         txt(g, perk[model], 10, cy + 14, DIM);
     }
@@ -434,55 +437,180 @@ public class PhoneScreen extends Screen {
     }
     private int rank(Listing li) { return (redacted(li) ? 3000 : locked(li) ? 2000 : 0) + li.tier() * 100 + li.price() / 40; }
 
+    // ---- storefront state
+    private String view = "grid";
+    private final List<String> cart = new ArrayList<>();
+    private int gridScroll;
+    private static final int RED = 0xFFFF4747, ORANGE = 0xFFFF8A00;
+
+    private static int h(Listing li, int salt) { return Math.floorMod(li.id().hashCode() * 31 + salt * 7919, 100000); }
+    private static int discount(Listing li) { return 8 + h(li, 1) % 38; }
+    private static int listPrice(Listing li) { return Math.round(li.price() * 100f / (100 - discount(li))); }
+    private static float rating(Listing li) { return 3.9f + (h(li, 2) % 12) / 10f; }
+    private static int sold(Listing li) { return 40 + h(li, 3) % 9000; }
+    private static String stars(float r) {
+        int full = Math.round(r);
+        return "★".repeat(Math.min(5, full)) + "☆".repeat(Math.max(0, 5 - full));
+    }
+    private static String kfmt(int n) { return n >= 1000 ? String.format("%.1fk", n / 1000f) : "" + n; }
+
     private void catalogTab(GuiGraphicsExtractor g, int mx, int my, float partial) {
-        // section selector
-        button(g, "sec:-1", "<", MX + 4, MY + 4, 14, 14, true, accent, mx, my);
-        button(g, "sec:1", ">", MX + 106, MY + 4, 14, 14, true, accent, mx, my);
-        g.fill(MX + 20, MY + 4, MX + 104, MY + 18, PANEL);
-        String sName = section.equals("ALL") ? "ALL LISTINGS" : section.toUpperCase();
-        txt(g, sName, MX + 22 + Math.max(0, (80 - font.width(sName)) / 2), MY + 8, accent);
+        switch (view) {
+            case "product" -> productView(g, mx, my, partial);
+            case "cart" -> cartView(g, mx, my);
+            default -> gridView(g, mx, my);
+        }
+    }
+
+    private void gridView(GuiGraphicsExtractor g, int mx, int my) {
+        // flash-sale banner
+        g.fillGradient(MX, MY, MX + MW, MY + 22, RED, ORANGE);
+        for (int i = 0; i < MW; i += 6) g.fill(MX + i, MY + 20, MX + i + 3, MY + 22, 0x33FFFFFF);
+        txtScaled(g, "SUPER ARMS SALE", MX + 6, MY + 4, 0xFFFFFFFF, 1.4f);
+        long secs = 10800 - (System.currentTimeMillis() / 1000 % 10800);
+        String cd = String.format("ENDS %02d:%02d:%02d", secs / 3600, secs / 60 % 60, secs % 60);
+        txt(g, cd, MX + 130, MY + 8, 0xFFFFF0C0);
+        button(g, "cartview", "☆ CART " + cart.size(), MX + MW - 60, MY + 4, 56, 14, true, 0xFFFFFFFF, mx, my);
+        // category pills
+        button(g, "sec:-1", "<", MX + 4, MY + 25, 14, 13, true, ORANGE, mx, my);
+        g.fill(MX + 20, MY + 25, MX + 130, MY + 38, 0xFFF2F2F2);
+        String sName = section.equals("ALL") ? "All categories" : section;
+        txt(g, sName, MX + 24, MY + 28, 0xFF333333);
+        button(g, "sec:1", ">", MX + 132, MY + 25, 14, 13, true, ORANGE, mx, my);
+        g.fill(MX + 152, MY + 25, MX + MW - 4, MY + 38, 0xFFF2F2F2);
+        txt(g, "⌕  search weapons, attachments, ammo...", MX + 156, MY + 28, 0xFF9A9A9A);
 
         List<Listing> list = visible();
-        int rowH = 19, top = MY + 22, rows = 7;
-        catScroll = Math.max(0, Math.min(catScroll, Math.max(0, list.size() - rows)));
-        for (int i = 0; i < rows; i++) {
-            int idx = catScroll + i;
+        int cols = 3, cw = 94, ch = 64, gx = MX + 4, gy = MY + 42;
+        int rows = (list.size() + cols - 1) / cols;
+        gridScroll = Math.max(0, Math.min(gridScroll, Math.max(0, rows - 2)));
+        for (int i = 0; i < cols * 2; i++) {
+            int idx = (gridScroll * cols) + i;
             if (idx >= list.size()) break;
             Listing li = list.get(idx);
-            int y = top + i * rowH;
-            Region r = new Region(MX + 4, y, 118, rowH - 1, "sel:" + li.id());
-            regions.add(r);
-            boolean sel = li.id().equals(selected), hov = hover(r, mx, my);
-            boolean red = redacted(li), lock = locked(li);
-            g.fill(r.x, y, r.x + r.w, y + rowH - 1, sel ? 0xFF202C3A : (hov ? 0xFF18202A : PANEL));
-            if (sel) g.fill(r.x, y, r.x + 2, y + rowH - 1, accent);
-            if (red) {
-                glitchTxt(g, corrupt("████████", 0.3f), r.x + 24, y + 5, 0xFFBE78FF, 1);
-                txt(g, "CLASSIFIED", r.x + 24, y + 11 - 2 + 0, 0xFF6A4A8A);
-            } else {
-                ItemStack icon = iconFor(li);
-                g.pose().pushMatrix(); g.pose().translate(r.x + 2, y + 1); g.pose().scale(1f, 1f); g.item(icon, 0, 0); g.pose().popMatrix();
-                String nm = li.name();
-                if (font.width(nm) > 92) nm = nm.substring(0, Math.min(nm.length(), 15)) + "..";
-                txt(g, nm, r.x + 22, y + 2, lock ? 0xFF58626E : (sel ? 0xFFFFFFFF : 0xFFD0D8E0));
-                String price = lock ? "LOCKED" : li.price() + " cr";
-                txt(g, price, r.x + 22, y + 10, lock ? 0xFF8A5050 : 0xFF8A94A0);
-                g.fill(r.x + r.w - 5, y + 3, r.x + r.w - 2, y + rowH - 4, TIER_COL[Math.min(4, li.tier())] & (lock ? 0x66FFFFFF : 0xFFFFFFFF));
-            }
+            int x = gx + (i % cols) * (cw + 2), y = gy + (i / cols) * (ch + 2);
+            card(g, li, x, y, cw, ch, mx, my);
         }
-        // scrollbar
-        if (list.size() > rows) {
-            int sbH = rows * rowH;
-            g.fill(MX + 125, top, MX + 127, top + sbH, 0xFF161B22);
-            int th = Math.max(10, sbH * rows / list.size());
-            int ty = top + (sbH - th) * catScroll / Math.max(1, list.size() - rows);
-            g.fill(MX + 125, ty, MX + 127, ty + th, accent);
+        if (rows > 2) {
+            int sbH = 2 * (ch + 2), th = Math.max(10, sbH * 2 / rows);
+            int ty = gy + (sbH - th) * gridScroll / Math.max(1, rows - 2);
+            g.fill(MX + MW - 3, gy, MX + MW - 1, gy + sbH, 0xFF1A2028);
+            g.fill(MX + MW - 3, ty, MX + MW - 1, ty + th, ORANGE);
         }
-        txt(g, list.size() + " listings", MX + 6, top + rows * rowH + 3, DIM);
-        // detail
-        Listing sel = Listing.BY_ID.get(selected);
-        if (sel == null || !list.contains(sel) && !list.isEmpty()) { sel = list.isEmpty() ? null : list.get(0); if (sel != null) selected = sel.id(); }
-        if (sel != null) detail(g, sel, mx, my, partial);
+    }
+
+    private void card(GuiGraphicsExtractor g, Listing li, int x, int y, int w, int hgt, int mx, int my) {
+        boolean red = redacted(li), lock = locked(li);
+        Region r = new Region(x, y, w, hgt, "card:" + li.id());
+        regions.add(r);
+        boolean hov = hover(r, mx, my);
+        g.fill(x, y, x + w, y + hgt, red ? 0xFF1C1428 : 0xFFF7F7F7);
+        g.outline(x, y, w, hgt, hov ? RED : (red ? 0xFF3A2A4A : 0xFFDDDDDD));
+        // image area
+        g.fill(x + 1, y + 1, x + w - 1, y + 31, red ? 0xFF120C1A : 0xFFEAEAEA);
+        if (red) {
+            glitchTxt(g, corrupt("█████", 0.4f), x + 30, y + 10, 0xFFBE78FF, 1);
+            txt(g, "CLASSIFIED", x + 22, y + 21, 0xFF6A4A8A);
+            txt(g, "dial the right line", x + 6, y + 36, 0xFF8A6AAA);
+            txt(g, "to reveal this item", x + 6, y + 46, 0xFF8A6AAA);
+            return;
+        }
+        float bob = hov ? (float) Math.sin(tick * 0.3) * 1.2f : 0;
+        g.pose().pushMatrix();
+        g.pose().translate(x + w / 2f, y + 16 + bob);
+        g.pose().scale(1.7f, 1.7f);
+        g.item(iconFor(li), -8, -8);
+        g.pose().popMatrix();
+        // badges
+        int disc = discount(li);
+        g.fill(x + 1, y + 1, x + 23, y + 10, RED);
+        txt(g, "-" + disc + "%", x + 3, y + 2, 0xFFFFFFFF);
+        int tc = TIER_COL[Math.min(4, li.tier())];
+        g.fill(x + w - 5, y + 1, x + w - 1, y + 31, tc & (lock ? 0x66FFFFFF : 0xFFFFFFFF));
+        // texts
+        String nm = li.name();
+        while (font.width(nm) > w - 6 && nm.length() > 3) nm = nm.substring(0, nm.length() - 1);
+        txt(g, nm, x + 3, y + 33, 0xFF222222);
+        String price = li.price() + " cr";
+        txtS(g, price, x + 3, y + 43, lock ? 0xFF999999 : RED);
+        String lp = listPrice(li) + "";
+        int px = x + 6 + font.width(price);
+        txt(g, lp, px, y + 43, 0xFF9A9A9A);
+        g.fill(px - 1, y + 47, px + font.width(lp), y + 48, 0xFF9A9A9A);
+        txt(g, stars(rating(li)), x + 3, y + 53, 0xFFFFB400);
+        txt(g, kfmt(sold(li)) + " sold", x + w - 3 - font.width(kfmt(sold(li)) + " sold"), y + 53, 0xFF888888);
+        if (lock) { g.fill(x + 1, y + 1, x + w - 1, y + hgt - 1, 0x99FFFFFF); txt(g, "LOCKED", x + w / 2 - 16, y + 14, 0xFFAA3030); }
+    }
+
+    private void productView(GuiGraphicsExtractor g, int mx, int my, float partial) {
+        Listing li = Listing.BY_ID.get(selected);
+        if (li == null) { view = "grid"; return; }
+        boolean lock = locked(li);
+        button(g, "back", "< Back", MX + 4, MY + 4, 44, 13, true, ORANGE, mx, my);
+        txt(g, "Home > " + li.section() + " > " + li.name(), MX + 54, MY + 7, DIM);
+        // left: hologram + stats
+        viewer(g, MX + 4, MY + 22, 104, 76, li, false, mx, my, partial);
+        int y = MY + 102;
+        if (li.gun() != null) gunStats(g, li.gun(), MX + 4, y, 160);
+        else if (li.att() != null) attStats(g, li, MX + 4, y);
+        else ammoStats(g, li, MX + 4, y);
+        // right: listing card
+        int x = MX + 116, w = MW - 120;
+        g.fill(x, MY + 22, x + w, MY + MH - 4, 0xFFF7F7F7);
+        g.outline(x, MY + 22, w, MH - 26, 0xFFDDDDDD);
+        String nm = li.name();
+        txtScaled(g, nm, x + 6, MY + 27, 0xFF111111, 1.25f);
+        txt(g, stars(rating(li)) + String.format(" %.1f", rating(li)), x + 6, MY + 41, 0xFFFFB400);
+        txt(g, kfmt(sold(li)) + " sold  •  " + kfmt(sold(li) / 7) + " reviews", x + 62, MY + 41, 0xFF777777);
+        int disc = discount(li);
+        int fee = Math.round(Catalog.DELIVERY_FEE.getOrDefault(li.delivery(), 10) * (model == 1 ? 0.8f : 1f));
+        g.fill(x + 4, MY + 52, x + w - 4, MY + 74, 0xFFFFF0F0);
+        txtScaled(g, li.price() + " cr", x + 8, MY + 56, RED, 1.7f);
+        String lp = listPrice(li) + " cr";
+        int lx = x + 12 + (int) (font.width(li.price() + " cr") * 1.7f);
+        txt(g, lp, lx, MY + 58, 0xFF999999);
+        g.fill(lx - 1, MY + 62, lx + font.width(lp), MY + 63, 0xFF999999);
+        g.fill(lx, MY + 65, lx + 30, MY + 73, RED);
+        txt(g, "-" + disc + "%", lx + 3, MY + 65, 0xFFFFFFFF);
+        long day = st().getLongOr("day", 0L);
+        String stock = stockOf(li, day);
+        int eta = Math.round(li.etaSec() * (model == 2 ? 0.85f : 1f) * (stock.startsWith("BACKORDER") ? 2 : 1) * ModConfig.get().deliveryTimeMultiplier);
+        txt(g, "✈ " + methodName(li.delivery()), x + 6, MY + 79, 0xFF333333);
+        txt(g, "Delivery fee " + fee + " cr  •  ETA " + eta + "s", x + 6, MY + 89, 0xFF2E8B57);
+        txt(g, stock, x + 6, MY + 99, stock.startsWith("IN") ? 0xFF2E8B57 : 0xFFCC7A00);
+        var wrapped = font.split(Component.literal(li.desc()), w - 12);
+        int dy = MY + 111;
+        for (var wl : wrapped) { if (dy > MY + 128) break; g.text(font, wl, x + 6, dy, 0xFF555555, false); dy += 9; }
+        int total = li.price() + fee;
+        boolean afford = credits() >= total;
+        boolean inCart = cart.contains(li.id());
+        button(g, "addcart", inCart ? "✓ IN CART" : "ADD TO CART", x + 4, MY + MH - 28, (w - 12) / 2, 20, !lock && !inCart && cart.size() < 6, ORANGE, mx, my);
+        button(g, "order", lock ? "LOCKED" : (afford ? "BUY NOW" : "NEED " + total), x + 8 + (w - 12) / 2, MY + MH - 28, (w - 12) / 2, 20, !lock && afford, RED, mx, my);
+    }
+
+    private void cartView(GuiGraphicsExtractor g, int mx, int my) {
+        button(g, "back", "< Back", MX + 4, MY + 4, 44, 13, true, ORANGE, mx, my);
+        txtS(g, "SHOPPING CART (" + cart.size() + "/6)", MX + 56, MY + 7, ORANGE);
+        int y = MY + 24, total = 0, fees = 0;
+        for (int i = 0; i < cart.size(); i++) {
+            Listing li = Listing.BY_ID.get(cart.get(i));
+            if (li == null) continue;
+            int fee = Math.round(Catalog.DELIVERY_FEE.getOrDefault(li.delivery(), 10) * (model == 1 ? 0.8f : 1f));
+            total += li.price(); fees += fee;
+            g.fill(MX + 4, y, MX + MW - 4, y + 20, 0xFFF7F7F7);
+            g.pose().pushMatrix(); g.pose().translate(MX + 8, y + 2); g.item(iconFor(li), 0, 0); g.pose().popMatrix();
+            txt(g, li.name(), MX + 30, y + 3, 0xFF222222);
+            txt(g, methodName(li.delivery()) + "  +" + fee + " cr", MX + 30, y + 12, 0xFF2E8B57);
+            txtS(g, li.price() + " cr", MX + MW - 110, y + 6, RED);
+            button(g, "rm:" + i, "REMOVE", MX + MW - 56, y + 3, 48, 14, true, 0xFF777777, mx, my);
+            y += 22;
+        }
+        if (cart.isEmpty()) txt(g, "Your cart is empty. Go find something that goes bang.", MX + 10, MY + 30, DIM);
+        int grand = total + fees;
+        g.fill(MX + 4, MY + MH - 34, MX + MW - 4, MY + MH - 4, 0xFF10151B);
+        txt(g, "Items " + total + " cr  +  delivery " + fees + " cr", MX + 10, MY + MH - 30, 0xFFB0B8C2);
+        txtS(g, "Total " + grand + " cr", MX + 10, MY + MH - 18, grand > credits() ? 0xFFFF7070 : 0xFFFFFFFF);
+        button(g, "checkout", "CHECKOUT (" + cart.size() + ")", MX + MW - 110, MY + MH - 28, 100, 20, !cart.isEmpty() && grand <= credits(), RED, mx, my);
     }
 
     private ItemStack iconFor(Listing li) {
@@ -497,55 +625,6 @@ public class PhoneScreen extends Screen {
     private static String stockOf(Listing li, long day) {
         int h = Math.floorMod((li.id().hashCode() * 31) + (int) day * 17, 10);
         return h < 7 ? "IN STOCK" : (h < 9 ? "LIMITED STOCK" : "BACKORDER (+100% ETA)");
-    }
-
-    private void detail(GuiGraphicsExtractor g, Listing li, int mx, int my, float partial) {
-        int dx = MX + 132, dw = MW - 136;
-        boolean red = redacted(li), lock = locked(li);
-        panel(g, dx, MY + 4, dw, MH - 8, 0xFF10151B, 0xFF262C34);
-        // hologram viewer
-        int vx = dx + dw - 84, vy = MY + 8, vw = 78, vh = 64;
-        viewer(g, vx, vy, vw, vh, li, red, mx, my, partial);
-        // title
-        int tcol = red ? 0xFFBE78FF : TIER_COL[Math.min(4, li.tier())];
-        String name = red ? corrupt("████████", 0.4f) : li.name();
-        txtS(g, name, dx + 6, MY + 9, red ? 0xFFBE78FF : 0xFFFFFFFF);
-        String sub = red ? "CLASSIFIED  •  SECRET LINE REQUIRED" : (li.secret() != null ? "CLASSIFIED" : TIER_NAME[Math.min(4, li.tier())]) + "  •  " + li.rarity().toUpperCase();
-        txt(g, sub, dx + 6, MY + 20, tcol);
-        int y = MY + 32;
-        if (red) {
-            for (String ln : new String[]{"This listing does not officially exist.", "Rumour has it that certain numbers,", "dialled from certain places, will make", "it exist."})
-            { glitchTxt(g, corrupt(ln, 0.06f), dx + 6, y, 0xFF8A6AAA, 0.5f); y += 10; }
-        } else {
-            String d = li.desc();
-            var wrapped = font.split(Component.literal(d), dw - 96);
-            for (var w : wrapped) { if (y > MY + 70) break; g.text(font, w, dx + 6, y, 0xFFA8B2BE, false); y += 9; }
-            y = Math.max(y + 2, MY + 74);
-            if (li.gun() != null) gunStats(g, li.gun(), dx + 6, y, dw - 12);
-            else if (li.att() != null) attStats(g, li, dx + 6, y);
-            else ammoStats(g, li, dx + 6, y);
-        }
-        // order strip
-        int by = MY + MH - 38;
-        g.fill(dx + 2, by - 2, dx + dw - 2, by - 1, 0xFF262C34);
-        if (!red) {
-            int fee = Math.round(Catalog.DELIVERY_FEE.getOrDefault(li.delivery(), 10) * (model == 1 ? 0.8f : 1f));
-            long day = st().getLongOr("day", 0L);
-            String stock = stockOf(li, day);
-            int eta = Math.round(li.etaSec() * (model == 2 ? 0.85f : 1f) * (stock.startsWith("BACKORDER") ? 2 : 1) * ModConfig.get().deliveryTimeMultiplier);
-            txt(g, methodName(li.delivery()), dx + 6, by + 1, 0xFFD0D8E0);
-            txt(g, "ETA " + eta + "s  •  FEE " + fee + " cr  •  " + stock, dx + 6, by + 11, stock.startsWith("IN") ? 0xFF6BFFB4 : 0xFFFFC95A);
-            int total = li.price() + fee;
-            boolean afford = credits() >= total;
-            String lbl = lock ? "LOCKED" : (afford ? "ORDER  " + total + " cr" : "NEED " + total + " cr");
-            button(g, "order", lbl, dx + dw - 108, by + 2, 102, 22, !lock && afford, 0xFF6BFFB4, mx, my);
-            if (lock) {
-                int need = Catalog.TIER_THRESHOLDS[Math.min(li.tier(), Catalog.TIER_THRESHOLDS.length - 1)] - st().getIntOr("spent", 0);
-                txt(g, "Clearance " + li.tier() + " needs " + Math.max(0, need) + " more credits spent", dx + 6, by + 22, 0xFFB06060);
-            }
-        } else {
-            txt(g, "ACCESS DENIED", dx + 6, by + 6, 0xFFBE78FF);
-        }
     }
 
     private void gunStats(GuiGraphicsExtractor g, GunDef d, int x, int y, int w) {
@@ -775,7 +854,7 @@ public class PhoneScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double x, double y, double sx, double sy) {
-        if (tab.equals("catalog")) { catScroll -= (int) Math.signum(sy); return true; }
+        if (tab.equals("catalog") && view.equals("grid")) { gridScroll -= (int) Math.signum(sy); return true; }
         return super.mouseScrolled(x, y, sx, sy);
     }
 
@@ -813,21 +892,24 @@ public class PhoneScreen extends Screen {
         if (id.startsWith("choice:")) { send("choice", id.substring(7)); return; }
         if (id.startsWith("dep:")) { send("deposit", id.substring(4)); return; }
         if (id.startsWith("ring:")) { send("ringtone", id.substring(5)); return; }
-        if (id.startsWith("sel:")) { selected = id.substring(4); spin = 0; return; }
+        if (id.startsWith("card:")) { selected = id.substring(5); spin = 0; view = "product"; return; }
+        if (id.startsWith("rm:")) { int i = Integer.parseInt(id.substring(3)); if (i >= 0 && i < cart.size()) cart.remove(i); return; }
         if (id.startsWith("sec:")) {
             int d = Integer.parseInt(id.substring(4));
             List<String> s = sections();
             sectionIdx = Math.floorMod(sectionIdx + d, s.size());
-            section = s.get(sectionIdx); catScroll = 0;
-            List<Listing> v = visible();
-            if (!v.isEmpty()) selected = v.get(0).id();
+            section = s.get(sectionIdx); gridScroll = 0;
             return;
         }
         switch (id) {
             case "dial" -> { if (!dial.isEmpty()) { send("dial", dial); tab = "call"; dial = ""; } }
             case "bksp" -> { if (!dial.isEmpty()) dial = dial.substring(0, dial.length() - 1); }
             case "clr" -> dial = "";
-            case "order" -> send("order", selected);
+            case "order" -> { send("order", selected); }
+            case "back" -> view = "grid";
+            case "cartview" -> view = "cart";
+            case "addcart" -> { if (!cart.contains(selected) && cart.size() < 6) cart.add(selected); }
+            case "checkout" -> { for (String cid : new ArrayList<>(cart)) send("order", cid); cart.clear(); view = "grid"; tab = "orders"; }
             default -> { }
         }
     }

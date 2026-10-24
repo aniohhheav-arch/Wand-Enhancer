@@ -1,0 +1,5 @@
+fullscreen:false
+onboardAccessibility:false
+tutorialStep:none
+skipMultiplayerWarning:true
+guiScale:3

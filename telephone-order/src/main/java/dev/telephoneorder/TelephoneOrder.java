@@ -34,6 +34,16 @@ public class TelephoneOrder implements ModInitializer {
         DistortionField.init();
         ShieldField.init();
         ServerSetup.init();
+        ServerPlayConnectionEvents.JOIN.register((h, sender, server) -> {
+            var p = h.getPlayer();
+            Account.of(p);
+            if (!Account.flag(p, "starter")) {
+                Account.setFlag(p, "starter", true);
+                var phone = new net.minecraft.world.item.ItemStack(ModItems.HANDHELD);
+                if (!p.getInventory().add(phone)) p.level().addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(p.level(), p.getX(), p.getY() + 0.5, p.getZ(), phone));
+                p.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u00a76Telephone Order:\u00a7r a Pocket Handset has been added to your inventory. Right-click it to place orders."));
+            }
+        });
         SelfTest.init();
         ServerPlayConnectionEvents.DISCONNECT.register((h, s) -> { GunLogic.forget(h.getPlayer().getUUID()); PhoneService.forget(h.getPlayer().getUUID()); });
         ServerLifecycleEvents.SERVER_STOPPED.register(s -> { Sched.clear(); GunLogic.clearAll(); PhoneService.clear(); DistortionField.clear(); ShieldField.clear(); });

@@ -41,3 +41,14 @@ loom {
         }
     }
 }
+
+loom {
+    runs {
+        uishot {
+            client()
+            name = "Telephone Order UI shots"
+            vmArg "-Dtelephoneorder.uishot=1"
+            runDir "run-uishot"
+        }
+    }
+}

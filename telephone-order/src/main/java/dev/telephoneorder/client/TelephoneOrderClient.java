@@ -63,6 +63,7 @@ public class TelephoneOrderClient implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(Payloads.WorkbenchOpen.TYPE, (p, ctx) -> Minecraft.getInstance().gui.setScreen(new WorkbenchScreen()));
 
+        if (System.getProperty("telephoneorder.uishot") != null) UiShot.install();
         HudElementRegistry.addLast(ModItems.id("hud"), new GunHud());
     }
 }

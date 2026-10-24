@@ -206,6 +206,7 @@ def gen_data():
     shaped("telephone_rotary", ["ICI", "RBR", "III"], {"I": "minecraft:iron_ingot", "C": "minecraft:copper_ingot", "R": "minecraft:redstone", "B": "minecraft:bell"}, "telephone_rotary", cat="misc")
     shaped("telephone_terminal", ["IGI", "RCR", "III"], {"I": "minecraft:iron_ingot", "G": "minecraft:glass_pane", "R": "minecraft:redstone", "C": "minecraft:comparator"}, "telephone_terminal", cat="misc")
     shaped("telephone_uplink", ["IRI", "LCL", "IEI"], {"I": "minecraft:iron_ingot", "R": "minecraft:lightning_rod", "L": "minecraft:lapis_lazuli", "C": "minecraft:comparator", "E": "minecraft:ender_pearl"}, "telephone_uplink", cat="misc")
+    shaped("handheld_phone", ["  C", "IGI", "IRI"], {"C": "minecraft:copper_ingot", "I": "minecraft:iron_ingot", "G": "minecraft:glass_pane", "R": "minecraft:redstone"}, "handheld_phone", cat="misc")
     shaped("weapons_workbench", ["III", "TCT", "P P"], {"I": "minecraft:iron_ingot", "T": "minecraft:smooth_stone", "C": "minecraft:crafting_table", "P": "minecraft:oak_planks"}, "weapons_workbench", cat="misc")
     shapeless("ammo_9mm", ["minecraft:copper_ingot", "minecraft:gunpowder"], "ammo_9mm")
     shapeless("ammo_357", ["minecraft:iron_ingot", "minecraft:gunpowder", "minecraft:copper_ingot"], "ammo_357")
@@ -229,7 +230,7 @@ def gen_lang(subtitles):
     for k, v in PHONE_NAMES.items(): lang[f"block.{NS}.telephone_{k}"] = v
     lang[f"block.{NS}.weapons_workbench"] = "Weapons Workbench"
     lang[f"block.{NS}.sentinel_turret"] = "Sentinel Turret"
-    lang.update({f"item.{NS}.clue_slip": "Torn Order Slip", f"item.{NS}.order_receipt": "Order Receipt", f"item.{NS}.credit_chip": "Credit Chip"})
+    lang.update({f"item.{NS}.clue_slip": "Torn Order Slip", f"item.{NS}.order_receipt": "Order Receipt", f"item.{NS}.credit_chip": "Credit Chip", f"item.{NS}.handheld_phone": "Pocket Handset"})
     for n in ("crate", "crate_open", "drone", "rotor", "pod", "pod_open", "container", "container_open", "case", "case_open"):
         lang[f"item.{NS}.prop_{n}"] = "Delivery Prop"
     for n in ("plasma", "shard", "charge", "heavy", "rift", "emp", "missile", "rocket"):

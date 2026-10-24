@@ -26,7 +26,7 @@ public final class ModItems {
     public static final Map<String, GunItem> GUNS = new LinkedHashMap<>();
     public static final Map<String, Item> AMMO = new LinkedHashMap<>();
     public static final Map<String, Item> ATTACHMENTS = new LinkedHashMap<>();
-    public static Item CLUE_SLIP, ORDER_RECEIPT, CREDIT_CHIP;
+    public static Item CLUE_SLIP, ORDER_RECEIPT, CREDIT_CHIP, HANDHELD;
     public static Item PROP_CRATE, PROP_CRATE_OPEN, PROP_DRONE, PROP_ROTOR, PROP_POD, PROP_POD_OPEN, PROP_CONTAINER, PROP_CONTAINER_OPEN, PROP_CASE, PROP_CASE_OPEN;
     private static final Map<GunProjectile.Kind, Item> PROJ = new java.util.EnumMap<>(GunProjectile.Kind.class);
 
@@ -72,6 +72,7 @@ public final class ModItems {
         CLUE_SLIP = reg("clue_slip", p -> new ClueSlipItem(p), new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON));
         ORDER_RECEIPT = reg("order_receipt", ReceiptItem::new, new Item.Properties().stacksTo(1));
         CREDIT_CHIP = reg("credit_chip", CreditChipItem::new, new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON));
+        HANDHELD = reg("handheld_phone", dev.telephoneorder.weapon.HandheldPhoneItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
         PROP_CRATE = reg("prop_crate", Item::new, plain());
         PROP_CRATE_OPEN = reg("prop_crate_open", Item::new, plain());
         PROP_DRONE = reg("prop_drone", Item::new, plain());
@@ -99,8 +100,7 @@ public final class ModItems {
                 .icon(() -> new ItemStack(GUNS.get("vesper_p9")))
                 .displayItems((params, out) -> {
                     out.accept(ALL.get("telephone_rotary")); out.accept(ALL.get("telephone_terminal")); out.accept(ALL.get("telephone_uplink"));
-                    out.accept(ALL.get("weapons_workbench"));
-                    for (GunItem g : GUNS.values()) out.accept(GunData.newStack(g.def, g));
+                    out.accept(ALL.get("weapons_workbench")); out.accept(HANDHELD);
                     for (Item i : AMMO.values()) out.accept(i);
                     for (Item i : ATTACHMENTS.values()) out.accept(i);
                     out.accept(CLUE_SLIP); out.accept(CREDIT_CHIP);

@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "  C",
+  "IGI",
+  "IRI"
+ ],
+ "key": {
+  "C": "minecraft:copper_ingot",
+  "I": "minecraft:iron_ingot",
+  "G": "minecraft:glass_pane",
+  "R": "minecraft:redstone"
+ },
+ "result": {
+  "id": "telephoneorder:handheld_phone",
+  "count": 1
+ }
+}
