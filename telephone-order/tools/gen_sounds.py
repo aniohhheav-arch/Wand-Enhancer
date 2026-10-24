@@ -373,6 +373,33 @@ def impact_flesh(): return norm(lp(noise(0.12, 143), 800) * env(int(SR * 0.12), 
 def turret_deploy(): return norm(mix((0, tick(500, 0.1)), (0.15, sweep(0.4, 200, 900) * env(int(SR * 0.4), 0.01, 0.2) * 0.5), (0.5, tick(1500, 0.05))))
 def rocket(): return norm(mix((0, lp(noise(0.8, 144), 2200) * env(int(SR * 0.8), 0.01, 0.35) * 0.9), (0, shot(0.35, 120, 40, 3500, 0.3, 0.1, 0.5, thump=1.5, seed=145))))
 
+def siren():
+    n = int(SR * 6.0); t = np.arange(n) / SR
+    f = 600 + 380 * (0.5 + 0.5 * np.sin(2 * np.pi * 0.33 * t - 1.57))
+    y = np.sin(2 * np.pi * np.cumsum(f) / SR) + 0.35 * np.sin(2 * np.pi * np.cumsum(f * 2) / SR)
+    y = np.tanh(y * 1.3)
+    return norm(y * np.minimum(1, t / 0.3) * np.minimum(1, (6.0 - t) / 0.6))
+
+def orbital_charge():
+    n = int(SR * 4.0); t = np.arange(n) / SR
+    y = sweep(4.0, 60, 900) * np.linspace(0.1, 1, n) + 0.5 * sweep(4.0, 120, 1800) * np.linspace(0, 1, n) ** 2
+    y += hp(noise(4.0, 201), 3000) * np.linspace(0, 0.4, n)
+    return norm(np.tanh(y))
+
+def orbital_beam():
+    n = int(SR * 3.5); t = np.arange(n) / SR
+    rumble = lp(noise(3.5, 202), 300) * 1.4 + sweep(3.5, 45, 28) * 1.2
+    zap = (np.sin(2 * np.pi * 220 * t) + np.sin(2 * np.pi * 222 * t) + 0.5 * np.sin(2 * np.pi * 880 * t)) * 0.35
+    y = (rumble + zap + hp(noise(3.5, 203), 2500) * 0.25) * np.minimum(1, t / 0.05) * np.minimum(1, (3.5 - t) / 1.2)
+    return norm(np.tanh(y * 1.3))
+
+def radio_beep():
+    return norm(mix((0, tone(0.08, 1100) * env(int(SR * 0.08), 0.002, 0.05)), (0.12, tone(0.08, 1100) * env(int(SR * 0.08), 0.002, 0.05)),
+                    (0.3, bp(noise(0.5, 204), 500, 3000) * env(int(SR * 0.5), 0.01, 0.2) * 0.5)))
+
+def mushroom_boom():
+    return norm(mix((0, shot(2.5, 70, 18, 1500, 0.2, 1.2, 1.0, thump=2.6, seed=205)), (0.1, lp(noise(2.5, 206), 400) * env(int(SR * 2.5), 0.05, 1.0))))
+
 SOUNDS = {}
 for k, f in SHOTS.items(): SOUNDS["fire_" + k] = f
 SOUNDS.update({
@@ -391,6 +418,7 @@ SOUNDS.update({
     "order_confirm": order_confirm, "order_denied": order_denied, "ui_click": ui_click, "ui_tab": ui_tab, "ui_error": ui_error,
     "incoming_whistle": incoming_whistle, "crate_impact": crate_impact, "pod_impact": pod_impact, "pod_hiss": pod_hiss,
     "drone_buzz": drone_buzz, "teleport_zap": teleport_zap, "rift_open": rift_open, "case_latch": case_latch,
+    "siren": siren, "orbital_charge": orbital_charge, "orbital_beam": orbital_beam, "radio_beep": radio_beep, "mushroom_boom": mushroom_boom,
     "flash_whoosh": flash_whoosh, "item_ready": item_ready, "eerie_drone": eerie_drone, "turret_deploy": turret_deploy,
 })
 

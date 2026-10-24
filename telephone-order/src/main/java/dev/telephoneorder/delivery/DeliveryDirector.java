@@ -191,6 +191,8 @@ public final class DeliveryDirector {
             if (!g.beh().equals("turret")) out.add(new ItemStack(ModItems.AMMO.get(g.ammo()), g.energy() ? 1 : 2));
         } else if (li.att() != null) {
             out.add(new ItemStack(ModItems.ATTACHMENTS.get(li.att().id()), 1));
+        } else if (li.strike() != null) {
+            out.add(new ItemStack(ModItems.ALL.get(li.strike()), 1));
         } else if (li.ammo() != null) {
             out.add(new ItemStack(ModItems.AMMO.get(li.ammo().id()), li.count()));
         }

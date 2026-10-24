@@ -665,6 +665,14 @@ def misc_icons():
         for kx in range(3): l.rect(12 + kx * 3, 19 + ky * 3, 14 + kx * 3, 21 + ky * 3, (200, 204, 212))
     l.rect(19, 3, 21, 8, (46, 50, 58)); l.p(20, 2, (255, 70, 60))
     out["handheld_phone"] = l.shaded()
+    # strike beacons (one sprite per hue)
+    def beacon(name, col):
+        l = Layer(); l.rect(13, 14, 19, 28, (50, 54, 62)); l.rect(14, 15, 18, 27, (74, 80, 92)); l.rect(15, 9, 17, 14, (50, 54, 62))
+        l.disc(16, 7, 3, col); l.disc(16, 7, 1.2, (255, 255, 255)); l.rect(14, 20, 18, 22, col); l.p(16, 2, col); l.p(12, 7, col); l.p(20, 7, col)
+        out[name] = l.shaded()
+    for nm, c in (("strike_orbital", (255, 70, 60)), ("strike_meteor_precision", (255, 160, 40)), ("strike_meteor_random", (255, 200, 70)),
+                  ("strike_meteor_wide", (255, 120, 40)), ("strike_lance", (190, 110, 255)), ("strike_strategic", (255, 255, 255))):
+        beacon(nm, c)
     # receipt
     l = Layer(); l.rect(8, 4, 24, 28, (240, 238, 228)); 
     for i in range(0, 16, 2): l.p(8 + i, 28, (240, 238, 228)); l.p(9 + i, 29, (0, 0, 0, 0)[:3] if False else (240, 238, 228))

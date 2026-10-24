@@ -23,6 +23,8 @@ public final class ModConfig {
     public boolean allowFriendlyDamage = true;    // PvP still honours the server pvp flag
     public float deliveryTimeMultiplier = 1.0f;   // 0.1 = very fast deliveries for testing
     public boolean clueLoot = true;
+    public boolean strikeTerrainDamage = false;   // orbital strikes / meteors / lance leave real craters
+    public boolean strategicDemoMode = true;      // the strategic superweapon is visual-only until you turn this off
     // ---- client / presentation ----
     public boolean screenShake = true;
     public float shakeIntensity = 1.0f;

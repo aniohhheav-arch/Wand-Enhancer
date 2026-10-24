@@ -491,6 +491,36 @@
   ],
   "subtitle": "subtitles.telephoneorder.case_latch"
  },
+ "siren": {
+  "sounds": [
+   "telephoneorder:siren"
+  ],
+  "subtitle": "subtitles.telephoneorder.siren"
+ },
+ "orbital_charge": {
+  "sounds": [
+   "telephoneorder:orbital_charge"
+  ],
+  "subtitle": "subtitles.telephoneorder.orbital_charge"
+ },
+ "orbital_beam": {
+  "sounds": [
+   "telephoneorder:orbital_beam"
+  ],
+  "subtitle": "subtitles.telephoneorder.orbital_beam"
+ },
+ "radio_beep": {
+  "sounds": [
+   "telephoneorder:radio_beep"
+  ],
+  "subtitle": "subtitles.telephoneorder.radio_beep"
+ },
+ "mushroom_boom": {
+  "sounds": [
+   "telephoneorder:mushroom_boom"
+  ],
+  "subtitle": "subtitles.telephoneorder.mushroom_boom"
+ },
  "flash_whoosh": {
   "sounds": [
    "telephoneorder:flash_whoosh"

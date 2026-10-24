@@ -1,0 +1,18 @@
+{
+  "damageMultiplier": 1.0,
+  "headshotMultiplier": 1.0,
+  "credits": 1.0,
+  "startingCredits": 150,
+  "killBounties": true,
+  "explosionsBreakBlocks": false,
+  "allowFriendlyDamage": true,
+  "deliveryTimeMultiplier": 1.0,
+  "clueLoot": true,
+  "screenShake": true,
+  "shakeIntensity": 1.0,
+  "reduceCameraMotion": false,
+  "recoilVisual": 1.0,
+  "particleScale": 1.0,
+  "hud": true,
+  "ringtone": 0
+}

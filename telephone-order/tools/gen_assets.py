@@ -117,7 +117,9 @@ def gen_items():
     for a in cd.SPECIAL_AMMO:
         simple_item(a["id"], art.ammo_icon(a, special=True), "ammo")
     for name, img in art.misc_icons().items():
-        if name.startswith("proj_"):
+        if name.startswith("strike_"):
+            simple_item(name, img, "strike")
+        elif name.startswith("proj_"):
             simple_item(name, img, "proj")
         else:
             simple_item(name, img, "misc")
@@ -231,6 +233,7 @@ def gen_lang(subtitles):
     lang[f"block.{NS}.weapons_workbench"] = "Weapons Workbench"
     lang[f"block.{NS}.sentinel_turret"] = "Sentinel Turret"
     lang.update({f"item.{NS}.clue_slip": "Torn Order Slip", f"item.{NS}.order_receipt": "Order Receipt", f"item.{NS}.credit_chip": "Credit Chip", f"item.{NS}.handheld_phone": "Pocket Handset"})
+    for k, v in STRIKE_NAMES.items(): lang[f"item.{NS}.{k}"] = v
     for n in ("crate", "crate_open", "drone", "rotor", "pod", "pod_open", "container", "container_open", "case", "case_open"):
         lang[f"item.{NS}.prop_{n}"] = "Delivery Prop"
     for n in ("plasma", "shard", "charge", "heavy", "rift", "emp", "missile", "rocket"):
@@ -244,6 +247,8 @@ def gen_lang(subtitles):
     lang.update(subtitles)
     wj(os.path.join(A, "lang", "en_us.json"), lang)
 
+STRIKE_NAMES = {"strike_orbital": "Orbital Strike Beacon", "strike_meteor_precision": "Meteor Beacon: Precision", "strike_meteor_random": "Meteor Beacon: Barrage",
+                "strike_meteor_wide": "Meteor Beacon: Wide Area", "strike_lance": "Planetary Lance Beacon", "strike_strategic": "Strategic Superweapon Beacon"}
 PHONE_NAMES = {"rotary": "Rotary Desk Phone", "terminal": "Desk Terminal", "uplink": "Field Uplink"}
 
 def gen_icon():

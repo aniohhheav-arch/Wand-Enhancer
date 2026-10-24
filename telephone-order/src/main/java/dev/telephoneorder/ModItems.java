@@ -72,6 +72,8 @@ public final class ModItems {
         CLUE_SLIP = reg("clue_slip", p -> new ClueSlipItem(p), new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON));
         ORDER_RECEIPT = reg("order_receipt", ReceiptItem::new, new Item.Properties().stacksTo(1));
         CREDIT_CHIP = reg("credit_chip", CreditChipItem::new, new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON));
+        for (String sid : new String[]{"strike_orbital", "strike_meteor_precision", "strike_meteor_random", "strike_meteor_wide", "strike_lance", "strike_strategic"})
+            reg(sid, p -> new dev.telephoneorder.strike.StrikeBeaconItem(p, sid), new Item.Properties().stacksTo(4).rarity(Rarity.EPIC));
         HANDHELD = reg("handheld_phone", dev.telephoneorder.weapon.HandheldPhoneItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
         PROP_CRATE = reg("prop_crate", Item::new, plain());
         PROP_CRATE_OPEN = reg("prop_crate_open", Item::new, plain());
@@ -104,6 +106,7 @@ public final class ModItems {
                     for (Item i : AMMO.values()) out.accept(i);
                     for (Item i : ATTACHMENTS.values()) out.accept(i);
                     out.accept(CLUE_SLIP); out.accept(CREDIT_CHIP);
+                    for (var e : ALL.entrySet()) if (e.getKey().startsWith("strike_")) out.accept(e.getValue());
                 }).build();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, tab);
     }

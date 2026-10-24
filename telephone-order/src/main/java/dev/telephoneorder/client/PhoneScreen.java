@@ -553,7 +553,8 @@ public class PhoneScreen extends Screen {
         int y = MY + 102;
         if (li.gun() != null) gunStats(g, li.gun(), MX + 4, y, 160);
         else if (li.att() != null) attStats(g, li, MX + 4, y);
-        else ammoStats(g, li, MX + 4, y);
+        else if (li.ammo() != null) ammoStats(g, li, MX + 4, y);
+        else { txt(g, "SUPPORT ORDER  \u2022  delivered as a targeting beacon", MX + 4, y, ORANGE); txt(g, "Throw it (right-click) at a distant spot.", MX + 4, y + 10, 0xFF8A94A0); txt(g, "Cooldown applies. Danger close is denied.", MX + 4, y + 20, 0xFF8A94A0); }
         // right: listing card
         int x = MX + 116, w = MW - 120;
         g.fill(x, MY + 22, x + w, MY + MH - 4, 0xFFF7F7F7);
@@ -614,7 +615,7 @@ public class PhoneScreen extends Screen {
     }
 
     private ItemStack iconFor(Listing li) {
-        Item it = li.gun() != null ? ModItems.GUNS.get(li.id()) : li.att() != null ? ModItems.ATTACHMENTS.get(li.id()) : ModItems.AMMO.get(li.id());
+        Item it = li.gun() != null ? ModItems.GUNS.get(li.id()) : li.att() != null ? ModItems.ATTACHMENTS.get(li.id()) : li.strike() != null ? ModItems.ALL.get(li.id()) : ModItems.AMMO.get(li.id());
         return new ItemStack(it);
     }
 
