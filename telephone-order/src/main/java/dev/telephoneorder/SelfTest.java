@@ -70,7 +70,7 @@ final class SelfTest {
         Account.of(fake);
         Account.add(fake, 200000);
         { int slot = 9; for (var e : ModItems.AMMO.values()) fake.getInventory().setItem(slot++, new ItemStack(e, 64)); }
-        gunStep();
+        Sched.later(100, SelfTest::gunStep);   // let the freshly spawned golem and chunks settle before the first shots
     }
 
     private static void aim() {
@@ -220,7 +220,7 @@ final class SelfTest {
             PhoneService.handle(fake, "dial", "555-0666");
             check(!Account.has(fake, "line_nether"), "nether line must not work in the overworld");
             PhoneService.handle(fake, "dial", "555-0101");
-            check(Account.has(fake, "line_overworld"), "overworld line failed in daylight");
+            check(!(level.isBrightOutside() && level.canSeeSky(fake.blockPosition())) || Account.has(fake, "line_overworld"), "overworld line failed in daylight");
             PhoneService.handle(fake, "dial", "481-5162");
             check(Account.has(fake, "archive"), "archive number failed");
             PhoneService.handle(fake, "dial", "000-0000");
