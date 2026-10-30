@@ -1,0 +1,74 @@
+{
+  "parent": "infinitygauntlet:tesseract",
+  "display": {
+    "icon": {
+      "id": "minecraft:end_crystal"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.master_of_space"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.master_of_space.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "dimensional_portal": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:dimensional_portal"
+      }
+    },
+    "spatial_rift": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:spatial_rift"
+      }
+    },
+    "blink": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:blink"
+      }
+    },
+    "portal_barrage": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:portal_barrage"
+      }
+    },
+    "spatial_compression": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:spatial_compression"
+      }
+    },
+    "dimension_swap": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:dimension_swap"
+      }
+    },
+    "cosmic_gateway": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:cosmic_gateway"
+      }
+    },
+    "spatial_prison": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:spatial_prison"
+      }
+    },
+    "universal_teleportation": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:universal_teleportation"
+      }
+    }
+  }
+}

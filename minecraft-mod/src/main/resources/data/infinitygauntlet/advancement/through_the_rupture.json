@@ -1,0 +1,23 @@
+{
+  "parent": "infinitygauntlet:first_rupture",
+  "display": {
+    "icon": {
+      "id": "minecraft:ender_pearl"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.through_the_rupture"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.through_the_rupture.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "travel": {
+      "trigger": "infinitygauntlet:portal_travel"
+    }
+  }
+}

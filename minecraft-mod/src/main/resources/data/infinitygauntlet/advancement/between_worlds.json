@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:through_the_rupture",
+  "display": {
+    "icon": {
+      "id": "minecraft:crying_obsidian"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.between_worlds"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.between_worlds.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "travel": {
+      "trigger": "infinitygauntlet:portal_travel",
+      "conditions": {
+        "value": "cross_dimension"
+      }
+    }
+  }
+}

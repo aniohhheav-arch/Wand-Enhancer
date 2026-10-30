@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:root",
+  "display": {
+    "icon": {
+      "id": "infinitygauntlet:infinity_gauntlet"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.inevitable"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.inevitable.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "complete": {
+      "trigger": "infinitygauntlet:stone_installed",
+      "conditions": {
+        "value": "all"
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "display": {
+    "icon": {
+      "id": "infinitygauntlet:infinity_gauntlet"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.root"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.root.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false,
+    "background": "minecraft:textures/block/gilded_blackstone.png"
+  },
+  "criteria": {
+    "has_gauntlet": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "infinitygauntlet:infinity_gauntlet"
+          }
+        ]
+      }
+    },
+    "has_stone": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "infinitygauntlet:space_stone",
+              "infinitygauntlet:mind_stone",
+              "infinitygauntlet:reality_stone",
+              "infinitygauntlet:power_stone",
+              "infinitygauntlet:time_stone",
+              "infinitygauntlet:soul_stone"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_gauntlet",
+      "has_stone"
+    ]
+  ]
+}

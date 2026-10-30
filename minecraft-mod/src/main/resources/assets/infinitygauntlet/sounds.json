@@ -1,0 +1,146 @@
+{
+  "space_portal_open": {
+    "subtitle": "subtitles.infinitygauntlet.space_portal_open",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_portal_open"
+      }
+    ]
+  },
+  "space_portal_close": {
+    "subtitle": "subtitles.infinitygauntlet.space_portal_close",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_portal_close"
+      }
+    ]
+  },
+  "space_portal_ambient": {
+    "subtitle": "subtitles.infinitygauntlet.space_portal_ambient",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_portal_ambient"
+      }
+    ]
+  },
+  "space_teleport": {
+    "subtitle": "subtitles.infinitygauntlet.space_teleport",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_teleport"
+      }
+    ]
+  },
+  "space_blink": {
+    "subtitle": "subtitles.infinitygauntlet.space_blink",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_blink"
+      }
+    ]
+  },
+  "space_bolt_fire": {
+    "subtitle": "subtitles.infinitygauntlet.space_bolt_fire",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_bolt_fire"
+      }
+    ]
+  },
+  "space_bolt_impact": {
+    "subtitle": "subtitles.infinitygauntlet.space_bolt_impact",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_bolt_impact"
+      }
+    ]
+  },
+  "space_rift": {
+    "subtitle": "subtitles.infinitygauntlet.space_rift",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_rift"
+      }
+    ]
+  },
+  "space_shockwave": {
+    "subtitle": "subtitles.infinitygauntlet.space_shockwave",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_shockwave"
+      }
+    ]
+  },
+  "space_compression": {
+    "subtitle": "subtitles.infinitygauntlet.space_compression",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_compression"
+      }
+    ]
+  },
+  "space_arc": {
+    "subtitle": "subtitles.infinitygauntlet.space_arc",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_arc"
+      }
+    ]
+  },
+  "space_prison": {
+    "subtitle": "subtitles.infinitygauntlet.space_prison",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_prison"
+      }
+    ]
+  },
+  "space_swap": {
+    "subtitle": "subtitles.infinitygauntlet.space_swap",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:space_swap"
+      }
+    ]
+  },
+  "gauntlet_charge": {
+    "subtitle": "subtitles.infinitygauntlet.gauntlet_charge",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:gauntlet_charge"
+      }
+    ]
+  },
+  "stone_insert": {
+    "subtitle": "subtitles.infinitygauntlet.stone_insert",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:stone_insert"
+      }
+    ]
+  },
+  "gauntlet_cast": {
+    "subtitle": "subtitles.infinitygauntlet.gauntlet_cast",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:gauntlet_cast"
+      }
+    ]
+  },
+  "gauntlet_fail": {
+    "subtitle": "subtitles.infinitygauntlet.gauntlet_fail",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:gauntlet_fail"
+      }
+    ]
+  },
+  "gauntlet_select": {
+    "subtitle": "subtitles.infinitygauntlet.gauntlet_select",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:gauntlet_select"
+      }
+    ]
+  }
+}

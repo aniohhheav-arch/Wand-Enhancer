@@ -1,0 +1,20 @@
+{
+  "subtitles.infinitygauntlet.gauntlet_cast": "Gauntlet unleashes power",
+  "subtitles.infinitygauntlet.gauntlet_charge": "Gauntlet charges",
+  "subtitles.infinitygauntlet.gauntlet_fail": "Gauntlet fizzles",
+  "subtitles.infinitygauntlet.gauntlet_select": "Ability selected",
+  "subtitles.infinitygauntlet.space_arc": "Energy arc crackles",
+  "subtitles.infinitygauntlet.space_blink": "Blink",
+  "subtitles.infinitygauntlet.space_bolt_fire": "Space bolt fires",
+  "subtitles.infinitygauntlet.space_bolt_impact": "Space bolt impacts",
+  "subtitles.infinitygauntlet.space_compression": "Space compresses",
+  "subtitles.infinitygauntlet.space_portal_ambient": "Dimensional rupture rumbles",
+  "subtitles.infinitygauntlet.space_portal_close": "Dimensional rupture implodes",
+  "subtitles.infinitygauntlet.space_portal_open": "Dimensional rupture tears open",
+  "subtitles.infinitygauntlet.space_prison": "Spatial prison locks",
+  "subtitles.infinitygauntlet.space_rift": "Spatial rift grinds",
+  "subtitles.infinitygauntlet.space_shockwave": "Spatial shockwave",
+  "subtitles.infinitygauntlet.space_swap": "Positions swap",
+  "subtitles.infinitygauntlet.space_teleport": "Space folds",
+  "subtitles.infinitygauntlet.stone_insert": "Infinity Stone locks into place"
+}

@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:tesseract",
+  "display": {
+    "icon": {
+      "id": "minecraft:ender_eye"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.first_rupture"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.first_rupture.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "cast": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:dimensional_portal"
+      }
+    }
+  }
+}

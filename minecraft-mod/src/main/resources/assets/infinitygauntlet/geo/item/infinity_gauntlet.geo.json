@@ -1,0 +1,574 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.infinity_gauntlet",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 3,
+    "visible_bounds_height": 3,
+    "visible_bounds_offset": [
+     0,
+     1,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "cuff",
+     "pivot": [
+      0,
+      0,
+      0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -4,
+        0,
+        -3
+       ],
+       "size": [
+        8,
+        6,
+        6
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -4.5,
+        4.5,
+        -3.5
+       ],
+       "size": [
+        9,
+        1.5,
+        7
+       ],
+       "uv": [
+        28,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -4.5,
+        0,
+        -3.5
+       ],
+       "size": [
+        9,
+        1,
+        7
+       ],
+       "uv": [
+        60,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "hand",
+     "pivot": [
+      0,
+      6,
+      0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -4,
+        6,
+        -2.5
+       ],
+       "size": [
+        8,
+        8,
+        5
+       ],
+       "uv": [
+        92,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -3,
+        7,
+        -3
+       ],
+       "size": [
+        6,
+        6,
+        1
+       ],
+       "uv": [
+        0,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "stone_mind",
+     "pivot": [
+      0,
+      10,
+      -3
+     ],
+     "parent": "hand",
+     "cubes": [
+      {
+       "origin": [
+        -1,
+        9,
+        -4
+       ],
+       "size": [
+        2,
+        2,
+        1
+       ],
+       "uv": [
+        14,
+        13
+       ],
+       "inflate": 0.1
+      }
+     ]
+    },
+    {
+     "name": "index",
+     "pivot": [
+      -3,
+      14,
+      0
+     ],
+     "parent": "hand",
+     "cubes": [
+      {
+       "origin": [
+        -3.9,
+        14,
+        -1
+       ],
+       "size": [
+        1.8,
+        3,
+        2
+       ],
+       "uv": [
+        20,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "index_tip",
+     "pivot": [
+      -3,
+      17,
+      0
+     ],
+     "parent": "index",
+     "cubes": [
+      {
+       "origin": [
+        -3.8,
+        17,
+        -0.9
+       ],
+       "size": [
+        1.6,
+        3,
+        1.8
+       ],
+       "uv": [
+        28,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "stone_power",
+     "pivot": [
+      -3,
+      15.5,
+      -1
+     ],
+     "parent": "index",
+     "cubes": [
+      {
+       "origin": [
+        -3.5,
+        15,
+        -1.8
+       ],
+       "size": [
+        1,
+        1,
+        1
+       ],
+       "uv": [
+        36,
+        13
+       ],
+       "inflate": 0.15
+      }
+     ]
+    },
+    {
+     "name": "middle",
+     "pivot": [
+      -1,
+      14,
+      0
+     ],
+     "parent": "hand",
+     "cubes": [
+      {
+       "origin": [
+        -1.9,
+        14,
+        -1
+       ],
+       "size": [
+        1.8,
+        4,
+        2
+       ],
+       "uv": [
+        40,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "middle_tip",
+     "pivot": [
+      -1,
+      18,
+      0
+     ],
+     "parent": "middle",
+     "cubes": [
+      {
+       "origin": [
+        -1.8,
+        18,
+        -0.9
+       ],
+       "size": [
+        1.6,
+        3,
+        1.8
+       ],
+       "uv": [
+        48,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "stone_space",
+     "pivot": [
+      -1,
+      15.5,
+      -1
+     ],
+     "parent": "middle",
+     "cubes": [
+      {
+       "origin": [
+        -1.5,
+        15,
+        -1.8
+       ],
+       "size": [
+        1,
+        1,
+        1
+       ],
+       "uv": [
+        56,
+        13
+       ],
+       "inflate": 0.15
+      }
+     ]
+    },
+    {
+     "name": "ring",
+     "pivot": [
+      1,
+      14,
+      0
+     ],
+     "parent": "hand",
+     "cubes": [
+      {
+       "origin": [
+        0.1,
+        14,
+        -1
+       ],
+       "size": [
+        1.8,
+        4,
+        2
+       ],
+       "uv": [
+        60,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "ring_tip",
+     "pivot": [
+      1,
+      18,
+      0
+     ],
+     "parent": "ring",
+     "cubes": [
+      {
+       "origin": [
+        0.2,
+        18,
+        -0.9
+       ],
+       "size": [
+        1.6,
+        3,
+        1.8
+       ],
+       "uv": [
+        68,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "stone_reality",
+     "pivot": [
+      1,
+      15.5,
+      -1
+     ],
+     "parent": "ring",
+     "cubes": [
+      {
+       "origin": [
+        0.5,
+        15,
+        -1.8
+       ],
+       "size": [
+        1,
+        1,
+        1
+       ],
+       "uv": [
+        76,
+        13
+       ],
+       "inflate": 0.15
+      }
+     ]
+    },
+    {
+     "name": "pinky",
+     "pivot": [
+      3,
+      14,
+      0
+     ],
+     "parent": "hand",
+     "cubes": [
+      {
+       "origin": [
+        2.1,
+        14,
+        -1
+       ],
+       "size": [
+        1.8,
+        3,
+        2
+       ],
+       "uv": [
+        80,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "pinky_tip",
+     "pivot": [
+      3,
+      17,
+      0
+     ],
+     "parent": "pinky",
+     "cubes": [
+      {
+       "origin": [
+        2.2,
+        17,
+        -0.9
+       ],
+       "size": [
+        1.6,
+        3,
+        1.8
+       ],
+       "uv": [
+        88,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "stone_soul",
+     "pivot": [
+      3,
+      15.5,
+      -1
+     ],
+     "parent": "pinky",
+     "cubes": [
+      {
+       "origin": [
+        2.5,
+        15,
+        -1.8
+       ],
+       "size": [
+        1,
+        1,
+        1
+       ],
+       "uv": [
+        96,
+        13
+       ],
+       "inflate": 0.15
+      }
+     ]
+    },
+    {
+     "name": "thumb",
+     "pivot": [
+      -4,
+      8,
+      0
+     ],
+     "parent": "hand",
+     "rotation": [
+      0,
+      0,
+      25
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -6,
+        8,
+        -1
+       ],
+       "size": [
+        2,
+        4,
+        2
+       ],
+       "uv": [
+        100,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "thumb_tip",
+     "pivot": [
+      -5,
+      12,
+      0
+     ],
+     "parent": "thumb",
+     "cubes": [
+      {
+       "origin": [
+        -5.9,
+        12,
+        -0.9
+       ],
+       "size": [
+        1.8,
+        3,
+        1.8
+       ],
+       "uv": [
+        108,
+        13
+       ]
+      }
+     ]
+    },
+    {
+     "name": "stone_time",
+     "pivot": [
+      -5,
+      10,
+      -1
+     ],
+     "parent": "thumb",
+     "cubes": [
+      {
+       "origin": [
+        -5.5,
+        9.5,
+        -1.8
+       ],
+       "size": [
+        1,
+        1,
+        1
+       ],
+       "uv": [
+        116,
+        13
+       ],
+       "inflate": 0.15
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
