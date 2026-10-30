@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 /** Wand evolution and customisation interface. All changes are requests; the server validates costs. */
 public class WandScreen extends Screen {
-    private static final int ROW_H = 24;
+    private static final int ROW_H = 20;
     private Button evolve;
     private int left, top;
 
@@ -39,15 +39,15 @@ public class WandScreen extends Screen {
     @Override
     protected void init() {
         left = width / 2 - 170;
-        top = Math.max(14, height / 2 - 118);
+        top = Math.max(8, (height - 218) / 2);
         for (int f = 0; f < WandStyle.FIELDS; f++) {
             final int field = f;
-            int y = top + 62 + f * ROW_H;
-            addRenderableWidget(Button.builder(Component.literal("<"), b -> step(field, -1)).bounds(left + 150, y, 20, 20).build());
-            addRenderableWidget(Button.builder(Component.literal(">"), b -> step(field, 1)).bounds(left + 320, y, 20, 20).build());
+            int y = top + 44 + f * ROW_H;
+            addRenderableWidget(Button.builder(Component.literal("<"), b -> step(field, -1)).bounds(left + 150, y, 20, 18).build());
+            addRenderableWidget(Button.builder(Component.literal(">"), b -> step(field, 1)).bounds(left + 320, y, 20, 18).build());
         }
         evolve = addRenderableWidget(Button.builder(Component.translatable("screen.arcana.evolve"), b -> PacketDistributor.sendToServer(new Net.EvolveReq()))
-            .bounds(left, top + 62 + 6 * ROW_H + 6, 130, 20).build());
+            .bounds(left, top + 44 + 6 * ROW_H + 6, 130, 20).build());
     }
 
     private void step(int field, int dir) {
@@ -104,7 +104,7 @@ public class WandScreen extends Screen {
             float y = height - ((i * 53 + t * (0.3f + (i % 7) * 0.06f)) % height);
             g.fill((int) x, (int) y, (int) x + 2, (int) y + 2, Draw.argb(rgb, 50 + (i * 13) % 100));
         }
-        int pw = 350, ph = 62 + 7 * ROW_H + 30;
+        int pw = 350, ph = 218;
         g.fill(left - 10, top - 10, left + pw, top + ph, 0xE00B0716);
         g.renderOutline(left - 10, top - 10, pw + 10, ph + 10, Draw.argb(rgb, 160));
         g.fillGradient(left - 10, top - 10, left + pw, top - 8, Draw.argb(rgb, 255), Draw.argb(rgb, 30));
@@ -123,14 +123,14 @@ public class WandScreen extends Screen {
 
         WandStyle st = WandItem.styleOf(w);
         for (int f = 0; f < WandStyle.FIELDS; f++) {
-            int y = top + 62 + f * ROW_H;
-            g.drawString(font, Component.translatable("customize.arcana.field." + f), left, y + 6, 0xFFB9B2D6, false);
+            int y = top + 44 + f * ROW_H;
+            g.drawString(font, Component.translatable("customize.arcana.field." + f), left, y + 5, 0xFFB9B2D6, false);
             Component name = valueName(f, st.get(f));
-            g.drawCenteredString(font, name, left + 245, y + 6, 0xFFFFFFFF);
+            g.drawCenteredString(font, name, left + 245, y + 5, 0xFFFFFFFF);
         }
 
         // evolution requirements
-        int y = top + 62 + 6 * ROW_H + 4;
+        int y = top + 44 + 6 * ROW_H + 2;
         if (school == School.NONE || stage >= 2) {
             evolve.active = false;
             g.drawString(font, Component.translatable(school == School.NONE ? "screen.arcana.no_evolution" : "screen.arcana.max_stage"), left + 140, y + 6, 0xFFFFD27F, false);
@@ -147,7 +147,7 @@ public class WandScreen extends Screen {
             g.drawString(font, Component.translatable("screen.arcana.req.item", 1, rare.getDescription()), left + 140, y + 9, okR ? 0xFF8CFF8C : 0xFFFF7777, false);
             g.drawString(font, Component.translatable("screen.arcana.req.item", needC, crystal.getDescription()), left + 140, y + 19, okC ? 0xFF8CFF8C : 0xFFFF7777, false);
         }
-        g.drawString(font, Component.translatable("screen.arcana.cost_hint"), left, top + ph - 22, 0xFF8A83A8, false);
+        g.drawString(font, Component.translatable("screen.arcana.cost_hint"), left, top + ph - 12, 0xFF8A83A8, false);
         super.render(g, mx, my, pt);
     }
 }
