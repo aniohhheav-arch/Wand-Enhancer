@@ -116,7 +116,10 @@ public final class ClientShots {
             case 348 -> shot("11_wand_screen");
             case 350 -> mc.setScreen(null);
             case 355 -> server(sp -> sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.NONE, 2)));
-            case 365 -> mc.setScreen(new SpellWheelScreen(mc.player.getMainHandItem()));
+            case 365 -> {
+                SpellWheelScreen.keepOpenForTests = true;
+                mc.setScreen(new SpellWheelScreen(mc.player.getMainHandItem()));
+            }
             case 378 -> shot("12_forbidden_wheel");
             case 380 -> mc.setScreen(null);
             case 400 -> {

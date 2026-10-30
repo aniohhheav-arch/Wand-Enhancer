@@ -26,7 +26,12 @@ public class SpellWheelScreen extends Screen {
         this.spells = Spell.forWand(WandItem.schoolOf(wand), WandItem.stageOf(wand));
     }
 
+    /** Dev/test hook: keep the wheel open without the key held. */
+    public static boolean keepOpenForTests;
+
     @Override public boolean isPauseScreen() { return false; }
+
+    @Override public void renderBackground(GuiGraphics g, int mx, int my, float pt) {}
 
     private boolean available(Spell s) {
         if (!s.isMimic()) return true;
@@ -35,7 +40,7 @@ public class SpellWheelScreen extends Screen {
 
     @Override
     public void tick() {
-        if (!isWheelKeyDown()) {
+        if (!keepOpenForTests && !isWheelKeyDown()) {
             confirm();
             onClose();
         }

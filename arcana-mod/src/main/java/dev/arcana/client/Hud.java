@@ -53,14 +53,14 @@ public final class Hud implements LayeredDraw.Layer {
         g.drawString(mc.font, stageName, ix + is + 8, iy + 12, Draw.argb(rgb, 255), false);
 
         // mana bar
-        int bx = ix + is + 8, by = iy + 25, bw = pw - bx - 8, bh = 8;
+        int bx = ix + is + 8, by = iy + 25, bw = pw - bx - 8, bh = 11;
         g.fill(bx - 1, by - 1, bx + bw + 1, by + bh + 1, 0xFF05030C);
         float frac = ClientState.max <= 0 ? 0 : Math.min(1f, ClientState.shownMana / ClientState.max);
         int fw = (int) (bw * frac);
         g.fillGradient(bx, by, bx + fw, by + bh, 0xFF5B8CFF, 0xFFB46CFF);
         int shimmer = (int) ((t * 1.5f) % (bw + 20)) - 10;
         if (fw > 4) g.fill(Math.max(bx, bx + shimmer), by, Math.min(bx + fw, bx + shimmer + 6), by + bh, 0x40FFFFFF);
-        g.drawString(mc.font, (int) ClientState.mana + "/" + (int) ClientState.max, bx + 2, by + 9, 0xFFB9C7FF, false);
+        g.drawCenteredString(mc.font, (int) ClientState.mana + "/" + (int) ClientState.max, bx + bw / 2, by + 2, 0xFFFFFFFF);
 
         // secondary / special / ultimate slots
         SpellSlot[] slots = {SpellSlot.SECONDARY, SpellSlot.SPECIAL, SpellSlot.ULTIMATE};

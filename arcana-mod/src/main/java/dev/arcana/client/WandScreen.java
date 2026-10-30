@@ -39,7 +39,7 @@ public class WandScreen extends Screen {
     @Override
     protected void init() {
         left = width / 2 - 170;
-        top = height / 2 - 100;
+        top = Math.max(14, height / 2 - 118);
         for (int f = 0; f < WandStyle.FIELDS; f++) {
             final int field = f;
             int y = top + 62 + f * ROW_H;
@@ -47,7 +47,7 @@ public class WandScreen extends Screen {
             addRenderableWidget(Button.builder(Component.literal(">"), b -> step(field, 1)).bounds(left + 320, y, 20, 20).build());
         }
         evolve = addRenderableWidget(Button.builder(Component.translatable("screen.arcana.evolve"), b -> PacketDistributor.sendToServer(new Net.EvolveReq()))
-            .bounds(left, top + 62 + 5 * ROW_H, 140, 20).build());
+            .bounds(left, top + 62 + 6 * ROW_H + 6, 130, 20).build());
     }
 
     private void step(int field, int dir) {
@@ -81,6 +81,9 @@ public class WandScreen extends Screen {
 
     @Override public boolean isPauseScreen() { return false; }
 
+    /** The panel paints its own backdrop; vanilla's blur would otherwise be drawn over the content. */
+    @Override public void renderBackground(GuiGraphics g, int mx, int my, float pt) {}
+
     @Override
     public void tick() {
         if (wand().isEmpty()) onClose();
@@ -101,7 +104,7 @@ public class WandScreen extends Screen {
             float y = height - ((i * 53 + t * (0.3f + (i % 7) * 0.06f)) % height);
             g.fill((int) x, (int) y, (int) x + 2, (int) y + 2, Draw.argb(rgb, 50 + (i * 13) % 100));
         }
-        int pw = 350, ph = 62 + 6 * ROW_H + 40;
+        int pw = 350, ph = 62 + 7 * ROW_H + 30;
         g.fill(left - 10, top - 10, left + pw, top + ph, 0xE00B0716);
         g.renderOutline(left - 10, top - 10, pw + 10, ph + 10, Draw.argb(rgb, 160));
         g.fillGradient(left - 10, top - 10, left + pw, top - 8, Draw.argb(rgb, 255), Draw.argb(rgb, 30));
@@ -127,10 +130,10 @@ public class WandScreen extends Screen {
         }
 
         // evolution requirements
-        int y = top + 62 + 5 * ROW_H + 0;
+        int y = top + 62 + 6 * ROW_H + 4;
         if (school == School.NONE || stage >= 2) {
             evolve.active = false;
-            g.drawString(font, Component.translatable(school == School.NONE ? "screen.arcana.no_evolution" : "screen.arcana.max_stage"), left + 150, y + 6, 0xFFFFD27F, false);
+            g.drawString(font, Component.translatable(school == School.NONE ? "screen.arcana.no_evolution" : "screen.arcana.max_stage"), left + 140, y + 6, 0xFFFFD27F, false);
         } else {
             int needM = stage == 0 ? ArcanaConfig.AWAKEN_MASTERY.get() : ArcanaConfig.ASCEND_MASTERY.get();
             int needC = stage == 0 ? ArcanaConfig.AWAKEN_CRYSTALS.get() : ArcanaConfig.ASCEND_CRYSTALS.get();
@@ -140,11 +143,11 @@ public class WandScreen extends Screen {
             boolean creative = minecraft.player.isCreative();
             boolean okM = lvl >= needM, okR = creative || count(rare) >= 1, okC = creative || count(crystal) >= needC;
             evolve.active = okM && okR && okC;
-            g.drawString(font, Component.translatable("screen.arcana.req.mastery", needM), left + 150, y - 1, okM ? 0xFF8CFF8C : 0xFFFF7777, false);
-            g.drawString(font, Component.translatable("screen.arcana.req.item", 1, rare.getDescription()), left + 150, y + 9, okR ? 0xFF8CFF8C : 0xFFFF7777, false);
-            g.drawString(font, Component.translatable("screen.arcana.req.item", needC, crystal.getDescription()), left + 150, y + 19, okC ? 0xFF8CFF8C : 0xFFFF7777, false);
+            g.drawString(font, Component.translatable("screen.arcana.req.mastery", needM), left + 140, y - 1, okM ? 0xFF8CFF8C : 0xFFFF7777, false);
+            g.drawString(font, Component.translatable("screen.arcana.req.item", 1, rare.getDescription()), left + 140, y + 9, okR ? 0xFF8CFF8C : 0xFFFF7777, false);
+            g.drawString(font, Component.translatable("screen.arcana.req.item", needC, crystal.getDescription()), left + 140, y + 19, okC ? 0xFF8CFF8C : 0xFFFF7777, false);
         }
-        g.drawString(font, Component.translatable("screen.arcana.cost_hint"), left, top + ph - 24, 0xFF8A83A8, false);
+        g.drawString(font, Component.translatable("screen.arcana.cost_hint"), left, top + ph - 22, 0xFF8A83A8, false);
         super.render(g, mx, my, pt);
     }
 }
