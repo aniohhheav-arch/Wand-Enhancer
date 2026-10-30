@@ -548,6 +548,10 @@ public final class BreachManager {
         }
         if (!s.entered) {
             TimeManager.apply(t, 0f, 3); // held at the tear until the caster passes through
+        } else if (t.level() instanceof ServerLevel level) {
+            // Vanilla stops ticking every entity in a level that has had no players for 15 seconds. With the caster in
+            // the chamber the target's world is usually empty, so keep it awake: the target must stay live, not frozen.
+            level.resetEmptyTime();
         }
         if (t.tickCount % 100 == 0) {
             if (s.has(SpecimenEntity.FLAG_LEVITATING)) {
