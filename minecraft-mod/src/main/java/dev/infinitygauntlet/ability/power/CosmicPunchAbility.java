@@ -39,6 +39,12 @@ public final class CosmicPunchAbility extends Ability {
         }
         ServerPlayer player = ctx.player();
         ServerLevel level = ctx.level();
+        if (dev.infinitygauntlet.finisher.FinisherManager.canFinish(player, target, CombatFx.damage(DAMAGE))) {
+            // a weakened target gets the full signature execution instead of a plain blow
+            dev.infinitygauntlet.finisher.FinisherManager.start(player, target, dev.infinitygauntlet.finisher.FinisherType.COSMIC_PUNCH);
+            PowerFx.anim(ctx, "finisher_punch");
+            return CastResult.SUCCESS;
+        }
         PowerFx.pose(player, PowerPose.PUNCH, 18);
         PowerFx.anim(ctx, "power_punch");
         Vfx.sound(level, player.position(), ModSounds.POWER_WHOOSH, 2f, 0.8f);

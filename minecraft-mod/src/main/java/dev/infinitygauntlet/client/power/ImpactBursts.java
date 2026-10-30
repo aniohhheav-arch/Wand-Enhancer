@@ -124,6 +124,18 @@ final class ImpactBursts {
                 Particles.glow(c, Vec3.ZERO, 0xA032FF, 4f * scale, 8);
             }
             case DISINTEGRATE -> Particles.glow(c, Vec3.ZERO, 0xFFB0F0, 2.2f * scale, 6);
+            case VAPORIZE -> {
+                for (int i = 0; i < Particles.scaled(60); i++) {
+                    Vec3 out = new Vec3(rnd() - 0.5, rnd() - 0.3, rnd() - 0.5).normalize().scale(0.3 + rnd() * 0.6);
+                    Particles.spark(c, out, i % 3 == 0 ? 0xFFFFFF : i % 2 == 0 ? 0xFF4FD8 : 0xA032FF, 0.16f);
+                    if (i % 4 == 0) {
+                        Particles.mote(c.add(out), out.scale(0.3), 0xFF90E8, 0.12f, 40);
+                    }
+                }
+                for (int i = 0; i < Particles.scaled(10); i++) {
+                    Particles.smoke(c, new Vec3(rnd() - 0.5, rnd() * 0.5, rnd() - 0.5).scale(0.2), 0x3A0A40, 1.2f * scale, 50);
+                }
+            }
             default -> {
             }
         }

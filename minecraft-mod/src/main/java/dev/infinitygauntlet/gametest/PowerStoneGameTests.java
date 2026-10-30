@@ -6,7 +6,9 @@ import dev.infinitygauntlet.ability.Ability;
 import dev.infinitygauntlet.ability.AbilityCaster;
 import dev.infinitygauntlet.entity.power.GravityCoreEntity;
 import dev.infinitygauntlet.entity.power.PowerOrbEntity;
-import dev.infinitygauntlet.entity.power.SeveredHeadEntity;
+import dev.infinitygauntlet.finisher.CosmicPunchTimeline;
+import dev.infinitygauntlet.finisher.FinisherManager;
+import dev.infinitygauntlet.time.TimeManager;
 import dev.infinitygauntlet.item.InfinityGauntletItem;
 import dev.infinitygauntlet.power.PowerOverload;
 import dev.infinitygauntlet.registry.ModEntities;
@@ -86,16 +88,42 @@ public final class PowerStoneGameTests {
         });
     }
 
-    @GameTest(template = "arena", timeoutTicks = 120, batch = "power_cosmicPunchExecutesAWoundedTarget")
+    @GameTest(template = "arena", timeoutTicks = 200, batch = "power_cosmicPunchExecutesAWoundedTarget")
     public static void cosmicPunchExecutesAWoundedTarget(GameTestHelper helper) {
         ServerPlayer player = caster(helper, 10f);
-        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.HUSK, new BlockPos(8, 2, 5));
+        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.HUSK, new BlockPos(8, 2, 7));
         zombie.setHealth(5f);
+        Vec3 held = zombie.position();
         helper.assertTrue(cast(player, "cosmic_punch"), "cosmic punch finds the zombie");
-        helper.runAfterDelay(20, () -> {
-            helper.assertTrue(!zombie.isAlive(), "the execution killed the wounded zombie");
-            List<SeveredHeadEntity> heads = helper.getLevel().getEntitiesOfClass(SeveredHeadEntity.class, new AABB(zombie.blockPosition()).inflate(16));
-            helper.assertTrue(!heads.isEmpty(), "the finisher knocked the zombie's head off");
+        helper.assertTrue(FinisherManager.busy(player), "a weakened target triggers the Cosmic Punch finisher");
+        helper.assertTrue(!cast(player, "power_beam"), "no other ability can be cast mid-finisher");
+        helper.runAfterDelay(CosmicPunchTimeline.IMPACT + 10, () -> {
+            helper.assertTrue(zombie.isAlive(), "the target survives the punch itself: the overload plays out first");
+            zombie.hurt(helper.getLevel().damageSources().generic(), 100f);
+            helper.assertTrue(zombie.isAlive(), "outside damage cannot cut the sequence short");
+            helper.assertTrue(zombie.position().distanceTo(held) < 0.05, "the target is held in place on the fist");
+            helper.assertTrue(TimeManager.isFrozen(zombie), "the target is frozen during the overload");
+            helper.assertTrue(player.position().distanceTo(zombie.position()) < 1.4, "the caster lunged in to drive the fist through (" + player.position().distanceTo(zombie.position()) + ")");
+        });
+        helper.runAfterDelay(CosmicPunchTimeline.ERUPTION - 2, () -> helper.assertTrue(zombie.isAlive(), "still alive right before the eruption"));
+        helper.runAfterDelay(CosmicPunchTimeline.ERUPTION + 3, () -> helper.assertTrue(!zombie.isAlive(), "the eruption finished the target"));
+        helper.runAfterDelay(CosmicPunchTimeline.DURATION + 3, () -> {
+            helper.assertTrue(!FinisherManager.busy(player), "the caster is released when the finisher ends");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "arena", timeoutTicks = 120, batch = "power_finisherInterruptedCleanly")
+    public static void finisherInterruptedCleanly(GameTestHelper helper) {
+        ServerPlayer player = caster(helper, 10f);
+        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.HUSK, new BlockPos(8, 2, 7));
+        zombie.setHealth(5f);
+        helper.assertTrue(cast(player, "cosmic_punch"), "the finisher starts");
+        helper.runAfterDelay(30, () -> player.kill());
+        helper.runAfterDelay(40, () -> {
+            helper.assertTrue(!FinisherManager.busy(player), "the dead caster's finisher was cancelled");
+            helper.assertTrue(zombie.isAlive(), "the target was released, not killed");
+            helper.assertTrue(!TimeManager.isFrozen(zombie), "the target is no longer frozen");
             helper.succeed();
         });
     }

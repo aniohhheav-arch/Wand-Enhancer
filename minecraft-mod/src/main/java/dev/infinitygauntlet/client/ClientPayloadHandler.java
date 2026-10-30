@@ -55,6 +55,10 @@ public final class ClientPayloadHandler {
         dev.infinitygauntlet.client.power.PowerPoses.set(payload);
     }
 
+    public static void finisher(dev.infinitygauntlet.network.FinisherPayload payload) {
+        dev.infinitygauntlet.client.finisher.ClientFinishers.handle(payload);
+    }
+
     public static void cooldowns(CooldownSyncPayload payload) {
         ClientCooldowns.sync(payload.remaining());
     }

@@ -62,6 +62,10 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue POWER_DISMEMBERMENT;
     public static final ModConfigSpec.BooleanValue POWER_SLOW_MOTION;
 
+    public static final ModConfigSpec.BooleanValue FINISHERS_ENABLED;
+    public static final ModConfigSpec.DoubleValue FINISHER_HEALTH_THRESHOLD;
+    public static final ModConfigSpec.BooleanValue FINISHERS_ON_PLAYERS;
+
     private static final Map<String, ModConfigSpec.IntValue> COOLDOWNS = new HashMap<>();
 
     static {
@@ -129,6 +133,15 @@ public final class ServerConfig {
         POSSESSION_CREEPER_DETONATION = b.comment("Whether a possessed creeper can be detonated (explosions follow the mobGriefing rule).")
                 .define("creeperDetonation", true);
         NEURAL_OVERRIDE_SECONDS = b.defineInRange("neuralOverrideSeconds", 10, 1, 120);
+        b.pop();
+
+        b.push("finishers");
+        FINISHERS_ENABLED = b.comment("Cinematic finishers: abilities that can finish a weakened target play a full execution sequence.")
+                .define("enabled", true);
+        FINISHER_HEALTH_THRESHOLD = b.comment("A target at or below this fraction of its health can be finished.")
+                .defineInRange("healthThreshold", 0.35, 0.0, 1.0);
+        FINISHERS_ON_PLAYERS = b.comment("Whether players can be finished (it locks them in place for several seconds).")
+                .define("onPlayers", false);
         b.pop();
 
         b.push("power_stone");

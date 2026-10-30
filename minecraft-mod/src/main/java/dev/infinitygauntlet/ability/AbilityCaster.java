@@ -41,6 +41,9 @@ public final class AbilityCaster {
      */
     public static boolean cast(ServerPlayer player, InteractionHand hand, ItemStack stack, Ability ability, boolean ignoreCooldown) {
         ServerLevel level = player.serverLevel();
+        if (dev.infinitygauntlet.finisher.FinisherManager.busy(player)) {
+            return false; // mid-finisher: the sequence owns the caster until it ends
+        }
         PlayerPowerData data = player.getData(ModAttachments.POWER_DATA);
         long now = level.getGameTime();
         long end = data.cooldownEnd(ability.id());

@@ -93,6 +93,9 @@ public final class TimeStoneGameTests {
     public static void rewindReturnsAnEntityAlongItsPath(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         player.getInventory().add(InfinityGauntletItem.fullGauntlet());
+        // history is only recorded near a Time Stone carrier: keep the player in the arena, not at the world spawn
+        Vec3 inArena = helper.absoluteVec(new Vec3(8.5, 2, 2.5));
+        player.moveTo(inArena.x, inArena.y, inArena.z);
         Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(8, 1, 4));
         Vec3 start = zombie.position();
         for (int i = 1; i <= 40; i++) {

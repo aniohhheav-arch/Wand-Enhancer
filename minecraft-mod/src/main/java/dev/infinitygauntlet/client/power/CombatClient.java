@@ -202,6 +202,14 @@ public final class CombatClient {
         pose.pushPose();
         float pt = event.getPartialTick();
         float h = e.getBbHeight();
+        var asCaster = dev.infinitygauntlet.client.finisher.ClientFinishers.asCaster(e);
+        if (asCaster != null) {
+            asCaster.script.transformCaster(pose, e, pt);
+        }
+        var asTarget = dev.infinitygauntlet.client.finisher.ClientFinishers.asTarget(e);
+        if (asTarget != null && d == null) {
+            asTarget.script.transformTarget(pose, e, pt);
+        }
         if (d != null) {
             applyDeath(pose, e, d, clock - d.start + pt, h);
             if (d.headless) {
@@ -215,6 +223,10 @@ public final class CombatClient {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     static void onRenderPost(RenderLivingEvent.Post<?, ?> event) {
+        var asTarget = dev.infinitygauntlet.client.finisher.ClientFinishers.asTarget(event.getEntity());
+        if (asTarget != null && event.getEntity().isAlive()) {
+            asTarget.script.overlayTarget(event.getPoseStack(), event.getMultiBufferSource(), event.getEntity(), event.getPartialTick());
+        }
         event.getPoseStack().popPose();
         if (HIDDEN.remove(event.getEntity().getId()) != null) {
             setHead(event.getRenderer().getModel(), true);
@@ -312,6 +324,7 @@ public final class CombatClient {
                 pose.translate(0, h * 0.5f * (1 - s), 0);
                 pose.scale(s, s, s);
             }
+            case VAPORIZE -> pose.scale(0.0001f, 0.0001f, 0.0001f); // erupted: nothing is left to fall
             case EXECUTION -> {
                 // a beat of rigid stillness, then thrown back, folding at the waist
                 float snap = Mth.clamp((age - 2) / 4f, 0, 1);

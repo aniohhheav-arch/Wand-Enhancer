@@ -34,6 +34,7 @@ public final class ModNetwork {
         registrar.playToClient(CombatPayload.TYPE, CombatPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.combat(payload));
         registrar.playToClient(CinematicPayload.TYPE, CinematicPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.cinematic(payload));
         registrar.playToClient(PowerPosePayload.TYPE, PowerPosePayload.CODEC, (payload, ctx) -> ClientPayloadHandler.powerPose(payload));
+        registrar.playToClient(FinisherPayload.TYPE, FinisherPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.finisher(payload));
         registrar.playToClient(CooldownSyncPayload.TYPE, CooldownSyncPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.cooldowns(payload));
     }
 

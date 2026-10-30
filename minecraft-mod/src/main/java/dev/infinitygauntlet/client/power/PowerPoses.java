@@ -40,6 +40,12 @@ public final class PowerPoses {
         public final HumanoidArm gauntletArm;
         public int age;
 
+        /** Ease in over 3 ticks and back out to the vanilla pose over {@link #BLEND_OUT} ticks after the pose ends. */
+        public float weight(float pt) {
+            float t = age + pt;
+            return PowerArmPose.smooth(t / 3f) * PowerArmPose.smooth((ticks + BLEND_OUT - t) / BLEND_OUT);
+        }
+
         State(PowerPose pose, int ticks, HumanoidArm gauntletArm) {
             this.pose = pose;
             this.ticks = ticks;
@@ -47,6 +53,7 @@ public final class PowerPoses {
         }
     }
 
+    static final int BLEND_OUT = 6;
     private static final Map<Integer, State> POSES = new HashMap<>();
     private static final Map<Integer, Integer> OVERLOAD = new HashMap<>();
 
@@ -92,7 +99,7 @@ public final class PowerPoses {
         Iterator<State> it = POSES.values().iterator();
         while (it.hasNext()) {
             State s = it.next();
-            if (++s.age > s.ticks) {
+            if (++s.age > s.ticks + BLEND_OUT) {
                 it.remove();
             }
         }
@@ -132,6 +139,18 @@ public final class PowerPoses {
     /** Third person: both arms (or just the gauntlet arm) take the Power pose. */
     @SubscribeEvent
     static void onRenderPlayer(RenderPlayerEvent.Pre event) {
+        var finisher = dev.infinitygauntlet.client.finisher.ClientFinishers.asCaster(event.getEntity());
+        if (finisher != null) {
+            // the whole body performs the finisher, squared up to the target
+            PlayerModel<?> model = event.getRenderer().getModel();
+            model.rightArmPose = PowerArmPose.get();
+            model.leftArmPose = PowerArmPose.get();
+            var p = event.getEntity();
+            float yaw = finisher.script.casterYaw();
+            p.yBodyRot = p.yBodyRotO = yaw;
+            p.yHeadRot = p.yHeadRotO = yaw;
+            return;
+        }
         State s = get(event.getEntity().getId());
         if (s == null) {
             return;

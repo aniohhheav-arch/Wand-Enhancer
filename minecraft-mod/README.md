@@ -43,6 +43,7 @@ chamber (milestone 4).
 | **Mind + Space: Consciousness Nexus** remote possession with a real-time camera feed | done |
 | **Mind + Space: Reality Breach**: walk through a rift into a white observation chamber and manipulate the real target | done |
 | **Power Stone: all 9 abilities**, with cinematic finishers, hit reactions, death styles and a cinematic camera | done |
+| Signature finisher system (shared framework); Cosmic Punch finisher | done; the other five stones' finishers are in progress |
 | Mind, Reality and Soul solo abilities | not started; the stones install and render, but have no solo abilities yet |
 | Other stone combinations, full-gauntlet ability set, the Snap sequence | not started |
 
@@ -108,6 +109,23 @@ Every Power Stone ability has its own body pose, gauntlet animation (GeckoLib), 
 ![Planetary Force charge](docs/power-planetary-charge.jpg)
 ![Planetary Force impact](docs/power-planetary-impact.jpg)
 ![Cosmic Barrage](docs/power-barrage.jpg)
+
+### Cinematic finishers
+
+A weakened target (35 % health or less by default) is not just hit: the stone's **signature finisher** plays out in full.
+The caster and target are locked into a choreographed sequence. The caster's real 3D model animates its whole body, the
+camera cuts between directed shots, and the screen is graded in the stone's colour. The caster takes no damage
+and the target cannot die early. If the caster disconnects, dies or changes dimension, or the target unloads, the
+sequence stops and everything is released. Server options live under `finishers` (`enabled`, `healthThreshold`,
+`onPlayers`).
+
+**Cosmic Punch: execution** (5.6 s). The caster rocks back, then lunges in six ticks with a purple energy trail on the
+arm. The gauntlet fist is driven through the target: a white then black impact frame, hit-stop, and energy bursting out
+of its back. The target hangs frozen on the fist while it glows ever brighter pink. Light cracks across its body and
+heartbeat pulses run through it, quickening, with the picture distorting more each beat. The camera slowly orbits,
+then pushes in on its face. At critical mass it erupts in a pink-purple cosmic explosion with a shockwave. The caster
+recoils and draws the arm back out of the dissolving energy. Each body type reacts differently: humanoids are impaled
+and arch back, quadrupeds rear, slimes swell, spiders curl, flyers spin.
 
 ### Combat presentation
 

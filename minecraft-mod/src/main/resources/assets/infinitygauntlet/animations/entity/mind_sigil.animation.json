@@ -1,0 +1,44 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.mind_sigil.idle": {
+   "loop": true,
+   "animation_length": 6.0,
+   "bones": {
+    "frame_0": {
+     "rotation": [
+      0,
+      "query.anim_time * 60",
+      "query.anim_time * 30"
+     ]
+    },
+    "frame_1": {
+     "rotation": [
+      90,
+      0,
+      "query.anim_time * -45"
+     ]
+    },
+    "frame_2": {
+     "rotation": [
+      "query.anim_time * 30",
+      "query.anim_time * -20",
+      0
+     ]
+    },
+    "core": {
+     "rotation": [
+      0,
+      "45 + query.anim_time * 90",
+      0
+     ],
+     "position": [
+      0,
+      "math.sin(query.anim_time * 120) * 0.6",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

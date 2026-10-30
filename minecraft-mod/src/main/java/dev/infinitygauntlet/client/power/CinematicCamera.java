@@ -35,6 +35,21 @@ import org.jetbrains.annotations.Nullable;
 public final class CinematicCamera {
     private static final int BLEND_IN = 5;
     private static final int BLEND_OUT = 7;
+    /** One frame of a directed shot: camera position, the point it looks at, dutch roll (degrees) and FOV multiplier. */
+    public record Shot(Vec3 pos, Vec3 look, float roll, float fovMul) {
+    }
+
+    /** Drives the camera frame by frame (finishers). Returning a null shot ends direction. */
+    public interface Director {
+        @Nullable
+        Shot shot(float pt);
+
+        /** 0..1 how much of the frame belongs to the director (eases in from and back out to the player's view). */
+        float weight(float pt);
+    }
+
+    @Nullable
+    private static Director director;
     @Nullable
     private static CinematicPayload shot;
     private static int age;
@@ -49,16 +64,26 @@ public final class CinematicCamera {
         lastFocus = payload.focus();
     }
 
+    public static void direct(Director d) {
+        if (ClientConfig.cinematicCamera()) {
+            director = d;
+        }
+    }
+
     public static void clear() {
         shot = null;
+        director = null;
     }
 
     public static boolean active() {
-        return shot != null;
+        return shot != null || director != null;
     }
 
     /** 0..1 how much of the frame belongs to the shot. */
     private static float weight(float pt) {
+        if (director != null) {
+            return director.weight(pt);
+        }
         if (shot == null) {
             return 0;
         }
@@ -71,10 +96,17 @@ public final class CinematicCamera {
         if (shot != null && !Minecraft.getInstance().isPaused() && ++age > shot.ticks()) {
             shot = null;
         }
+        if (director != null && director.shot(0) == null) {
+            director = null;
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     static void onFov(ViewportEvent.ComputeFov event) {
+        if (director != null && event.usedConfiguredFov()) {
+            directed(event);
+            return;
+        }
         if (shot == null || !event.usedConfiguredFov()) {
             return;
         }
@@ -119,6 +151,37 @@ public final class CinematicCamera {
         event.setFOV(event.getFOV() * Mth.lerp(w * Mth.sin(t * Mth.PI), 1f, shot.fovMul()));
     }
 
+    private static void directed(ViewportEvent.ComputeFov event) {
+        Minecraft mc = Minecraft.getInstance();
+        float pt = (float) event.getPartialTick();
+        Shot s = director.shot(pt);
+        if (s == null || mc.level == null) {
+            director = null;
+            return;
+        }
+        float w = director.weight(pt);
+        if (w <= 0) {
+            return;
+        }
+        Camera camera = event.getCamera();
+        Vec3 wanted = s.pos();
+        BlockHitResult hit = mc.level.clip(new ClipContext(s.look(), wanted, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, mc.player));
+        if (hit.getType() != HitResult.Type.MISS) {
+            wanted = hit.getLocation().add(s.look().subtract(wanted).normalize().scale(0.3));
+        }
+        Vec3 d = s.look().subtract(wanted);
+        float yaw = (float) (Mth.atan2(d.z, d.x) * Mth.RAD_TO_DEG) - 90f;
+        float pitch = (float) -(Mth.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)) * Mth.RAD_TO_DEG);
+        Vec3 shake = CameraEffects.shakeAngles(pt);
+        camera.setPosition(camera.getPosition().lerp(wanted, w));
+        camera.setRotation(camera.getYRot() + Mth.wrapDegrees(yaw + (float) shake.x - camera.getYRot()) * w,
+                Mth.lerp(w, camera.getXRot(), pitch + (float) shake.y), (s.roll() + (float) shake.z) * w);
+        if (w > 0.15f) {
+            camera.detached = true;
+        }
+        event.setFOV(event.getFOV() * Mth.lerp(w, 1f, s.fovMul()));
+    }
+
     @SubscribeEvent
     static void onRenderHand(RenderHandEvent event) {
         if (weight(event.getPartialTick()) > 0.15f) {
@@ -128,9 +191,11 @@ public final class CinematicCamera {
 
     @SubscribeEvent
     static void onGuiLayer(RenderGuiLayerEvent.Pre event) {
-        if (shot != null && (event.getName().equals(VanillaGuiLayers.CROSSHAIR) || event.getName().equals(VanillaGuiLayers.HOTBAR)
+        if (active() && (event.getName().equals(VanillaGuiLayers.CROSSHAIR) || event.getName().equals(VanillaGuiLayers.HOTBAR)
                 || event.getName().equals(VanillaGuiLayers.EXPERIENCE_BAR) || event.getName().equals(VanillaGuiLayers.PLAYER_HEALTH)
-                || event.getName().equals(VanillaGuiLayers.FOOD_LEVEL) || event.getName().equals(VanillaGuiLayers.ARMOR_LEVEL))) {
+                || event.getName().equals(VanillaGuiLayers.FOOD_LEVEL) || event.getName().equals(VanillaGuiLayers.ARMOR_LEVEL)
+                || event.getName().equals(VanillaGuiLayers.CHAT) || event.getName().equals(VanillaGuiLayers.SELECTED_ITEM_NAME)
+                || event.getName().getNamespace().equals(InfinityGauntlet.MOD_ID) && event.getName().getPath().equals("ability_hud"))) {
             event.setCanceled(true);
         }
     }

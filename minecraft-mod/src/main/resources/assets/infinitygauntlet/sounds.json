@@ -455,6 +455,118 @@
       }
     ]
   },
+  "mind_grab": {
+    "subtitle": "subtitles.infinitygauntlet.mind_grab",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_grab"
+      }
+    ]
+  },
+  "mind_throw": {
+    "subtitle": "subtitles.infinitygauntlet.mind_throw",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_throw"
+      }
+    ]
+  },
+  "mind_control": {
+    "subtitle": "subtitles.infinitygauntlet.mind_control",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_control"
+      }
+    ]
+  },
+  "mind_beam_charge": {
+    "subtitle": "subtitles.infinitygauntlet.mind_beam_charge",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_beam_charge"
+      }
+    ]
+  },
+  "mind_beam": {
+    "subtitle": "subtitles.infinitygauntlet.mind_beam",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_beam"
+      }
+    ]
+  },
+  "mind_pulse": {
+    "subtitle": "subtitles.infinitygauntlet.mind_pulse",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_pulse"
+      }
+    ]
+  },
+  "mind_mark": {
+    "subtitle": "subtitles.infinitygauntlet.mind_mark",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_mark"
+      }
+    ]
+  },
+  "mind_burst": {
+    "subtitle": "subtitles.infinitygauntlet.mind_burst",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_burst"
+      }
+    ]
+  },
+  "mind_field": {
+    "subtitle": "subtitles.infinitygauntlet.mind_field",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_field"
+      }
+    ]
+  },
+  "mind_astral_out": {
+    "subtitle": "subtitles.infinitygauntlet.mind_astral_out",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_astral_out"
+      }
+    ]
+  },
+  "mind_astral_in": {
+    "subtitle": "subtitles.infinitygauntlet.mind_astral_in",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_astral_in"
+      }
+    ]
+  },
+  "mind_shield": {
+    "subtitle": "subtitles.infinitygauntlet.mind_shield",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_shield"
+      }
+    ]
+  },
+  "mind_shield_hit": {
+    "subtitle": "subtitles.infinitygauntlet.mind_shield_hit",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_shield_hit"
+      }
+    ]
+  },
+  "mind_eye": {
+    "subtitle": "subtitles.infinitygauntlet.mind_eye",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:mind_eye"
+      }
+    ]
+  },
   "gauntlet_charge": {
     "subtitle": "subtitles.infinitygauntlet.gauntlet_charge",
     "sounds": [

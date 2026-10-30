@@ -23,12 +23,21 @@ public final class PowerArmPose {
         return PROXY.getValue();
     }
 
+    /** Blend weight of the current pose over the vanilla one: eases in and out instead of snapping. */
+    private static float weight = 1f;
+
     private static void apply(HumanoidModel<?> model, LivingEntity entity, HumanoidArm arm) {
+        float pt = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        dev.infinitygauntlet.client.finisher.ClientFinishers.Active finisher = dev.infinitygauntlet.client.finisher.ClientFinishers.asCaster(entity);
+        if (finisher != null) {
+            finisher.script.poseCaster(model, entity, arm, null, pt);
+            return;
+        }
         PowerPoses.State s = PowerPoses.get(entity.getId());
         if (s == null) {
             return;
         }
-        float pt = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        weight = s.weight(pt);
         float age = s.age + pt;
         float t = Mth.clamp(age / Math.max(1, s.ticks), 0, 1);
         boolean gauntlet = arm == s.gauntletArm;
@@ -89,17 +98,16 @@ public final class PowerArmPose {
             }
             case OVERLOAD -> {
                 if (gauntlet) {
-                    part.xRot = part.xRot * 0.5f - 0.3f + tremble;
-                    part.zRot = out * 0.22f;
+                    set(part, part.xRot * 0.5f - 0.3f + tremble, part.yRot, out * 0.22f);
                 }
             }
         }
     }
 
     private static void set(ModelPart part, float x, float y, float z) {
-        part.xRot = x;
-        part.yRot = y;
-        part.zRot = z;
+        part.xRot = Mth.lerp(weight, part.xRot, x);
+        part.yRot = Mth.lerp(weight, part.yRot, y);
+        part.zRot = Mth.lerp(weight, part.zRot, z);
     }
 
     static float smooth(float x) {

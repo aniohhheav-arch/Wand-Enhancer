@@ -65,7 +65,9 @@ public final class CombatFx {
         /** Burnt away layer by layer into purple ash. */
         DISINTEGRATE,
         /** A finishing blow: frozen for a beat, then thrown back and broken. */
-        EXECUTION
+        EXECUTION,
+        /** Gone in an instant: the body erupts into energy and leaves nothing behind. */
+        VAPORIZE
     }
 
     public static float damage(float base) {
@@ -181,12 +183,14 @@ public final class CombatFx {
         }
     }
 
-    /** Slow motion for every non-player creature around {@code center}. */
-    public static void slowmo(ServerLevel level, Vec3 center, double radius, float scale, int ticks) {
+    /** Slow motion for every non-player creature around {@code center}, except {@code spared}. */
+    public static void slowmo(ServerLevel level, Vec3 center, double radius, float scale, int ticks, Entity... spared) {
         if (!ServerConfig.POWER_SLOW_MOTION.get()) {
             return;
         }
-        for (Entity e : level.getEntities((Entity) null, new AABB(center, center).inflate(radius), e -> e instanceof LivingEntity && !(e instanceof Player))) {
+        java.util.List<Entity> skip = java.util.Arrays.asList(spared);
+        for (Entity e : level.getEntities((Entity) null, new AABB(center, center).inflate(radius),
+                e -> e instanceof LivingEntity && !(e instanceof Player) && !skip.contains(e))) {
             TimeManager.apply(e, scale, ticks, true);
         }
     }

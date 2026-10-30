@@ -525,6 +525,26 @@ def make_gauntlet_animations():
         "hand": {"rotation": kf([(0.0, [0, 0, 0]), (0.25, [-55, 0, 0]), (0.75, [-60, 0, 0]), (1.0, [0, 0, 0])]),
                  "position": kf([(0.0, [0, 0, 0]), (0.25, [0, 2.5, 0]), (1.0, [0, 0, 0])])},
         **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.2, [15, 0, 0]), (0.8, [15, 0, 0]), (1.0, [0, 0, 0])])} for f in fingers4}}}
+    # Cosmic Punch finisher, timed to the 112-tick sequence: clench, drive, hold through the overload, open on retract
+    anims["animation.infinity_gauntlet.finisher_punch"] = {"animation_length": 5.6, "bones": {
+        **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.2, [-105, 0, 0]), (4.0, [-105, 0, 0]), (4.9, [-20, 0, 0]), (5.6, [0, 0, 0])])} for f in fingers4},
+        "thumb": {"rotation": kf([(0.0, [0, 0, 0]), (0.2, [-55, 0, 65]), (4.0, [-55, 0, 65]), (5.6, [0, 0, 0])])},
+        "hand": {"rotation": kf([(0.0, [0, 0, 0]), (0.3, [-20, 12, 0]), (0.6, [8, -4, 0]), (3.7, [10, -4, 0]), (3.8, [-25, 0, 0]), (5.6, [0, 0, 0])]),
+                 "position": kf([(0.0, [0, 0, 0]), (0.3, [0, -0.8, -2.5]), (0.6, [0, 0.3, 2.4]), (3.7, [0, 0.3, 2.2]), (3.8, [0, 1.2, 0.5]),
+                                 (5.6, [0, 0, 0])])},
+        "stone_power": {"scale": kf([(0.0, [1, 1, 1]), (0.6, [1.6, 1.6, 1.6]), (2.0, [2.0, 2.0, 2.0]), (3.0, [2.6, 2.6, 2.6]), (3.7, [3.4, 3.4, 3.4]),
+                                     (3.8, [1.2, 1.2, 1.2]), (5.6, [1, 1, 1])])}}}
+    anims["animation.infinity_gauntlet.mind_focus"] = {"animation_length": 1.2, "bones": {
+        "hand": {"rotation": kf([(0.0, [0, 0, 0]), (0.25, [-20, 25, 15]), (0.95, [-22, 25, 15]), (1.2, [0, 0, 0])])},
+        "index": {"rotation": kf([(0.0, [0, 0, 0]), (0.25, [10, 0, 0]), (0.95, [10, 0, 0]), (1.2, [0, 0, 0])])},
+        "middle": {"rotation": kf([(0.0, [0, 0, 0]), (0.25, [8, 0, 0]), (0.95, [8, 0, 0]), (1.2, [0, 0, 0])])},
+        **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.25, [-90, 0, 0]), (0.95, [-90, 0, 0]), (1.2, [0, 0, 0])])} for f in ("ring", "pinky")},
+        "stone_mind": {"scale": kf([(0.0, [1, 1, 1]), (0.3, [2.2, 2.2, 2.2]), (0.9, [1.8, 1.8, 1.8]), (1.2, [1, 1, 1])])}}}
+    anims["animation.infinity_gauntlet.mind_push"] = {"animation_length": 0.9, "bones": {
+        "hand": {"position": kf([(0.0, [0, 0, 0]), (0.15, [0, 0, -1.2]), (0.3, [0, 0, 2.6]), (0.9, [0, 0, 0])]),
+                 "rotation": kf([(0.0, [0, 0, 0]), (0.3, [-35, 0, 0]), (0.9, [0, 0, 0])])},
+        **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.3, [20, 0, 0]), (0.9, [0, 0, 0])])} for f in fingers4},
+        "stone_mind": {"scale": kf([(0.0, [1, 1, 1]), (0.3, [2.6, 2.6, 2.6]), (0.9, [1, 1, 1])])}}}
     for stone in STONES:
         anims[f"animation.infinity_gauntlet.activate_{stone}"] = {
             "animation_length": 0.9,
@@ -959,6 +979,55 @@ def make_power():
             json.dump({"textures": [f"infinitygauntlet:{s}" for s in sprites]}, f, indent=2)
 
 
+def make_mind():
+    """Mind Stone: a floating geometric sigil (levitation field core, shield emitter)."""
+    GOLD = (255, 210, 42)
+    PALE = (255, 244, 176)
+    AMBER = (210, 140, 20)
+    p = BoxUvPainter(128, 64)
+    core = [p.cube([-1.5, -3, -1.5], [3, 6, 3], PALE, glow=True, seed=1000),
+            p.cube([-2.5, -1, -2.5], [5, 2, 5], GOLD, glow=True, seed=1001)]
+    bones = [bone("root", [0, 0, 0]), bone("core", [0, 0, 0], core, parent="root", rotation=[0, 45, 0])]
+    # three nested polygon frames: triangle, square, hexagon
+    for j, (sides, rad, col) in enumerate(((3, 5.5, GOLD), (4, 7.5, AMBER), (6, 9.5, GOLD))):
+        segs = []
+        for k in range(sides):
+            a0 = 2 * math.pi * k / sides
+            a1 = 2 * math.pi * (k + 1) / sides
+            x0, y0, x1, y1 = math.cos(a0) * rad, math.sin(a0) * rad, math.cos(a1) * rad, math.sin(a1) * rad
+            mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+            length = math.hypot(x1 - x0, y1 - y0)
+            c = p.cube([mx - length / 2, my - 0.35, -0.35], [length, 0.7, 0.7], col, glow=True, seed=1010 + j * 10 + k)
+            c["pivot"] = [mx, my, 0]
+            c["rotation"] = [0, 0, math.degrees(math.atan2(y1 - y0, x1 - x0))]
+            segs.append(c)
+            node = p.cube([x0 - 0.8, y0 - 0.8, -0.8], [1.6, 1.6, 1.6], PALE, glow=True, seed=1050 + j * 10 + k)
+            segs.append(node)
+        bones.append(bone(f"frame_{j}", [0, 0, 0], segs, parent="root", rotation=[90 if j == 1 else 0, j * 30, 0]))
+    write_geo("mind_sigil", "entity", p, bones, (2.5, 2.5))
+
+    # hexagonal lattice for the Mental Shield dome
+    size = 128
+    yy, xx = np.mgrid[0:size, 0:size].astype(float)
+    sc = size / 8.0
+    q = (xx / sc) * 2 / 3
+    r = (-xx / sc / 3 + np.sqrt(3) / 3 * yy / sc)
+    cube = np.stack([q, -q - r, r])
+    rounded = np.round(cube)
+    diff = np.abs(rounded - cube)
+    edge = np.max(diff, axis=0)
+    line = np.clip((edge - 0.36) / 0.12, 0, 1)
+    hexa = line ** 1.5 * 0.9 + 0.08
+    save(gray_alpha(hexa), "textures", "vfx", "hexgrid.png")
+    write_anims("mind_sigil", "entity", {
+        "animation.mind_sigil.idle": {"loop": True, "animation_length": 6.0, "bones": {
+            "frame_0": {"rotation": [0, "query.anim_time * 60", "query.anim_time * 30"]},
+            "frame_1": {"rotation": [90, 0, "query.anim_time * -45"]},
+            "frame_2": {"rotation": ["query.anim_time * 30", "query.anim_time * -20", 0]},
+            "core": {"rotation": [0, "45 + query.anim_time * 90", 0], "position": [0, "math.sin(query.anim_time * 120) * 0.6", 0]}}},
+    })
+
+
 # --------------------------------------------------------------------------- sounds
 
 SR = 44100
@@ -1262,6 +1331,54 @@ def make_sounds():
     add("power_finisher", sum(sweep(d, f, f * 0.25, 0.4) * (0.3 / (i + 1)) for i, f in enumerate((400, 600, 900))) * env(d, 0.01, 1.9)
         + fit(np.concatenate([np.zeros(int(SR * 0.05)), boom(1.9, 60, 18) * 2]), d), "Finishing blow")
 
+    # Mind Stone ------------------------------------------------------------
+    def chime(sec, freqs, decay=1.5, seed=0):
+        tt = t_axis(sec)
+        out = np.zeros_like(tt)
+        for i, f in enumerate(freqs):
+            out += np.sin(2 * np.pi * f * tt + i) * np.exp(-tt * decay * (1 + i * 0.3)) / (i + 1)
+        return out
+
+    def shimmer(sec, f0, f1, seed=0):
+        tt = t_axis(sec)
+        f = np.linspace(f0, f1, len(tt))
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        return (np.sin(ph) + 0.5 * np.sin(ph * 1.5 + 0.3) + 0.3 * np.sin(ph * 2.01)) * (0.6 + 0.4 * np.sin(2 * np.pi * 7 * tt))
+
+    d = 1.2
+    add("mind_grab", chime(d, (660, 990, 1320), 2.5) * 0.6 + shimmer(d, 300, 520) * env(d, 0.05, 1.0) * 0.25, "Telekinetic grip")
+    d = 1.0
+    add("mind_throw", bandpass(noise(d), 600, 5000) * env(d, 0.02, 0.8) * 0.6 + shimmer(d, 900, 250) * env(d, 0.01, 0.9) * 0.3, "Telekinetic throw")
+    d = 2.0
+    add("mind_control", shimmer(d, 220, 330) * env(d, 0.3, 1.5) * 0.35 + chime(d, (440, 554, 659, 880), 1.2) * 0.5
+        + lowpass(noise(d), 300) * env(d, 0.2, 1.5) * 1.5, "A mind is seized")
+    d = 0.9
+    add("mind_beam_charge", shimmer(d, 200, 1400) * env(d, 0.8, 0.1, 1) * 0.4 + chime(d, (1760,), 0.5) * env(d, 0.7, 0.2, 1) * 0.3, "Neural energy gathers")
+    d = 1.4
+    add("mind_beam", shimmer(d, 520, 480) * env(d, 0.01, 1.2) * 0.4 + bandpass(noise(d), 1500, 7000) * env(d, 0.01, 1.0) * 0.4
+        + chime(d, (880, 1320, 1760), 2.0) * 0.4, "Neural beam fires")
+    d = 1.6
+    add("mind_pulse", boom(d, 140, 60) * 0.8 + chime(d, (330, 495, 660, 990), 1.8) * 0.6 + bandpass(noise(d), 300, 3000) * env(d, 0.005, 1.0, 2) * 0.5,
+        "Psychic pulse")
+    d = 2.2
+    add("mind_mark", shimmer(d, 400, 1200) * env(d, 2.0, 0.2, 1) * 0.35 + chime(d, (1046, 1568), 0.6) * 0.3, "A target is marked")
+    d = 1.3
+    add("mind_burst", boom(d, 180, 50) * 1.2 + chime(d, (784, 1175, 1568, 2093), 2.5) * 0.7 + crackle(d, 300, 0.001, seed=80) * env(d, 0.001, 0.5, 2),
+        "Mental overload bursts")
+    d = 3.0
+    add("mind_field", shimmer(d, 160, 180) * env(d, 0.5, 1.0) * 0.4 + chime(d, (220, 330, 440), 0.6) * 0.5, "A levitation field hums")
+    d = 1.8
+    add("mind_astral_out", shimmer(d, 1200, 200) * env(d, 0.05, 1.5) * 0.4 + chime(d, (523, 659, 784, 1046), 1.0) * 0.5
+        + bandpass(noise(d), 2000, 8000) * env(d, 0.3, 1.2) * 0.3, "Consciousness leaves the body")
+    d = 1.4
+    add("mind_astral_in", shimmer(d, 200, 1100) * env(d, 0.8, 0.5) * 0.4 + chime(d, (1046, 784, 523), 1.5) * 0.5, "Consciousness returns")
+    d = 1.6
+    add("mind_shield", chime(d, (392, 587, 784, 1175), 1.0) * 0.6 + shimmer(d, 300, 300) * env(d, 0.2, 1.3) * 0.2, "A mental shield forms")
+    d = 0.5
+    add("mind_shield_hit", chime(d, (1568, 2349), 6.0) * 0.8 + bandpass(noise(d), 3000, 9000) * env(d, 0.001, 0.2, 3) * 0.4, "Shield deflects")
+    d = 2.0
+    add("mind_eye", shimmer(d, 600, 900) * env(d, 0.4, 1.4) * 0.3 + chime(d, (880, 1108, 1318), 1.0) * 0.5, "The Mind's Eye opens")
+
     # Gauntlet ---------------------------------------------------------------
     d = 2.2
     charge = sum(sweep(d, f, f * 3, 2.0) * (0.35 / (i + 1)) for i, f in enumerate((70, 140, 210, 280)))
@@ -1296,6 +1413,7 @@ def main():
     make_nexus()
     make_breach()
     make_power()
+    make_mind()
     make_sounds()
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "generated_subtitles.json"), "w") as f:
         json.dump(SUBTITLES, f, indent=2, sort_keys=True)

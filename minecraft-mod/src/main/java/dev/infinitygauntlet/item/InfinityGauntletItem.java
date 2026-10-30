@@ -184,7 +184,8 @@ public class InfinityGauntletItem extends Item implements GeoItem {
                 .triggerableAnim("charge", CHARGE)
                 .triggerableAnim("snap", SNAP)
                 .triggerableAnim("overload", OVERLOAD);
-        for (String power : new String[]{"power_charge", "power_fire", "power_punch", "power_slam", "power_spread", "power_raise"}) {
+        for (String power : new String[]{"power_charge", "power_fire", "power_punch", "power_slam", "power_spread", "power_raise", "finisher_punch",
+                "mind_focus", "mind_push"}) {
             main.triggerableAnim(power, power.equals("power_charge")
                     ? RawAnimation.begin().thenPlayXTimes("animation.infinity_gauntlet." + power, 5)
                     : RawAnimation.begin().thenPlay("animation.infinity_gauntlet." + power));
