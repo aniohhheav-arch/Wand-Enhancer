@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  C",
+    " S ",
+    "X  "
+  ],
+  "key": {
+    "C": {
+      "item": "arcana:chronos_crystal"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "minecraft:clock"
+    }
+  },
+  "result": {
+    "id": "arcana:chronos_wand",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "arcana:shrine_storm",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 58,
+    "separation": 18,
+    "salt": 8125
+  }
+}

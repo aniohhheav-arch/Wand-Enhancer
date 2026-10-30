@@ -1,0 +1,33 @@
+{
+  "display": {
+    "icon": {
+      "id": "arcana:solar_wand"
+    },
+    "title": {
+      "translate": "advancements.arcana.ascended.title"
+    },
+    "description": {
+      "translate": "advancements.arcana.ascended.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "a": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#arcana:wands",
+            "components": {
+              "arcana:stage": 2
+            }
+          }
+        ]
+      }
+    }
+  },
+  "parent": "arcana:awakened"
+}

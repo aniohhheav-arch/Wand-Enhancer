@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  C",
+    " S ",
+    "X  "
+  ],
+  "key": {
+    "C": {
+      "item": "arcana:glacier_crystal"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "minecraft:blue_ice"
+    }
+  },
+  "result": {
+    "id": "arcana:glacier_wand",
+    "count": 1
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "parent": "arcana:item/forbidden_wand_look_0",
+  "overrides": [
+    {
+      "predicate": {
+        "arcana:look": 0.045454545454545456
+      },
+      "model": "arcana:item/forbidden_wand_look_1"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.13636363636363635
+      },
+      "model": "arcana:item/forbidden_wand_look_2"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.22727272727272727
+      },
+      "model": "arcana:item/forbidden_wand_look_3"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.3181818181818182
+      },
+      "model": "arcana:item/forbidden_wand_look_4"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.4090909090909091
+      },
+      "model": "arcana:item/forbidden_wand_look_5"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.5
+      },
+      "model": "arcana:item/forbidden_wand_look_6"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.5909090909090909
+      },
+      "model": "arcana:item/forbidden_wand_look_7"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.6818181818181818
+      },
+      "model": "arcana:item/forbidden_wand_look_8"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.7727272727272727
+      },
+      "model": "arcana:item/forbidden_wand_look_9"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.8636363636363636
+      },
+      "model": "arcana:item/forbidden_wand_look_10"
+    },
+    {
+      "predicate": {
+        "arcana:look": 0.9545454545454546
+      },
+      "model": "arcana:item/forbidden_wand_look_11"
+    }
+  ]
+}

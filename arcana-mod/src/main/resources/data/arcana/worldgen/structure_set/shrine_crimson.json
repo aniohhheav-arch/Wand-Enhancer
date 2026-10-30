@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "arcana:shrine_crimson",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 54,
+    "separation": 18,
+    "salt": 8123
+  }
+}

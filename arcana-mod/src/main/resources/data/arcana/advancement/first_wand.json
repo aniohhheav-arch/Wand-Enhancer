@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "id": "arcana:storm_wand"
+    },
+    "title": {
+      "translate": "advancements.arcana.first_wand.title"
+    },
+    "description": {
+      "translate": "advancements.arcana.first_wand.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "w": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#arcana:wands"
+          }
+        ]
+      }
+    }
+  },
+  "parent": "arcana:first_crystal"
+}

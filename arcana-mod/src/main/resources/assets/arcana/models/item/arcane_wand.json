@@ -1,0 +1,17 @@
+{
+  "parent": "arcana:item/arcane_wand_0",
+  "overrides": [
+    {
+      "predicate": {
+        "arcana:stage": 0.5
+      },
+      "model": "arcana:item/arcane_wand_1"
+    },
+    {
+      "predicate": {
+        "arcana:stage": 1.0
+      },
+      "model": "arcana:item/arcane_wand_2"
+    }
+  ]
+}

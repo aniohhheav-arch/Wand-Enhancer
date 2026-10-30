@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  C",
+    " S ",
+    "X  "
+  ],
+  "key": {
+    "C": {
+      "item": "arcana:crimson_crystal"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "minecraft:crimson_fungus"
+    }
+  },
+  "result": {
+    "id": "arcana:crimson_wand",
+    "count": 1
+  }
+}

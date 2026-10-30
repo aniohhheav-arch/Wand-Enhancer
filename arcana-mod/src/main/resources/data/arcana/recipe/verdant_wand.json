@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  C",
+    " S ",
+    "X  "
+  ],
+  "key": {
+    "C": {
+      "item": "arcana:verdant_crystal"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "minecraft:moss_block"
+    }
+  },
+  "result": {
+    "id": "arcana:verdant_wand",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "arcana:ancient_ruins",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 12,
+    "salt": 8112
+  }
+}

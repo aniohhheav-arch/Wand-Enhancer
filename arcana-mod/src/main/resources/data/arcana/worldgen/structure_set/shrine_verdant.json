@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "arcana:shrine_verdant",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 50,
+    "separation": 18,
+    "salt": 8121
+  }
+}

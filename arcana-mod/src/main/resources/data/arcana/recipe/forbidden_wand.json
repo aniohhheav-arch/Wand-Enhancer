@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "arcana:forbidden_fragment"
+    },
+    {
+      "item": "arcana:forbidden_fragment"
+    },
+    {
+      "item": "arcana:forbidden_fragment"
+    },
+    {
+      "item": "arcana:ascension_core"
+    },
+    {
+      "item": "minecraft:nether_star"
+    }
+  ],
+  "result": {
+    "id": "arcana:forbidden_wand",
+    "count": 1
+  }
+}

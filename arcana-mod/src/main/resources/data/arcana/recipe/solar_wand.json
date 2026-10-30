@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  C",
+    " S ",
+    "X  "
+  ],
+  "key": {
+    "C": {
+      "item": "arcana:solar_crystal"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "minecraft:glowstone"
+    }
+  },
+  "result": {
+    "id": "arcana:solar_wand",
+    "count": 1
+  }
+}

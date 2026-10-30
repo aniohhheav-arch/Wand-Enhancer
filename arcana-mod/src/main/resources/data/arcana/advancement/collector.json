@@ -1,0 +1,112 @@
+{
+  "display": {
+    "icon": {
+      "id": "arcana:chronos_wand"
+    },
+    "title": {
+      "translate": "advancements.arcana.collector.title"
+    },
+    "description": {
+      "translate": "advancements.arcana.collector.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "void": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:void_wand"
+          }
+        ]
+      }
+    },
+    "verdant": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:verdant_wand"
+          }
+        ]
+      }
+    },
+    "glacier": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:glacier_wand"
+          }
+        ]
+      }
+    },
+    "crimson": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:crimson_wand"
+          }
+        ]
+      }
+    },
+    "solar": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:solar_wand"
+          }
+        ]
+      }
+    },
+    "storm": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:storm_wand"
+          }
+        ]
+      }
+    },
+    "chronos": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:chronos_wand"
+          }
+        ]
+      }
+    },
+    "arcane": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:arcane_wand"
+          }
+        ]
+      }
+    }
+  },
+  "parent": "arcana:first_wand",
+  "requirements": [
+    [
+      "void",
+      "verdant",
+      "glacier",
+      "crimson",
+      "solar",
+      "storm",
+      "chronos",
+      "arcane"
+    ]
+  ]
+}

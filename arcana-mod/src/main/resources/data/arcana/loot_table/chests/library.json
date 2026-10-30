@@ -1,0 +1,136 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "arcana:rune_amplify",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:rune_efficient",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:rune_swift",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:rune_wide",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:rune_leech",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:core_ember",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:core_frost",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:core_volt",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "arcana:core_spirit",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_nugget",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:lapis_lazuli",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 3,
+                "max": 9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 3,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:constant",
+        "value": 1
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "arcana:awakening_shard",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

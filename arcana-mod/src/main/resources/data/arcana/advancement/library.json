@@ -1,0 +1,40 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:book"
+    },
+    "title": {
+      "translate": "advancements.arcana.library.title"
+    },
+    "description": {
+      "translate": "advancements.arcana.library.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "r": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "arcana:core_ember",
+              "arcana:core_frost",
+              "arcana:core_volt",
+              "arcana:core_spirit",
+              "arcana:rune_amplify",
+              "arcana:rune_efficient",
+              "arcana:rune_swift",
+              "arcana:rune_wide",
+              "arcana:rune_leech"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "parent": "arcana:first_crystal"
+}

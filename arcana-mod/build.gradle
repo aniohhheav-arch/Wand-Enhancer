@@ -1,0 +1,60 @@
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = mod_version
+group = 'dev.arcana'
+base { archivesName = mod_id }
+
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = neo_version
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+            if (project.hasProperty('quickPlay')) {
+                programArguments = ['--quickPlaySingleplayer', project.property('quickPlay')]
+                systemProperty 'arcana.shots', 'true'
+            }
+        }
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.gametest
+        }
+    }
+    addModdingDependenciesTo(sourceSets.gametest)
+}
+
+tasks.withType(ProcessResources).configureEach {
+    var props = [
+        minecraft_version: minecraft_version, neo_version: neo_version, mod_id: mod_id,
+        mod_name: mod_name, mod_version: mod_version, mod_license: mod_license,
+        mod_authors: mod_authors, mod_description: mod_description
+    ]
+    inputs.properties props
+    filesMatching('META-INF/neoforge.mods.toml') { expand props }
+}
+
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "id": "arcana:void_crystal"
+    },
+    "title": {
+      "translate": "advancements.arcana.first_crystal.title"
+    },
+    "description": {
+      "translate": "advancements.arcana.first_crystal.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "c": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#arcana:crystals"
+          }
+        ]
+      }
+    }
+  },
+  "parent": "arcana:root"
+}

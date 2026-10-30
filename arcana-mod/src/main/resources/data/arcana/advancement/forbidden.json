@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "id": "arcana:forbidden_wand"
+    },
+    "title": {
+      "translate": "advancements.arcana.forbidden.title"
+    },
+    "description": {
+      "translate": "advancements.arcana.forbidden.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "f": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "arcana:forbidden_wand"
+          }
+        ]
+      }
+    }
+  },
+  "parent": "arcana:archmage"
+}
