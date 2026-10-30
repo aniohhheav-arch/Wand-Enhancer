@@ -135,6 +135,13 @@ public final class ClientEvents {
 
         @SubscribeEvent
         public static void camera(ViewportEvent.ComputeCameraAngles e) {
+            Minecraft mcc = Minecraft.getInstance();
+            if (casterCinematic(mcc)) {
+                // look up at the set-piece (black hole, sun, storm cloud...) instead of the ground in front of us
+                float p = ClientState.cinematicProgress((float) e.getPartialTick());
+                float lift = Math.min(1f, Math.min(p / 0.12f, (1f - p) / 0.15f));
+                if (lift > 0f) e.setPitch(e.getPitch() - 17f * lift);
+            }
             if (!ArcanaConfig.SCREEN_SHAKE.get() || ClientState.cinematicKind != 0) return;
             float s = ClientState.cinematicStrength((float) e.getPartialTick());
             if (s <= 0) return;
