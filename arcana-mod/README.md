@@ -69,6 +69,21 @@ Its model re-skins itself to the selected ability and crystal colour.
 * Ancient ruins, wizard towers, hidden libraries, 8 school shrines, and the **Archmage Sanctum** (underground, with the boss).
 * Boss: **The Hollow Archmage** - boss bar, 3 phases, telegraphed attacks, vex summons, ~2s cinematic death, drops Ascension Core, Awakening Shards, crystals, runes/cores and (rarely) Forbidden Fragments.
 
+## Admin commands (op level 2)
+```
+/arcana mastery <players> <school|all> set|add <level>      /arcana mastery <players> <school|all> setxp|addxp <xp>
+/arcana mastery <players> reset
+/arcana mana <players> fill | set <amount>                 /arcana cooldowns <players> reset
+/arcana stage <players> <0-2>   (held wand)                /arcana info <player>
+```
+
+## 3D and cinematics (GeckoLib 4.8, bundled via jar-in-jar)
+* Wands are animated 3D models: per-school geometry, extra filigree/wings/orbiting gems per stage, crystal tinted by the chosen dye,
+  handle colour by material, idle/charge/cast animations. The Forbidden Wand re-skins itself to the selected ability.
+* The Hollow Archmage is an animated 3D model (idle, walk, cast, summon, phase roar, 5-second death).
+* Every ultimate spawns a 3D set-piece (black hole, sun, ice spire, crimson blades, storm cloud, giant clock, arcane sigil, world tree, rift),
+  shows a title card, slides in letterbox bars, tilts to a third-person hero camera with an FOV push (config `cinematicCamera`).
+
 ## Configuration
 `serverconfig/arcana-server.toml` (world) - global multipliers, particle density, effect cap, block-change toggles, mimic window,
 evolution requirements, boss health, and **per-spell** `enabled` / `damageMultiplier` / `cooldownMultiplier` / `manaMultiplier`.
@@ -86,7 +101,7 @@ test fails on any exception in an effect callback; plus evolution/customisation 
 `gradle runClient -PquickPlay=<world>` additionally runs the dev-only screenshot harness (`ClientShots`, not shipped) that writes images to `run/screenshots`.
 
 ## Known limitations (honest list)
-* Wand "models" are 2D pixel-art item models (with stage variants, animated ascended textures, tint layers), not custom 3D geometry; the boss uses the vanilla humanoid model at 1.35x with a custom skin.
+* The 3D models are procedurally generated low-poly GeckoLib models (`tools/gen_geo.py`), not hand-sculpted Blockbench art; they are meant to be replaceable with the same file names.
 * Sounds are vanilla sounds pitched per school; there are no custom `.ogg` files.
 * Dynamic light is not used (vanilla has none); luminous crystals and particles carry the effect.
 * Numeric balance (damage, costs, cooldowns) has not been playtested by humans.
