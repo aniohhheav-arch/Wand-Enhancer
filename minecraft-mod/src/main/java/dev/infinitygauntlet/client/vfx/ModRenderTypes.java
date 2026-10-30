@@ -27,6 +27,10 @@ public final class ModRenderTypes {
     public static final ResourceLocation CRACKLE = tex("crackle");
     public static final ResourceLocation GLYPH_TIME = tex("glyph_time");
     public static final ResourceLocation GEAR_RING = tex("gear_ring");
+    public static final ResourceLocation STATIC = tex("static");
+    public static final ResourceLocation SCANLINES = tex("scanlines");
+    public static final ResourceLocation VIGNETTE = tex("vignette");
+    public static final ResourceLocation GLYPH_MIND = tex("glyph_mind");
     public static final ResourceLocation WHITE = tex("white");
 
     private static final RenderStateShard.ShaderStateShard POSITION_TEX_COLOR = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexColorShader);

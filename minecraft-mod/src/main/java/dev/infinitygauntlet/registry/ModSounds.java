@@ -35,6 +35,12 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> TIME_SUSPEND = register("time_suspend");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIME_FRACTURE = register("time_fracture");
     public static final DeferredHolder<SoundEvent, SoundEvent> TIME_SHATTER = register("time_shatter");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_POWER_ON = register("nexus_power_on");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_HUM = register("nexus_hum");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_LINK = register("nexus_link");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_DISCONNECT = register("nexus_disconnect");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_STATIC = register("nexus_static");
+    public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_WARNING = register("nexus_warning");
     public static final DeferredHolder<SoundEvent, SoundEvent> GAUNTLET_CHARGE = register("gauntlet_charge");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_INSERT = register("stone_insert");
     public static final DeferredHolder<SoundEvent, SoundEvent> GAUNTLET_CAST = register("gauntlet_cast");

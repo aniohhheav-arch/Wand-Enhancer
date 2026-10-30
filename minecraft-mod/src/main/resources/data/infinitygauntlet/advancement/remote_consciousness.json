@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:root",
+  "display": {
+    "icon": {
+      "id": "infinitygauntlet:consciousness_nexus"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.remote_consciousness"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.remote_consciousness.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "cast": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:remote_consciousness"
+      }
+    }
+  }
+}

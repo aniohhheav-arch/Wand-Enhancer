@@ -199,6 +199,54 @@
       }
     ]
   },
+  "nexus_power_on": {
+    "subtitle": "subtitles.infinitygauntlet.nexus_power_on",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:nexus_power_on"
+      }
+    ]
+  },
+  "nexus_hum": {
+    "subtitle": "subtitles.infinitygauntlet.nexus_hum",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:nexus_hum"
+      }
+    ]
+  },
+  "nexus_link": {
+    "subtitle": "subtitles.infinitygauntlet.nexus_link",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:nexus_link"
+      }
+    ]
+  },
+  "nexus_disconnect": {
+    "subtitle": "subtitles.infinitygauntlet.nexus_disconnect",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:nexus_disconnect"
+      }
+    ]
+  },
+  "nexus_static": {
+    "subtitle": "subtitles.infinitygauntlet.nexus_static",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:nexus_static"
+      }
+    ]
+  },
+  "nexus_warning": {
+    "subtitle": "subtitles.infinitygauntlet.nexus_warning",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:nexus_warning"
+      }
+    ]
+  },
   "gauntlet_charge": {
     "subtitle": "subtitles.infinitygauntlet.gauntlet_charge",
     "sounds": [

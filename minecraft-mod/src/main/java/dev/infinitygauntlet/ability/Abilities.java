@@ -27,11 +27,13 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Ordered ability lists per stone. The order is the selection order in the HUD and ability wheel. */
 public final class Abilities {
     private static final Map<InfinityStone, List<Ability>> BY_STONE = new EnumMap<>(InfinityStone.class);
     private static final List<Ability> ALL = new ArrayList<>();
+    private static final List<Ability> COMBINATIONS = new ArrayList<>();
 
     static {
         register(new DimensionalPortalAbility());
@@ -53,15 +55,37 @@ public final class Abilities {
         register(new TemporalLoopAbility());
         register(new ChronologicalBarrierAbility());
         register(new TimeFractureAbility());
+
+        register(new dev.infinitygauntlet.ability.combo.RemoteConsciousnessAbility());
     }
 
     private static void register(Ability ability) {
-        BY_STONE.computeIfAbsent(ability.stone(), s -> new ArrayList<>()).add(ability);
+        if (ability.isCombination()) {
+            COMBINATIONS.add(ability);
+        } else {
+            BY_STONE.computeIfAbsent(ability.stone(), s -> new ArrayList<>()).add(ability);
+        }
         ALL.add(ability);
     }
 
+    /** The stone's own abilities, excluding combinations. */
     public static List<Ability> forStone(InfinityStone stone) {
         return Collections.unmodifiableList(BY_STONE.getOrDefault(stone, List.of()));
+    }
+
+    /** The stone's own abilities followed by every combination involving it whose stones are all installed. */
+    public static List<Ability> available(InfinityStone stone, Set<InfinityStone> installed) {
+        List<Ability> list = new ArrayList<>(forStone(stone));
+        for (Ability combo : COMBINATIONS) {
+            if (combo.requiredStones().contains(stone) && installed.containsAll(combo.requiredStones())) {
+                list.add(combo);
+            }
+        }
+        return list;
+    }
+
+    public static List<Ability> combinations() {
+        return Collections.unmodifiableList(COMBINATIONS);
     }
 
     public static List<Ability> all() {

@@ -88,6 +88,7 @@ public final class ClientGameEvents {
         float pt = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         ClientVfxManager.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
         dev.infinitygauntlet.client.time.TimeOverlay.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
+        dev.infinitygauntlet.client.nexus.NexusLinkRenderer.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
     }
 
     @SubscribeEvent

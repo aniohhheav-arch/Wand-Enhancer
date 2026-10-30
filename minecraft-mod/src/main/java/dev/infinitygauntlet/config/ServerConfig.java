@@ -51,6 +51,12 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue BARRIER_SECONDS;
     public static final ModConfigSpec.IntValue FRACTURE_SECONDS;
 
+    public static final ModConfigSpec.IntValue POSSESSION_RANGE;
+    public static final ModConfigSpec.IntValue POSSESSION_SECONDS;
+    public static final ModConfigSpec.IntValue POSSESSION_MAX_FEEDS;
+    public static final ModConfigSpec.BooleanValue POSSESSION_CREEPER_DETONATION;
+    public static final ModConfigSpec.IntValue NEURAL_OVERRIDE_SECONDS;
+
     private static final Map<String, ModConfigSpec.IntValue> COOLDOWNS = new HashMap<>();
 
     static {
@@ -108,6 +114,16 @@ public final class ServerConfig {
         LOOP_PERIOD_TICKS = b.comment("How often a Temporal Loop snaps captured entities back.").defineInRange("loopPeriodTicks", 50, 10, 400);
         BARRIER_SECONDS = b.defineInRange("barrierSeconds", 15, 2, 300);
         FRACTURE_SECONDS = b.defineInRange("fractureSeconds", 12, 3, 120);
+        b.pop();
+
+        b.push("consciousness_nexus");
+        POSSESSION_RANGE = b.comment("Maximum distance between a possessed creature and its Nexus; stability falls toward it and the link breaks beyond it.")
+                .defineInRange("possessionRange", 64, 8, 160);
+        POSSESSION_SECONDS = b.comment("Maximum duration of one possession link.").defineInRange("possessionSeconds", 300, 10, 7200);
+        POSSESSION_MAX_FEEDS = b.comment("How many creatures one Nexus can hold at once (multi-feed).").defineInRange("maxFeeds", 3, 1, 3);
+        POSSESSION_CREEPER_DETONATION = b.comment("Whether a possessed creeper can be detonated (explosions follow the mobGriefing rule).")
+                .define("creeperDetonation", true);
+        NEURAL_OVERRIDE_SECONDS = b.defineInRange("neuralOverrideSeconds", 10, 1, 120);
         b.pop();
 
         b.comment("Ability cooldowns in ticks (20 ticks = 1 second).").push("cooldowns");

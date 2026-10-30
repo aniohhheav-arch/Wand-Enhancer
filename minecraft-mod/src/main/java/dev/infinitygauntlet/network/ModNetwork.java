@@ -15,6 +15,12 @@ public final class ModNetwork {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToServer(SelectAbilityPayload.TYPE, SelectAbilityPayload.CODEC,
                 (payload, ctx) -> AbilityCaster.select((ServerPlayer) ctx.player(), payload.stone(), payload.ability()));
+        registrar.playToServer(ControlInputPayload.TYPE, ControlInputPayload.CODEC,
+                (payload, ctx) -> dev.infinitygauntlet.nexus.PossessionManager.input((ServerPlayer) ctx.player(), payload));
+        registrar.playToServer(PossessionActionPayload.TYPE, PossessionActionPayload.CODEC,
+                (payload, ctx) -> dev.infinitygauntlet.nexus.PossessionManager.action((ServerPlayer) ctx.player(), payload.action()));
+        registrar.playToClient(PossessionStatePayload.TYPE, PossessionStatePayload.CODEC,
+                (payload, ctx) -> ClientPayloadHandler.possession(payload));
         // Client handlers are only invoked on the logical client; the lambdas keep the client class unloaded on servers.
         registrar.playToClient(VfxPayload.TYPE, VfxPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.vfx(payload));
         registrar.playToClient(CameraPayload.TYPE, CameraPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.camera(payload));

@@ -37,7 +37,7 @@ public final class HeldGauntlet {
         }
         GauntletState state = InfinityGauntletItem.state(stack);
         InfinityStone stone = state.selected();
-        int count = Abilities.forStone(stone).size();
+        int count = Abilities.available(stone, state.stoneSet()).size();
         if (!state.has(stone) || count == 0) {
             return;
         }

@@ -27,6 +27,10 @@ public final class ClientPayloadHandler {
         ClientTime.set(payload.entityId(), payload.scale());
     }
 
+    public static void possession(dev.infinitygauntlet.network.PossessionStatePayload payload) {
+        dev.infinitygauntlet.client.nexus.RemoteControlClient.state(payload);
+    }
+
     public static void cooldowns(CooldownSyncPayload payload) {
         ClientCooldowns.sync(payload.remaining());
     }

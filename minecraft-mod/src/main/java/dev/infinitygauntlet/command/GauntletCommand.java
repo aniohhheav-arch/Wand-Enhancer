@@ -10,6 +10,8 @@ import dev.infinitygauntlet.ability.Ability;
 import dev.infinitygauntlet.ability.AbilityCaster;
 import dev.infinitygauntlet.entity.PortalNetwork;
 import dev.infinitygauntlet.item.InfinityGauntletItem;
+import dev.infinitygauntlet.nexus.NexusBlockEntity;
+import dev.infinitygauntlet.nexus.PossessionManager;
 import dev.infinitygauntlet.registry.ModAttachments;
 import dev.infinitygauntlet.registry.ModItems;
 import dev.infinitygauntlet.stone.InfinityStone;
@@ -65,7 +67,46 @@ public final class GauntletCommand {
                         .then(Commands.literal("clear").executes(GauntletCommand::clearPortals)))
                 .then(Commands.literal("vfx").then(Commands.argument("type", StringArgumentType.word()).suggests(VFX_SUGGESTIONS)
                         .executes(GauntletCommand::vfx)))
-                .then(Commands.literal("abilities").executes(GauntletCommand::listAbilities)));
+                .then(Commands.literal("abilities").executes(GauntletCommand::listAbilities))
+                .then(Commands.literal("nexus")
+                        .then(Commands.literal("bind").executes(ctx -> withNexus(ctx, (p, n) -> n.bindOwner(p))))
+                        .then(Commands.literal("control").executes(ctx -> withNexus(ctx, PossessionManager::toggleControl)))
+                        .then(Commands.literal("action").then(Commands.argument("action", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(NEXUS_ACTIONS, b))
+                                .executes(GauntletCommand::nexusAction)))));
+    }
+
+    private static final List<String> NEXUS_ACTIONS = List.of("leave", "disconnect", "switch", "blink", "override", "extract");
+
+    /** Runs {@code action} on the nearest Consciousness Nexus within 8 blocks of the player. */
+    private static int withNexus(CommandContext<CommandSourceStack> ctx, java.util.function.BiConsumer<ServerPlayer, NexusBlockEntity> action)
+            throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        NexusBlockEntity best = null;
+        double bestDist = 64;
+        for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(player.blockPosition().offset(-8, -4, -8),
+                player.blockPosition().offset(8, 4, 8))) {
+            if (player.level().getBlockEntity(pos) instanceof NexusBlockEntity n && pos.distSqr(player.blockPosition()) < bestDist) {
+                best = n;
+                bestDist = pos.distSqr(player.blockPosition());
+            }
+        }
+        if (best == null) {
+            ctx.getSource().sendFailure(Component.translatable("command.infinitygauntlet.nexus.none"));
+            return 0;
+        }
+        action.accept(player, best);
+        return 1;
+    }
+
+    private static int nexusAction(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        int index = NEXUS_ACTIONS.indexOf(StringArgumentType.getString(ctx, "action"));
+        if (index < 0) {
+            ctx.getSource().sendFailure(Component.literal("Unknown action"));
+            return 0;
+        }
+        PossessionManager.action(ctx.getSource().getPlayerOrException(), index);
+        return 1;
     }
 
     private static int give(CommandContext<CommandSourceStack> ctx, ItemStack stack) throws CommandSyntaxException {
@@ -158,6 +199,10 @@ public final class GauntletCommand {
             for (Ability ability : list) {
                 ctx.getSource().sendSuccess(() -> Component.literal("  " + ability.id() + " - ").append(ability.displayName()), false);
             }
+        }
+        for (Ability combo : Abilities.combinations()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("  [combination " + combo.requiredStones() + "] " + combo.id() + " - ")
+                    .append(combo.displayName()), false);
         }
         return 1;
     }

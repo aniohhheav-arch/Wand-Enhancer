@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "infinitygauntlet:item/consciousness_nexus"
+  }
+}

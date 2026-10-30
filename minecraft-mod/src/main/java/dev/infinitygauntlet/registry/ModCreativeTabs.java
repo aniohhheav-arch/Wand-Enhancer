@@ -19,6 +19,7 @@ public final class ModCreativeTabs {
             .displayItems((params, output) -> {
                 output.accept(ModItems.INFINITY_GAUNTLET.get());
                 output.accept(InfinityGauntletItem.fullGauntlet());
+                output.accept(ModBlocks.CONSCIOUSNESS_NEXUS_ITEM.get());
                 for (InfinityStone stone : InfinityStone.values()) {
                     output.accept(ModItems.stone(stone));
                 }

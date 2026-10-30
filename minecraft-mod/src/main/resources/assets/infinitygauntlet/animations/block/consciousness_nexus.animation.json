@@ -1,0 +1,216 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.consciousness_nexus.standby": {
+   "loop": true,
+   "animation_length": 8.0,
+   "bones": {
+    "crystal_anchor": {
+     "position": [
+      0,
+      "math.sin(query.anim_time * 45) * 0.6",
+      0
+     ]
+    },
+    "crystal": {
+     "rotation": [
+      45,
+      "query.anim_time * 20",
+      45
+     ]
+    },
+    "ring_gold": {
+     "rotation": [
+      12,
+      "query.anim_time * 15",
+      0
+     ]
+    },
+    "ring_blue": {
+     "rotation": [
+      -20,
+      "-query.anim_time * 10",
+      15
+     ]
+    }
+   }
+  },
+  "animation.consciousness_nexus.active": {
+   "loop": true,
+   "animation_length": 4.0,
+   "bones": {
+    "crystal_anchor": {
+     "position": [
+      0,
+      "1.5 + math.sin(query.anim_time * 180) * 0.8",
+      0
+     ]
+    },
+    "crystal": {
+     "rotation": [
+      45,
+      "query.anim_time * 120",
+      45
+     ],
+     "scale": [
+      "1.15 + math.sin(query.anim_time * 540) * 0.08",
+      "1.15 + math.sin(query.anim_time * 540) * 0.08",
+      "1.15 + math.sin(query.anim_time * 540) * 0.08"
+     ]
+    },
+    "ring_gold": {
+     "rotation": [
+      "12 + math.sin(query.anim_time * 90) * 10",
+      "query.anim_time * 140",
+      0
+     ]
+    },
+    "ring_blue": {
+     "rotation": [
+      "-20 + math.cos(query.anim_time * 90) * 12",
+      "-query.anim_time * 100",
+      15
+     ]
+    },
+    "rune_0": {
+     "scale": [
+      1,
+      "1 + math.sin(query.anim_time * 720) * 0.6",
+      1
+     ]
+    },
+    "rune_3": {
+     "scale": [
+      1,
+      "1 + math.cos(query.anim_time * 720) * 0.6",
+      1
+     ]
+    }
+   }
+  },
+  "animation.consciousness_nexus.unstable": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "crystal_anchor": {
+     "position": [
+      "math.sin(query.anim_time * 4000) * 0.6",
+      "1.5 + math.cos(query.anim_time * 3300) * 0.6",
+      0
+     ]
+    },
+    "crystal": {
+     "rotation": [
+      45,
+      "query.anim_time * 400",
+      45
+     ]
+    },
+    "ring_gold": {
+     "rotation": [
+      "12 + math.sin(query.anim_time * 2000) * 20",
+      "query.anim_time * 300",
+      0
+     ]
+    },
+    "ring_blue": {
+     "rotation": [
+      "-20 + math.cos(query.anim_time * 1700) * 25",
+      "-query.anim_time * 260",
+      15
+     ]
+    },
+    "screen_frame": {
+     "position": [
+      "math.sin(query.anim_time * 5000) * 0.3",
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "animation.consciousness_nexus.power_on": {
+   "animation_length": 1.5,
+   "bones": {
+    "crystal": {
+     "scale": {
+      "0.0": [
+       0.4,
+       0.4,
+       0.4
+      ],
+      "0.5": [
+       1.6,
+       1.6,
+       1.6
+      ],
+      "1.0": [
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     "rotation": {
+      "0.0": [
+       45,
+       0,
+       45
+      ],
+      "1.5": [
+       45,
+       720,
+       45
+      ]
+     }
+    },
+    "ring_gold": {
+     "rotation": {
+      "0.0": [
+       12,
+       0,
+       0
+      ],
+      "1.5": [
+       12,
+       540,
+       0
+      ]
+     }
+    },
+    "ring_blue": {
+     "rotation": {
+      "0.0": [
+       -20,
+       0,
+       15
+      ],
+      "1.5": [
+       -20,
+       -540,
+       15
+      ]
+     }
+    },
+    "screen_frame": {
+     "scale": {
+      "0.0": [
+       1,
+       0.9,
+       1
+      ],
+      "0.3": [
+       1.03,
+       1.05,
+       1
+      ],
+      "0.6": [
+       1,
+       1,
+       1
+      ]
+     }
+    }
+   }
+  }
+ }
+}

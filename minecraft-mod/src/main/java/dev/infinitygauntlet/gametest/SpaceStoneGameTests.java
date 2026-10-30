@@ -85,7 +85,8 @@ public final class SpaceStoneGameTests {
         RupturePortalEntity pb = RupturePortalEntity.create(level, b, 1.6f, new java.util.UUID(1, 1), 0, RupturePortalEntity.STYLE_PORTAL, false);
         PortalNetwork.get(level.getServer()).link(pa.getUUID(), pb.getUUID());
         helper.runAfterDelay(RupturePortalEntity.OPEN_TICKS + 5, () -> {
-            helper.assertTrue(pa.isOpen() && pa.isLinked(), "portal opened and linked");
+            helper.assertTrue(pa.isOpen() && pa.isLinked(), "portal opened and linked (phase " + pa.phase() + ", linked " + pa.isLinked()
+                    + ", ticks " + pa.tickCount + ", removed " + pa.isRemoved() + ", entry " + PortalNetwork.get(level.getServer()).get(pa.getUUID()) + ")");
             Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(8, 1, 5));
             zombie.setPos(a.x, a.y - 1.0, a.z);
             helper.succeedWhen(() -> {
@@ -168,12 +169,17 @@ public final class SpaceStoneGameTests {
         helper.assertTrue(cast, "gateway cast succeeds under open sky");
         helper.runAfterDelay(50, () -> {
             java.util.List<RupturePortalEntity> portals = helper.getLevel().getEntitiesOfClass(RupturePortalEntity.class,
-                    player.getBoundingBox().inflate(64));
+                    player.getBoundingBox().inflate(64), p -> {
+                        PortalNetwork.Entry e = PortalNetwork.get(helper.getLevel().getServer()).get(p.getUUID());
+                        return e != null && e.owner().equals(player.getUUID());
+                    });
             long gateways = portals.stream().filter(p -> p.style() == RupturePortalEntity.STYLE_GATEWAY).count();
             helper.assertTrue(gateways == 1, "one sky gateway exists (portals found: " + portals.size() + ")");
             RupturePortalEntity gateway = portals.stream().filter(p -> p.style() == RupturePortalEntity.STYLE_GATEWAY).findFirst().orElseThrow();
             helper.assertTrue(gateway.getY() > start.y + 10, "the gateway hangs high above the ground");
-            portals.forEach(p -> PortalNetwork.get(helper.getLevel().getServer()).close(helper.getLevel().getServer(), p.getUUID()));
+            // close only this test's ruptures: other tests' portals can be within range on the shared test grid
+            PortalNetwork network = PortalNetwork.get(helper.getLevel().getServer());
+            network.ownedBy(player.getUUID()).forEach(e -> network.close(helper.getLevel().getServer(), e.id()));
             helper.succeed();
         });
     }

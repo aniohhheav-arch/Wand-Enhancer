@@ -28,7 +28,8 @@ import java.util.List;
 public final class AbilityHud {
     public static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || ClientConfig.SPEC.isLoaded() && !ClientConfig.SHOW_HUD.get()) {
+        if (mc.player == null || mc.options.hideGui || ClientConfig.SPEC.isLoaded() && !ClientConfig.SHOW_HUD.get()
+                || dev.infinitygauntlet.client.nexus.RemoteControlClient.isControlling()) {
             return;
         }
         ItemStack stack = HeldGauntlet.find(mc.player);
@@ -68,8 +69,8 @@ public final class AbilityHud {
             g.drawString(font, msg, w - 8 - font.width(msg), y + 8, 0xFFAAAAAA);
             return;
         }
-        InfinityStone stone = ability.stone();
-        List<Ability> list = Abilities.forStone(stone);
+        InfinityStone stone = state.selected();
+        List<Ability> list = Abilities.available(state.selected(), state.stoneSet());
         int index = list.indexOf(ability);
         Component name = ability.displayName().copy().withStyle(stone.format());
         int nameW = font.width(name);

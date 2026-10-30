@@ -4,6 +4,8 @@ import dev.infinitygauntlet.config.ClientConfig;
 import dev.infinitygauntlet.config.ServerConfig;
 import dev.infinitygauntlet.network.ModNetwork;
 import dev.infinitygauntlet.registry.ModAttachments;
+import dev.infinitygauntlet.registry.ModBlockEntities;
+import dev.infinitygauntlet.registry.ModBlocks;
 import dev.infinitygauntlet.registry.ModCreativeTabs;
 import dev.infinitygauntlet.registry.ModDataComponents;
 import dev.infinitygauntlet.registry.ModEntities;
@@ -27,7 +29,9 @@ public final class InfinityGauntlet {
 
     public InfinityGauntlet(IEventBus modBus, ModContainer container) {
         ModDataComponents.REGISTER.register(modBus);
+        ModBlocks.REGISTER.register(modBus);
         ModItems.REGISTER.register(modBus);
+        ModBlockEntities.REGISTER.register(modBus);
         ModEntities.REGISTER.register(modBus);
         ModParticles.REGISTER.register(modBus);
         ModSounds.REGISTER.register(modBus);

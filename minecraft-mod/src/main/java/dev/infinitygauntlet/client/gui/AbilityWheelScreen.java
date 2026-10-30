@@ -92,7 +92,7 @@ public class AbilityWheelScreen extends Screen {
 
         // outer ring: abilities of the selected stone
         hoveredAbility = -1;
-        List<Ability> abilities = Abilities.forStone(stone);
+        List<Ability> abilities = Abilities.available(stone, state.stoneSet());
         for (int i = 0; i < abilities.size(); i++) {
             Ability ability = abilities.get(i);
             double a = -Math.PI / 2 + i * Math.PI * 2 / abilities.size();

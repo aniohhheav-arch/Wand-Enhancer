@@ -518,6 +518,146 @@ def make_gauntlet_animations():
         json.dump({"format_version": "1.8.0", "animations": stone_anims}, f, indent=1)
 
 
+def make_nexus():
+    """Consciousness Nexus: plinth, console pillar, floating crystal, gold/blue rings, rune plates, cables, screen frame.
+    Model space: block footprint is x/z -8..8, y 0..16; the holographic screen (drawn by the renderer) is 64x36 px,
+    centred 54 px up and 6 px behind the block centre."""
+    p = BoxUvPainter(256, 256)
+    DARK = (46, 48, 62)
+    STEEL = (96, 104, 128)
+    BLUE = (60, 150, 255)
+    GOLD_E = (255, 205, 80)
+    bones = [bone("root", [0, 0, 0])]
+    bones.append(bone("base", [0, 0, 0], [
+        p.cube([-12, 0, -12], [24, 3, 24], DARK, seed=1),
+        p.cube([-10, 3, -10], [20, 2, 20], STEEL, seed=2),
+        p.cube([-12.5, 2.2, -12.5], [25, 0.6, 25], GOLD_DARK, seed=3),
+    ], parent="root"))
+    for i, (x, z) in enumerate(((-10, -10), (10, -10), (-10, 10), (10, 10))):
+        bones.append(bone(f"rune_{i}", [x, 3, z], [p.cube([x - 1.5, 3, z - 1.5], [3, 0.6, 3], GOLD_E, glow=True, seed=10 + i)], parent="base"))
+    bones.append(bone("pillar", [0, 5, 0], [
+        p.cube([-3, 5, -3], [6, 16, 6], STEEL, seed=20),
+        p.cube([-3.5, 9, -3.5], [7, 1.2, 7], GOLD, seed=21),
+        p.cube([-3.5, 15, -3.5], [7, 1.2, 7], GOLD, seed=22),
+        p.cube([-1, 6, -3.3], [2, 14, 0.5], BLUE, glow=True, seed=23),
+        p.cube([-1, 6, 2.8], [2, 14, 0.5], BLUE, glow=True, seed=24),
+    ], parent="root"))
+    # angled console desk on the front (+z faces the operator after block rotation)
+    bones.append(bone("console", [0, 18, 4], [
+        p.cube([-8, 17, 3], [16, 1.5, 7], DARK, seed=30),
+        p.cube([-7, 18.5, 4], [14, 0.4, 5], BLUE, glow=True, seed=31),
+        p.cube([-2, 18.9, 5], [4, 0.6, 3], GOLD_E, glow=True, seed=32),
+    ], parent="pillar", rotation=[-25, 0, 0]))
+    bones.append(bone("crystal_anchor", [0, 28, 0], parent="root"))
+    bones.append(bone("crystal", [0, 28, 0], [
+        p.cube([-2.5, 25.5, -2.5], [5, 5, 5], BLUE, glow=True, seed=40),
+        p.cube([-1.6, 24.5, -1.6], [3.2, 7, 3.2], (150, 210, 255), glow=True, seed=41),
+    ], parent="crystal_anchor", rotation=[45, 0, 45]))
+    def ring(name, radius, count, color, size, parent_rot):
+        cubes = []
+        for k in range(count):
+            a = 2 * math.pi * k / count
+            cx, cz = math.cos(a) * radius, math.sin(a) * radius
+            c = p.cube([cx - size[0] / 2, 28 - size[1] / 2, cz - size[2] / 2], list(size), color, glow=True, seed=50 + k)
+            c["pivot"] = [cx, 28, cz]
+            c["rotation"] = [0, -math.degrees(a), 0]
+            cubes.append(c)
+        bones.append(bone(name, [0, 28, 0], cubes, parent="crystal_anchor", rotation=parent_rot))
+    ring("ring_gold", 8, 14, GOLD_E, (1.2, 0.8, 3.4), [12, 0, 0])
+    ring("ring_blue", 11, 18, BLUE, (1.0, 0.7, 3.6), [-20, 0, 15])
+    # neural cables from the base corners up to the screen frame corners
+    cables = []
+    for i, (x0, z0, x1, y1) in enumerate(((-9, -9, -30, 38), (9, -9, 30, 38))):
+        length = math.dist((x0, 3, z0), (x1, y1, -6))
+        c = p.cube([x0 - 0.6, 3, z0 - 0.6], [1.2, length, 1.2], BLUE, glow=True, seed=60 + i)
+        dx, dy, dz = x1 - x0, y1 - 3, -6 - z0
+        c["pivot"] = [x0, 3, z0]
+        c["rotation"] = [math.degrees(math.atan2(dz, dy)), 0, -math.degrees(math.atan2(dx, math.hypot(dy, dz)))]
+        cables.append(c)
+    bones.append(bone("cables", [0, 3, 0], cables, parent="root"))
+    # screen frame: 64x36 opening centred at (0, 46, -6)
+    W, H, T, Y, Z = 64, 36, 2, 54, -6
+    bones.append(bone("screen_frame", [0, Y, Z], [
+        p.cube([-W / 2 - T, Y + H / 2, Z - 1], [W + 2 * T, T, 2], GOLD, seed=70),
+        p.cube([-W / 2 - T, Y - H / 2 - T, Z - 1], [W + 2 * T, T, 2], GOLD, seed=71),
+        p.cube([-W / 2 - T, Y - H / 2, Z - 1], [T, H, 2], GOLD, seed=72),
+        p.cube([W / 2, Y - H / 2, Z - 1], [T, H, 2], GOLD, seed=73),
+        p.cube([-W / 2 - T - 1, Y - H / 2 - T - 1, Z - 1.6], [4, 4, 1], BLUE, glow=True, seed=74),
+        p.cube([W / 2 - T + 1, Y - H / 2 - T - 1, Z - 1.6], [4, 4, 1], BLUE, glow=True, seed=75),
+        p.cube([-6, Y + H / 2 + T, Z - 0.8], [12, 2, 1.6], DARK, seed=76),
+        p.cube([-4, Y + H / 2 + T + 0.5, Z + 0.9], [8, 1, 0.3], GOLD_E, glow=True, seed=77),
+    ], parent="root"))
+    # authored with the console on +z; GeckoLib's unrotated (north-facing) block model faces -z, so mirror along z
+    def mirror_z(obj):
+        if "pivot" in obj:
+            obj["pivot"] = [obj["pivot"][0], obj["pivot"][1], -obj["pivot"][2]]
+        if "rotation" in obj:
+            r = obj["rotation"]
+            obj["rotation"] = [-r[0], -r[1], r[2]]
+        for c in obj.get("cubes", []):
+            c["origin"] = [c["origin"][0], c["origin"][1], -(c["origin"][2] + c["size"][2])]
+            mirror_z(c)
+    for b in bones:
+        mirror_z(b)
+    geo = {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": "geometry.consciousness_nexus", "texture_width": p.w, "texture_height": p.h,
+                        "visible_bounds_width": 6, "visible_bounds_height": 5, "visible_bounds_offset": [0, 2, 0]},
+        "bones": bones}]}
+    with open(path("geo", "block", "consciousness_nexus.geo.json"), "w") as f:
+        json.dump(geo, f, indent=1)
+    tex, glow = p.images()
+    save(tex, "textures", "block", "consciousness_nexus.png")
+    save(glow, "textures", "block", "consciousness_nexus_glowmask.png")
+    anims = {
+        "animation.consciousness_nexus.standby": {"loop": True, "animation_length": 8.0, "bones": {
+            "crystal_anchor": {"position": [0, "math.sin(query.anim_time * 45) * 0.6", 0]},
+            "crystal": {"rotation": [45, "query.anim_time * 20", 45]},
+            "ring_gold": {"rotation": [12, "query.anim_time * 15", 0]},
+            "ring_blue": {"rotation": [-20, "-query.anim_time * 10", 15]}}},
+        "animation.consciousness_nexus.active": {"loop": True, "animation_length": 4.0, "bones": {
+            "crystal_anchor": {"position": [0, "1.5 + math.sin(query.anim_time * 180) * 0.8", 0]},
+            "crystal": {"rotation": [45, "query.anim_time * 120", 45],
+                        "scale": ["1.15 + math.sin(query.anim_time * 540) * 0.08"] * 3},
+            "ring_gold": {"rotation": ["12 + math.sin(query.anim_time * 90) * 10", "query.anim_time * 140", 0]},
+            "ring_blue": {"rotation": ["-20 + math.cos(query.anim_time * 90) * 12", "-query.anim_time * 100", 15]},
+            "rune_0": {"scale": [1, "1 + math.sin(query.anim_time * 720) * 0.6", 1]},
+            "rune_3": {"scale": [1, "1 + math.cos(query.anim_time * 720) * 0.6", 1]}}},
+        "animation.consciousness_nexus.unstable": {"loop": True, "animation_length": 1.0, "bones": {
+            "crystal_anchor": {"position": ["math.sin(query.anim_time * 4000) * 0.6", "1.5 + math.cos(query.anim_time * 3300) * 0.6", 0]},
+            "crystal": {"rotation": [45, "query.anim_time * 400", 45]},
+            "ring_gold": {"rotation": ["12 + math.sin(query.anim_time * 2000) * 20", "query.anim_time * 300", 0]},
+            "ring_blue": {"rotation": ["-20 + math.cos(query.anim_time * 1700) * 25", "-query.anim_time * 260", 15]},
+            "screen_frame": {"position": ["math.sin(query.anim_time * 5000) * 0.3", 0, 0]}}},
+        "animation.consciousness_nexus.power_on": {"animation_length": 1.5, "bones": {
+            "crystal": {"scale": {"0.0": [0.4, 0.4, 0.4], "0.5": [1.6, 1.6, 1.6], "1.0": [1.0, 1.0, 1.0]},
+                        "rotation": {"0.0": [45, 0, 45], "1.5": [45, 720, 45]}},
+            "ring_gold": {"rotation": {"0.0": [12, 0, 0], "1.5": [12, 540, 0]}},
+            "ring_blue": {"rotation": {"0.0": [-20, 0, 15], "1.5": [-20, -540, 15]}},
+            "screen_frame": {"scale": {"0.0": [1, 0.9, 1], "0.3": [1.03, 1.05, 1], "0.6": [1, 1, 1]}}}},
+    }
+    with open(path("animations", "block", "consciousness_nexus.animation.json"), "w") as f:
+        json.dump({"format_version": "1.8.0", "animations": anims}, f, indent=1)
+    # item icon
+    icon = np.zeros((16, 16, 4))
+    icon[12:15, 2:14] = [0.25, 0.26, 0.32, 1]
+    icon[5:12, 6:10] = [0.45, 0.48, 0.58, 1]
+    icon[1:5, 1:15] = [0.9, 0.7, 0.2, 1]
+    icon[2:4, 2:14] = [0.25, 0.6, 1.0, 1]
+    icon[6:9, 7:9] = [1.0, 0.85, 0.3, 1]
+    save(Image.fromarray((icon * 255).astype(np.uint8), "RGBA"), "textures", "item", "consciousness_nexus.png")
+    # screen overlays: scanlines and static noise
+    sl = np.zeros((64, 64, 4))
+    sl[::2, :, 3] = 0.22
+    save(Image.fromarray((sl * 255).astype(np.uint8), "RGBA"), "textures", "vfx", "scanlines.png")
+    n = RNG.random((128, 128))
+    st = np.stack([n, n, n, np.ones_like(n)], -1)
+    save(Image.fromarray((st * 255).astype(np.uint8), "RGBA"), "textures", "vfx", "static.png")
+    v = radial(128)[0]
+    vig = np.clip((v - 0.55) / 0.6, 0, 1) ** 1.5
+    save(gray_alpha(vig, np.zeros_like(vig)), "textures", "vfx", "vignette.png")
+    save(glyph_circle(128, 3, 5), "textures", "vfx", "glyph_mind.png")
+
+
 # --------------------------------------------------------------------------- sounds
 
 SR = 44100
@@ -705,6 +845,27 @@ def make_sounds():
     d = 1.6
     add("time_shatter", boom(d, 90, 25) * 1.2 + crackle(d, 400, 0.001, seed=23) * env(d, 0.001, 0.7, 2) * 1.2, "Time shatters")
 
+    # Consciousness Nexus ----------------------------------------------------
+    d = 2.0
+    add("nexus_power_on", sweep(d, 60, 900, 1.5) * env(d, 0.05, 0.4) * 0.4 + sweep(d, 90, 1350, 1.5) * env(d, 0.1, 0.4) * 0.2
+        + fit(np.concatenate([np.zeros(int(SR * 1.2)), np.sin(2 * np.pi * 1760 * t_axis(0.8)) * np.exp(-t_axis(0.8) * 5) * 0.5]), d)
+        + bandpass(noise(d), 2000, 8000) * env(d, 0.01, 0.15, 3) * 0.4, "Consciousness Nexus powers on")
+    d = 4.0
+    hum = (np.sin(2 * np.pi * 60 * t_axis(d)) * 0.35 + np.sin(2 * np.pi * 120 * t_axis(d)) * 0.2 + np.sin(2 * np.pi * 330 * t_axis(d)) * 0.08
+           * (0.6 + 0.4 * np.sin(2 * np.pi * 0.7 * t_axis(d))) + bandpass(noise(d), 1500, 5000) * 0.05)
+    fade = np.minimum(1, np.minimum(t_axis(d), d - t_axis(d)) / 0.05)
+    add("nexus_hum", hum * fade, "Nexus hums")
+    d = 1.6
+    add("nexus_link", sweep(d, 1800, 300, 0.6) * env(d, 0.02, 1.4) * 0.3 + sweep(d, 300, 2400, 1.8) * env(d, 0.6, 0.6) * 0.3
+        + crackle(d, 90, seed=31) * 0.5, "Neural link forms")
+    d = 2.2
+    add("nexus_disconnect", bandpass(noise(d), 300, 7000) * env(d, 0.05, 1.6, 1.2) * 0.6 + sweep(d, 900, 40, 0.5) * env(d, 0.01, 2.0) * 0.4
+        + fit(np.concatenate([np.zeros(int(SR * 1.5)), boom(0.7, 120, 50)]), d), "Neural link severed")
+    d = 1.0
+    add("nexus_static", bandpass(noise(d), 800, 9000) * env(d, 0.01, 0.9, 1) * 0.5, "Signal static")
+    d = 0.5
+    add("nexus_warning", np.sign(np.sin(2 * np.pi * 880 * t_axis(d))) * ((t_axis(d) % 0.25) < 0.12) * env(d, 0.005, 0.1, 1) * 0.25, "Connection unstable")
+
     # Gauntlet ---------------------------------------------------------------
     d = 2.2
     charge = sum(sweep(d, f, f * 3, 2.0) * (0.35 / (i + 1)) for i, f in enumerate((70, 140, 210, 280)))
@@ -736,6 +897,7 @@ def main():
     make_gauntlet()
     make_stone_model()
     make_gauntlet_animations()
+    make_nexus()
     make_sounds()
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "generated_subtitles.json"), "w") as f:
         json.dump(SUBTITLES, f, indent=2, sort_keys=True)

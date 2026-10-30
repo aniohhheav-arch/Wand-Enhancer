@@ -21,14 +21,16 @@ public final class PlayerPowerData {
             UUIDUtil.CODEC.optionalFieldOf("pending_portal").forGetter(d -> Optional.ofNullable(d.pendingPortal)),
             GlobalPos.CODEC.optionalFieldOf("swap_marker").forGetter(d -> Optional.ofNullable(d.swapMarker)),
             UUIDUtil.CODEC.optionalFieldOf("swap_entity").forGetter(d -> Optional.ofNullable(d.swapEntity)),
-            GlobalPos.CODEC.optionalFieldOf("waypoint").forGetter(d -> Optional.ofNullable(d.waypoint))
-    ).apply(i, (cd, portal, marker, entity, waypoint) -> {
+            GlobalPos.CODEC.optionalFieldOf("waypoint").forGetter(d -> Optional.ofNullable(d.waypoint)),
+            GlobalPos.CODEC.optionalFieldOf("nexus").forGetter(d -> Optional.ofNullable(d.nexus))
+    ).apply(i, (cd, portal, marker, entity, waypoint, nexus) -> {
         PlayerPowerData d = new PlayerPowerData();
         d.cooldowns.putAll(cd);
         d.pendingPortal = portal.orElse(null);
         d.swapMarker = marker.orElse(null);
         d.swapEntity = entity.orElse(null);
         d.waypoint = waypoint.orElse(null);
+        d.nexus = nexus.orElse(null);
         return d;
     }));
 
@@ -37,6 +39,8 @@ public final class PlayerPowerData {
     public GlobalPos swapMarker;
     public UUID swapEntity;
     public GlobalPos waypoint;
+    /** The Consciousness Nexus this player last bound. */
+    public GlobalPos nexus;
 
     public long cooldownEnd(ResourceLocation ability) {
         return cooldowns.getOrDefault(ability.toString(), 0L);

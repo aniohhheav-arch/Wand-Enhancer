@@ -36,6 +36,8 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.CHRONO_BARRIER.get(), dev.infinitygauntlet.client.render.ChronoBarrierRenderer::new);
         event.registerEntityRenderer(ModEntities.TIME_FRACTURE.get(), dev.infinitygauntlet.client.render.TimeFractureRenderer::new);
         event.registerEntityRenderer(ModEntities.TEMPORAL_ECHO.get(), dev.infinitygauntlet.client.render.TemporalEchoRenderer::new);
+        event.registerBlockEntityRenderer(dev.infinitygauntlet.registry.ModBlockEntities.CONSCIOUSNESS_NEXUS.get(),
+                dev.infinitygauntlet.client.nexus.NexusRenderer::new);
     }
 
     @SubscribeEvent
@@ -53,12 +55,18 @@ public final class ClientModEvents {
         event.register(Keybinds.PREVIOUS_ABILITY);
         event.register(Keybinds.NEXT_STONE);
         event.register(Keybinds.ABILITY_WHEEL);
+        event.register(Keybinds.REMOTE_BLINK);
+        event.register(Keybinds.NEURAL_OVERRIDE);
+        event.register(Keybinds.PORTAL_EXTRACTION);
+        event.register(Keybinds.SWITCH_FEED);
+        event.register(Keybinds.EMERGENCY_DISCONNECT);
     }
 
     @SubscribeEvent
     static void onGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, InfinityGauntlet.id("ability_hud"), AbilityHud::render);
         event.registerAboveAll(InfinityGauntlet.id("screen_effects"), ScreenEffectsLayer::render);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, InfinityGauntlet.id("remote_control"), dev.infinitygauntlet.client.nexus.RemoteControlHud::render);
     }
 
     private ClientModEvents() {

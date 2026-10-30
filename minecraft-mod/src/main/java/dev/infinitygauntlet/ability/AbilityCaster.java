@@ -75,7 +75,7 @@ public final class AbilityCaster {
         if (!state.has(stone)) {
             return null;
         }
-        List<Ability> list = Abilities.forStone(stone);
+        List<Ability> list = Abilities.available(stone, state.stoneSet());
         if (list.isEmpty()) {
             return null;
         }
@@ -97,7 +97,7 @@ public final class AbilityCaster {
             if (!state.has(stone)) {
                 return;
             }
-            int count = Math.max(1, Abilities.forStone(stone).size());
+            int count = Math.max(1, Abilities.available(stone, state.stoneSet()).size());
             stack.set(ModDataComponents.GAUNTLET_STATE, state.withSelection(stone, Math.floorMod(abilityIndex, count)));
             return;
         }

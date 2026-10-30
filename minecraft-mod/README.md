@@ -1,7 +1,8 @@
 # Infinity Gauntlet: The Six Stones
 
 A NeoForge 1.21.1 mod that recreates wielding the MCU Infinity Gauntlet. Done so far: the gauntlet, the shared
-ability/VFX/cinematic frameworks, the complete **Space Stone** (milestone 1) and the complete **Time Stone** (milestone 2).
+ability/VFX/cinematic frameworks, the complete **Space Stone** (milestone 1), the complete **Time Stone** (milestone 2) and the
+**Mind + Space Consciousness Nexus** remote-possession system (milestone 3).
 
 | Dimensional rupture | Cosmic Gateway | Spatial Prison |
 | --- | --- | --- |
@@ -10,6 +11,10 @@ ability/VFX/cinematic frameworks, the complete **Space Stone** (milestone 1) and
 | Time Freeze | Temporal Echo | Time Fracture |
 | --- | --- | --- |
 | ![freeze](docs/time-freeze.jpg) | ![echo](docs/temporal-echo.jpg) | ![fracture](docs/time-fracture.jpg) |
+
+| Nexus console (live feed from a pig) | Neural link over a possessed zombie | Disconnection sequence |
+| --- | --- | --- |
+| ![console](docs/nexus-console.jpg) | ![link](docs/nexus-link.jpg) | ![disconnect](docs/nexus-disconnect.jpg) |
 
 *Screenshots are from the headless test client (Mesa llvmpipe, default "Fancy" graphics).*
 
@@ -25,8 +30,10 @@ ability/VFX/cinematic frameworks, the complete **Space Stone** (milestone 1) and
 | **Space Stone: all 9 abilities** | done |
 | **Time Stone: all 9 abilities**, built on real tick-level time dilation | done |
 | Progression: crafting, loot discovery, advancements, testing commands, GameTests | done for the Space and Time Stones |
-| Mind, Reality, Power and Soul abilities | not started; the stones install and render, but have no abilities yet |
-| Stone combinations, full-gauntlet ability set, the Snap sequence, Consciousness Nexus (Mind + Space) | not started |
+| Combination system (combos appear under each of their stones once all are installed) | done |
+| **Mind + Space: Consciousness Nexus** remote possession with a real-time camera feed | done |
+| Mind, Reality, Power and Soul solo abilities | not started; the stones install and render, but have no solo abilities yet |
+| Other stone combinations, full-gauntlet ability set, the Snap sequence | not started |
 
 The `snap` and `overload` gauntlet animations and the per-stone palettes are already in place for the later milestones.
 
@@ -66,13 +73,65 @@ Only position, rotation and velocity are ever restored, never health, inventorie
 | Chronological Barrier | A disc of clockwork rings in front of you. Incoming projectiles decelerate and hang suspended in front of it; cast again to send them all back. |
 | Time Fracture | Charges, then shatters the air over the battlefield into a turning pane of cracked time. It pulses nearby creatures into near-stillness, shows afterimages of where they were, and implodes in a green flash. |
 
+## Mind + Space: the Consciousness Nexus
+
+The player never becomes the creature. They stay in their own body at a control station and operate the creature
+remotely, watching a live camera feed on the station's holographic screen.
+
+1. **Build and bind a Nexus.** Craft it (tinted glass over ender eyes and an observer, on gold blocks around a
+   lodestone), place it, and use it once to bind it to yourself.
+2. **Link a creature.** With the Mind and Space Stones installed, select *Remote Consciousness* (it appears under both
+   stones) and cast it at a mob within 64 blocks of the Nexus. A miniature blue-black rupture opens over its head,
+   golden neural tendrils reach into it, its eyes glow yellow, and a blue-and-gold stream runs from the rupture to
+   the Nexus. The station powers on (the screen opens like an old CRT) and the creature's own goals are suspended.
+3. **Take the controls.** Use the Nexus: you are placed at the console facing the screen. WASD moves the creature,
+   the mouse turns its head, Space jumps, Sprint runs, Attack is its natural attack and Use its special action.
+   Your own body and view stay at the station.
+
+**The live screen is a real render.** Every frame the level is rendered a second time from the creature's eyes into
+an offscreen framebuffer: the main render target and camera entity are swapped through an access transformer. The
+screen samples that framebuffer, so it shows exactly what the creature sees. The operator's feed renders every
+frame, other feeds every third or tenth frame at 512 px wide, and only for stations within 40 blocks.
+
+**Interface.** The screen shows a LIVE FEED marker, the creature's name and a reticle. Holographic panels around it
+show health, distance, connection stability, link duration and coordinates, the multi-feed monitors, ability status,
+and the emergency disconnect control. Stability drops with distance; below 30% the picture fills with golden
+interference, the station shakes, warnings blink and an alarm sounds. Past the range limit the link breaks.
+
+| Creature | Attack | Special (Use) |
+| --- | --- | --- |
+| Zombie | melee | groan |
+| Skeleton | draws and shoots along the view | — |
+| Spider | melee | leap (climbs walls by walking into them) |
+| Creeper | detonate (configurable) | detonate |
+| Enderman | melee | teleport to where it looks |
+| Iron Golem | heavy smash (launches the target) | ground slam (knocks everything nearby away) |
+| Villager | — | operates doors, trapdoors, gates, buttons, levers and bells in front of it |
+| Other mobs | melee if they have an attack | — |
+
+| Key (default) | Action |
+| --- | --- |
+| Z | **Remote Blink**: Space-teleports the creature 8 blocks along its view |
+| N | **Neural Override**: speed, strength, jump and resistance for 10 s (costs stability) |
+| B | **Portal Extraction**: rupture-transports the creature to the Nexus and ends its link |
+| H | **Entity Switching**: cycles the active creature (up to 3 linked: multi-feed) |
+| X | **Emergency Recall**: severs every link at once |
+| Sneak | leave the console (links stay up) |
+
+**Disconnecting** (by key, death, unloading, range, expiry or extraction) plays the full sequence: golden
+interference floods the picture, the signal is lost to static showing the reason, the rupture over the creature's
+head implodes and the beam fades, the screen collapses to a line, and the station returns to standby. The
+creature's own AI, movement control and targeting are restored exactly as they were. Possessed mobs never despawn.
+Everything is decided on the server: clients only send movement, view and button state, which the server validates
+(the operator must be at their own console, within 6 blocks).
+
 ## Getting the gauntlet (survival)
 
 * **Gauntlet:** crafted from 6 gold blocks, a netherite ingot and a nether star (shaped: ` N ` / `GUG` / `GGG`).
 * **Space Stone (Tesseract):** found in End City treasure chests (20%), stronghold libraries (8%) and ancient cities (4%).
 * **Time Stone (Eye of Agamotto):** found in jungle temples (25%), woodland mansions (15%) and desert pyramids (6%).
 * **Installing a stone:** right-click the stone onto the gauntlet in your inventory (bundle-style), or sneak-use the gauntlet with the stone in your off hand. Right-click the gauntlet with an empty cursor to take the selected stone back out.
-* **Advancements:** the "Infinity" tab includes Infinity, The Tesseract, A Hole in Reality, Folded Space, Between Worlds, Master of Space, The Eye of Agamotto, Za Warudo, Dormammu I've Come to Bargain, Master of Time and I Am Inevitable.
+* **Advancements:** the "Infinity" tab includes Infinity, The Tesseract, A Hole in Reality, Folded Space, Between Worlds, Master of Space, The Eye of Agamotto, Za Warudo, Puppet Master, Dormammu I've Come to Bargain, Master of Time and I Am Inevitable.
 
 ## Testing commands (permission level 2)
 
@@ -83,11 +142,13 @@ Only position, rotation and velocity are ever restored, never health, inventorie
 /gauntlet portals list|clear
 /gauntlet vfx <type>                 # preview any VFX primitive in front of you
 /gauntlet abilities
+/gauntlet nexus bind|control         # bind / take the controls of the nearest Nexus (within 8 blocks)
+/gauntlet nexus action <leave|disconnect|switch|blink|override|extract>
 ```
 
 ## Configuration
 
-* **Server** (`serverconfig/infinitygauntlet-server.toml`, per world): portal size and duration, pair limit, cross-dimension linking, what portals may transport, all damage values, gateway height/size, group-teleport radius/range, every Time Stone strength, radius and duration (freeze, slow and bubble time scales, rewind history length, loop period...), PvP (`offensiveAbilitiesAffectPlayers`, off by default), a global cooldown multiplier and every ability's cooldown.
+* **Server** (`serverconfig/infinitygauntlet-server.toml`, per world): portal size and duration, pair limit, cross-dimension linking, what portals may transport, all damage values, gateway height/size, group-teleport radius/range, every Time Stone strength, radius and duration (freeze, slow and bubble time scales, rewind history length, loop period...), possession range, link duration, feed count, creeper detonation and Neural Override length, PvP (`offensiveAbilitiesAffectPlayers`, off by default), a global cooldown multiplier and every ability's cooldown.
 * **Client** (`config/infinitygauntlet-client.toml`): VFX quality (`LOW`…`ULTRA`, scales particle and smoke density), effect draw distance, camera effects on/off, shake intensity, screen flashes, portal transition overlay and the HUD.
 
 No ability in either stone edits terrain.
@@ -99,10 +160,13 @@ ability/        Ability base, CastResult, AbilityCaster (the single cast path), 
 ability/space/  the nine Space Stone abilities
 ability/time/   the nine Time Stone abilities
 time/           TimeManager (tick dilation), EntityHistory (movement recording), RewindController
+nexus/          Consciousness Nexus block + block entity, PossessionManager (sessions), RemoteMoveControl, ControlProfiles
+ability/combo/  combination abilities (Remote Consciousness)
 entity/         RupturePortalEntity + PortalNetwork (SavedData links, survive unloads/restarts/dimensions),
                 TimedEffectEntity base, rift/compression/prison/barrage-portal/bolt entities
 vfx/            server API (Vfx) and the VfxType primitives; EnergyParticleOptions
 network/        payloads; all sends skip connections without the mod's channels (fake/test players)
+client/nexus/   FeedRenderer (offscreen camera feeds), NexusRenderer (screen + panels), NexusLinkRenderer, operator client + HUD
 client/time/    ClientTime (client tick dilation), ClientHistory, Afterimages (ghost models), TimeOverlay
 client/vfx/     render types, geometry builders (VfxDraw), RuptureDraw, ClientVfxManager, CameraEffects
 client/render/  entity renderers and the GeckoLib item renderers
@@ -122,5 +186,5 @@ Requires JDK 21.
 ./gradlew build                 # jar in build/libs
 ./gradlew runClient             # dev client
 ./gradlew runClient -PquickPlayWorld=<save>   # boot straight into a singleplayer world
-./gradlew runGameTestServer     # server GameTests (16 tests)
+./gradlew runGameTestServer     # server GameTests (21 tests)
 ```
