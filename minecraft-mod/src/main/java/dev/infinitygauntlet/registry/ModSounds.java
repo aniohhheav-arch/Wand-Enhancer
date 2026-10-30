@@ -41,6 +41,12 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_DISCONNECT = register("nexus_disconnect");
     public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_STATIC = register("nexus_static");
     public static final DeferredHolder<SoundEvent, SoundEvent> NEXUS_WARNING = register("nexus_warning");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BREACH_OPEN = register("breach_open");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BREACH_ENTER = register("breach_enter");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHAMBER_AMBIENT = register("chamber_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> REALITY_GLITCH = register("reality_glitch");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PANEL_PRESS = register("panel_press");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPECIMEN_LOST = register("specimen_lost");
     public static final DeferredHolder<SoundEvent, SoundEvent> GAUNTLET_CHARGE = register("gauntlet_charge");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_INSERT = register("stone_insert");
     public static final DeferredHolder<SoundEvent, SoundEvent> GAUNTLET_CAST = register("gauntlet_cast");

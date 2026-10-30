@@ -56,6 +56,13 @@ public final class ModEntities {
                     .noSummon()
                     .build(InfinityGauntlet.MOD_ID + ":temporal_echo"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.breach.DimensionalRiftEntity>> DIMENSIONAL_RIFT =
+            register("dimensional_rift", dev.infinitygauntlet.breach.DimensionalRiftEntity::new, 1.0f, 1.0f, 10, 1);
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.breach.ObservationPanelEntity>> OBSERVATION_PANEL =
+            register("observation_panel", dev.infinitygauntlet.breach.ObservationPanelEntity::new, 2.5f, 1.4f, 8, 20);
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.breach.SpecimenEntity>> SPECIMEN =
+            register("specimen", dev.infinitygauntlet.breach.SpecimenEntity::new, 1.5f, 2.0f, 8, 1);
+
     @SubscribeEvent
     static void onAttributes(EntityAttributeCreationEvent event) {
         event.put(TEMPORAL_ECHO.get(), TemporalEchoEntity.attributes().build());

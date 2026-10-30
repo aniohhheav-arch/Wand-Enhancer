@@ -1,0 +1,158 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.containment.idle": {
+   "loop": true,
+   "animation_length": 8.0,
+   "bones": {
+    "ring_0": {
+     "rotation": [
+      "query.anim_time * 40",
+      "query.anim_time * 25",
+      0
+     ]
+    },
+    "ring_1": {
+     "rotation": [
+      0,
+      "-query.anim_time * 35",
+      "query.anim_time * 30"
+     ]
+    },
+    "ring_2": {
+     "rotation": [
+      "math.sin(query.anim_time * 45) * 25",
+      "query.anim_time * 15",
+      "math.cos(query.anim_time * 45) * 25"
+     ]
+    },
+    "pylon_0": {
+     "scale": [
+      1,
+      "1 + math.sin(query.anim_time * 180 + 0) * 0.04",
+      1
+     ]
+    },
+    "pylon_1": {
+     "scale": [
+      1,
+      "1 + math.sin(query.anim_time * 180 + 90) * 0.04",
+      1
+     ]
+    },
+    "pylon_2": {
+     "scale": [
+      1,
+      "1 + math.sin(query.anim_time * 180 + 180) * 0.04",
+      1
+     ]
+    },
+    "pylon_3": {
+     "scale": [
+      1,
+      "1 + math.sin(query.anim_time * 180 + 270) * 0.04",
+      1
+     ]
+    }
+   }
+  },
+  "animation.containment.lost": {
+   "animation_length": 1.5,
+   "bones": {
+    "ring_0": {
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.4": [
+       1.2,
+       1.2,
+       1.2
+      ],
+      "1.5": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.5": [
+       0,
+       -900,
+       0
+      ]
+     }
+    },
+    "ring_1": {
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.4": [
+       1.2,
+       1.2,
+       1.2
+      ],
+      "1.5": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.5": [
+       0,
+       900,
+       0
+      ]
+     }
+    },
+    "ring_2": {
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.4": [
+       1.2,
+       1.2,
+       1.2
+      ],
+      "1.5": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.5": [
+       0,
+       -900,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

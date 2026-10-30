@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:white_stained_glass"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.white_room"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.white_room.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "enter": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "infinitygauntlet:observation_chamber"
+      }
+    }
+  }
+}

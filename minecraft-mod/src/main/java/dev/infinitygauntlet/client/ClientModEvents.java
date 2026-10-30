@@ -36,8 +36,16 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.CHRONO_BARRIER.get(), dev.infinitygauntlet.client.render.ChronoBarrierRenderer::new);
         event.registerEntityRenderer(ModEntities.TIME_FRACTURE.get(), dev.infinitygauntlet.client.render.TimeFractureRenderer::new);
         event.registerEntityRenderer(ModEntities.TEMPORAL_ECHO.get(), dev.infinitygauntlet.client.render.TemporalEchoRenderer::new);
+        event.registerEntityRenderer(ModEntities.DIMENSIONAL_RIFT.get(), dev.infinitygauntlet.client.breach.RiftRenderer::new);
+        event.registerEntityRenderer(ModEntities.OBSERVATION_PANEL.get(), dev.infinitygauntlet.client.breach.PanelRenderer::new);
+        event.registerEntityRenderer(ModEntities.SPECIMEN.get(), dev.infinitygauntlet.client.breach.SpecimenRenderer::new);
         event.registerBlockEntityRenderer(dev.infinitygauntlet.registry.ModBlockEntities.CONSCIOUSNESS_NEXUS.get(),
                 dev.infinitygauntlet.client.nexus.NexusRenderer::new);
+    }
+
+    @SubscribeEvent
+    static void onDimensionEffects(net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent event) {
+        event.register(InfinityGauntlet.id("observation_chamber"), new dev.infinitygauntlet.client.breach.ChamberSpecialEffects());
     }
 
     @SubscribeEvent

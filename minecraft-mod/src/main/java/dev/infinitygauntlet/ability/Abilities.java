@@ -57,6 +57,7 @@ public final class Abilities {
         register(new TimeFractureAbility());
 
         register(new dev.infinitygauntlet.ability.combo.RemoteConsciousnessAbility());
+        register(new dev.infinitygauntlet.ability.combo.RealityBreachAbility());
     }
 
     private static void register(Ability ability) {

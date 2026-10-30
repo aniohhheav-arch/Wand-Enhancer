@@ -2,7 +2,8 @@
 
 A NeoForge 1.21.1 mod that recreates wielding the MCU Infinity Gauntlet. Done so far: the gauntlet, the shared
 ability/VFX/cinematic frameworks, the complete **Space Stone** (milestone 1), the complete **Time Stone** (milestone 2) and the
-**Mind + Space Consciousness Nexus** remote-possession system (milestone 3).
+**Mind + Space Consciousness Nexus** remote-possession system (milestone 3) and the **Reality Breach** observation
+chamber (milestone 4).
 
 | Dimensional rupture | Cosmic Gateway | Spatial Prison |
 | --- | --- | --- |
@@ -15,6 +16,14 @@ ability/VFX/cinematic frameworks, the complete **Space Stone** (milestone 1), th
 | Nexus console (live feed from a pig) | Neural link over a possessed zombie | Disconnection sequence |
 | --- | --- | --- |
 | ![console](docs/nexus-console.jpg) | ![link](docs/nexus-link.jpg) | ![disconnect](docs/nexus-disconnect.jpg) |
+
+| Breach torn open on a pig | The white observation chamber | The control panel |
+| --- | --- | --- |
+| ![rift](docs/breach-rift.jpg) | ![chamber](docs/breach-chamber.jpg) | ![panel](docs/breach-panel.jpg) |
+
+| The way back | The real pig afterwards: grown, frozen, exposed |
+| --- | --- |
+| ![return](docs/breach-return.jpg) | ![real](docs/breach-real-target.jpg) |
 
 *Screenshots are from the headless test client (Mesa llvmpipe, default "Fancy" graphics).*
 
@@ -32,6 +41,7 @@ ability/VFX/cinematic frameworks, the complete **Space Stone** (milestone 1), th
 | Progression: crafting, loot discovery, advancements, testing commands, GameTests | done for the Space and Time Stones |
 | Combination system (combos appear under each of their stones once all are installed) | done |
 | **Mind + Space: Consciousness Nexus** remote possession with a real-time camera feed | done |
+| **Mind + Space: Reality Breach**: walk through a rift into a white observation chamber and manipulate the real target | done |
 | Mind, Reality, Power and Soul solo abilities | not started; the stones install and render, but have no solo abilities yet |
 | Other stone combinations, full-gauntlet ability set, the Snap sequence | not started |
 
@@ -125,13 +135,63 @@ creature's own AI, movement control and targeting are restored exactly as they w
 Everything is decided on the server: clients only send movement, view and button state, which the server validates
 (the operator must be at their own console, within 6 blocks).
 
+## Mind + Space: Reality Breach
+
+A forbidden reality-manipulation machine disguised as a spell. Nothing here is a GUI: the rift, the room, the
+specimen and the control panel are all physical objects in the world.
+
+1. **Manifestation.** Cast *Reality Breach* (it appears under both Mind and Space) at a creature. Reality tears
+   open on it: a ring of jagged GeckoLib-animated shards snaps together around it, the aperture shows the white
+   of the room beyond, and the torn edge is drawn in separated red, cyan and white for in-world chromatic
+   aberration. Cracks run out into the surrounding space and a lens darkens what is behind it. The tear clings
+   to the creature wherever it goes.
+2. **Entering.** Walk into the tear. Only the caster passes. You dissolve, the screen tears, and you arrive in
+   your own **observation chamber**: a separate dimension holding a featureless, glowing white lab whose edges
+   dissolve into white fog, so it seems to go on forever. Every player has their own room, 1024 blocks from the
+   next.
+3. **The specimen.** A GeckoLib containment unit (pylons and three gimballed rings) holds a live mirror of the
+   target, drawn with its real model. It shows the target's pose, head turning, walk cycle, size and age as they
+   happen. Telemetry floats above it (name, health, scale, real coordinates and dimension, active manipulations).
+   Beside it, a survey hologram shows a miniature of the blocks around the real target, refreshed every two
+   seconds, with a tiny copy of the creature where it actually stands.
+4. **The control panel.** A floating GeckoLib console deploys in front of you. Aim at a holographic button on
+   its face and click. It's a real ray test against the panel's plane, re-validated on the server.
+
+| Group | Controls (all act on the real creature in its own world) |
+| --- | --- |
+| Movement | ◀ EAST · ▲ SOUTH · ▼ NORTH · WEST ▶ (2-block shifts, matching what you see from the console), LIFT (levitate), DROP |
+| Vision and perspective | BLIND (blindness, darkness, and its follow range cut by 90%: it loses its targets), EXPOSE (glowing), ⟲ TURN / TURN ⟳ (45°), PACIFY (no targeting) |
+| Dimension | SHRINK / GROW (five sizes from ×0.3 to ×2.4, through the scale attribute), FREEZE (Time Stone tick freeze), PHASE (invisibility), RESET |
+| System | RELEASE: revert everything and seal the breach |
+
+Toggles light up while they are active, and the specimen shows them too (green time-ghost when frozen, pale
+outline when phased, aura when exposed).
+
+5. **Reality distortion.** A full-screen post shader interferes with the image: rippling space radiating from
+   the rift's on-screen position, slice tearing, RGB separation, grain, corrupted inverted blocks, and exposure and
+   colour flickers. It runs constantly but subtly in the chamber, with random bursts (each with a digital glitch
+   sound and a flicker of the room's "white" light). Outside, it swells as you approach an open rift, and every
+   crossing tears the picture. The specimen itself splits into red and cyan copies during glitches. Strength
+   follows the VFX quality setting.
+6. **Leaving.** Walk into the return rift behind the arrival point to go back to where you entered. The breach
+   stays open, so you can go back in, until you seal it.
+
+**Cleanup.** Sealing the breach (RELEASE, re-casting, logging out, the 10-minute limit) reverts every
+manipulation on the real creature, removes the room's objects and brings you home if you are inside. If the
+creature dies or unloads, the specimen shatters with "SPECIMEN LOST", the tear closes, and the return rift stays
+until you use it. If you log back in inside a chamber without a breach, you are sent back to where you entered.
+Players cannot be breached unless the server allows offensive abilities against players.
+
+> **Note:** like every mod that adds a dimension, the first load of a world shows Minecraft's "experimental
+> settings" warning once. Confirm it and NeoForge remembers your choice for that world.
+
 ## Getting the gauntlet (survival)
 
 * **Gauntlet:** crafted from 6 gold blocks, a netherite ingot and a nether star (shaped: ` N ` / `GUG` / `GGG`).
 * **Space Stone (Tesseract):** found in End City treasure chests (20%), stronghold libraries (8%) and ancient cities (4%).
 * **Time Stone (Eye of Agamotto):** found in jungle temples (25%), woodland mansions (15%) and desert pyramids (6%).
 * **Installing a stone:** right-click the stone onto the gauntlet in your inventory (bundle-style), or sneak-use the gauntlet with the stone in your off hand. Right-click the gauntlet with an empty cursor to take the selected stone back out.
-* **Advancements:** the "Infinity" tab includes Infinity, The Tesseract, A Hole in Reality, Folded Space, Between Worlds, Master of Space, The Eye of Agamotto, Za Warudo, Puppet Master, Dormammu I've Come to Bargain, Master of Time and I Am Inevitable.
+* **Advancements:** the "Infinity" tab includes Infinity, The Tesseract, A Hole in Reality, Folded Space, Between Worlds, Master of Space, The Eye of Agamotto, Za Warudo, Puppet Master, The White Room, Dormammu I've Come to Bargain, Master of Time and I Am Inevitable.
 
 ## Testing commands (permission level 2)
 
@@ -142,6 +202,8 @@ Everything is decided on the server: clients only send movement, view and button
 /gauntlet portals list|clear
 /gauntlet vfx <type>                 # preview any VFX primitive in front of you
 /gauntlet abilities
+/gauntlet breach traverse            # pass through your breach (in or out) without walking into the tear
+/gauntlet breach press <control>     # press a chamber panel button
 /gauntlet nexus bind|control         # bind / take the controls of the nearest Nexus (within 8 blocks)
 /gauntlet nexus action <leave|disconnect|switch|blink|override|extract>
 ```
@@ -160,12 +222,14 @@ ability/        Ability base, CastResult, AbilityCaster (the single cast path), 
 ability/space/  the nine Space Stone abilities
 ability/time/   the nine Time Stone abilities
 time/           TimeManager (tick dilation), EntityHistory (movement recording), RewindController
+breach/         Reality Breach: chamber dimension and cells, rift/panel/specimen entities, PanelLayout (shared hit test), BreachManager
 nexus/          Consciousness Nexus block + block entity, PossessionManager (sessions), RemoteMoveControl, ControlProfiles
 ability/combo/  combination abilities (Remote Consciousness)
 entity/         RupturePortalEntity + PortalNetwork (SavedData links, survive unloads/restarts/dimensions),
                 TimedEffectEntity base, rift/compression/prison/barrage-portal/bolt entities
 vfx/            server API (Vfx) and the VfxType primitives; EnergyParticleOptions
 network/        payloads; all sends skip connections without the mod's channels (fake/test players)
+client/breach/  RealityDistortion (post shader, fog, glitches), rift/panel/specimen renderers, survey hologram, panel interaction
 client/nexus/   FeedRenderer (offscreen camera feeds), NexusRenderer (screen + panels), NexusLinkRenderer, operator client + HUD
 client/time/    ClientTime (client tick dilation), ClientHistory, Afterimages (ghost models), TimeOverlay
 client/vfx/     render types, geometry builders (VfxDraw), RuptureDraw, ClientVfxManager, CameraEffects
@@ -186,5 +250,9 @@ Requires JDK 21.
 ./gradlew build                 # jar in build/libs
 ./gradlew runClient             # dev client
 ./gradlew runClient -PquickPlayWorld=<save>   # boot straight into a singleplayer world
-./gradlew runGameTestServer     # server GameTests (21 tests)
+./gradlew runGameTestServer     # server GameTests (24 tests)
 ```
+
+GameTests run in a world with only the vanilla flat-preset dimensions (the GameTest server does not load datapack
+dimensions), so the breach test checks rift behaviour and the graceful no-chamber path there. It runs the full
+enter, manipulate and leave loop whenever the chamber dimension is present.

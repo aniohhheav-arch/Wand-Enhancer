@@ -53,7 +53,7 @@ public final class NexusGameTests {
         helper.assertTrue(!Abilities.available(InfinityStone.SPACE, spaceOnly.stoneSet()).contains(combo), "hidden with Space alone");
         helper.assertTrue(Abilities.available(InfinityStone.SPACE, both.stoneSet()).contains(combo), "listed under Space with Mind + Space");
         List<Ability> mind = Abilities.available(InfinityStone.MIND, both.stoneSet());
-        helper.assertTrue(mind.size() == 1 && mind.getFirst() == combo, "the only Mind ability for now");
+        helper.assertTrue(mind.contains(combo) && mind.stream().allMatch(Ability::isCombination), "Mind lists only its combinations for now");
         helper.succeed();
     }
 

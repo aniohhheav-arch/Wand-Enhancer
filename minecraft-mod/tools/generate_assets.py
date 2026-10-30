@@ -658,6 +658,163 @@ def make_nexus():
     save(glyph_circle(128, 3, 5), "textures", "vfx", "glyph_mind.png")
 
 
+def write_geo(name, folder, p, bones, bounds=(4, 4)):
+    geo = {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": f"geometry.{name}", "texture_width": p.w, "texture_height": p.h,
+                        "visible_bounds_width": bounds[0], "visible_bounds_height": bounds[1], "visible_bounds_offset": [0, 0, 0]},
+        "bones": bones}]}
+    with open(path("geo", folder, f"{name}.geo.json"), "w") as f:
+        json.dump(geo, f, indent=1)
+    tex, glow = p.images()
+    save(tex, "textures", folder, f"{name}.png")
+    save(glow, "textures", folder, f"{name}_glowmask.png")
+
+
+def write_anims(name, folder, anims):
+    with open(path("animations", folder, f"{name}.animation.json"), "w") as f:
+        json.dump({"format_version": "1.8.0", "animations": anims}, f, indent=1)
+
+
+def make_breach():
+    """Reality Breach: the rift's shard ring, the observation panel and the specimen containment unit."""
+    WHITE = (240, 244, 250)
+    INK = (20, 18, 30)
+    CYAN = (90, 230, 255)
+    MAGENTA = (255, 70, 200)
+    GOLD_E = (255, 210, 90)
+
+    # -- dimensional rift: 14 jagged shards around a torn aperture, centred on the origin (16 px = 1 block radius)
+    p = BoxUvPainter(128, 128)
+    bones = [bone("root", [0, 0, 0])]
+    for k in range(14):
+        a = 2 * math.pi * k / 14 + (RNG.random() - 0.5) * 0.25
+        r = 15 + RNG.random() * 3
+        cx, cy = math.cos(a) * r, math.sin(a) * r
+        length = 5 + RNG.random() * 6
+        col = [INK, CYAN, MAGENTA, INK][k % 4]
+        c = p.cube([cx - 0.8, cy - length / 2, -0.8], [1.6, length, 1.6], col, glow=col != INK, seed=200 + k)
+        c["pivot"] = [cx, cy, 0]
+        c["rotation"] = [0, 0, math.degrees(a) + RNG.uniform(-25, 25)]
+        bones.append(bone(f"shard_{k}", [cx, cy, 0], [c], parent="root"))
+    ring = []
+    for k in range(20):
+        a = 2 * math.pi * k / 20
+        cx, cy = math.cos(a) * 13, math.sin(a) * 13
+        c = p.cube([cx - 0.4, cy - 2.1, -0.4], [0.8, 4.2, 0.8], WHITE, glow=True, seed=260 + k)
+        c["pivot"] = [cx, cy, 0]
+        c["rotation"] = [0, 0, math.degrees(a)]
+        ring.append(c)
+    bones.append(bone("inner_ring", [0, 0, 0], ring, parent="root"))
+    bones.append(bone("eye", [0, 0, 0], [p.cube([-1.2, -1.2, -1.2], [2.4, 2.4, 2.4], WHITE, glow=True, seed=290)], parent="root",
+                      rotation=[45, 45, 0]))
+    write_geo("dimensional_rift", "entity", p, bones, (3, 3))
+    shard_names = [f"shard_{k}" for k in range(14)]
+    write_anims("dimensional_rift", "entity", {
+        "animation.dimensional_rift.open": {"animation_length": 1.6, "bones": {
+            **{n: {"position": {"0.0": [RNG.uniform(-30, 30), RNG.uniform(-30, 30), RNG.uniform(-20, 20)], "1.1": [0, 0, 0]},
+                   "scale": {"0.0": [0, 0, 0], "0.6": [1.4, 1.4, 1.4], "1.1": [1, 1, 1]}} for n in shard_names},
+            "inner_ring": {"scale": {"0.0": [0, 0, 0], "0.9": [0.2, 0.2, 0.2], "1.4": [1.15, 1.15, 1.15], "1.6": [1, 1, 1]},
+                           "rotation": {"0.0": [0, 0, 0], "1.6": [0, 0, 540]}},
+            "eye": {"scale": {"0.0": [0, 0, 0], "0.3": [3, 3, 3], "0.8": [1, 1, 1]}}}},
+        "animation.dimensional_rift.idle": {"loop": True, "animation_length": 6.0, "bones": {
+            **{n: {"position": [f"math.sin(query.anim_time * {170 + i * 23} + {i * 40}) * 0.9",
+                                f"math.cos(query.anim_time * {150 + i * 17} + {i * 25}) * 0.9", 0],
+                   "rotation": [0, 0, f"math.sin(query.anim_time * {90 + i * 11}) * 9"]} for i, n in enumerate(shard_names)},
+            "inner_ring": {"rotation": [0, 0, "query.anim_time * 45"], "scale": ["1 + math.sin(query.anim_time * 140) * 0.05"] * 3},
+            "eye": {"rotation": ["query.anim_time * 160", "query.anim_time * 230", 0]},
+            "root": {"rotation": [0, 0, "math.sin(query.anim_time * 30) * 4"]}}},
+        "animation.dimensional_rift.close": {"animation_length": 1.0, "bones": {
+            **{n: {"position": {"0.0": [0, 0, 0], "0.8": [0, 0, 0]}, "scale": {"0.0": [1, 1, 1], "0.9": [0, 0, 0]}} for n in shard_names},
+            "inner_ring": {"scale": {"0.0": [1, 1, 1], "0.5": [1.3, 1.3, 1.3], "0.9": [0, 0, 0]}, "rotation": {"0.0": [0, 0, 0], "1.0": [0, 0, -720]}},
+            "eye": {"scale": {"0.0": [1, 1, 1], "0.7": [2.5, 2.5, 2.5], "1.0": [0, 0, 0]}}}},
+    })
+
+    # -- observation panel: tilted holo slab (the button plane is drawn by the renderer), side wings, rear halo, emitters
+    p = BoxUvPainter(256, 128)
+    STEEL = (205, 212, 226)
+    bones = [bone("root", [0, 0, 0])]
+    bones.append(bone("slab", [0, 0, 0], [
+        p.cube([-19, -9, -0.6], [38, 18, 1.2], STEEL, seed=300),
+        p.cube([-20, -10, 0.4], [40, 20, 0.6], INK, seed=301),
+        p.cube([-20, 9.2, -1.2], [40, 0.8, 1.2], CYAN, glow=True, seed=302),
+        p.cube([-20, -10, -1.2], [40, 0.8, 1.2], CYAN, glow=True, seed=303),
+    ], parent="root", rotation=[38, 0, 0]))
+    for side, sx in (("left", -1), ("right", 1)):
+        bones.append(bone(f"wing_{side}", [sx * 20, 0, 0], [
+            p.cube([sx * 20 - (0 if sx > 0 else 3), -7, -0.5], [3, 14, 1], STEEL, seed=310 + sx),
+            p.cube([sx * 20 + (2.2 if sx > 0 else -3.2), -5, -0.8], [1, 10, 1.6], MAGENTA, glow=True, seed=312 + sx),
+        ], parent="slab"))
+    halo = []
+    for k in range(24):
+        a = 2 * math.pi * k / 24
+        cx, cy = math.cos(a) * 15, math.sin(a) * 9
+        c = p.cube([cx - 0.5, cy - 1.2, -4.4], [1, 2.4, 0.6], WHITE, glow=True, seed=320 + k)
+        c["pivot"] = [cx, cy, -4.1]
+        c["rotation"] = [0, 0, math.degrees(math.atan2(cy / 9, cx / 15))]
+        halo.append(c)
+    # GeckoLib entity models face +z toward the viewer: the halo sits behind the slab at -z
+    bones.append(bone("halo", [0, 0, -4.1], halo, parent="slab"))
+    for i, x in enumerate((-12, 12)):
+        bones.append(bone(f"emitter_{i}", [x, -14, 0], [p.cube([x - 1.5, -15.5, -1.5], [3, 3, 3], CYAN, glow=True, seed=350 + i)],
+                          parent="root", rotation=[45, 45, 0]))
+    bones.append(bone("stem", [0, -10, 2], [p.cube([-0.8, -22, 1.2], [1.6, 12, 1.6], STEEL, seed=360),
+                                             p.cube([-3, -23, -1], [6, 1, 6], INK, seed=361)], parent="root"))
+    write_geo("observation_panel", "entity", p, bones, (4, 3))
+    write_anims("observation_panel", "entity", {
+        "animation.observation_panel.deploy": {"animation_length": 1.2, "bones": {
+            "slab": {"scale": {"0.0": [0.05, 0.05, 1], "0.5": [1.1, 0.1, 1], "0.9": [1.05, 1.08, 1], "1.2": [1, 1, 1]}},
+            "wing_left": {"rotation": {"0.0": [0, 90, 0], "1.0": [0, 0, 0]}},
+            "wing_right": {"rotation": {"0.0": [0, -90, 0], "1.0": [0, 0, 0]}},
+            "halo": {"scale": {"0.0": [0, 0, 0], "0.8": [0, 0, 0], "1.2": [1, 1, 1]}}}},
+        "animation.observation_panel.idle": {"loop": True, "animation_length": 4.0, "bones": {
+            "root": {"position": [0, "math.sin(query.anim_time * 90) * 0.5", 0]},
+            "halo": {"rotation": [0, 0, "query.anim_time * 30"]},
+            "emitter_0": {"rotation": [45, "query.anim_time * 180", 0]},
+            "emitter_1": {"rotation": [45, "-query.anim_time * 180", 0]},
+            "wing_left": {"rotation": [0, "math.sin(query.anim_time * 90) * 4", 0]},
+            "wing_right": {"rotation": [0, "-math.sin(query.anim_time * 90) * 4", 0]}}},
+        "animation.observation_panel.press": {"animation_length": 0.35, "bones": {
+            "slab": {"position": {"0.0": [0, 0, 0], "0.08": [0, 0, 0.8], "0.35": [0, 0, 0]}},
+            "halo": {"scale": {"0.0": [1, 1, 1], "0.1": [1.15, 1.15, 1.15], "0.35": [1, 1, 1]}}}},
+    })
+
+    # -- containment unit: floor disc, three gimballed rings, four emitter pylons
+    p = BoxUvPainter(128, 128)
+    bones = [bone("root", [0, 0, 0])]
+    disc = [p.cube([-14, 0, -14], [28, 1, 28], STEEL, seed=400), p.cube([-11, 1, -11], [22, 0.4, 22], CYAN, glow=True, seed=401)]
+    bones.append(bone("base", [0, 0, 0], disc, parent="root"))
+    for i, (x, z) in enumerate(((-13, -13), (13, -13), (-13, 13), (13, 13))):
+        bones.append(bone(f"pylon_{i}", [x, 1, z], [p.cube([x - 1, 1, z - 1], [2, 14, 2], STEEL, seed=410 + i),
+                                                    p.cube([x - 0.6, 15, z - 0.6], [1.2, 3, 1.2], MAGENTA, glow=True, seed=415 + i)],
+                          parent="base"))
+    for j, (rad, col) in enumerate(((16, WHITE), (19, CYAN), (22, GOLD_E))):
+        segs = []
+        for k in range(22):
+            a = 2 * math.pi * k / 22
+            cx, cz = math.cos(a) * rad, math.sin(a) * rad
+            c = p.cube([cx - 0.4, 24 - 0.4, cz - 2.4], [0.8, 0.8, 4.8], col, glow=True, seed=430 + j * 30 + k)
+            c["pivot"] = [cx, 24, cz]
+            c["rotation"] = [0, -math.degrees(a), 0]
+            segs.append(c)
+        bones.append(bone(f"ring_{j}", [0, 24, 0], segs, parent="root"))
+    write_geo("containment", "entity", p, bones, (4, 4))
+    write_anims("containment", "entity", {
+        "animation.containment.idle": {"loop": True, "animation_length": 8.0, "bones": {
+            "ring_0": {"rotation": ["query.anim_time * 40", "query.anim_time * 25", 0]},
+            "ring_1": {"rotation": [0, "-query.anim_time * 35", "query.anim_time * 30"]},
+            "ring_2": {"rotation": ["math.sin(query.anim_time * 45) * 25", "query.anim_time * 15", "math.cos(query.anim_time * 45) * 25"]},
+            **{f"pylon_{i}": {"scale": [1, f"1 + math.sin(query.anim_time * 180 + {i * 90}) * 0.04", 1]} for i in range(4)}}},
+        "animation.containment.lost": {"animation_length": 1.5, "bones": {
+            **{f"ring_{j}": {"scale": {"0.0": [1, 1, 1], "0.4": [1.2, 1.2, 1.2], "1.5": [0, 0, 0]},
+                             "rotation": {"0.0": [0, 0, 0], "1.5": [0, 900 * (1 if j % 2 else -1), 0]}} for j in range(3)}}},
+    })
+
+    # lab floor: white with a faint grid seam
+    f = np.ones((16, 16, 4)) * np.array([0.97, 0.975, 0.985, 1.0])
+    f[0, :, :3] = f[:, 0, :3] = [0.9, 0.915, 0.94]
+    save(Image.fromarray((f * 255).astype(np.uint8), "RGBA"), "textures", "block", "chamber_floor.png")
+
+
 # --------------------------------------------------------------------------- sounds
 
 SR = 44100
@@ -866,6 +1023,41 @@ def make_sounds():
     d = 0.5
     add("nexus_warning", np.sign(np.sin(2 * np.pi * 880 * t_axis(d))) * ((t_axis(d) % 0.25) < 0.12) * env(d, 0.005, 0.1, 1) * 0.25, "Connection unstable")
 
+    # Reality Breach -----------------------------------------------------
+    d = 2.6
+    tear = (crackle(d, 220, 0.0012, seed=41) * env(d, 0.05, 2.2, 1.2) * 1.1 + sweep(d, 30, 160, 0.4) * env(d, 0.3, 2.0) * 0.6
+            + np.sign(np.sin(2 * np.pi * np.cumsum(70 + 400 * t_axis(d) ** 2) / SR)) * env(d, 0.5, 1.4) * 0.12
+            + fit(np.concatenate([np.zeros(int(SR * 1.4)), boom(1.2, 50, 22) * 1.3]), d))
+    add("breach_open", tear, "Reality tears open")
+    d = 2.0
+    add("breach_enter", bandpass(noise(d), 200, 9000)[::-1] * env(d, 1.6, 0.4, 1) * 0.7 + sweep(d, 2000, 60, 0.4) * env(d, 0.4, 1.4) * 0.4
+        + fit(np.concatenate([np.zeros(int(SR * 1.6)), boom(0.4, 140, 60)]), d), "You pass through the breach")
+    d = 6.0
+    tt = t_axis(d)
+    amb = (np.sin(2 * np.pi * 47 * tt) * 0.25 + np.sin(2 * np.pi * 47.6 * tt) * 0.25 + np.sin(2 * np.pi * 3520 * tt) * 0.012
+           * (0.5 + 0.5 * np.sin(2 * np.pi * 0.21 * tt)) + bandpass(noise(d), 4000, 9000) * 0.015)
+    fade = np.minimum(1, np.minimum(tt, d - tt) / 0.08)
+    add("chamber_ambient", amb * fade, "The white room hums")
+    d = 0.6
+    gl = np.zeros(int(SR * d))
+    rng2 = np.random.default_rng(55)
+    i = 0
+    while i < len(gl):
+        n = int(SR * rng2.uniform(0.01, 0.05))
+        f0 = rng2.uniform(80, 3000)
+        seg = np.sign(np.sin(2 * np.pi * f0 * np.arange(n) / SR)) * rng2.uniform(0.2, 0.8)
+        if rng2.random() < 0.3:
+            seg = rng2.standard_normal(n) * 0.5
+        gl[i:i + n] = seg[:len(gl[i:i + n])]
+        i += n + int(SR * rng2.uniform(0, 0.03))
+    add("reality_glitch", gl * env(d, 0.002, 0.2, 1), "Reality glitches")
+    d = 0.18
+    add("panel_press", np.sin(2 * np.pi * 1320 * t_axis(d)) * np.exp(-t_axis(d) * 30) * 0.5
+        + np.sin(2 * np.pi * 1980 * t_axis(d)) * np.exp(-t_axis(d) * 40) * 0.3, "Control panel beeps")
+    d = 1.2
+    add("specimen_lost", sweep(d, 900, 90, 0.5) * env(d, 0.01, 1.1) * 0.4 + crackle(d, 160, 0.002, seed=57) * env(d, 0.01, 0.8, 2) * 0.6,
+        "Specimen signal lost")
+
     # Gauntlet ---------------------------------------------------------------
     d = 2.2
     charge = sum(sweep(d, f, f * 3, 2.0) * (0.35 / (i + 1)) for i, f in enumerate((70, 140, 210, 280)))
@@ -898,6 +1090,7 @@ def main():
     make_stone_model()
     make_gauntlet_animations()
     make_nexus()
+    make_breach()
     make_sounds()
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "generated_subtitles.json"), "w") as f:
         json.dump(SUBTITLES, f, indent=2, sort_keys=True)

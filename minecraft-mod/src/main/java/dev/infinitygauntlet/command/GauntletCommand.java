@@ -68,6 +68,22 @@ public final class GauntletCommand {
                 .then(Commands.literal("vfx").then(Commands.argument("type", StringArgumentType.word()).suggests(VFX_SUGGESTIONS)
                         .executes(GauntletCommand::vfx)))
                 .then(Commands.literal("abilities").executes(GauntletCommand::listAbilities))
+                .then(Commands.literal("breach").then(Commands.literal("traverse").executes(ctx -> {
+                    boolean ok = dev.infinitygauntlet.breach.BreachManager.forceTraverse(ctx.getSource().getPlayerOrException());
+                    return ok ? 1 : 0;
+                })).then(Commands.literal("press").then(Commands.argument("control", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(dev.infinitygauntlet.breach.PanelControl.values())
+                                .map(v -> v.name().toLowerCase(Locale.ROOT)), b))
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            var panel = dev.infinitygauntlet.breach.BreachManager.panelOf(player);
+                            if (panel == null) {
+                                return 0;
+                            }
+                            var control = dev.infinitygauntlet.breach.PanelControl.valueOf(StringArgumentType.getString(ctx, "control").toUpperCase(Locale.ROOT));
+                            dev.infinitygauntlet.breach.BreachManager.press(player, panel.getId(), control.ordinal());
+                            return 1;
+                        }))))
                 .then(Commands.literal("nexus")
                         .then(Commands.literal("bind").executes(ctx -> withNexus(ctx, (p, n) -> n.bindOwner(p))))
                         .then(Commands.literal("control").executes(ctx -> withNexus(ctx, PossessionManager::toggleControl)))

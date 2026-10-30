@@ -62,6 +62,11 @@ public final class Vfx {
         ModNetwork.sendTo(player, new TransitionPayload(ticks, stone.color()));
     }
 
+    /** A burst of screen-space reality distortion for every player near {@code origin}. */
+    public static void glitch(ServerLevel level, Vec3 origin, float radius, float strength) {
+        ModNetwork.sendNear(level, origin, radius, new dev.infinitygauntlet.network.GlitchPayload(origin, radius, strength));
+    }
+
     public static void sound(ServerLevel level, Vec3 pos, Holder<SoundEvent> sound, float volume, float pitch) {
         level.playSound(null, pos.x, pos.y, pos.z, sound, SoundSource.PLAYERS, volume, pitch);
     }

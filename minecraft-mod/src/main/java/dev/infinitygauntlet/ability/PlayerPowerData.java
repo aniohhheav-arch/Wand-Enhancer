@@ -22,8 +22,9 @@ public final class PlayerPowerData {
             GlobalPos.CODEC.optionalFieldOf("swap_marker").forGetter(d -> Optional.ofNullable(d.swapMarker)),
             UUIDUtil.CODEC.optionalFieldOf("swap_entity").forGetter(d -> Optional.ofNullable(d.swapEntity)),
             GlobalPos.CODEC.optionalFieldOf("waypoint").forGetter(d -> Optional.ofNullable(d.waypoint)),
-            GlobalPos.CODEC.optionalFieldOf("nexus").forGetter(d -> Optional.ofNullable(d.nexus))
-    ).apply(i, (cd, portal, marker, entity, waypoint, nexus) -> {
+            GlobalPos.CODEC.optionalFieldOf("nexus").forGetter(d -> Optional.ofNullable(d.nexus)),
+            GlobalPos.CODEC.optionalFieldOf("chamber_return").forGetter(d -> Optional.ofNullable(d.chamberReturn))
+    ).apply(i, (cd, portal, marker, entity, waypoint, nexus, chamberReturn) -> {
         PlayerPowerData d = new PlayerPowerData();
         d.cooldowns.putAll(cd);
         d.pendingPortal = portal.orElse(null);
@@ -31,6 +32,7 @@ public final class PlayerPowerData {
         d.swapEntity = entity.orElse(null);
         d.waypoint = waypoint.orElse(null);
         d.nexus = nexus.orElse(null);
+        d.chamberReturn = chamberReturn.orElse(null);
         return d;
     }));
 
@@ -41,6 +43,8 @@ public final class PlayerPowerData {
     public GlobalPos waypoint;
     /** The Consciousness Nexus this player last bound. */
     public GlobalPos nexus;
+    /** Where to put the player back if they are found in the observation chamber without a live breach (relog, restart). */
+    public GlobalPos chamberReturn;
 
     public long cooldownEnd(ResourceLocation ability) {
         return cooldowns.getOrDefault(ability.toString(), 0L);

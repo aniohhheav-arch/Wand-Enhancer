@@ -31,6 +31,14 @@ public final class ClientPayloadHandler {
         dev.infinitygauntlet.client.nexus.RemoteControlClient.state(payload);
     }
 
+    public static void survey(dev.infinitygauntlet.network.SurveyPayload payload) {
+        dev.infinitygauntlet.client.breach.SurveyHologram.accept(payload);
+    }
+
+    public static void glitch(dev.infinitygauntlet.network.GlitchPayload payload) {
+        dev.infinitygauntlet.client.breach.RealityDistortion.glitch(payload);
+    }
+
     public static void cooldowns(CooldownSyncPayload payload) {
         ClientCooldowns.sync(payload.remaining());
     }

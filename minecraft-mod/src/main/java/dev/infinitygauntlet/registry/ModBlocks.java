@@ -24,6 +24,11 @@ public final class ModBlocks {
                     .lightLevel(s -> 10)
                     .noOcclusion()));
 
+    /** The observation chamber's floor: featureless, glowing, indestructible white. */
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> CHAMBER_FLOOR = REGISTER.registerSimpleBlock("chamber_floor",
+            BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1f, 3600000f).noLootTable().lightLevel(s -> 15)
+                    .sound(SoundType.GLASS).isValidSpawn((s, l, p, t) -> false));
+
     public static final DeferredItem<BlockItem> CONSCIOUSNESS_NEXUS_ITEM = ModItems.REGISTER.register("consciousness_nexus",
             () -> new BlockItem(CONSCIOUSNESS_NEXUS.get(), new Item.Properties().rarity(Rarity.EPIC)));
 

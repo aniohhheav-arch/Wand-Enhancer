@@ -34,6 +34,7 @@ public final class ClientGameEvents {
             ClientCooldowns.tick();
             dev.infinitygauntlet.client.time.ClientHistory.tick();
             dev.infinitygauntlet.client.time.TimeOverlay.tick();
+            dev.infinitygauntlet.client.breach.SpecimenRenderer.tickDummies();
             auraTick(mc.player);
         }
         while (Keybinds.NEXT_ABILITY.consumeClick()) {
@@ -121,6 +122,8 @@ public final class ClientGameEvents {
         dev.infinitygauntlet.client.time.ClientTime.clear();
         dev.infinitygauntlet.client.time.ClientHistory.clear();
         dev.infinitygauntlet.client.time.TimeOverlay.clear();
+        dev.infinitygauntlet.client.breach.SpecimenRenderer.clear();
+        dev.infinitygauntlet.client.breach.SurveyHologram.clear();
     }
 
     private ClientGameEvents() {

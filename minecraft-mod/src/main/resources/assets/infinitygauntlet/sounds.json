@@ -247,6 +247,54 @@
       }
     ]
   },
+  "breach_open": {
+    "subtitle": "subtitles.infinitygauntlet.breach_open",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:breach_open"
+      }
+    ]
+  },
+  "breach_enter": {
+    "subtitle": "subtitles.infinitygauntlet.breach_enter",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:breach_enter"
+      }
+    ]
+  },
+  "chamber_ambient": {
+    "subtitle": "subtitles.infinitygauntlet.chamber_ambient",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:chamber_ambient"
+      }
+    ]
+  },
+  "reality_glitch": {
+    "subtitle": "subtitles.infinitygauntlet.reality_glitch",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:reality_glitch"
+      }
+    ]
+  },
+  "panel_press": {
+    "subtitle": "subtitles.infinitygauntlet.panel_press",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:panel_press"
+      }
+    ]
+  },
+  "specimen_lost": {
+    "subtitle": "subtitles.infinitygauntlet.specimen_lost",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:specimen_lost"
+      }
+    ]
+  },
   "gauntlet_charge": {
     "subtitle": "subtitles.infinitygauntlet.gauntlet_charge",
     "sounds": [
