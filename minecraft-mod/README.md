@@ -43,8 +43,8 @@ chamber (milestone 4).
 | **Mind + Space: Consciousness Nexus** remote possession with a real-time camera feed | done |
 | **Mind + Space: Reality Breach**: walk through a rift into a white observation chamber and manipulate the real target | done |
 | **Power Stone: all 9 abilities**, with cinematic finishers, hit reactions, death styles and a cinematic camera | done |
-| Signature finisher system (shared framework); Cosmic Punch finisher | done; the other five stones' finishers are in progress |
-| Mind, Reality and Soul solo abilities | not started; the stones install and render, but have no solo abilities yet |
+| **Signature finishers for all six stones** (Cosmic Punch, Dimensional Erasure, Psychic Overload, Reality Rewrite, Temporal Collapse, Soul Extraction) | done |
+| Mind, Reality and Soul solo abilities (beyond their finishers) | not started |
 | Other stone combinations, full-gauntlet ability set, the Snap sequence | not started |
 
 The `snap` and `overload` gauntlet animations and the per-stone palettes are already in place for the later milestones.
@@ -126,6 +126,31 @@ heartbeat pulses run through it, quickening, with the picture distorting more ea
 then pushes in on its face. At critical mass it erupts in a pink-purple cosmic explosion with a shockwave. The caster
 recoils and draws the arm back out of the dissolving energy. Each body type reacts differently: humanoids are impaled
 and arch back, quadrupeds rear, slimes swell, spiders curl, flyers spin.
+
+Every stone has its own signature finisher, cast as an ability on a weakened target. Space and Time get it as a
+tenth ability; Mind, Reality and Soul get it as their first.
+
+| Finisher | Sequence |
+| --- | --- |
+| **Space: Dimensional Erasure** | The caster raises an open hand. A rupture tears open around the target and swallows it, stretching it thin and spinning it into the dark. The fist closes and the rift is crushed into a single point of light that winks out, leaving cracks in the air. |
+| **Mind: Psychic Overload** | Two fingers to the temple, the other hand reaching out. The target rises limp inside a closing cage of golden geometry, with a neural filament from the caster's head and its eyes burning. Chimes quicken until everything is released in one massive psychic pulse that drops the body and staggers everything nearby. |
+| **Reality: Reality Rewrite** | An open palm and the target stops dead. It is rewritten through four impossible states, each landing with a glitch: twisted like taffy, a heap of crimson cubes, split into red and cyan copies, then inverted glass. The palm closes and it shatters into fragments of reality that drift up and dissolve. |
+| **Time: Temporal Collapse** | The whole scene stops. The target's past and future selves surround it, some walking backwards through what it did, some racing ahead at impossible speed. Clock rings stack and spin faster, the copies are dragged into it, and time snaps back, ageing it to dust. |
+| **Soul: Soul Extraction** | A clawed hand reaches out and the soul, a glowing orange copy of the target, is torn slowly out of its body while the body sags and greys. It hangs writhing, tethered by burning threads, until it is pulled into the Soul Stone in a stream of fire. The empty body crumbles. |
+
+![Cosmic Punch overload](docs/finisher-cosmic-punch.jpg)
+![Dimensional Erasure](docs/finisher-erasure.jpg)
+![Psychic Overload](docs/finisher-psychic.jpg)
+![Reality Rewrite](docs/finisher-rewrite.jpg)
+![Temporal Collapse](docs/finisher-collapse.jpg)
+![Soul Extraction](docs/finisher-soul.jpg)
+![Soul Extraction absorb](docs/finisher-soul-absorb.jpg)
+
+Each finisher has its own camera direction, colour grade, impact frames, sounds and body language. The player and
+creature animations run on the actual vanilla models through a keyframed pose system. GeckoLib cannot animate the
+vanilla player model without replacing its renderer, so it is used for the gauntlet's own finisher animation. The
+distortion and chromatic aberration come from the reality-distortion post shader (or its overlay fallback). Bloom is
+approximated with additive glow layers.
 
 ### Combat presentation
 

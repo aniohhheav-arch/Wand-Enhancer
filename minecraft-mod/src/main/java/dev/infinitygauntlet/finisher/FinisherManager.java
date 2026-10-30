@@ -113,6 +113,11 @@ public final class FinisherManager {
     public static Session start(ServerPlayer caster, LivingEntity target, FinisherType type) {
         Script script = switch (type) {
             case COSMIC_PUNCH -> new CosmicPunchScript();
+            case DIMENSIONAL_ERASURE -> new StoneFinisherScripts.Erasure();
+            case PSYCHIC_OVERLOAD -> new StoneFinisherScripts.Psychic();
+            case REALITY_REWRITE -> new StoneFinisherScripts.Rewrite();
+            case TEMPORAL_COLLAPSE -> new StoneFinisherScripts.Collapse();
+            case SOUL_EXTRACTION -> new StoneFinisherScripts.Extraction();
         };
         Session s = new Session(type, caster, target, script);
         SESSIONS.put(caster.getUUID(), s);

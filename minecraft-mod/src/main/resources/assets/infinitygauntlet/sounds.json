@@ -567,6 +567,54 @@
       }
     ]
   },
+  "finisher_bass": {
+    "subtitle": "subtitles.infinitygauntlet.finisher_bass",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:finisher_bass"
+      }
+    ]
+  },
+  "finisher_space_collapse": {
+    "subtitle": "subtitles.infinitygauntlet.finisher_space_collapse",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:finisher_space_collapse"
+      }
+    ]
+  },
+  "finisher_reality_shift": {
+    "subtitle": "subtitles.infinitygauntlet.finisher_reality_shift",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:finisher_reality_shift"
+      }
+    ]
+  },
+  "finisher_time_tick": {
+    "subtitle": "subtitles.infinitygauntlet.finisher_time_tick",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:finisher_time_tick"
+      }
+    ]
+  },
+  "finisher_soul_wail": {
+    "subtitle": "subtitles.infinitygauntlet.finisher_soul_wail",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:finisher_soul_wail"
+      }
+    ]
+  },
+  "finisher_soul_absorb": {
+    "subtitle": "subtitles.infinitygauntlet.finisher_soul_absorb",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:finisher_soul_absorb"
+      }
+    ]
+  },
   "gauntlet_charge": {
     "subtitle": "subtitles.infinitygauntlet.gauntlet_charge",
     "sounds": [

@@ -55,6 +55,11 @@ public final class ClientFinishers {
             this.targetPos = p.targetPos();
             this.script = switch (type) {
                 case COSMIC_PUNCH -> new CosmicPunchClient(this);
+                case DIMENSIONAL_ERASURE -> new ErasureClient(this);
+                case PSYCHIC_OVERLOAD -> new PsychicClient(this);
+                case REALITY_REWRITE -> new RewriteClient(this);
+                case TEMPORAL_COLLAPSE -> new CollapseClient(this);
+                case SOUL_EXTRACTION -> new ExtractionClient(this);
             };
         }
 

@@ -67,7 +67,9 @@ public final class CombatFx {
         /** A finishing blow: frozen for a beat, then thrown back and broken. */
         EXECUTION,
         /** Gone in an instant: the body erupts into energy and leaves nothing behind. */
-        VAPORIZE
+        VAPORIZE,
+        /** Removed from existence by a finisher that already showed where it went: no body, no burst. */
+        ERASED
     }
 
     public static float damage(float base) {

@@ -88,6 +88,9 @@ final class ImpactBursts {
     }
 
     static void death(Entity e, CombatClient.Material m, CombatFx.DeathStyle style, Vec3 dir, boolean headless) {
+        if (style == CombatFx.DeathStyle.ERASED) {
+            return; // the finisher draws its own ending
+        }
         Vec3 c = e.getBoundingBox().getCenter();
         float scale = Mth.clamp(e.getBbHeight() / 1.8f, 0.5f, 2f);
         hit(e, m, dir, 2f);

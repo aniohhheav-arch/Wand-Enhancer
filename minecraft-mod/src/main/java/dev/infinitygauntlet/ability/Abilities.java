@@ -56,6 +56,12 @@ public final class Abilities {
         register(new ChronologicalBarrierAbility());
         register(new TimeFractureAbility());
 
+        register(new dev.infinitygauntlet.finisher.FinisherAbility("dimensional_erasure", dev.infinitygauntlet.finisher.FinisherType.DIMENSIONAL_ERASURE, 400));
+        register(new dev.infinitygauntlet.finisher.FinisherAbility("temporal_collapse", dev.infinitygauntlet.finisher.FinisherType.TEMPORAL_COLLAPSE, 400));
+        register(new dev.infinitygauntlet.finisher.FinisherAbility("psychic_overload", dev.infinitygauntlet.finisher.FinisherType.PSYCHIC_OVERLOAD, 400));
+        register(new dev.infinitygauntlet.finisher.FinisherAbility("reality_rewrite", dev.infinitygauntlet.finisher.FinisherType.REALITY_REWRITE, 400));
+        register(new dev.infinitygauntlet.finisher.FinisherAbility("soul_extraction", dev.infinitygauntlet.finisher.FinisherType.SOUL_EXTRACTION, 400));
+
         register(new dev.infinitygauntlet.ability.power.PowerBeamAbility());
         register(new dev.infinitygauntlet.ability.power.CosmicPunchAbility());
         register(new dev.infinitygauntlet.ability.power.GroundbreakerAbility());

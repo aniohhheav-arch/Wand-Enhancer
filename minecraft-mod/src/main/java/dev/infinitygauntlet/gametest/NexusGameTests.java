@@ -53,7 +53,9 @@ public final class NexusGameTests {
         helper.assertTrue(!Abilities.available(InfinityStone.SPACE, spaceOnly.stoneSet()).contains(combo), "hidden with Space alone");
         helper.assertTrue(Abilities.available(InfinityStone.SPACE, both.stoneSet()).contains(combo), "listed under Space with Mind + Space");
         List<Ability> mind = Abilities.available(InfinityStone.MIND, both.stoneSet());
-        helper.assertTrue(mind.contains(combo) && mind.stream().allMatch(Ability::isCombination), "Mind lists only its combinations for now");
+        helper.assertTrue(mind.contains(combo), "the combination is listed under Mind too");
+        helper.assertTrue(mind.indexOf(combo) > mind.indexOf(Abilities.byId(InfinityGauntlet.id("psychic_overload"))),
+                "combinations follow the stone's own abilities");
         helper.succeed();
     }
 

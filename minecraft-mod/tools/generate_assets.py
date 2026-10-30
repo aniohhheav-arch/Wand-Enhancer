@@ -1379,6 +1379,35 @@ def make_sounds():
     d = 2.0
     add("mind_eye", shimmer(d, 600, 900) * env(d, 0.4, 1.4) * 0.3 + chime(d, (880, 1108, 1318), 1.0) * 0.5, "The Mind's Eye opens")
 
+    # Finishers -------------------------------------------------------------
+    d = 2.6
+    add("finisher_bass", boom(d, 48, 16) * 2.4 + lowpass(noise(d), 120) * env(d, 0.005, 2.2, 2) * 2.0, "A deep impact")
+    d = 3.0
+    tt = t_axis(d)
+    add("finisher_space_collapse", (sweep(d, 900, 40, 0.5) * 0.4 + bandpass(noise(d), 200, 4000) * 0.5) * env(d, 0.2, 0.4) * np.clip(1.4 - tt / d, 0, 1)
+        + fit(np.concatenate([np.zeros(int(SR * 2.4)), boom(0.6, 200, 40) * 1.6]), d), "Space folds shut")
+    d = 2.4
+    add("finisher_reality_shift", sum(np.sign(np.sin(2 * np.pi * f * t_axis(d))) * 0.08 for f in (110, 167, 233))
+        * (0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 6 * t_axis(d)))) * env(d, 0.05, 0.6) + crackle(d, 200, 0.002, seed=90) * 0.6 * env(d, 0.05, 0.6),
+        "Reality is rewritten")
+    d = 3.0
+    ticks = np.zeros(int(SR * d))
+    tpos, gap = 0.0, 0.35
+    while tpos < d - 0.05:
+        i0 = int(tpos * SR)
+        click = np.sin(2 * np.pi * 2600 * np.arange(int(SR * 0.03)) / SR) * np.exp(-np.arange(int(SR * 0.03)) / (SR * 0.006))
+        ticks[i0:i0 + len(click)] += click[:len(ticks) - i0]
+        tpos += gap
+        gap = max(0.04, gap * 0.86)
+    add("finisher_time_tick", ticks * 0.8 + sweep(d, 60, 240, 2.0) * env(d, 2.5, 0.2, 1) * 0.3, "Time races toward collapse")
+    d = 3.0
+    tt = t_axis(d)
+    wail = sum(np.sin(2 * np.pi * np.cumsum(f * (1 + 0.04 * np.sin(2 * np.pi * (3 + i) * tt))) / SR) / (i + 1) for i, f in enumerate((330, 440, 523)))
+    add("finisher_soul_wail", wail * env(d, 0.6, 1.4) * 0.35 + bandpass(noise(d), 400, 2400) * env(d, 0.8, 1.2) * 0.35, "A soul cries out")
+    d = 1.6
+    add("finisher_soul_absorb", sweep(d, 1200, 120, 0.7) * env(d, 0.05, 1.3) * 0.5 + boom(d, 90, 40) * 0.8 + chime(d, (392, 587, 784), 2.0) * 0.4,
+        "The Soul Stone feeds")
+
     # Gauntlet ---------------------------------------------------------------
     d = 2.2
     charge = sum(sweep(d, f, f * 3, 2.0) * (0.35 / (i + 1)) for i, f in enumerate((70, 140, 210, 280)))
