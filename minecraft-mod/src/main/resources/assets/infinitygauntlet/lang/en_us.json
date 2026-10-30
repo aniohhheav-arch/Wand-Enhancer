@@ -284,5 +284,7 @@
   "specimen.infinitygauntlet.flag.pacified": "PACIFIED",
   "specimen.infinitygauntlet.flag.frozen": "FROZEN",
   "specimen.infinitygauntlet.flag.phased": "PHASED",
-  "message.infinitygauntlet.breach.no_chamber": "The observation chamber does not exist in this world."
+  "message.infinitygauntlet.breach.no_chamber": "The observation chamber does not exist in this world.",
+  "specimen.infinitygauntlet.eyes": "THROUGH THE EYES OF %s",
+  "specimen.infinitygauntlet.acquiring": "ACQUIRING SIGNAL…"
 }

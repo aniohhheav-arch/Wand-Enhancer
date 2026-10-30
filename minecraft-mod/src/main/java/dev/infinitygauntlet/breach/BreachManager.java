@@ -5,7 +5,6 @@ import dev.infinitygauntlet.ability.CastResult;
 import dev.infinitygauntlet.ability.PlayerPowerData;
 import dev.infinitygauntlet.ability.TargetRules;
 import dev.infinitygauntlet.network.ModNetwork;
-import dev.infinitygauntlet.network.SurveyPayload;
 import dev.infinitygauntlet.registry.ModAttachments;
 import dev.infinitygauntlet.registry.ModEntities;
 import dev.infinitygauntlet.registry.ModSounds;
@@ -520,6 +519,9 @@ public final class BreachManager {
                     s.lastSurvey = now;
                     sendSurvey(player, s);
                 }
+                if (inside && now % 2 == 0) {
+                    sendView(player, s);
+                }
             }
             if (inside) {
                 Vec3 origin = ChamberDimension.origin(s.cell);
@@ -557,26 +559,48 @@ public final class BreachManager {
         }
     }
 
+    private static final int SLICE_RADIUS = 16, SLICE_DOWN = 8, SLICE_UP = 10;
+
+    /** Streams the blocks around the target (the live view's world, and the survey hologram). */
     static void sendSurvey(ServerPlayer player, Session s) {
         if (s.specimen == null || s.lost) {
             return;
         }
         Level level = s.target.level();
-        int r = 5, down = 3, up = 4;
-        BlockPos base = s.target.blockPosition().offset(-r, -down, -r);
-        int sx = 2 * r + 1, sy = down + up + 1, sz = 2 * r + 1;
-        List<Integer> states = new ArrayList<>(sx * sy * sz);
+        BlockPos base = s.target.blockPosition().offset(-SLICE_RADIUS, -SLICE_DOWN, -SLICE_RADIUS);
+        int sx = 2 * SLICE_RADIUS + 1, sy = SLICE_DOWN + SLICE_UP + 1, sz = 2 * SLICE_RADIUS + 1;
+        int[] states = new int[sx * sy * sz];
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        int i = 0;
         for (int y = 0; y < sy; y++) {
             for (int z = 0; z < sz; z++) {
                 for (int x = 0; x < sx; x++) {
                     m.set(base.getX() + x, base.getY() + y, base.getZ() + z);
-                    states.add(Block.getId(level.getBlockState(m)));
+                    states[i++] = Block.getId(level.getBlockState(m));
                 }
             }
         }
-        Vec3 off = s.target.position().subtract(Vec3.atLowerCornerOf(base));
-        ModNetwork.sendTo(player, new SurveyPayload(s.specimen.getId(), base, sx, sy, sz, states, (float) off.x, (float) off.y, (float) off.z));
+        ModNetwork.sendTo(player, new dev.infinitygauntlet.network.SlicePayload(s.specimen.getId(), base, sx, sy, sz, states));
+    }
+
+    /** Streams the target's eyes and the creatures around it. */
+    static void sendView(ServerPlayer player, Session s) {
+        if (s.specimen == null || s.lost) {
+            return;
+        }
+        LivingEntity t = s.target;
+        List<dev.infinitygauntlet.network.ViewPayload.Creature> list = new ArrayList<>();
+        for (Entity e : t.level().getEntities(t, t.getBoundingBox().inflate(SLICE_RADIUS), e -> e instanceof LivingEntity && e.isAlive())) {
+            if (list.size() >= 32) {
+                break;
+            }
+            LivingEntity l = (LivingEntity) e;
+            double dx = l.getX() - l.xo, dz = l.getZ() - l.zo;
+            list.add(new dev.infinitygauntlet.network.ViewPayload.Creature(l.getId(),
+                    net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getId(l.getType()), l.position(), l.yBodyRot, l.yHeadRot, l.getXRot(),
+                    (float) Math.sqrt(dx * dx + dz * dz), l.isBaby(), l.getScale(), l instanceof Player p ? p.getGameProfile().getName() : ""));
+        }
+        ModNetwork.sendTo(player, new dev.infinitygauntlet.network.ViewPayload(s.specimen.getId(), t.getEyePosition(), t.getYHeadRot(), t.getXRot(), list));
     }
 
     // ------------------------------------------------------------------ safety nets

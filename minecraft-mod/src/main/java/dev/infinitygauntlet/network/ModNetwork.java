@@ -23,7 +23,8 @@ public final class ModNetwork {
                 (payload, ctx) -> ClientPayloadHandler.possession(payload));
         registrar.playToServer(PanelPressPayload.TYPE, PanelPressPayload.CODEC,
                 (payload, ctx) -> dev.infinitygauntlet.breach.BreachManager.press((ServerPlayer) ctx.player(), payload.panelId(), payload.control()));
-        registrar.playToClient(SurveyPayload.TYPE, SurveyPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.survey(payload));
+        registrar.playToClient(SlicePayload.TYPE, SlicePayload.CODEC, (payload, ctx) -> ClientPayloadHandler.slice(payload));
+        registrar.playToClient(ViewPayload.TYPE, ViewPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.view(payload));
         registrar.playToClient(GlitchPayload.TYPE, GlitchPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.glitch(payload));
         // Client handlers are only invoked on the logical client; the lambdas keep the client class unloaded on servers.
         registrar.playToClient(VfxPayload.TYPE, VfxPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.vfx(payload));

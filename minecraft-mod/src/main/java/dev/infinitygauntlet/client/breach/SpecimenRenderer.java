@@ -151,11 +151,73 @@ public class SpecimenRenderer extends GeoEntityRenderer<SpecimenEntity> {
         }
         pose.popPose();
 
+        drawLiveScreen(specimen, t, pose, buffers);
+
         // survey hologram on its own plinth
         pose.pushPose();
         pose.translate(3.6, 0.9, 0);
         SurveyHologram.render(specimen.getId(), dummy, t, pose, buffers);
         pose.popPose();
+    }
+
+    /** The live view: a big holographic monitor behind the containment unit, facing the arrival point. */
+    private static void drawLiveScreen(SpecimenEntity specimen, float t, PoseStack pose, MultiBufferSource buffers) {
+        float w = 7.2f, h = 4.05f;
+        pose.pushPose();
+        pose.translate(0, PLATFORM + 3.1f, 4.2f);
+        pose.mulPose(Axis.YP.rotationDegrees(180));
+        Matrix4f m = pose.last().pose();
+        float g = RealityDistortion.spike();
+        quad(m, buffers.getBuffer(ModRenderTypes.translucent(ModRenderTypes.WHITE)), -w / 2 - 0.08f, -h / 2 - 0.08f, w + 0.16f, h + 0.16f,
+                0.02f, 0.02f, 0.05f, 0.92f, -0.02f);
+        net.minecraft.client.renderer.RenderType feed = specimen.has(SpecimenEntity.FLAG_LOST) ? null : LiveView.screen(specimen.getId());
+        if (feed != null) {
+            float j = g > 0.25f ? (float) Math.sin(t * 17) * 0.08f * g : 0;
+            feedQuad(m, buffers.getBuffer(feed), -w / 2 + j, -h / 2, w, h, 1, 1, 1, 1, 0);
+            if (specimen.has(SpecimenEntity.FLAG_BLIND)) {
+                quad(m, buffers.getBuffer(ModRenderTypes.translucent(ModRenderTypes.VIGNETTE)), -w / 2, -h / 2, w, h, 0, 0, 0, 1f, 0.004f);
+                quad(m, buffers.getBuffer(ModRenderTypes.translucent(ModRenderTypes.WHITE)), -w / 2, -h / 2, w, h, 0, 0, 0, 0.75f, 0.005f);
+            }
+            if (g > 0.2f) {
+                // red/cyan split ghosts of the picture during glitches
+                feedQuad(m, buffers.getBuffer(feed), -w / 2 + 0.12f * g, -h / 2, w, h, 1f, 0.15f, 0.2f, 0.35f * g, 0.006f);
+                feedQuad(m, buffers.getBuffer(feed), -w / 2 - 0.12f * g, -h / 2, w, h, 0.15f, 0.9f, 1f, 0.35f * g, 0.007f);
+            }
+        } else {
+            float u = (t * 0.37f) % 1f;
+            quad(m, buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.STATIC)), -w / 2, -h / 2, w, h, 0.5f, 0.5f, 0.55f, 0.6f, 0.003f);
+        }
+        quad(m, buffers.getBuffer(ModRenderTypes.translucent(ModRenderTypes.SCANLINES)), -w / 2, -h / 2, w, h, 0, 0.02f, 0.05f, 0.8f, 0.009f);
+        var edge = buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.WHITE));
+        quad(m, edge, -w / 2 - 0.08f, h / 2, w + 0.16f, 0.04f, 1f, 0.27f, 0.78f, 0.9f, 0.01f);
+        quad(m, buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.WHITE)), -w / 2 - 0.08f, -h / 2 - 0.04f, w + 0.16f, 0.04f, 0.35f, 0.9f, 1f, 0.9f,
+                0.01f);
+        pose.translate(0, 0, 0.02f);
+        boolean blink = ((int) (t / 10)) % 2 == 0;
+        text(pose, buffers, Component.literal((blink ? "\u25CF " : "  ") + "LIVE // ").append(Component.translatable("specimen.infinitygauntlet.eyes",
+                specimen.targetName())), 0, h / 2 + 0.22f, 2.2f, 0xC0207A);
+        if (feed == null) {
+            text(pose, buffers, Component.translatable(specimen.has(SpecimenEntity.FLAG_LOST) ? "specimen.infinitygauntlet.lost"
+                    : "specimen.infinitygauntlet.acquiring"), 0, 0, 3f, 0xFFFFFF);
+        }
+        pose.popPose();
+    }
+
+    private static void quad(Matrix4f m, com.mojang.blaze3d.vertex.VertexConsumer vc, float x, float y, float w, float h, float r, float g, float b,
+                             float a, float z) {
+        vc.addVertex(m, x, y, z).setUv(0, 1).setColor(r, g, b, a);
+        vc.addVertex(m, x + w, y, z).setUv(1, 1).setColor(r, g, b, a);
+        vc.addVertex(m, x + w, y + h, z).setUv(1, 0).setColor(r, g, b, a);
+        vc.addVertex(m, x, y + h, z).setUv(0, 0).setColor(r, g, b, a);
+    }
+
+    /** Framebuffer textures are stored bottom-up, so the top edge samples v = 1. */
+    private static void feedQuad(Matrix4f m, com.mojang.blaze3d.vertex.VertexConsumer vc, float x, float y, float w, float h, float r, float g, float b,
+                                 float a, float z) {
+        vc.addVertex(m, x, y, z).setUv(0, 0).setColor(r, g, b, a);
+        vc.addVertex(m, x + w, y, z).setUv(1, 0).setColor(r, g, b, a);
+        vc.addVertex(m, x + w, y + h, z).setUv(1, 1).setColor(r, g, b, a);
+        vc.addVertex(m, x, y + h, z).setUv(0, 1).setColor(r, g, b, a);
     }
 
     private static void prepare(LivingEntity d, SpecimenEntity s, float lift) {
