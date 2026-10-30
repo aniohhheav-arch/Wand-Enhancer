@@ -69,6 +69,13 @@ public final class BreachManager {
     private static final int ENTRY_COOLDOWN = 30;
     private static final String COOLDOWN_KEY = "infinitygauntlet_breach_cd";
     private static final double PANEL_REACH = 6;
+    /**
+     * Keeps the target's chunk loaded and entity-ticking while its breach is open. Without it, the target unloads
+     * as soon as its world has no player nearby (the caster is in the chamber) and the link is lost.
+     */
+    private static final net.minecraft.server.level.TicketType<net.minecraft.world.level.ChunkPos> ANCHOR =
+            net.minecraft.server.level.TicketType.create("infinitygauntlet_breach",
+                    java.util.Comparator.comparingLong(net.minecraft.world.level.ChunkPos::toLong), 80);
 
     static final class Session {
         final UUID player;
@@ -85,6 +92,8 @@ public final class BreachManager {
         boolean lost;
         int flags;
         int scaleStep = 2;
+        /** Until the caster first steps through, the target is held motionless at the tear. */
+        boolean entered;
         long lastSurvey;
 
         Session(UUID player, LivingEntity target, int cell, long started) {
@@ -153,6 +162,8 @@ public final class BreachManager {
         Session s = new Session(player.getUUID(), target, ChamberDimension.cellFor(player.server, player.getUUID()), level.getGameTime());
         s.rift = DimensionalRiftEntity.breach(level, target, player);
         SESSIONS.put(player.getUUID(), s);
+        anchor(s);
+        TimeManager.apply(target, 0f, 3);
 
         Vec3 c = target.getBoundingBox().getCenter();
         Vfx.sound(level, c, ModSounds.BREACH_OPEN, 3f, 1f);
@@ -190,6 +201,7 @@ public final class BreachManager {
     static void enter(ServerPlayer player, Session s) {
         MinecraftServer server = player.server;
         ServerLevel chamber = server.getLevel(ChamberDimension.KEY);
+        anchor(s);
         if (chamber == null) {
             InfinityGauntlet.LOGGER.warn("Observation chamber dimension is not loaded in this world");
             player.getPersistentData().putLong(COOLDOWN_KEY, player.serverLevel().getGameTime() + 100);
@@ -206,6 +218,7 @@ public final class BreachManager {
         player.getData(ModAttachments.POWER_DATA).chamberReturn = s.returnPos;
 
         ChamberDimension.ensureBuilt(chamber, s.cell);
+        s.entered = true;
         spawnChamberObjects(chamber, s);
         Vfx.dissolve(from, player, InfinityStone.SPACE);
         Vfx.sound(from, riftPos, ModSounds.BREACH_ENTER, 1.5f, 1f);
@@ -517,9 +530,23 @@ public final class BreachManager {
         }
     }
 
+    private static void anchor(Session s) {
+        if (s.target.level() instanceof ServerLevel level) {
+            // forceTicks: the target keeps ticking (moving, being manipulated, mirrored) with no player in its world
+            level.getChunkSource().addRegionTicket(ANCHOR, s.target.chunkPosition(), 2, s.target.chunkPosition(), true);
+        }
+    }
+
     /** Keeps timed manipulations alive while their toggle is on. */
     private static void upkeep(Session s) {
         LivingEntity t = s.target;
+        // refresh by server time: the target's own tick counter stops if its chunk ever stops ticking
+        if (t.level().getGameTime() % 20 == 0 || !s.entered) {
+            anchor(s);
+        }
+        if (!s.entered) {
+            TimeManager.apply(t, 0f, 3); // held at the tear until the caster passes through
+        }
         if (t.tickCount % 100 == 0) {
             if (s.has(SpecimenEntity.FLAG_LEVITATING)) {
                 t.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 20 * 30, 1));

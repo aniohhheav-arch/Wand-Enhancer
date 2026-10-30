@@ -74,6 +74,8 @@ public final class ClientModEvents {
     static void onGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, InfinityGauntlet.id("ability_hud"), AbilityHud::render);
         event.registerAboveAll(InfinityGauntlet.id("screen_effects"), ScreenEffectsLayer::render);
+        event.registerBelow(VanillaGuiLayers.CROSSHAIR, InfinityGauntlet.id("reality_distortion"),
+                dev.infinitygauntlet.client.breach.DistortionOverlay::render);
         event.registerAbove(VanillaGuiLayers.HOTBAR, InfinityGauntlet.id("remote_control"), dev.infinitygauntlet.client.nexus.RemoteControlHud::render);
     }
 

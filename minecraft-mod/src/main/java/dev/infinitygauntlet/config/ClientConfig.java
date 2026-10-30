@@ -23,12 +23,23 @@ public final class ClientConfig {
     public static final ModConfigSpec.BooleanValue SCREEN_FLASHES;
     public static final ModConfigSpec.BooleanValue PORTAL_TRANSITION;
     public static final ModConfigSpec.BooleanValue SHOW_HUD;
+    public static final ModConfigSpec.EnumValue<DistortionMode> DISTORTION;
+
+    public enum DistortionMode {
+        /** Post shader, or the overlay when a shader-pack mod is installed or the shader fails to load. */
+        AUTO,
+        SHADER,
+        OVERLAY,
+        OFF
+    }
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("visuals");
         VFX_QUALITY = b.comment("Particle density and mesh detail for all cinematic effects.").defineEnum("vfxQuality", Quality.HIGH);
         VFX_DISTANCE = b.comment("Effects further than this many blocks from the camera are skipped.").defineInRange("vfxDistance", 128, 16, 512);
+        DISTORTION = b.comment("Reality distortion: AUTO uses the screen shader, or a shader-pack-safe overlay when Iris/Oculus is installed.")
+                .defineEnum("realityDistortion", DistortionMode.AUTO);
         b.pop();
         b.push("camera");
         CAMERA_EFFECTS = b.comment("Camera shake, zoom and slow-motion pushes.").define("cameraEffects", true);

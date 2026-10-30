@@ -58,6 +58,31 @@ public final class RealityDistortion {
     @Nullable
     private static ChamberHum hum;
 
+    /** Whether glitches are drawn by the GUI overlay instead of the post shader. */
+    public static boolean useOverlay() {
+        ClientConfig.DistortionMode mode = ClientConfig.SPEC.isLoaded() ? ClientConfig.DISTORTION.get() : ClientConfig.DistortionMode.AUTO;
+        return switch (mode) {
+            case OVERLAY -> true;
+            case SHADER, OFF -> false;
+            case AUTO -> failed || SHADER_PACK_MOD;
+        };
+    }
+
+    private static boolean enabled() {
+        return !ClientConfig.SPEC.isLoaded() || ClientConfig.DISTORTION.get() != ClientConfig.DistortionMode.OFF;
+    }
+
+    private static final boolean SHADER_PACK_MOD = net.neoforged.fml.ModList.get() != null
+            && (net.neoforged.fml.ModList.get().isLoaded("iris") || net.neoforged.fml.ModList.get().isLoaded("oculus"));
+
+    public static float intensity() {
+        return intensity;
+    }
+
+    public static float clock() {
+        return clock;
+    }
+
     public static float spike() {
         return spike;
     }
@@ -96,7 +121,7 @@ public final class RealityDistortion {
         float target = 0;
         focusWorld = null;
         if (inChamber()) {
-            target = 0.32f;
+            target = 0.45f;
             if (tick >= nextBurst) {
                 ThreadLocalRandom r = ThreadLocalRandom.current();
                 spike = Math.max(spike, 0.45f + r.nextFloat() * 0.55f);
@@ -125,7 +150,7 @@ public final class RealityDistortion {
 
     @SubscribeEvent
     static void onRenderStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL || FeedRenderer.isRendering() || failed) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL || FeedRenderer.isRendering() || failed || !enabled() || useOverlay()) {
             return;
         }
         float quality = Math.min(1f, ClientConfig.quality().density);
