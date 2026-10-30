@@ -127,8 +127,7 @@ public final class ClientShots {
                 ArcanaMod.LOGGER.info("[arcana-shots] done");
                 Minecraft.getInstance().stop();
             });
-            return;
-        }
+        } else {
         at(40, () -> server(sp -> {
             sp.setGameMode(GameType.SURVIVAL);
             ServerLevel l = sp.serverLevel();
@@ -192,6 +191,7 @@ public final class ClientShots {
             ArcanaMod.LOGGER.info("[arcana-shots] done");
             Minecraft.getInstance().stop();
         });
+        }
     }
 
     @SubscribeEvent
