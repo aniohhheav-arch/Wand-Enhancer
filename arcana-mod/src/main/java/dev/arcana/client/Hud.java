@@ -128,25 +128,25 @@ public final class Hud implements LayeredDraw.Layer {
         // title card
         if (ClientState.cinematicSpell >= 0 && ClientState.cinematicSpell < Spell.values().length) {
             Spell sp = Spell.values()[ClientState.cinematicSpell];
-            float in = Math.min(1f, Math.max(0f, (prog - 0.06f) / 0.14f)), out = Math.min(1f, Math.max(0f, (0.85f - prog) / 0.15f));
+            float in = Math.min(1f, Math.max(0f, (prog - 0.06f) / 0.14f)), out = Math.min(1f, Math.max(0f, (0.5f - prog) / 0.12f));
             float a = Math.min(in, out);
             if (a > 0.02f) {
                 String title = sp.displayName().getString().toUpperCase(java.util.Locale.ROOT);
                 StringBuilder spaced = new StringBuilder();
                 for (char c : title.toCharArray()) spaced.append(c).append(c == ' ' ? "" : " ");
-                float scale = 3.0f - 0.6f * (1f - in);
+                float scale = 2.4f - 0.5f * (1f - in);
                 int tw = mc.font.width(spaced.toString());
                 int alpha = Math.max(4, (int) (255 * a));
                 g.pose().pushPose();
-                g.pose().translate(w / 2f, h * 0.24f - (1f - in) * 10f, 0);
+                g.pose().translate(w / 2f, h * 0.115f - (1f - in) * 8f, 0);
                 g.pose().scale(scale, scale, 1);
                 g.drawString(mc.font, spaced.toString(), -tw / 2, 0, Draw.argb(0x000000, alpha / 2), false);
                 g.drawString(mc.font, spaced.toString(), -tw / 2 - 1, -1, Draw.argb(rgb, alpha) | 0, false);
                 g.pose().popPose();
                 int lineW = (int) (Math.min(w * 0.6f, tw * scale + 60) * in);
-                g.fill(w / 2 - lineW / 2, (int) (h * 0.24f + 34), w / 2 + lineW / 2, (int) (h * 0.24f + 35), Draw.argb(rgb, alpha));
+                g.fill(w / 2 - lineW / 2, (int) (h * 0.115f + 27), w / 2 + lineW / 2, (int) (h * 0.115f + 28), Draw.argb(rgb, alpha));
                 String sub = Component.translatable("hud.arcana.ultimate", Component.translatable("school.arcana." + sp.school.id)).getString().toUpperCase(java.util.Locale.ROOT);
-                g.drawCenteredString(mc.font, sub, w / 2, (int) (h * 0.24f + 40), Draw.argb(0xFFFFFF, alpha));
+                g.drawCenteredString(mc.font, sub, w / 2, (int) (h * 0.115f + 33), Draw.argb(0xFFFFFF, alpha));
             }
         }
     }

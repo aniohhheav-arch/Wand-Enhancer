@@ -371,7 +371,7 @@ def fx_black_hole(pal):
         for (x, y, z, ang) in ring_pts(0, 0, 0, (r0 + r1) / 2, n, tilt=0.0, start=rnd.random()):
             t = rnd.random(); m.box('glow_disc', (x, rnd.random() * 0.8 - 0.4, z), (1.5, 0.5 + rnd.random() * 0.4, 1.5), mix(col0, col1, t))
     for sgn in (-1, 1): chain(m, 'glow_jets', (0, sgn * 6.5, 0), (0, sgn, 0), 8, 1.8, 0.4, lambda t: mix((200, 150, 255), (255, 255, 255), t))
-    m.bones['disc']['rotation'] = [18, 0, 8]
+    m.bones['disc']['rotation'] = [74, 0, 12]
     anims = {'animation.arcana.fx.idle': anim(6.0, {**spin('disc', 6.0, 360), 'glow_jets': {'scale': kf([(0, (1, 1, 1)), (1.5, (1, 1.2, 1)), (3, (1, 1, 1)), (4.5, (1, 1.2, 1)), (6, (1, 1, 1))], 'easeInOutSine')}})}
     return m, anims
 

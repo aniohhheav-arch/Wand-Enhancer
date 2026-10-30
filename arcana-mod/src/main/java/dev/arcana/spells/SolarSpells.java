@@ -112,7 +112,7 @@ public final class SolarSpells {
         Vec3 core = ground.add(0, 7, 0);
         double r = 14 * c.radius;
         Magic.snd(c.level, core, SoundEvents.BEACON_ACTIVATE, 2f, 0.5f);
-        Magic.fx3d(c.level, dev.arcana.entity.FxKind.SUN, core, 11f, 80, dev.arcana.entity.SpellFxEntity.GATHER);
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.SUN, core, 15f, 80, dev.arcana.entity.SpellFxEntity.GATHER);
         EffectManager.run(c.level, 70, age -> {
             double size = 0.4 + age * 0.04;
             for (int i = 0; i < Magic.count(22); i++) {
