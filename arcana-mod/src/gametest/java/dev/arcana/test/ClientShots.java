@@ -100,7 +100,27 @@ public final class ClientShots {
     }
 
     static {
-        if ("boss".equals(System.getProperty("arcana.shots.mode"))) {
+        if ("timestop".equals(System.getProperty("arcana.shots.mode"))) {
+            at(40, () -> server(sp -> {
+                sp.setGameMode(GameType.SURVIVAL);
+                ServerLevel l = sp.serverLevel();
+                l.setDayTime(18000);
+                int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0);
+                sp.teleportTo(l, 0.5, y, 0.5, 0f, 8f);
+                sp.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20000, 5, false, false));
+                var m = sp.getData(ModAttachments.MAGIC);
+                for (School s : School.real()) m.mastery.put(s.id, 40 * 5 * 5);
+                sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.CHRONOS, 2));
+                crowd(sp);
+            }));
+            at(70, () -> server(sp -> cast(sp, Spell.TIME_STOP)));
+            at(90, () -> shot("50_timestop_a"));
+            at(120, () -> shot("51_timestop_b"));
+            at(160, () -> {
+                ArcanaMod.LOGGER.info("[arcana-shots] done");
+                Minecraft.getInstance().stop();
+            });
+        } else if ("boss".equals(System.getProperty("arcana.shots.mode"))) {
             at(40, () -> server(sp -> {
                 sp.setGameMode(GameType.SURVIVAL);
                 ServerLevel l = sp.serverLevel();

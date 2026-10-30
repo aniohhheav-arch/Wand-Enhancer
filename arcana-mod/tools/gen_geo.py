@@ -443,8 +443,7 @@ def fx_clock(pal):
     for i, (x, y, z, ang) in enumerate(ring_pts(0, 0, 0, 8.2, 12)):
         big = i % 3 == 0
         m.box('glow_ticks', (x, 0.2, z), (2.2 if big else 1.2, 0.8, 2.2 if big else 1.2), (230, 255, 250) if big else (130, 240, 225), rot=[0, -math.degrees(ang), 0])
-    m.box('glow_hour', (0, 0.6, -3.2), (1.4, 0.8, 6.4), (255, 255, 255)); m.box('glow_minute', (0, 0.9, -4.8), (0.9, 0.8, 9.6), (200, 255, 245))
-    m.box('glow_face', (0, 0.6, 0), (2.4, 1.2, 2.4), (255, 255, 255))
+    m.box('glow_hour', (0, 0.6, -5.4), (1.2, 0.6, 4.0), (255, 255, 255)); m.box('glow_minute', (0, 0.9, -6.4), (0.8, 0.6, 6.4), (200, 255, 245))
     return m, {'animation.arcana.fx.idle': anim(6.0, {'minute': {'rotation': kf([(0, (0, 0, 0)), (6.0, (0, -1080, 0))])}, 'hour': {'rotation': kf([(0, (0, 0, 0)), (6.0, (0, -90, 0))])},
                                                        'glow_ticks': {'rotation': kf([(0, (0, 0, 0)), (6.0, (0, 30, 0))])}})}
 
