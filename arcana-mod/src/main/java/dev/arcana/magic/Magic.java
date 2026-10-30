@@ -218,6 +218,11 @@ public final class Magic {
         return f.particle != null ? f.particle : dust(c, 1.0f);
     }
 
+    /** Spawns a short-lived 3D cinematic effect model (see {@link dev.arcana.entity.FxKind}). */
+    public static void fx3d(ServerLevel l, dev.arcana.entity.FxKind kind, Vec3 pos, float scale, int life, int profile) {
+        dev.arcana.entity.SpellFxEntity.spawn(l, kind, pos, scale, life, profile);
+    }
+
     public static void line(ServerLevel l, ParticleOptions p, Vec3 a, Vec3 b, double step) {
         Vec3 d = b.subtract(a);
         double len = d.length();

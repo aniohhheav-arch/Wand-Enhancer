@@ -152,6 +152,7 @@ public final class VoidSpells {
     public static boolean eventHorizon(SpellContext c) {
         Vec3 center = Magic.aimPoint(c, 26).add(0, 2.5, 0);
         well(c, center, 12 * c.radius, 140, 0.55, 2.5f, 16f, true);
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.BLACK_HOLE, center, 12f * c.radius, 160, dev.arcana.entity.SpellFxEntity.EASE);
         return true;
     }
 

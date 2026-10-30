@@ -126,6 +126,7 @@ public final class StormSpells {
         Vec3 center = Magic.aimPoint(c, 26);
         double r = 12 * c.radius;
         Magic.snd(c.level, center, SoundEvents.LIGHTNING_BOLT_THUNDER, 2f, 0.7f);
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.STORM_CLOUD, center.add(0, 14, 0), 13.7f * c.radius, 170, dev.arcana.entity.SpellFxEntity.EASE);
         EffectManager.run(c.level, 160, age -> {
             if (!c.valid()) return false;
             for (int i = 0; i < Magic.count(8); i++) {

@@ -8,7 +8,7 @@ public final class ClientPayloadHandler {
     }
 
     public static void cinematic(Net.Cinematic p) {
-        ClientState.startCinematic(p.rgb(), p.ticks(), p.kind());
+        ClientState.startCinematic(p.rgb(), p.ticks(), p.kind(), p.spell(), p.caster());
     }
 
     private ClientPayloadHandler() {}

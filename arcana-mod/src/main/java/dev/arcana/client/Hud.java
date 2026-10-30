@@ -110,19 +110,44 @@ public final class Hud implements LayeredDraw.Layer {
         float s = ClientState.cinematicStrength(pt);
         if (s <= 0) return;
         int w = g.guiWidth(), h = g.guiHeight();
+        float prog = ClientState.cinematicProgress(pt);
+        int rgb = ClientState.cinematicRgb;
         if (ClientState.cinematicKind == 1) {
             g.fill(0, 0, w, h, Draw.argb(0x8890A0, (int) (95 * s)));
-            int bar = (int) (h * 0.1f * s);
-            g.fill(0, 0, w, bar, 0xFF000000);
-            g.fill(0, h - bar, w, h, 0xFF000000);
         } else {
-            int edge = (int) (150 * s);
-            g.fillGradient(0, 0, w, edge, Draw.argb(ClientState.cinematicRgb, (int) (170 * s)), 0x00000000);
-            g.fillGradient(0, h - edge, w, h, 0x00000000, Draw.argb(ClientState.cinematicRgb, (int) (170 * s)));
-            g.fill(0, 0, w, h, Draw.argb(ClientState.cinematicRgb, (int) (55 * s * s)));
-            int bar = (int) (h * 0.07f * s);
-            g.fill(0, 0, w, bar, 0xFF000000);
-            g.fill(0, h - bar, w, h, 0xFF000000);
+            int edge = (int) (170 * s);
+            g.fillGradient(0, 0, w, edge, Draw.argb(rgb, (int) (170 * s)), 0x00000000);
+            g.fillGradient(0, h - edge, w, h, 0x00000000, Draw.argb(rgb, (int) (170 * s)));
+            g.fill(0, 0, w, h, Draw.argb(rgb, (int) (50 * s * s)));
+        }
+        // letterbox slides in and out
+        float bars = Math.min(1f, Math.min(prog / 0.1f, (1f - prog) / 0.12f));
+        int bar = (int) (h * 0.12f * Math.max(0f, bars));
+        g.fill(0, 0, w, bar, 0xFF000000);
+        g.fill(0, h - bar, w, h, 0xFF000000);
+        // title card
+        if (ClientState.cinematicSpell >= 0 && ClientState.cinematicSpell < Spell.values().length) {
+            Spell sp = Spell.values()[ClientState.cinematicSpell];
+            float in = Math.min(1f, Math.max(0f, (prog - 0.06f) / 0.14f)), out = Math.min(1f, Math.max(0f, (0.85f - prog) / 0.15f));
+            float a = Math.min(in, out);
+            if (a > 0.02f) {
+                String title = sp.displayName().getString().toUpperCase(java.util.Locale.ROOT);
+                StringBuilder spaced = new StringBuilder();
+                for (char c : title.toCharArray()) spaced.append(c).append(c == ' ' ? "" : " ");
+                float scale = 3.0f - 0.6f * (1f - in);
+                int tw = mc.font.width(spaced.toString());
+                int alpha = Math.max(4, (int) (255 * a));
+                g.pose().pushPose();
+                g.pose().translate(w / 2f, h * 0.24f - (1f - in) * 10f, 0);
+                g.pose().scale(scale, scale, 1);
+                g.drawString(mc.font, spaced.toString(), -tw / 2, 0, Draw.argb(0x000000, alpha / 2), false);
+                g.drawString(mc.font, spaced.toString(), -tw / 2 - 1, -1, Draw.argb(rgb, alpha) | 0, false);
+                g.pose().popPose();
+                int lineW = (int) (Math.min(w * 0.6f, tw * scale + 60) * in);
+                g.fill(w / 2 - lineW / 2, (int) (h * 0.24f + 34), w / 2 + lineW / 2, (int) (h * 0.24f + 35), Draw.argb(rgb, alpha));
+                String sub = Component.translatable("hud.arcana.ultimate", Component.translatable("school.arcana." + sp.school.id)).getString().toUpperCase(java.util.Locale.ROOT);
+                g.drawCenteredString(mc.font, sub, w / 2, (int) (h * 0.24f + 40), Draw.argb(0xFFFFFF, alpha));
+            }
         }
     }
 }

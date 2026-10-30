@@ -101,6 +101,7 @@ public final class ChronosSpells {
         Vec3 center = c.player.position();
         double r = 18 * c.radius;
         int duration = 100 + c.stage * 20;
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.CLOCK, center.add(0, 0.08, 0), 24f * c.radius, duration + 12, dev.arcana.entity.SpellFxEntity.EASE);
         List<Entity> frozen = new ArrayList<>();
         Map<Entity, Boolean> hadGravity = new HashMap<>();
         for (Entity e : c.level.getEntitiesOfClass(Entity.class, new AABB(center, center).inflate(r))) {

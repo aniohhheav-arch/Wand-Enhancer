@@ -133,6 +133,7 @@ public final class ForbiddenSpells {
         Vec3 center = Magic.aimPoint(c, 28).add(0, 3, 0);
         double r = 14 * c.radius;
         VoidSpells.well(c, center, r, 120, 0.7, 2f, 28f, true);
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.RIFT, center.subtract(0, 3, 0), 6.5f, 130, dev.arcana.entity.SpellFxEntity.EASE);
         School[] schools = School.real();
         for (int i = 0; i < schools.length; i++) {
             final School s = schools[i];

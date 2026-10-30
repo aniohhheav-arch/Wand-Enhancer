@@ -1,20 +1,26 @@
 package dev.arcana.test;
 
-import net.minecraft.client.Screenshot;
 import dev.arcana.ArcanaMod;
-import dev.arcana.client.SpellWheelScreen;
-import dev.arcana.client.WandScreen;
+import dev.arcana.entity.ArchmageEntity;
 import dev.arcana.magic.CastService;
 import dev.arcana.magic.PlayerMagic;
 import dev.arcana.magic.School;
 import dev.arcana.magic.Spell;
 import dev.arcana.registry.ModAttachments;
 import dev.arcana.registry.ModComponents;
+import dev.arcana.registry.ModEntities;
 import dev.arcana.registry.ModItems;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
@@ -26,12 +32,15 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
- * Development-only client driver (lives in the gametest source set, never shipped). Enabled with -Pquickplay=<world>
- * on runClient: gives wands, casts spells, opens screens and writes screenshots to run/screenshots.
+ * Development-only client driver (gametest source set, never shipped). Run with {@code gradle runClient -PquickPlay=<world>}: it
+ * gives wands, casts spells, spawns the boss and writes screenshots to run/screenshots.
  */
 @EventBusSubscriber(modid = ArcanaMod.MODID, value = Dist.CLIENT)
 public final class ClientShots {
-    private static int t = -1;
+    private record Step(int tick, Runnable action) {}
+
+    private static final List<Step> STEPS = new ArrayList<>();
+    private static int t = -1, next = 0;
 
     private static ItemStack wand(School s, int stage) {
         ItemStack w = new ItemStack(ModItems.WANDS.get(s).get());
@@ -44,7 +53,7 @@ public final class ClientShots {
         Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), c -> {});
     }
 
-    private static void server(java.util.function.Consumer<ServerPlayer> r) {
+    private static void server(Consumer<ServerPlayer> r) {
         Minecraft mc = Minecraft.getInstance();
         var srv = mc.getSingleplayerServer();
         if (srv == null || mc.player == null) return;
@@ -61,6 +70,89 @@ public final class ClientShots {
         CastService.cast(sp, CastService.heldWand(sp), s, 1f, InteractionHand.MAIN_HAND);
     }
 
+    private static void crowd(ServerPlayer sp) {
+        ServerLevel l = sp.serverLevel();
+        for (var z : l.getEntitiesOfClass(Zombie.class, sp.getBoundingBox().inflate(60))) z.discard();
+        for (int i = 0; i < 8; i++) {
+            Zombie zom = EntityType.ZOMBIE.create(l);
+            double zx = sp.getX() - 6 + (i % 4) * 4, zz = sp.getZ() + 10 + (i / 4) * 4;
+            zom.moveTo(zx, l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) zx, (int) zz), zz, 0, 0);
+            zom.setNoAi(true);
+            zom.setPersistenceRequired();
+            l.addFreshEntity(zom);
+        }
+    }
+
+    private static void at(int tick, Runnable r) {
+        STEPS.add(new Step(tick, r));
+    }
+
+    static {
+        at(40, () -> server(sp -> {
+            sp.setGameMode(GameType.SURVIVAL);
+            ServerLevel l = sp.serverLevel();
+            l.setDayTime(18000); // night makes the glowing 3D effects readable
+            int x = 0, z = 0, y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            sp.teleportTo(l, x + 0.5, y, z + 0.5, 0f, 8f);
+            sp.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20000, 5, false, false));
+            var m = sp.getData(ModAttachments.MAGIC);
+            for (School s : School.real()) m.mastery.put(s.id, 40 * 5 * 5);
+            sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.STORM, 2));
+            crowd(sp);
+        }));
+        Minecraft mc = Minecraft.getInstance();
+        at(60, () -> mc.setScreen(new WandGallery(2)));
+        at(68, () -> shot("00_gallery_ascended"));
+        at(72, () -> mc.setScreen(new WandGallery(0)));
+        at(80, () -> shot("00_gallery_dormant"));
+        at(84, () -> mc.setScreen(null));
+        at(95, () -> shot("01_first_person_wand"));
+        at(98, () -> Minecraft.getInstance().options.setCameraType(CameraType.THIRD_PERSON_BACK));
+        at(108, () -> shot("02_third_person_wand"));
+        at(110, () -> Minecraft.getInstance().options.setCameraType(CameraType.FIRST_PERSON));
+
+        Object[][] ults = {
+            {School.VOID, Spell.EVENT_HORIZON, "event_horizon"}, {School.SOLAR, Spell.SUPERNOVA, "supernova"},
+            {School.GLACIER, Spell.BLIZZARD, "blizzard"}, {School.CRIMSON, Spell.CRIMSON_CATACLYSM, "crimson_cataclysm"},
+            {School.STORM, Spell.TEMPEST, "tempest"}, {School.CHRONOS, Spell.TIME_STOP, "time_stop"},
+            {School.ARCANE, Spell.ARCANE_CATACLYSM, "arcane_cataclysm"}, {School.VERDANT, Spell.GROVE_GUARDIANS, "grove_guardians"},
+            {School.NONE, Spell.RIFT_COLLAPSE, "rift_collapse"}};
+        int base = 130;
+        for (int i = 0; i < ults.length; i++) {
+            final School sc = (School) ults[i][0];
+            final Spell sp0 = (Spell) ults[i][1];
+            final String nm = String.format("%02d_%s", 10 + i, ults[i][2]);
+            int t0 = base + i * 170;
+            at(t0, () -> server(sp -> {
+                crowd(sp);
+                sp.setItemInHand(InteractionHand.MAIN_HAND, wand(sc, 2));
+            }));
+            at(t0 + 8, () -> server(sp -> cast(sp, sp0)));
+            at(t0 + 26, () -> shot(nm + "_a_title"));
+            at(t0 + 62, () -> shot(nm + "_b_effect"));
+            at(t0 + 100, () -> shot(nm + "_c_late"));
+        }
+        int tb = base + ults.length * 170 + 20;
+        at(tb, () -> server(sp -> {
+            ServerLevel l = sp.serverLevel();
+            for (var z : l.getEntitiesOfClass(Zombie.class, sp.getBoundingBox().inflate(60))) z.discard();
+            ArchmageEntity boss = ModEntities.ARCHMAGE.get().create(l);
+            boss.moveTo(sp.getX(), l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) sp.getX(), (int) sp.getZ() + 9), sp.getZ() + 9, 180f, 0f);
+            l.addFreshEntity(boss);
+        }));
+        at(tb + 30, () -> shot("30_boss_idle"));
+        at(tb + 80, () -> shot("31_boss_attack"));
+        at(tb + 110, () -> shot("32_boss_attack2"));
+        at(tb + 120, () -> server(sp -> sp.serverLevel().getEntitiesOfClass(ArchmageEntity.class, sp.getBoundingBox().inflate(60)).forEach(b -> b.hurt(sp.damageSources().genericKill(), 1000f))));
+        at(tb + 150, () -> shot("33_boss_death_a"));
+        at(tb + 200, () -> shot("34_boss_death_b"));
+        at(tb + 235, () -> shot("35_boss_death_c"));
+        at(tb + 260, () -> {
+            ArcanaMod.LOGGER.info("[arcana-shots] done");
+            Minecraft.getInstance().stop();
+        });
+    }
+
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post e) {
         if (!Boolean.getBoolean("arcana.shots")) return;
@@ -68,66 +160,7 @@ public final class ClientShots {
         if (mc.player == null || mc.level == null) return;
         if (t < 0) t = 0;
         t++;
-        switch (t) {
-            case 40 -> server(sp -> {
-                sp.setGameMode(GameType.SURVIVAL);
-                ServerLevel l = sp.serverLevel();
-                l.setDayTime(6000);
-                int x = 0, z = 0;
-                int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-                sp.teleportTo(l, x + 0.5, y, z + 0.5, 0f, 8f);
-                for (int i = 0; i < 8; i++) {
-                    Zombie zom = EntityType.ZOMBIE.create(l);
-                    double zx = x - 6 + (i % 4) * 4, zz = z + 10 + (i / 4) * 4;
-                    zom.moveTo(zx, l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) zx, (int) zz), zz, 0, 0);
-                    zom.setNoAi(true);
-                    zom.setPersistenceRequired();
-                    l.addFreshEntity(zom);
-                }
-                var m = sp.getData(ModAttachments.MAGIC);
-                for (School s : School.real()) m.mastery.put(s.id, 40 * 5 * 5);
-                sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.STORM, 2));
-                m.mana = 70;
-            });
-            case 80 -> shot("01_hud_storm");
-            case 85 -> server(sp -> cast(sp, Spell.THUNDERBOLT));
-            case 92 -> shot("02_thunderbolt");
-            case 100 -> server(sp -> cast(sp, Spell.CHAIN_LIGHTNING));
-            case 104 -> shot("03_chain_lightning");
-            case 120 -> server(sp -> sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.VOID, 2)));
-            case 130 -> server(sp -> cast(sp, Spell.EVENT_HORIZON));
-            case 136 -> shot("04_event_horizon_cinematic");
-            case 170 -> shot("05_event_horizon_late");
-            case 175 -> server(sp -> sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.SOLAR, 2)));
-            case 185 -> server(sp -> cast(sp, Spell.SOLAR_BEAM));
-            case 188 -> shot("06_solar_beam");
-            case 200 -> server(sp -> sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.GLACIER, 2)));
-            case 210 -> server(sp -> cast(sp, Spell.ICE_SPIKES));
-            case 216 -> shot("07_ice_spikes");
-            case 225 -> server(sp -> cast(sp, Spell.FROZEN_PRISON));
-            case 235 -> shot("08_frozen_prison");
-            case 245 -> server(sp -> sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.CRIMSON, 2)));
-            case 255 -> server(sp -> cast(sp, Spell.CRIMSON_CATACLYSM));
-            case 266 -> shot("09_crimson_cataclysm");
-            case 300 -> server(sp -> sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.CHRONOS, 2)));
-            case 310 -> server(sp -> cast(sp, Spell.TIME_STOP));
-            case 318 -> shot("10_time_stop");
-            case 340 -> mc.setScreen(new WandScreen());
-            case 348 -> shot("11_wand_screen");
-            case 350 -> mc.setScreen(null);
-            case 355 -> server(sp -> sp.setItemInHand(InteractionHand.MAIN_HAND, wand(School.NONE, 2)));
-            case 365 -> {
-                SpellWheelScreen.keepOpenForTests = true;
-                mc.setScreen(new SpellWheelScreen(mc.player.getMainHandItem()));
-            }
-            case 378 -> shot("12_forbidden_wheel");
-            case 380 -> mc.setScreen(null);
-            case 400 -> {
-                ArcanaMod.LOGGER.info("[arcana-shots] done");
-                mc.stop();
-            }
-            default -> {}
-        }
+        while (next < STEPS.size() && STEPS.get(next).tick() <= t) STEPS.get(next++).action().run();
     }
 
     private ClientShots() {}

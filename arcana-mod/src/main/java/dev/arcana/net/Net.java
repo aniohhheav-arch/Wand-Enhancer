@@ -76,10 +76,11 @@ public final class Net {
     }
 
     /** Cinematic screen effect. kind 0 = colour flash + shake, 1 = time-stop desaturation. */
-    public record Cinematic(int rgb, int ticks, int kind) implements CustomPacketPayload {
+    public record Cinematic(int rgb, int ticks, int kind, int spell, int caster) implements CustomPacketPayload {
         public static final Type<Cinematic> TYPE = mk("cinematic");
         public static final StreamCodec<RegistryFriendlyByteBuf, Cinematic> CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT, Cinematic::rgb, ByteBufCodecs.VAR_INT, Cinematic::ticks, ByteBufCodecs.VAR_INT, Cinematic::kind, Cinematic::new);
+            ByteBufCodecs.VAR_INT, Cinematic::rgb, ByteBufCodecs.VAR_INT, Cinematic::ticks, ByteBufCodecs.VAR_INT, Cinematic::kind,
+            ByteBufCodecs.VAR_INT, Cinematic::spell, ByteBufCodecs.VAR_INT, Cinematic::caster, Cinematic::new);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
@@ -149,13 +150,14 @@ public final class Net {
         }
     }
 
-    public static void cinematic(ServerPlayer caster, int rgb, int ticks, int kind) {
-        Cinematic c = new Cinematic(rgb, ticks, kind);
-        cinematicNear((net.minecraft.server.level.ServerLevel) caster.level(), caster.position(), c.rgb(), c.ticks(), c.kind());
+    /** Cinematic for everyone near the caster; {@code spell} is the Spell ordinal for the title card (-1 = none). */
+    public static void cinematic(ServerPlayer caster, int rgb, int ticks, int kind, int spell) {
+        Cinematic c = new Cinematic(rgb, ticks, kind, spell, caster.getId());
+        for (ServerPlayer p : ((net.minecraft.server.level.ServerLevel) caster.level()).players()) if (p.position().distanceToSqr(caster.position()) <= 64 * 64) send(p, c);
     }
 
     public static void cinematicNear(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, int rgb, int ticks, int kind) {
-        Cinematic c = new Cinematic(rgb, ticks, kind);
+        Cinematic c = new Cinematic(rgb, ticks, kind, -1, -1);
         for (ServerPlayer p : level.players()) if (p.position().distanceToSqr(at) <= 64 * 64) send(p, c);
     }
 

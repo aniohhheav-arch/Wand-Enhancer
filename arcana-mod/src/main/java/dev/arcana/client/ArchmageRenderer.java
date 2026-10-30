@@ -1,39 +1,35 @@
 package dev.arcana.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.arcana.ArcanaMod;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.arcana.entity.ArchmageEntity;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
-import net.minecraft.client.renderer.entity.layers.EyesLayer;
-import net.minecraft.resources.ResourceLocation;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-public class ArchmageRenderer extends HumanoidMobRenderer<ArchmageEntity, HumanoidModel<ArchmageEntity>> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(ArcanaMod.MODID, "textures/entity/hollow_archmage.png");
-    private static final ResourceLocation GLOW = ResourceLocation.fromNamespaceAndPath(ArcanaMod.MODID, "textures/entity/hollow_archmage_glow.png");
-
+/** The Hollow Archmage as an animated 3D GeckoLib model (idle, walk, cast, summon, phase roar, 5-second death). */
+public class ArchmageRenderer extends GeoEntityRenderer<ArchmageEntity> {
     public ArchmageRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new HumanoidModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE)), 0.8f);
-        addLayer(new EyesLayer<>(this) {
-            @Override
-            public RenderType renderType() {
-                return RenderType.eyes(GLOW);
-            }
-        });
+        super(ctx, new ArchmageGeoModel());
+        this.shadowRadius = 0.9f;
     }
 
     @Override
-    protected void scale(ArchmageEntity e, PoseStack pose, float partial) {
-        float s = 1.35f;
-        if (e.deathTime > 0) s *= 1f + Math.min(0.3f, e.deathTime / 300f);
+    public void preRender(PoseStack pose, ArchmageEntity e, BakedGeoModel model, MultiBufferSource buffers, VertexConsumer buffer,
+                          boolean isReRender, float partialTick, int light, int overlay, int colour) {
+        float s = 1.25f;
         pose.scale(s, s, s);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ArchmageEntity e) {
-        return TEXTURE;
+    public void renderCubesOfBone(PoseStack pose, GeoBone bone, VertexConsumer buffer, int light, int overlay, int colour) {
+        super.renderCubesOfBone(pose, bone, buffer, GeoBright.light(bone, light), overlay, colour);
+    }
+
+    @Override
+    protected float getDeathMaxRotation(ArchmageEntity e) {
+        return 0f; // the death animation is authored in the model; don't topple the whole entity
     }
 }

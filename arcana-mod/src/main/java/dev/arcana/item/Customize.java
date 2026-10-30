@@ -93,7 +93,7 @@ public final class Customize {
         level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, p.getX(), p.getY() + 1.2, p.getZ(), 60, 0.5, 0.8, 0.5, 0.4);
         level.sendParticles(School.dust(school.color, 2f), p.getX(), p.getY() + 1.2, p.getZ(), 40, 0.6, 0.9, 0.6, 0);
         level.playSound(null, p.blockPosition(), SoundEvents.TOTEM_USE, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.2f);
-        Net.cinematic(p, school.color, 30, 0);
+        Net.cinematic(p, school.color, 30, 0, -1);
         p.displayClientMessage(Component.translatable("evolve.arcana.success." + (stage + 1)), true);
     }
 

@@ -19,14 +19,69 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
+import software.bernie.geckolib.animatable.GeoItem;
+import software.bernie.geckolib.animatable.client.GeoRenderProvider;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.constant.DataTickets;
+import software.bernie.geckolib.util.GeckoLibUtil;
+import java.util.function.Consumer;
 
 /** A wand of one magic school. Right-click casts the selected spell; hold to charge spells that support it. */
-public class WandItem extends Item {
+public class WandItem extends Item implements GeoItem {
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.arcana.wand.idle");
+    private static final RawAnimation CHARGE = RawAnimation.begin().thenLoop("animation.arcana.wand.charge");
+    private static final RawAnimation CAST = RawAnimation.begin().thenPlay("animation.arcana.wand.cast");
+
     public final School school;
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public WandItem(Properties props, School school) {
         super(props);
         this.school = school;
+        GeoItem.registerSyncedAnimatable(this);
+    }
+
+    // ---------------------------------------------------------------- GeckoLib
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "main", 3, state -> {
+            LivingEntity holder = state.getData(DataTickets.ENTITY) instanceof LivingEntity le ? le : null;
+            boolean charging = holder != null && holder.isUsingItem() && holder.getUseItem().getItem() == this;
+            return state.setAndContinue(charging ? CHARGE : IDLE);
+        }).triggerableAnim("cast", CAST));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
+    }
+
+    @Override
+    public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
+        consumer.accept(new GeoRenderProvider() {
+            private dev.arcana.client.WandRenderer renderer;
+
+            @Override
+            public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getGeoItemRenderer() {
+                if (renderer == null) renderer = new dev.arcana.client.WandRenderer();
+                return renderer;
+            }
+        });
+    }
+
+    /** Plays the cast flourish on every client tracking {@code player}. */
+    public void playCast(ServerPlayer player, ItemStack stack) {
+        if (player.connection == null) return;
+        try {
+            triggerAnim(player, GeoItem.getOrAssignId(stack, player.serverLevel()), "main", "cast");
+        } catch (UnsupportedOperationException ignored) {
+            // fake/mocked connections cannot receive clientbound payloads
+        }
     }
 
     // ---------------------------------------------------------------- component helpers

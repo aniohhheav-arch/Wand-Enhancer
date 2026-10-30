@@ -111,19 +111,6 @@ def save(img, path):
     os.makedirs(os.path.dirname(path), exist_ok=True); img.save(path)
 
 IT = os.path.join(A, 'textures', 'item')
-for s, col in SCHOOLS:
-    for st in range(3):
-        if st == 2:
-            save(anim_strip([wand_frame(s, 2, phase=p) for p in range(4)]), f'{IT}/{s}_wand_2.png')
-            w(f'{IT}/{s}_wand_2.png.mcmeta', json.dumps({'animation': {'frametime': 5, 'interpolate': True}}))
-        else:
-            save(wand_frame(s, st), f'{IT}/{s}_wand_{st}.png')
-for st in range(3): save(crystal_overlay(st), f'{IT}/wand_crystal_{st}.png')
-
-LOOK_COLORS = [COLORS['forbidden']] + [c for _, c in SCHOOLS] + [0x9B30FF, 0x30FFB4, 0xFFFFFF]
-for i, c in enumerate(LOOK_COLORS):
-    save(anim_strip([wand_frame('forbidden', 2, accent=c, phase=p) for p in range(4)]), f'{IT}/forbidden_wand_look_{i}.png')
-    w(f'{IT}/forbidden_wand_look_{i}.png.mcmeta', json.dumps({'animation': {'frametime': 3, 'interpolate': True}}))
 
 # ---------------------------------------------------------------- textures: materials, crystals, blocks
 def gem(color, shape='shard', glow=1.0):
@@ -239,56 +226,27 @@ for name, school, slot in spells:
     if slot == 'ultimate': d.ellipse([0, 0, 31, 31], outline=(255, 230, 140, 255), width=2)
     save(img, f'{A}/textures/gui/spell/{name}.png')
 
-# ---------------------------------------------------------------- textures: boss
-def skin():
-    img = Image.new('RGBA', (64, 64), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
-    robe, trim, skinc = (44, 18, 74, 255), (177, 13, 255, 255), (150, 130, 170, 255)
-    # humanoid UV layout (64x64, legacy-compatible regions)
-    def box(x, y, wd, ht, dp, front, side, top):
-        d.rectangle([x, y + dp, x + 2 * (wd + dp) + wd - 1, y + dp + ht - 1], fill=side)
-        d.rectangle([x + dp, y + dp, x + dp + wd - 1, y + dp + ht - 1], fill=front)
-        d.rectangle([x + dp, y, x + dp + wd - 1, y + dp - 1], fill=top)
-        d.rectangle([x + dp + wd, y, x + 2 * wd + dp - 1, y + dp - 1], fill=side)
-    box(0, 0, 8, 8, 8, skinc, (110, 96, 130, 255), (80, 60, 100, 255))        # head
-    d.rectangle([8, 8, 15, 15], fill=skinc)
-    for (x, y) in [(9, 11), (10, 11), (13, 11), (14, 11)]: d.point((x, y), fill=(255, 43, 214, 255))
-    d.rectangle([10, 14, 13, 14], fill=(30, 10, 40, 255))
-    d.rectangle([32, 0, 63, 15], fill=robe)                                    # hood / hat layer
-    d.rectangle([40, 8, 47, 15], fill=(0, 0, 0, 0))
-    box(16, 16, 8, 12, 4, robe, (34, 12, 58, 255), trim)                       # body
-    d.rectangle([20, 20, 27, 31], fill=robe); d.rectangle([22, 20, 25, 31], fill=trim)
-    box(40, 16, 4, 12, 4, robe, (34, 12, 58, 255), trim)                       # right arm
-    d.rectangle([44, 20, 47, 31], fill=robe); d.rectangle([40, 28, 55, 31], fill=skinc)
-    box(0, 16, 4, 12, 4, (30, 12, 50, 255), (24, 8, 40, 255), trim)            # right leg
-    box(16, 48, 4, 12, 4, (30, 12, 50, 255), (24, 8, 40, 255), trim)           # left leg
-    box(32, 48, 4, 12, 4, robe, (34, 12, 58, 255), trim)                       # left arm
-    d.rectangle([36, 52, 39, 63], fill=robe); d.rectangle([32, 60, 47, 63], fill=skinc)
-    d.rectangle([16, 16, 39, 17], fill=trim)
-    return img
-sk = skin(); save(sk, f'{A}/textures/entity/hollow_archmage.png')
-glow = Image.new('RGBA', (64, 64), (0, 0, 0, 0)); gp = glow.load(); sp = sk.load()
-for (x, y) in [(9, 11), (10, 11), (13, 11), (14, 11)]: gp[x, y] = (255, 43, 214, 255)
-for y in range(16, 32):
-    for x in range(16, 40):
-        if sp[x, y] == (177, 13, 255, 255): gp[x, y] = (177, 13, 255, 255)
-save(glow, f'{A}/textures/entity/hollow_archmage_glow.png')
+# (boss and wand 3D models/textures are produced by tools/gen_geo.py)
 
 # ---------------------------------------------------------------- models & blockstates
 def model(name, obj): jw(f'{A}/models/item/{name}.json', obj)
+WAND_DISPLAY = {
+    'gui': {'rotation': [0, 0, 40], 'translation': [0, 0, 0], 'scale': [0.62, 0.62, 0.62]},
+    'ground': {'rotation': [0, 0, 0], 'translation': [0, 2, 0], 'scale': [0.4, 0.4, 0.4]},
+    'fixed': {'rotation': [0, 0, 40], 'translation': [0, 0, 0], 'scale': [0.6, 0.6, 0.6]},
+    'head': {'rotation': [0, 0, 0], 'translation': [0, 8, 0], 'scale': [0.8, 0.8, 0.8]},
+    'thirdperson_righthand': {'rotation': [80, 0, 0], 'translation': [0, 2.5, 1], 'scale': [0.55, 0.55, 0.55]},
+    'thirdperson_lefthand': {'rotation': [80, 0, 0], 'translation': [0, 2.5, 1], 'scale': [0.55, 0.55, 0.55]},
+    'firstperson_righthand': {'rotation': [0, 0, 0], 'translation': [0, 3, 1], 'scale': [0.6, 0.6, 0.6]},
+    'firstperson_lefthand': {'rotation': [0, 0, 0], 'translation': [0, 3, 1], 'scale': [0.6, 0.6, 0.6]},
+}
 for s, _ in SCHOOLS:
-    for st in range(3):
-        model(f'{s}_wand_{st}', {'parent': 'minecraft:item/handheld', 'textures': {'layer0': f'{M}:item/{s}_wand_{st}', 'layer1': f'{M}:item/wand_crystal_{st}'}})
-    model(f'{s}_wand', {'parent': f'{M}:item/{s}_wand_0', 'overrides': [
-        {'predicate': {f'{M}:stage': 0.5}, 'model': f'{M}:item/{s}_wand_1'},
-        {'predicate': {f'{M}:stage': 1.0}, 'model': f'{M}:item/{s}_wand_2'}]})
+    model(f'{s}_wand', {'parent': 'minecraft:builtin/entity', 'display': WAND_DISPLAY})
     model(f'{s}_crystal', {'parent': 'minecraft:item/generated', 'textures': {'layer0': f'{M}:item/{s}_crystal'}})
     model(f'{s}_crystal_cluster', {'parent': 'minecraft:item/generated', 'textures': {'layer0': f'{M}:block/{s}_crystal_cluster'}})
     jw(f'{A}/models/block/{s}_crystal_cluster.json', {'parent': 'minecraft:block/cross', 'render_type': 'minecraft:cutout', 'textures': {'cross': f'{M}:block/{s}_crystal_cluster'}})
     jw(f'{A}/blockstates/{s}_crystal_cluster.json', {'variants': {'': {'model': f'{M}:block/{s}_crystal_cluster'}}})
-for i in range(12):
-    model(f'forbidden_wand_look_{i}', {'parent': 'minecraft:item/handheld', 'textures': {'layer0': f'{M}:item/forbidden_wand_look_{i}', 'layer1': f'{M}:item/wand_crystal_2'}})
-model('forbidden_wand', {'parent': f'{M}:item/forbidden_wand_look_0', 'overrides': [
-    {'predicate': {f'{M}:look': (i - 0.5) / 11}, 'model': f'{M}:item/forbidden_wand_look_{i}'} for i in range(1, 12)]})
+model('forbidden_wand', {'parent': 'minecraft:builtin/entity', 'display': WAND_DISPLAY})
 for k in MAT: model(k, {'parent': 'minecraft:item/generated', 'textures': {'layer0': f'{M}:item/{k}'}})
 model('hollow_archmage_spawn_egg', {'parent': 'minecraft:item/template_spawn_egg'})
 
@@ -339,7 +297,7 @@ lang = {
  'tooltip.arcana.forbidden': 'Bound to no school. Borrows every magic.',
  'tooltip.arcana.selected': 'Spell: %s', 'tooltip.arcana.handle': 'Handle: %s', 'tooltip.arcana.core': 'Core: %s',
  'tooltip.arcana.rune': 'Rune: %s', 'tooltip.arcana.menu_hint': 'Press G to evolve and customise',
- 'hud.arcana.mastery': 'Mastery %s', 'hud.arcana.unbound': 'Unbound', 'hud.arcana.wheel': 'Spell Wheel',
+ 'hud.arcana.mastery': 'Mastery %s', 'hud.arcana.unbound': 'Unbound', 'hud.arcana.wheel': 'Spell Wheel', 'hud.arcana.ultimate': 'Ultimate \u00b7 %s',
  'hud.arcana.cost': 'Mana %s  |  Cooldown %ss',
  'cast.arcana.fail.disabled': 'This spell is disabled', 'cast.arcana.fail.stage': 'Evolve your wand to use this spell',
  'cast.arcana.fail.mimic_locked': 'Cast that school\'s magic first to copy it', 'cast.arcana.fail.cooldown': 'Spell on cooldown',
@@ -363,7 +321,7 @@ lang = {
  'fx.arcana.default': 'School', 'fx.arcana.stars': 'Stars', 'fx.arcana.embers': 'Embers', 'fx.arcana.souls': 'Souls', 'fx.arcana.glyphs': 'Glyphs', 'fx.arcana.fireflies': 'Fireflies',
  'rune.arcana.none': 'Empty', 'rune.arcana.amplify': 'Amplify (+25% dmg, +15% mana)', 'rune.arcana.efficient': 'Efficient (-25% mana)',
  'rune.arcana.swift': 'Swift (-25% cooldown)', 'rune.arcana.wide': 'Wide (+30% area, -8% dmg)', 'rune.arcana.leech': 'Leech (heal 15% of damage)',
- 'entity.arcana.hollow_archmage': 'The Hollow Archmage', 'entity.arcana.grove_guardian': 'Grove Guardian',
+ 'entity.arcana.hollow_archmage': 'The Hollow Archmage', 'entity.arcana.spell_fx': 'Spell Effect', 'entity.arcana.grove_guardian': 'Grove Guardian',
  'boss.arcana.phase.2': 'The Archmage tears open the void!', 'boss.arcana.phase.3': 'The Archmage unravels completely!',
  'item.arcana.hollow_archmage_spawn_egg': 'Hollow Archmage Spawn Egg',
  'block.arcana.dummy': '',

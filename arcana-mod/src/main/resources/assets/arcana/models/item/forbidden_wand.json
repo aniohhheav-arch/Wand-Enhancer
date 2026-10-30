@@ -1,71 +1,141 @@
 {
-  "parent": "arcana:item/forbidden_wand_look_0",
-  "overrides": [
-    {
-      "predicate": {
-        "arcana:look": 0.045454545454545456
-      },
-      "model": "arcana:item/forbidden_wand_look_1"
+  "parent": "minecraft:builtin/entity",
+  "display": {
+    "gui": {
+      "rotation": [
+        0,
+        0,
+        40
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.62,
+        0.62,
+        0.62
+      ]
     },
-    {
-      "predicate": {
-        "arcana:look": 0.13636363636363635
-      },
-      "model": "arcana:item/forbidden_wand_look_2"
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        2,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
     },
-    {
-      "predicate": {
-        "arcana:look": 0.22727272727272727
-      },
-      "model": "arcana:item/forbidden_wand_look_3"
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        40
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
     },
-    {
-      "predicate": {
-        "arcana:look": 0.3181818181818182
-      },
-      "model": "arcana:item/forbidden_wand_look_4"
+    "head": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        8,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
     },
-    {
-      "predicate": {
-        "arcana:look": 0.4090909090909091
-      },
-      "model": "arcana:item/forbidden_wand_look_5"
+    "thirdperson_righthand": {
+      "rotation": [
+        80,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        1
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
     },
-    {
-      "predicate": {
-        "arcana:look": 0.5
-      },
-      "model": "arcana:item/forbidden_wand_look_6"
+    "thirdperson_lefthand": {
+      "rotation": [
+        80,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        1
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
     },
-    {
-      "predicate": {
-        "arcana:look": 0.5909090909090909
-      },
-      "model": "arcana:item/forbidden_wand_look_7"
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        1
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
     },
-    {
-      "predicate": {
-        "arcana:look": 0.6818181818181818
-      },
-      "model": "arcana:item/forbidden_wand_look_8"
-    },
-    {
-      "predicate": {
-        "arcana:look": 0.7727272727272727
-      },
-      "model": "arcana:item/forbidden_wand_look_9"
-    },
-    {
-      "predicate": {
-        "arcana:look": 0.8636363636363636
-      },
-      "model": "arcana:item/forbidden_wand_look_10"
-    },
-    {
-      "predicate": {
-        "arcana:look": 0.9545454545454546
-      },
-      "model": "arcana:item/forbidden_wand_look_11"
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        1
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
     }
-  ]
+  }
 }

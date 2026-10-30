@@ -152,4 +152,37 @@ public class SpellGameTests {
         h.assertTrue(Spell.MIMIC_STORM.lookIndex() == 6 && Spell.RIFT_COLLAPSE.lookIndex() == 11, "forbidden look indices");
         h.succeed();
     }
+
+    @GameTest(template = "arena")
+    public static void admin_commands(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        ItemStack w = wand(School.STORM, 0);
+        p.setItemInHand(InteractionHand.MAIN_HAND, w);
+        var src = p.createCommandSourceStack().withPermission(4);
+        var cmds = h.getLevel().getServer().getCommands();
+        PlayerMagic m = p.getData(ModAttachments.MAGIC);
+        cmds.performPrefixedCommand(src, "arcana mastery @s storm set 7");
+        h.assertTrue(m.level(School.STORM) == 7, "set level 7, got " + m.level(School.STORM));
+        cmds.performPrefixedCommand(src, "arcana mastery @s storm add 9");
+        h.assertTrue(m.level(School.STORM) == 10, "add clamps to 10, got " + m.level(School.STORM));
+        cmds.performPrefixedCommand(src, "arcana mastery @s void setxp 500");
+        h.assertTrue(m.xp(School.VOID) == 500, "setxp");
+        cmds.performPrefixedCommand(src, "arcana mastery @s void addxp 100");
+        h.assertTrue(m.xp(School.VOID) == 600, "addxp");
+        cmds.performPrefixedCommand(src, "arcana mastery @s all set 3");
+        h.assertTrue(m.level(School.ARCANE) == 3 && m.level(School.CHRONOS) == 3, "all set 3");
+        cmds.performPrefixedCommand(src, "arcana stage @s 2");
+        h.assertTrue(WandItem.stageOf(w) == 2, "stage command");
+        cmds.performPrefixedCommand(src, "arcana mana @s set 5");
+        h.assertTrue(Math.round(m.mana) == 5, "mana set");
+        cmds.performPrefixedCommand(src, "arcana mana @s fill");
+        h.assertTrue(m.mana >= 100, "mana fill");
+        m.cooldowns.put("thunderbolt", 99999L);
+        cmds.performPrefixedCommand(src, "arcana cooldowns @s reset");
+        h.assertTrue(m.cooldowns.isEmpty(), "cooldowns reset");
+        cmds.performPrefixedCommand(src, "arcana mastery @s bogus set 1");
+        cmds.performPrefixedCommand(src, "arcana mastery @s reset");
+        h.assertTrue(m.level(School.STORM) == 0, "reset");
+        h.succeed();
+    }
 }

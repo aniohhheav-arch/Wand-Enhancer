@@ -1,0 +1,69 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.arcana.fx.idle": {
+   "animation_length": 4.0,
+   "bones": {
+    "glow_corona": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "4.00": [
+       0,
+       360,
+       0
+      ]
+     }
+    },
+    "glow_core": {
+     "scale": {
+      "0.00": {
+       "vector": [
+        1,
+        1,
+        1
+       ],
+       "easing": "easeInOutSine"
+      },
+      "1.00": {
+       "vector": [
+        1.06,
+        1.06,
+        1.06
+       ],
+       "easing": "easeInOutSine"
+      },
+      "2.00": {
+       "vector": [
+        1,
+        1,
+        1
+       ],
+       "easing": "easeInOutSine"
+      },
+      "3.00": {
+       "vector": [
+        1.06,
+        1.06,
+        1.06
+       ],
+       "easing": "easeInOutSine"
+      },
+      "4.00": {
+       "vector": [
+        1,
+        1,
+        1
+       ],
+       "easing": "easeInOutSine"
+      }
+     }
+    }
+   },
+   "loop": true
+  }
+ }
+}

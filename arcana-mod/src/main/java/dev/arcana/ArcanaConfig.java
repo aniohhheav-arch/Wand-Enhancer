@@ -20,7 +20,7 @@ public final class ArcanaConfig {
     public record SpellCfg(ModConfigSpec.BooleanValue enabled, ModConfigSpec.DoubleValue damage,
                            ModConfigSpec.DoubleValue cooldown, ModConfigSpec.DoubleValue mana) {}
 
-    public static final ModConfigSpec.BooleanValue SCREEN_SHAKE, CINEMATICS;
+    public static final ModConfigSpec.BooleanValue SCREEN_SHAKE, CINEMATICS, CINEMATIC_CAMERA;
     public static final ModConfigSpec.DoubleValue HUD_SCALE;
 
     static {
@@ -65,6 +65,7 @@ public final class ArcanaConfig {
         ModConfigSpec.Builder c = new ModConfigSpec.Builder();
         SCREEN_SHAKE = c.comment("Camera shake during ultimates.").define("screenShake", true);
         CINEMATICS = c.comment("Full-screen colour flashes during ultimates.").define("cinematics", true);
+        CINEMATIC_CAMERA = c.comment("Switch to a third-person hero camera with a FOV push during your own ultimates.").define("cinematicCamera", true);
         HUD_SCALE = c.defineInRange("hudScale", 1.0, 0.5, 2.0);
         CLIENT = c.build();
     }

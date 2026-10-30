@@ -10,16 +10,13 @@ import dev.arcana.net.Net;
 import dev.arcana.registry.ModEntities;
 import dev.arcana.registry.ModItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
@@ -48,25 +45,7 @@ public final class ClientEvents {
         @SubscribeEvent
         public static void renderers(EntityRenderersEvent.RegisterRenderers e) {
             e.registerEntityRenderer(ModEntities.ARCHMAGE.get(), ArchmageRenderer::new);
-        }
-
-        @SubscribeEvent
-        public static void setup(FMLClientSetupEvent e) {
-            e.enqueueWork(() -> {
-                ResourceLocation stage = ResourceLocation.fromNamespaceAndPath(ArcanaMod.MODID, "stage");
-                ResourceLocation look = ResourceLocation.fromNamespaceAndPath(ArcanaMod.MODID, "look");
-                for (var w : ModItems.WANDS.values()) {
-                    ItemProperties.register(w.get(), stage, (stack, level, entity, seed) -> WandItem.stageOf(stack) / 2f);
-                    ItemProperties.register(w.get(), look, (stack, level, entity, seed) -> WandItem.selectedOf(stack).lookIndex() / 11f);
-                }
-            });
-        }
-
-        @SubscribeEvent
-        public static void colors(RegisterColorHandlersEvent.Item e) {
-            for (var w : ModItems.WANDS.values()) {
-                e.register((stack, tint) -> tint == 1 ? 0xFF000000 | WandItem.tintOf(stack, WandItem.schoolOf(stack)) : -1, w.get());
-            }
+            e.registerEntityRenderer(ModEntities.SPELL_FX.get(), SpellFxRenderer::new);
         }
 
         @SubscribeEvent
@@ -104,6 +83,7 @@ public final class ClientEvents {
             ClientState.clientTick();
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;
+            cinematicCamera(mc);
             ItemStack wand = CastService.heldWand(mc.player);
             boolean inGame = mc.screen == null;
             sendSlot(ClientKeys.SECONDARY, SpellSlot.SECONDARY, wand, inGame);
@@ -121,6 +101,36 @@ public final class ClientEvents {
             while (key.consumeClick()) {
                 if (inGame && !wand.isEmpty()) PacketDistributor.sendToServer(new Net.CastSlot(slot.ordinal()));
             }
+        }
+
+        private static net.minecraft.client.CameraType savedCamera;
+
+        private static boolean casterCinematic(Minecraft mc) {
+            return mc.player != null && ClientState.cinematicSpell >= 0 && ClientState.cinematicCaster == mc.player.getId()
+                && ArcanaConfig.CINEMATIC_CAMERA.get() && ArcanaConfig.CINEMATICS.get();
+        }
+
+        /** Own ultimates: hero camera behind the caster while the 3D effect plays, restored afterwards. */
+        static void cinematicCamera(Minecraft mc) {
+            boolean active = casterCinematic(mc) && ClientState.cinematicProgress(0f) > 0f;
+            if (active && savedCamera == null) {
+                savedCamera = mc.options.getCameraType();
+                mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+            } else if (!active && savedCamera != null) {
+                mc.options.setCameraType(savedCamera);
+                savedCamera = null;
+            }
+        }
+
+        @SubscribeEvent
+        public static void fov(ViewportEvent.ComputeFov e) {
+            Minecraft mc = Minecraft.getInstance();
+            if (!casterCinematic(mc)) return;
+            float p = ClientState.cinematicProgress((float) e.getPartialTick());
+            if (p <= 0f) return;
+            float push = (float) Math.sin(Math.min(1f, p) * Math.PI) * 0.22f; // pull in, then ease back out
+            float punch = Math.max(0f, 0.12f - p * 1.2f);                      // sharp widen on the cast
+            e.setFOV(e.getFOV() * (1f - push + punch));
         }
 
         @SubscribeEvent

@@ -47,6 +47,24 @@ neoForge {
     addModdingDependenciesTo(sourceSets.gametest)
 }
 
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content { includeGroup 'software.bernie.geckolib' }
+    }
+}
+
+dependencies {
+    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    jarJar("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}") {
+        version {
+            strictly '[4.8,5.0)'
+            prefer geckolib_version
+        }
+    }
+}
+
 tasks.withType(ProcessResources).configureEach {
     var props = [
         minecraft_version: minecraft_version, neo_version: neo_version, mod_id: mod_id,

@@ -105,7 +105,8 @@ public final class CastService {
         }
         p.swing(hand == null ? InteractionHand.MAIN_HAND : hand, true);
         castBurst(c);
-        if (spell.slot == SpellSlot.ULTIMATE) Net.cinematic(p, c.rgb(), spell == Spell.TIME_STOP ? 100 : 45, spell == Spell.TIME_STOP ? 1 : 0);
+        if (wand.getItem() instanceof WandItem wi) wi.playCast(p, wand);
+        if (spell.slot == SpellSlot.ULTIMATE) Net.cinematic(p, c.rgb(), spell == Spell.TIME_STOP ? 110 : 75, spell == Spell.TIME_STOP ? 1 : 0, spell.ordinal());
         Net.sync(p, true);
         return true;
     }

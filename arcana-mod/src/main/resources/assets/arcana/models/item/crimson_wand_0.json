@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "arcana:item/crimson_wand_0",
-    "layer1": "arcana:item/wand_crystal_0"
-  }
-}

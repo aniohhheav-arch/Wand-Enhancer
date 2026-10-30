@@ -121,6 +121,7 @@ public final class GlacierSpells {
         Vec3 center = Magic.aimPoint(c, 24);
         double r = 10 * c.radius;
         Magic.snd(c.level, center, SoundEvents.WIND_CHARGE_BURST.value(), 1.2f, 0.5f);
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.ICE_SPIRE, center, 5.5f * c.radius, 200, dev.arcana.entity.SpellFxEntity.EASE);
         EffectManager.run(c.level, 200, age -> {
             if (!c.valid()) return false;
             for (int i = 0; i < Magic.count(10); i++) {

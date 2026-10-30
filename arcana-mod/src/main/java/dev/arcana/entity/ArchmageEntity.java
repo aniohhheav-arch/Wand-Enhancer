@@ -37,19 +37,33 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
  * The Hollow Archmage: a three-phase boss with telegraphed attacks, a boss bar and a drawn-out cinematic death.
  * Phase 1 (&gt;66%): missiles and eruptions. Phase 2: adds gravity pulses, blinking and vex summons.
  * Phase 3 (&lt;33%): relentless barrages and overlapping eruptions.
  */
-public class ArchmageEntity extends Monster {
+public class ArchmageEntity extends Monster implements GeoEntity {
     private static final int PURPLE = 0xB10DFF;
     private static final DustParticleOptions DUST = School.dust(PURPLE, 1.5f);
     private static final int DEATH_TICKS = 110;
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.arcana.hollow_archmage"),
         BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.arcana.archmage.idle");
+    private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.arcana.archmage.walk");
+    private static final RawAnimation DEATH = RawAnimation.begin().thenPlayAndHold("animation.arcana.archmage.death");
+    private static final RawAnimation CAST = RawAnimation.begin().thenPlay("animation.arcana.archmage.cast");
+    private static final RawAnimation SUMMON = RawAnimation.begin().thenPlay("animation.arcana.archmage.summon");
+    private static final RawAnimation PHASE = RawAnimation.begin().thenPlay("animation.arcana.archmage.phase");
+
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int phase = 1;
     private int transition;
     private DamageSource deathSource;
@@ -97,6 +111,23 @@ public class ArchmageEntity extends Monster {
     @Override public boolean removeWhenFarAway(double d) { return false; }
     @Override public boolean fireImmune() { return true; }
 
+    // ------------------------------------------------------------------ animation
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "move", 6, state -> {
+            if (isDeadOrDying()) return state.setAndContinue(DEATH);
+            return state.setAndContinue(state.isMoving() ? WALK : IDLE);
+        }));
+        controllers.add(new AnimationController<>(this, "action", 2, state -> software.bernie.geckolib.animation.PlayState.STOP)
+            .triggerableAnim("cast", CAST).triggerableAnim("summon", SUMMON).triggerableAnim("phase", PHASE));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
+    }
+
     // ------------------------------------------------------------------ boss bar & phases
 
     @Override
@@ -140,6 +171,8 @@ public class ArchmageEntity extends Monster {
     private void enterPhase(int p) {
         phase = p;
         transition = 50;
+        triggerAnim("action", "phase");
+        if (p == 3) SpellFxEntity.spawn((ServerLevel) level(), FxKind.RIFT, position(), 3.2f, 70, SpellFxEntity.EASE);
         ServerLevel sl = (ServerLevel) level();
         sl.playSound(null, blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 1.5f, 0.6f + 0.2f * p);
         sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY() + 1, getZ(), 1, 0, 0, 0, 0);
@@ -189,6 +222,7 @@ public class ArchmageEntity extends Monster {
 
     private void missiles(int n) {
         ServerLevel sl = (ServerLevel) level();
+        triggerAnim("action", "cast");
         sl.playSound(null, blockPosition(), SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.HOSTILE, 1.5f, 0.7f);
         EffectManager.run(sl, n * 4 + 1, age -> {
             if (!isAlive()) return false;
@@ -208,6 +242,7 @@ public class ArchmageEntity extends Monster {
 
     private void eruptions(boolean extra) {
         ServerLevel sl = (ServerLevel) level();
+        triggerAnim("action", "cast");
         List<Vec3> spots = new java.util.ArrayList<>();
         for (Player p : playersNear(26)) spots.add(p.position());
         if (extra) for (int i = 0; i < 4; i++) spots.add(position().add(random.nextInt(17) - 8, 0, random.nextInt(17) - 8));
@@ -231,6 +266,7 @@ public class ArchmageEntity extends Monster {
 
     private void voidPulse() {
         ServerLevel sl = (ServerLevel) level();
+        triggerAnim("action", "cast");
         Vec3 c = position().add(0, 1, 0);
         sl.playSound(null, blockPosition(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 1.5f, 0.6f);
         EffectManager.run(sl, 30, age -> {
@@ -264,6 +300,7 @@ public class ArchmageEntity extends Monster {
 
     private void summonVexes(int n) {
         ServerLevel sl = (ServerLevel) level();
+        triggerAnim("action", "summon");
         long existing = sl.getEntitiesOfClass(Vex.class, getBoundingBox().inflate(30), v -> v.getOwner() == this).size();
         for (int i = 0; i < n && existing + i < 6; i++) {
             Vex v = EntityType.VEX.create(sl);
@@ -325,6 +362,7 @@ public class ArchmageEntity extends Monster {
         setNoGravity(true);
         if (deathTime == 1) {
             Net.cinematicNear(sl, position(), PURPLE, DEATH_TICKS, 0);
+            SpellFxEntity.spawn(sl, FxKind.SIGIL, position().add(0, 0.05, 0), 7f, DEATH_TICKS, SpellFxEntity.EASE);
             sl.playSound(null, blockPosition(), SoundEvents.WITHER_DEATH, SoundSource.HOSTILE, 2f, 0.5f);
         }
         double a = deathTime * 0.5;

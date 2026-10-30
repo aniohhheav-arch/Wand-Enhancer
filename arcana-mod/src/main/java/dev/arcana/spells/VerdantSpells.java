@@ -148,6 +148,8 @@ public final class VerdantSpells {
             Magic.hurt(c, e, 4f);
         }
         Magic.snd(c.level, pos, SoundEvents.RAVAGER_ROAR, 1f, 0.6f);
+        Vec3 treeAt = pos.add(Magic.flatLook(c.player).scale(7));
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.WORLD_TREE, new Vec3(treeAt.x, Magic.groundY(c.level, treeAt.x, pos.y, treeAt.z), treeAt.z), 4.5f * c.radius, 140, dev.arcana.entity.SpellFxEntity.GROW);
         EffectManager.run(c.level, 900, age -> {
             golems.removeIf(g -> {
                 if (g.isAlive()) return false;

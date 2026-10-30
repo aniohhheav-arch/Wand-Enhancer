@@ -12,7 +12,7 @@ public final class ClientState {
     public static int tick;
     private static int syncTick;
 
-    public static int cinematicRgb, cinematicStart = -1000, cinematicTicks, cinematicKind;
+    public static int cinematicRgb, cinematicStart = -1000, cinematicTicks, cinematicKind, cinematicSpell = -1, cinematicCaster = -1;
 
     public static void applySync(float m, float mx, int[] x, int[] cd, int mask) {
         mana = m;
@@ -30,11 +30,19 @@ public final class ClientState {
         return Math.max(0, cooldowns[s.ordinal()] - (tick - syncTick));
     }
 
-    public static void startCinematic(int rgb, int ticks, int kind) {
+    public static void startCinematic(int rgb, int ticks, int kind, int spell, int caster) {
         cinematicRgb = rgb;
         cinematicTicks = ticks;
         cinematicStart = tick;
         cinematicKind = kind;
+        cinematicSpell = spell;
+        cinematicCaster = caster;
+    }
+
+    /** 0..1 progress through the active cinematic (0 when none). */
+    public static float cinematicProgress(float partial) {
+        float t = tick + partial - cinematicStart;
+        return t < 0 || t > cinematicTicks ? 0f : t / cinematicTicks;
     }
 
     /** 0..1 remaining strength of the active cinematic. */

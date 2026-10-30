@@ -124,6 +124,7 @@ public final class CrimsonSpells {
                 if (!c.valid()) return;
                 Set<UUID> hit = new HashSet<>();
                 Vec3 ctr = c.player.position();
+                Magic.fx3d(c.level, dev.arcana.entity.FxKind.CRIMSON_SPEARS, ctr, 16f * c.radius, 14, dev.arcana.entity.SpellFxEntity.EXPAND);
                 Magic.snd(c.level, ctr, SoundEvents.WARDEN_SONIC_BOOM, 0.7f, 0.9f + wave * 0.1f);
                 EffectManager.run(c.level, 14, age -> {
                     double r = 1.5 + (max - 1.5) * (age + 1) / 14.0;

@@ -2,6 +2,7 @@ package dev.arcana.registry;
 
 import dev.arcana.ArcanaMod;
 import dev.arcana.entity.ArchmageEntity;
+import dev.arcana.entity.SpellFxEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -14,6 +15,10 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<ArchmageEntity>> ARCHMAGE = ENTITIES.register("hollow_archmage",
         () -> EntityType.Builder.of(ArchmageEntity::new, MobCategory.MONSTER).sized(0.7f, 2.4f).fireImmune().clientTrackingRange(10)
             .build(ArcanaMod.MODID + ":hollow_archmage"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<SpellFxEntity>> SPELL_FX = ENTITIES.register("spell_fx",
+        () -> EntityType.Builder.<SpellFxEntity>of(SpellFxEntity::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(16)
+            .updateInterval(20).noSave().noSummon().fireImmune().build(ArcanaMod.MODID + ":spell_fx"));
 
     private ModEntities() {}
 }
