@@ -251,7 +251,7 @@ def wand_animations():
 # ================================================================== BOSS
 def build_boss(pal):
     rnd = random.Random(7)
-    robe, robe2, trim, skin = (46, 20, 78), (34, 14, 60), (177, 13, 255), (140, 120, 165)
+    robe, robe2, trim, skin = (92, 52, 150), (70, 38, 120), (200, 80, 255), (190, 170, 215)
     glow = (255, 43, 214)
     m = Model('geometry.arcana.hollow_archmage', pal, bounds=(4, 5))
     m.bone('root'); m.bone('body', 'root', (0, 10, 0))
