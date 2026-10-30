@@ -31,6 +31,11 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.SPATIAL_PRISON.get(), SpatialPrisonRenderer::new);
         event.registerEntityRenderer(ModEntities.MINI_PORTAL.get(), MiniPortalRenderer::new);
         event.registerEntityRenderer(ModEntities.SPACE_BOLT.get(), SpaceBoltRenderer::new);
+        event.registerEntityRenderer(ModEntities.TIME_FIELD.get(), dev.infinitygauntlet.client.render.TimeFieldRenderer::new);
+        event.registerEntityRenderer(ModEntities.TEMPORAL_LOOP.get(), dev.infinitygauntlet.client.render.TemporalLoopRenderer::new);
+        event.registerEntityRenderer(ModEntities.CHRONO_BARRIER.get(), dev.infinitygauntlet.client.render.ChronoBarrierRenderer::new);
+        event.registerEntityRenderer(ModEntities.TIME_FRACTURE.get(), dev.infinitygauntlet.client.render.TimeFractureRenderer::new);
+        event.registerEntityRenderer(ModEntities.TEMPORAL_ECHO.get(), dev.infinitygauntlet.client.render.TemporalEchoRenderer::new);
     }
 
     @SubscribeEvent

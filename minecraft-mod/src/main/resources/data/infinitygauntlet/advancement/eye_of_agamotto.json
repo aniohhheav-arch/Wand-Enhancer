@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:root",
+  "display": {
+    "icon": {
+      "id": "infinitygauntlet:time_stone"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.eye_of_agamotto"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.eye_of_agamotto.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "installed": {
+      "trigger": "infinitygauntlet:stone_installed",
+      "conditions": {
+        "value": "time"
+      }
+    }
+  }
+}

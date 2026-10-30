@@ -9,6 +9,15 @@ import dev.infinitygauntlet.ability.space.SpatialCompressionAbility;
 import dev.infinitygauntlet.ability.space.SpatialPrisonAbility;
 import dev.infinitygauntlet.ability.space.SpatialRiftAbility;
 import dev.infinitygauntlet.ability.space.UniversalTeleportationAbility;
+import dev.infinitygauntlet.ability.time.ChronologicalBarrierAbility;
+import dev.infinitygauntlet.ability.time.RewindAbility;
+import dev.infinitygauntlet.ability.time.TemporalBubbleAbility;
+import dev.infinitygauntlet.ability.time.TemporalEchoAbility;
+import dev.infinitygauntlet.ability.time.TemporalLoopAbility;
+import dev.infinitygauntlet.ability.time.TimeAccelerationAbility;
+import dev.infinitygauntlet.ability.time.TimeFractureAbility;
+import dev.infinitygauntlet.ability.time.TimeFreezeAbility;
+import dev.infinitygauntlet.ability.time.TimeSlowAbility;
 import dev.infinitygauntlet.stone.InfinityStone;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +43,16 @@ public final class Abilities {
         register(new CosmicGatewayAbility());
         register(new SpatialPrisonAbility());
         register(new UniversalTeleportationAbility());
+
+        register(new TimeFreezeAbility());
+        register(new TimeSlowAbility());
+        register(new TimeAccelerationAbility());
+        register(new TemporalBubbleAbility());
+        register(new TemporalEchoAbility());
+        register(new RewindAbility());
+        register(new TemporalLoopAbility());
+        register(new ChronologicalBarrierAbility());
+        register(new TimeFractureAbility());
     }
 
     private static void register(Ability ability) {

@@ -31,6 +31,11 @@ public final class Particles {
         add(new EnergyParticleOptions(ModParticles.ENERGY_MOTE.get(), color, size, 40, EnergyParticleOptions.BEHAVIOR_INWARD), pos, target);
     }
 
+    /** A mote frozen in place that flickers and fades (time-stop residue). */
+    public static void suspended(Vec3 pos, int color, float size, int life) {
+        add(new EnergyParticleOptions(ModParticles.ENERGY_MOTE.get(), color, size, life, EnergyParticleOptions.BEHAVIOR_SUSPENDED), pos, Vec3.ZERO);
+    }
+
     public static void smoke(Vec3 pos, Vec3 vel, int color, float size, int life) {
         add(new EnergyParticleOptions(ModParticles.DIMENSIONAL_SMOKE.get(), color, size, life, EnergyParticleOptions.BEHAVIOR_BILLOW), pos, vel);
     }

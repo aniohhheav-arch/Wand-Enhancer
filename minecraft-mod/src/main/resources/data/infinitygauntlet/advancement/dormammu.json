@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:eye_of_agamotto",
+  "display": {
+    "icon": {
+      "id": "minecraft:recovery_compass"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.dormammu"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.dormammu.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "cast": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:temporal_loop"
+      }
+    }
+  }
+}

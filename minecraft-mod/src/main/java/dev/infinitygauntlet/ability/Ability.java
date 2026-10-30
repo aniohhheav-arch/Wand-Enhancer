@@ -19,6 +19,14 @@ public abstract class Ability {
 
     public abstract CastResult cast(AbilityContext ctx);
 
+    /**
+     * Lets a cast run while the ability is recharging, for follow-up actions such as dismissing what the
+     * previous cast created. Such casts should return {@link CastResult#utility}.
+     */
+    public boolean bypassesCooldown(AbilityContext ctx) {
+        return false;
+    }
+
     public ResourceLocation id() {
         return id;
     }

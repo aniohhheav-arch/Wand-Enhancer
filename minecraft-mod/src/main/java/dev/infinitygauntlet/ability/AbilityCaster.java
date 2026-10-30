@@ -44,12 +44,13 @@ public final class AbilityCaster {
         PlayerPowerData data = player.getData(ModAttachments.POWER_DATA);
         long now = level.getGameTime();
         long end = data.cooldownEnd(ability.id());
-        if (!ignoreCooldown && end > now) {
+        AbilityContext ctx = new AbilityContext(player, level, stack, hand);
+        if (!ignoreCooldown && end > now && !ability.bypassesCooldown(ctx)) {
             fail(player, Component.translatable("message.infinitygauntlet.cooldown", ability.displayName(),
                     String.format("%.1f", (end - now) / 20.0)));
             return false;
         }
-        CastResult result = ability.cast(new AbilityContext(player, level, stack, hand));
+        CastResult result = ability.cast(ctx);
         if (result.message() != null) {
             player.displayClientMessage(result.message(), true);
         }

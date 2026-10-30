@@ -1,0 +1,74 @@
+{
+  "parent": "infinitygauntlet:eye_of_agamotto",
+  "display": {
+    "icon": {
+      "id": "minecraft:amethyst_cluster"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.master_of_time"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.master_of_time.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "time_freeze": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:time_freeze"
+      }
+    },
+    "time_slow": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:time_slow"
+      }
+    },
+    "time_acceleration": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:time_acceleration"
+      }
+    },
+    "temporal_bubble": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:temporal_bubble"
+      }
+    },
+    "temporal_echo": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:temporal_echo"
+      }
+    },
+    "rewind": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:rewind"
+      }
+    },
+    "temporal_loop": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:temporal_loop"
+      }
+    },
+    "chronological_barrier": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:chronological_barrier"
+      }
+    },
+    "time_fracture": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:time_fracture"
+      }
+    }
+  }
+}

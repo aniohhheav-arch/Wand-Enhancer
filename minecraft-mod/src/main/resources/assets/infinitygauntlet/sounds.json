@@ -103,6 +103,102 @@
       }
     ]
   },
+  "time_freeze": {
+    "subtitle": "subtitles.infinitygauntlet.time_freeze",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_freeze"
+      }
+    ]
+  },
+  "time_resume": {
+    "subtitle": "subtitles.infinitygauntlet.time_resume",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_resume"
+      }
+    ]
+  },
+  "time_field_loop": {
+    "subtitle": "subtitles.infinitygauntlet.time_field_loop",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_field_loop"
+      }
+    ]
+  },
+  "time_field_open": {
+    "subtitle": "subtitles.infinitygauntlet.time_field_open",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_field_open"
+      }
+    ]
+  },
+  "time_accelerate": {
+    "subtitle": "subtitles.infinitygauntlet.time_accelerate",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_accelerate"
+      }
+    ]
+  },
+  "time_rewind": {
+    "subtitle": "subtitles.infinitygauntlet.time_rewind",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_rewind"
+      }
+    ]
+  },
+  "time_echo": {
+    "subtitle": "subtitles.infinitygauntlet.time_echo",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_echo"
+      }
+    ]
+  },
+  "time_loop": {
+    "subtitle": "subtitles.infinitygauntlet.time_loop",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_loop"
+      }
+    ]
+  },
+  "time_barrier": {
+    "subtitle": "subtitles.infinitygauntlet.time_barrier",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_barrier"
+      }
+    ]
+  },
+  "time_suspend": {
+    "subtitle": "subtitles.infinitygauntlet.time_suspend",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_suspend"
+      }
+    ]
+  },
+  "time_fracture": {
+    "subtitle": "subtitles.infinitygauntlet.time_fracture",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_fracture"
+      }
+    ]
+  },
+  "time_shatter": {
+    "subtitle": "subtitles.infinitygauntlet.time_shatter",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:time_shatter"
+      }
+    ]
+  },
   "gauntlet_charge": {
     "subtitle": "subtitles.infinitygauntlet.gauntlet_charge",
     "sounds": [

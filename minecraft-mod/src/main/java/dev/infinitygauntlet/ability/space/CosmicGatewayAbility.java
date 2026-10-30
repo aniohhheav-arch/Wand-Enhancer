@@ -10,14 +10,12 @@ import dev.infinitygauntlet.item.InfinityGauntletItem;
 import dev.infinitygauntlet.registry.ModSounds;
 import dev.infinitygauntlet.stone.InfinityStone;
 import dev.infinitygauntlet.util.ServerScheduler;
-import dev.infinitygauntlet.util.TeleportUtil;
 import dev.infinitygauntlet.vfx.Vfx;
 import dev.infinitygauntlet.vfx.VfxType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -39,9 +37,7 @@ public final class CosmicGatewayAbility extends Ability {
         ServerLevel level = ctx.level();
         ServerPlayer player = ctx.player();
         // aiming past the ground (horizon, open sky) targets the ground beneath a point at mid range
-        BlockHitResult aim = ctx.pickBlock(MAX_RANGE);
-        Vec3 aimPoint = aim.getType() == HitResult.Type.MISS ? ctx.eye().add(ctx.look().scale(MISS_RANGE)) : aim.getLocation();
-        Vec3 target = TeleportUtil.groundBelow(level, aimPoint, 160);
+        Vec3 target = ctx.groundTarget(MAX_RANGE, MISS_RANGE);
         double height = ServerConfig.GATEWAY_HEIGHT.get();
         // keep the gateway below any ceiling over the target
         HitResult ceiling = level.clip(new ClipContext(target.add(0, 1, 0), target.add(0, height, 0), ClipContext.Block.COLLIDER,

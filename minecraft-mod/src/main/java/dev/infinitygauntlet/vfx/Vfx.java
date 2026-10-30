@@ -18,8 +18,12 @@ public final class Vfx {
     private static final double BROADCAST_RADIUS = 192;
 
     public static void send(ServerLevel level, VfxType type, Vec3 a, Vec3 b, int color, int color2, float scale, int duration) {
-        VfxPayload payload = new VfxPayload(type, a, b, color, color2, scale, duration, level.random.nextInt());
-        ModNetwork.sendNear(level, a, BROADCAST_RADIUS, payload);
+        send(level, type, a, b, color, color2, scale, duration, level.random.nextInt());
+    }
+
+    /** As above with an explicit seed; entity-following effects (AFTERIMAGES) pass the entity id here. */
+    public static void send(ServerLevel level, VfxType type, Vec3 a, Vec3 b, int color, int color2, float scale, int duration, int seed) {
+        ModNetwork.sendNear(level, a, BROADCAST_RADIUS, new VfxPayload(type, a, b, color, color2, scale, duration, seed));
     }
 
     public static void send(ServerLevel level, VfxType type, Vec3 a, InfinityStone stone, float scale, int duration) {

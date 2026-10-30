@@ -34,6 +34,23 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue GROUP_TELEPORT_RADIUS;
     public static final ModConfigSpec.IntValue GROUP_TELEPORT_RANGE;
 
+    public static final ModConfigSpec.DoubleValue FREEZE_RADIUS;
+    public static final ModConfigSpec.IntValue FREEZE_SECONDS;
+    public static final ModConfigSpec.DoubleValue SLOW_FIELD_SCALE;
+    public static final ModConfigSpec.IntValue SLOW_FIELD_SECONDS;
+    public static final ModConfigSpec.DoubleValue BUBBLE_SCALE;
+    public static final ModConfigSpec.DoubleValue BUBBLE_RADIUS;
+    public static final ModConfigSpec.IntValue BUBBLE_SECONDS;
+    public static final ModConfigSpec.IntValue ACCELERATION_SECONDS;
+    public static final ModConfigSpec.DoubleValue ACCELERATION_SPEED_BONUS;
+    public static final ModConfigSpec.IntValue REWIND_HISTORY_TICKS;
+    public static final ModConfigSpec.DoubleValue REWIND_RADIUS;
+    public static final ModConfigSpec.IntValue ECHO_RECORD_TICKS;
+    public static final ModConfigSpec.IntValue LOOP_SECONDS;
+    public static final ModConfigSpec.IntValue LOOP_PERIOD_TICKS;
+    public static final ModConfigSpec.IntValue BARRIER_SECONDS;
+    public static final ModConfigSpec.IntValue FRACTURE_SECONDS;
+
     private static final Map<String, ModConfigSpec.IntValue> COOLDOWNS = new HashMap<>();
 
     static {
@@ -70,6 +87,27 @@ public final class ServerConfig {
                 .defineInRange("groupTeleportRadius", 6.0, 1.0, 32.0);
         GROUP_TELEPORT_RANGE = b.comment("Maximum range of an aimed Universal Teleportation without a waypoint.")
                 .defineInRange("groupTeleportRange", 160, 16, 1024);
+        b.pop();
+
+        b.push("time_stone");
+        FREEZE_RADIUS = b.comment("Radius of Time Freeze around the caster.").defineInRange("freezeRadius", 12.0, 2.0, 48.0);
+        FREEZE_SECONDS = b.defineInRange("freezeSeconds", 8, 1, 120);
+        SLOW_FIELD_SCALE = b.comment("Time scale inside a Time Slow field (1 = normal speed, 0 = frozen).")
+                .defineInRange("slowFieldScale", 0.25, 0.0, 1.0);
+        SLOW_FIELD_SECONDS = b.defineInRange("slowFieldSeconds", 15, 1, 300);
+        BUBBLE_SCALE = b.defineInRange("bubbleScale", 0.12, 0.0, 1.0);
+        BUBBLE_RADIUS = b.defineInRange("bubbleRadius", 8.0, 2.0, 32.0);
+        BUBBLE_SECONDS = b.defineInRange("bubbleSeconds", 12, 1, 300);
+        ACCELERATION_SECONDS = b.defineInRange("accelerationSeconds", 12, 1, 300);
+        ACCELERATION_SPEED_BONUS = b.comment("Movement speed bonus of Time Acceleration (1.0 = +100%).")
+                .defineInRange("accelerationSpeedBonus", 0.8, 0.0, 4.0);
+        REWIND_HISTORY_TICKS = b.comment("How many ticks of movement history Rewind can play back.").defineInRange("rewindHistoryTicks", 100, 20, 600);
+        REWIND_RADIUS = b.comment("Radius of an untargeted Rewind.").defineInRange("rewindRadius", 10.0, 1.0, 48.0);
+        ECHO_RECORD_TICKS = b.comment("Length of the movement a Temporal Echo replays.").defineInRange("echoRecordTicks", 80, 20, 600);
+        LOOP_SECONDS = b.defineInRange("loopSeconds", 12, 2, 300);
+        LOOP_PERIOD_TICKS = b.comment("How often a Temporal Loop snaps captured entities back.").defineInRange("loopPeriodTicks", 50, 10, 400);
+        BARRIER_SECONDS = b.defineInRange("barrierSeconds", 15, 2, 300);
+        FRACTURE_SECONDS = b.defineInRange("fractureSeconds", 12, 3, 120);
         b.pop();
 
         b.comment("Ability cooldowns in ticks (20 ticks = 1 second).").push("cooldowns");

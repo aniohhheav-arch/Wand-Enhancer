@@ -27,7 +27,15 @@ public enum VfxType {
     /** Refraction-like lens shell. a = centre, scale = radius. */
     DISTORTION,
     /** Spherical burst of sparks and smoke. a = centre, scale = radius. */
-    SPARK_BURST;
+    SPARK_BURST,
+    /** Rotating clock dial on the ground (Time Stone glyph). a = centre, scale = radius. */
+    CLOCK_GLYPH,
+    /** Trailing afterimages of a living entity. seed = entity id, duration = ticks to keep trailing. */
+    AFTERIMAGES,
+    /** Emerald motes hanging motionless in the air. a = centre, scale = radius. */
+    SUSPENDED_FIELD,
+    /** Vertical stack of counter-rotating clock rings. a = centre, scale = radius. */
+    CLOCK_RINGS;
 
     public static final StreamCodec<ByteBuf, VfxType> STREAM_CODEC = ByteBufCodecs.idMapper(i -> values()[i], VfxType::ordinal);
 }

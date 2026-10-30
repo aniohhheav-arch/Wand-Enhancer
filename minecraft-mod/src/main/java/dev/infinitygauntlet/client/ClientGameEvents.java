@@ -32,6 +32,8 @@ public final class ClientGameEvents {
             ClientVfxManager.tick();
             CameraEffects.tick();
             ClientCooldowns.tick();
+            dev.infinitygauntlet.client.time.ClientHistory.tick();
+            dev.infinitygauntlet.client.time.TimeOverlay.tick();
             auraTick(mc.player);
         }
         while (Keybinds.NEXT_ABILITY.consumeClick()) {
@@ -83,8 +85,9 @@ public final class ClientGameEvents {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        ClientVfxManager.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(),
-                event.getPartialTick().getGameTimeDeltaPartialTick(false));
+        float pt = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        ClientVfxManager.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
+        dev.infinitygauntlet.client.time.TimeOverlay.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
     }
 
     @SubscribeEvent
@@ -99,6 +102,9 @@ public final class ClientGameEvents {
 
     @SubscribeEvent
     static void onFov(ViewportEvent.ComputeFov event) {
+        if (!event.usedConfiguredFov()) {
+            return; // first-person hand pass: zooming it would magnify the held gauntlet
+        }
         float m = CameraEffects.fovMultiplier((float) event.getPartialTick());
         if (m != 1f) {
             event.setFOV(event.getFOV() * m);
@@ -111,6 +117,9 @@ public final class ClientGameEvents {
         CameraEffects.reset();
         ClientCooldowns.clear();
         ClientEffects.clear();
+        dev.infinitygauntlet.client.time.ClientTime.clear();
+        dev.infinitygauntlet.client.time.ClientHistory.clear();
+        dev.infinitygauntlet.client.time.TimeOverlay.clear();
     }
 
     private ClientGameEvents() {

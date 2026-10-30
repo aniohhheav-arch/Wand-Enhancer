@@ -1,0 +1,26 @@
+{
+  "parent": "infinitygauntlet:eye_of_agamotto",
+  "display": {
+    "icon": {
+      "id": "minecraft:clock"
+    },
+    "title": {
+      "translate": "advancement.infinitygauntlet.stop_time"
+    },
+    "description": {
+      "translate": "advancement.infinitygauntlet.stop_time.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "cast": {
+      "trigger": "infinitygauntlet:ability_used",
+      "conditions": {
+        "value": "infinitygauntlet:time_freeze"
+      }
+    }
+  }
+}

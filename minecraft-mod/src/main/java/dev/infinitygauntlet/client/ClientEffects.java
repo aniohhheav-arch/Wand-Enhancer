@@ -143,6 +143,72 @@ public final class ClientEffects {
         }
     }
 
+    private static final int TIME = InfinityStone.TIME.color();
+    private static final int TIME_HI = InfinityStone.TIME.highlight();
+
+    public static void timeFieldTick(dev.infinitygauntlet.entity.TimeFieldEntity field) {
+        RandomSource rnd = field.getRandom();
+        float r = field.visualRadius() * field.size(0);
+        dev.infinitygauntlet.client.time.ClientHistory.keepAlive(20);
+        for (int i = 0; i < Particles.scaled(field.shape() == dev.infinitygauntlet.entity.TimeFieldEntity.SHAPE_SPHERE ? 4 : 3); i++) {
+            Vec3 at;
+            if (field.shape() == dev.infinitygauntlet.entity.TimeFieldEntity.SHAPE_SPHERE) {
+                at = field.position().add(randomDir(rnd).scale(r * Math.cbrt(rnd.nextDouble())));
+            } else {
+                double a = rnd.nextDouble() * Math.PI * 2, d = Math.sqrt(rnd.nextDouble()) * r;
+                at = field.position().add(Math.cos(a) * d, rnd.nextDouble() * 3, Math.sin(a) * d);
+            }
+            // motes inside drift at the field's crawl
+            Particles.mote(at, new Vec3(0, 0.004, 0), rnd.nextBoolean() ? TIME : TIME_HI, 0.05f, 50);
+        }
+    }
+
+    public static void loopTick(dev.infinitygauntlet.entity.TemporalLoopEntity loop) {
+        RandomSource rnd = loop.getRandom();
+        double phase = (loop.tickCount % loop.period()) / (double) loop.period();
+        double a = phase * Math.PI * 6;
+        float r = loop.visualRadius() * 0.9f;
+        Particles.mote(loop.position().add(Math.cos(a) * r, phase * 3, Math.sin(a) * r), Vec3.ZERO, TIME_HI, 0.08f, 12);
+        if (Particles.chance(0.4f)) {
+            Particles.mote(loop.position().add(Math.cos(-a) * r * 0.5, 0.1, Math.sin(-a) * r * 0.5), new Vec3(0, 0.03, 0), TIME, 0.06f, 20);
+        }
+        if (rnd.nextFloat() < 0.05f) {
+            dev.infinitygauntlet.client.time.ClientHistory.keepAlive(40);
+        }
+    }
+
+    public static void barrierTick(dev.infinitygauntlet.entity.ChronoBarrierEntity barrier) {
+        RandomSource rnd = barrier.getRandom();
+        if (Particles.chance(0.6f)) {
+            Vec3 n = barrier.facing(0);
+            Vec3 ax = new Vec3(-n.z, 0, n.x).normalize();
+            double a = rnd.nextDouble() * Math.PI * 2;
+            Vec3 at = barrier.position().add(ax.scale(Math.cos(a) * barrier.visualRadius())).add(0, Math.sin(a) * barrier.visualRadius(), 0);
+            Particles.suspended(at, TIME_HI, 0.05f, 20);
+        }
+    }
+
+    public static void fractureTick(dev.infinitygauntlet.entity.TimeFractureEntity fracture) {
+        RandomSource rnd = fracture.getRandom();
+        dev.infinitygauntlet.client.time.ClientHistory.keepAlive(60);
+        float r = fracture.visualRadius() * fracture.spread(0) * (1 - fracture.collapse(0));
+        if (fracture.collapse(0) > 0) {
+            for (int i = 0; i < Particles.scaled(6); i++) {
+                Particles.inward(fracture.position().add(randomDir(rnd).scale(fracture.visualRadius() * 1.4)), fracture.position(), TIME_HI, 0.12f);
+            }
+            return;
+        }
+        for (int i = 0; i < Particles.scaled(2); i++) {
+            Particles.shard(fracture.position().add(randomDir(rnd).scale(r * rnd.nextDouble())), randomDir(rnd).scale(0.01), TIME_HI, 0.18f, 40);
+        }
+        if (fracture.pulse(0) > 0.9f) {
+            for (int i = 0; i < Particles.scaled(30); i++) {
+                Particles.suspended(fracture.position().add(randomDir(rnd).scale(fracture.visualRadius() * 1.4 * Math.cbrt(rnd.nextDouble()))),
+                        TIME, 0.05f, 16);
+            }
+        }
+    }
+
     public static void clear() {
         AMBIENT.clear();
     }

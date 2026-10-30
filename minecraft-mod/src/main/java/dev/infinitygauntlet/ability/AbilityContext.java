@@ -49,6 +49,16 @@ public record AbilityContext(ServerPlayer player, ServerLevel level, ItemStack g
         return hit.getType() == HitResult.Type.MISS ? eye().add(look().scale(range)) : hit.getLocation();
     }
 
+    /**
+     * Ground point under the aim. Aiming past the terrain (at the horizon or the sky) falls back to the ground below a
+     * point {@code missRange} blocks out, so effects never land absurdly far away.
+     */
+    public Vec3 groundTarget(double range, double missRange) {
+        BlockHitResult hit = pickBlock(range);
+        Vec3 p = hit.getType() == HitResult.Type.MISS ? eye().add(look().scale(missRange)) : hit.getLocation();
+        return dev.infinitygauntlet.util.TeleportUtil.groundBelow(level, p.add(0, 0.5, 0), 64);
+    }
+
     @Nullable
     public LivingEntity pickLiving(double range) {
         Entity e = pickEntity(range, entity -> entity instanceof LivingEntity living && living.isAlive() && TargetRules.canTarget(player, living));

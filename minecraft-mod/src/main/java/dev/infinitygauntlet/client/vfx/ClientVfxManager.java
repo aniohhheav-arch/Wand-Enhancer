@@ -141,6 +141,14 @@ public final class ClientVfxManager {
                         Particles.spark(a.add(dir.scale(0.3)), dir.scale(p.scale() / duration * 1.1), p.color2(), 0.1f);
                     }
                 }
+                case AFTERIMAGES -> dev.infinitygauntlet.client.time.ClientHistory.keepAlive(duration + 40);
+                case SUSPENDED_FIELD -> {
+                    int n = (int) (140 * density);
+                    for (int i = 0; i < n; i++) {
+                        Vec3 at = a.add(VfxDraw.unit(p.seed(), i).scale(p.scale() * Math.cbrt(VfxDraw.hash(p.seed(), i, 9))));
+                        Particles.suspended(at, i % 3 == 0 ? p.color2() : p.color(), 0.04f + 0.05f * VfxDraw.hash(p.seed(), i, 10), duration);
+                    }
+                }
                 case GROUND_GLYPH -> {
                     int count = (int) (20 * density);
                     for (int i = 0; i < count; i++) {
@@ -293,6 +301,56 @@ public final class ClientVfxManager {
                     VertexConsumer glow = buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.GLOW));
                     float f = 1 - smooth(t / 0.4f);
                     VfxDraw.billboard(last, glow, camRot, 0, 0, 0, p.scale() * 3.5f * (0.5f + t), 0, hr, hg, hb, f);
+                }
+                case CLOCK_GLYPH -> {
+                    float alpha = smooth(t * duration / 10f) * (1 - smooth((t - 1 + 14f / duration) * duration / 14f));
+                    float grow = 1 - (1 - smooth(t * duration / 12f)) * 0.6f;
+                    Vec3 ax = new Vec3(1, 0, 0);
+                    Vec3 az = new Vec3(0, 0, 1);
+                    pose.pushPose();
+                    pose.mulPose(com.mojang.math.Axis.YP.rotation(time * 0.02f));
+                    VfxDraw.plane(pose.last(), buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.GLYPH_TIME)), ax, az, p.scale() * 2.1f * grow,
+                            cr, cg, cb, 0.85f * alpha);
+                    pose.popPose();
+                    pose.pushPose();
+                    pose.translate(0, 0.02, 0);
+                    pose.mulPose(com.mojang.math.Axis.YP.rotation(-time * 0.045f));
+                    VfxDraw.plane(pose.last(), buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.GLYPH_TIME)), ax, az, p.scale() * 1.1f * grow,
+                            hr, hg, hb, 0.7f * alpha);
+                    VfxDraw.ring(pose.last(), buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.GEAR_RING)), ax, az, p.scale() * 1.02f * grow,
+                            p.scale() * 1.16f * grow, 64, 0, cr, cg, cb, 0.8f * alpha);
+                    pose.popPose();
+                }
+                case CLOCK_RINGS -> {
+                    float alpha = smooth(t / 0.15f) * (1 - smooth((t - 0.6f) / 0.4f));
+                    VertexConsumer vc = buffers.getBuffer(ModRenderTypes.additive(ModRenderTypes.GEAR_RING));
+                    for (int k = -1; k <= 1; k++) {
+                        float rr = p.scale() * (1.1f - Math.abs(k) * 0.25f) * (0.8f + 0.4f * t);
+                        pose.pushPose();
+                        pose.translate(0, k * p.scale() * 0.55f, 0);
+                        pose.mulPose(com.mojang.math.Axis.YP.rotation(time * 0.12f * (k == 0 ? -1 : 1)));
+                        VfxDraw.ring(pose.last(), vc, new Vec3(1, 0, 0), new Vec3(0, 0, 1), rr * 0.82f, rr, 40, 0, k == 0 ? hr : cr, k == 0 ? hg : cg,
+                                k == 0 ? hb : cb, alpha);
+                        pose.popPose();
+                    }
+                }
+                case AFTERIMAGES -> {
+                    net.minecraft.world.entity.Entity entity = Minecraft.getInstance().level.getEntity(p.seed());
+                    if (!(entity instanceof net.minecraft.world.entity.LivingEntity living)) {
+                        break;
+                    }
+                    float fade = Math.min(1f, (duration - age - pt) / 10f);
+                    Vec3 now = entity.getPosition(pt);
+                    for (int k = 1; k <= 5; k++) {
+                        dev.infinitygauntlet.client.time.ClientHistory.Frame f = dev.infinitygauntlet.client.time.ClientHistory.get(p.seed(), k * 2);
+                        if (f == null || now.distanceToSqr(f.x(), f.y(), f.z()) < 0.04) {
+                            continue;
+                        }
+                        dev.infinitygauntlet.client.time.Afterimages.drawFrame(pose, buffers, living, f, p.a().x, p.a().y, p.a().z,
+                                0.42f * fade * (1 - k / 6f), p.color());
+                    }
+                }
+                case SUSPENDED_FIELD -> {
                 }
             }
         }

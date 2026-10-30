@@ -171,6 +171,44 @@ def glyph_circle(size, seed, spokes):
     return gray_alpha(np.clip(a, 0, 1))
 
 
+def clock_face(size):
+    """Ornate clock dial: concentric rings, 60 minute ticks, 12 hour blades, rotating inner gear teeth and two hands."""
+    r, ang = radial(size)
+    lin = np.linspace(-1, 1, size)
+    x, y = np.meshgrid(lin, lin)
+    a = np.zeros_like(r)
+    for rad, wid in ((0.97, 0.012), (0.90, 0.008), (0.70, 0.010), (0.52, 0.008), (0.30, 0.012), (0.12, 0.02)):
+        a += np.exp(-((r - rad) ** 2) / (wid ** 2))
+    minute = (np.abs(((ang / (2 * np.pi) * 60) + 0.5) % 1 - 0.5) < 0.06) & (r > 0.91) & (r < 0.96)
+    hour = (np.abs(((ang / (2 * np.pi) * 12) + 0.5) % 1 - 0.5) < 0.035) & (r > 0.72) & (r < 0.89)
+    a += minute * 0.9 + hour * 1.0
+    # roman-numeral-like blocks between 0.74 and 0.86, offset half an hour
+    blocks = (np.abs(((ang / (2 * np.pi) * 12)) % 1 - 0.5) < 0.12) & (r > 0.76) & (r < 0.84)
+    a += blocks * 0.45
+    gear = (np.sin(ang * 24) > 0.2) & (r > 0.52) & (r < 0.58)
+    a += gear * 0.8
+    # spokes of the inner wheel
+    spokes = (np.abs(np.sin(ang * 3)) < 0.05) & (r > 0.12) & (r < 0.52)
+    a += spokes * 0.7
+    # hands
+    for theta, length, width in ((-1.2, 0.62, 0.025), (0.55, 0.45, 0.035)):
+        ux, uy = math.cos(theta), math.sin(theta)
+        t = np.clip(x * ux + y * uy, 0, length)
+        d = np.hypot(x - t * ux, y - t * uy)
+        a += np.exp(-(d ** 2) / (width ** 2)) * (x * ux + y * uy > -0.05)
+    return gray_alpha(np.clip(a, 0, 1))
+
+
+def gear_strip(w, h):
+    v = np.linspace(0, 1, h)[:, None]
+    u = np.linspace(0, 1, w)[None, :]
+    band = np.exp(-((v - 0.5) ** 2) / 0.02)
+    teeth = ((np.sin(u * 2 * np.pi * 32) > 0.3) & (v > 0.12) & (v < 0.32)) * 1.0
+    ticks = ((np.sin(u * 2 * np.pi * 96) > 0.8) & (v > 0.68) & (v < 0.86)) * 0.8
+    edge = np.exp(-((v - 0.1) ** 2) / 0.001) + np.exp(-((v - 0.9) ** 2) / 0.001)
+    return gray_alpha(np.clip(band * 0.6 + teeth + ticks + edge * 0.8, 0, 1) * np.ones_like(u))
+
+
 def lightning_noise(size):
     n = fbm(size, 77, 5, 4)
     a = np.clip(1 - np.abs(n - 0.5) * 18, 0, 1)
@@ -205,6 +243,8 @@ def make_vfx_textures():
     save(beam_tex(32, 128), "textures", "vfx", "beam.png")
     save(glyph_circle(128, 1, 6), "textures", "vfx", "glyph_space.png")
     save(lightning_noise(64), "textures", "vfx", "crackle.png")
+    save(clock_face(256), "textures", "vfx", "glyph_time.png")
+    save(gear_strip(256, 32), "textures", "vfx", "gear_ring.png")
     save(transition_tex(256), "textures", "gui", "dimensional_transition.png")
 
     save(soft_glow(16, 1.8), "textures", "particle", "glow.png")
@@ -609,6 +649,61 @@ def make_sounds():
     add("space_prison", sweep(d, 220, 440, 1.0) * env(d, 0.1, 1.2) * 0.4 + sweep(d, 330, 660, 1.0) * env(d, 0.2, 1.2) * 0.3 + crackle(d, 40, seed=11) * 0.4, "Spatial prison locks")
     d = 1.3
     add("space_swap", sweep(d, 300, 1200, 0.8) * env(d, 0.3, 0.6) * 0.4 + sweep(d, 1200, 300, 0.8) * env(d, 0.3, 0.6) * 0.4 + crackle(d, 60, seed=12) * 0.5, "Positions swap")
+
+    # Time Stone -----------------------------------------------------------
+    def tick_click(sec, period, pitch=2400, seed=0):
+        out = np.zeros(int(SR * sec))
+        click = np.sin(2 * np.pi * pitch * t_axis(0.03)) * np.exp(-t_axis(0.03) * 180)
+        tock = np.sin(2 * np.pi * pitch * 0.7 * t_axis(0.03)) * np.exp(-t_axis(0.03) * 160)
+        i, k = 0, 0
+        while i < len(out):
+            c = click if k % 2 == 0 else tock
+            seg = out[i:i + len(c)]
+            seg += c[:len(seg)]
+            i += int(SR * period)
+            k += 1
+        return out
+
+    d = 2.4
+    stop = (sweep(d, 900, 40, 0.35) * env(d, 0.01, 2.0) * 0.5 + bandpass(noise(d), 300, 6000)[::-1] * env(d, 0.6, 0.2, 1) * 0.5
+            + fit(np.concatenate([np.zeros(int(SR * 0.6)), boom(1.8, 70, 30)]), d) + fit(tick_click(0.7, 0.16), d) * 0.5)
+    add("time_freeze", stop, "Time stops")
+    d = 1.4
+    add("time_resume", sweep(d, 40, 600, 2.0) * env(d, 0.6, 0.6) * 0.5 + bandpass(noise(d), 500, 8000) * env(d, 0.9, 0.4, 1) * 0.5
+        + fit(np.concatenate([np.zeros(int(SR * 0.9)), boom(0.5, 120, 60)]), d), "Time resumes")
+    d = 4.0
+    wob = 1 + 0.25 * np.sin(2 * np.pi * 0.35 * t_axis(d))
+    slow = (np.sin(2 * np.pi * np.cumsum(110 * wob) / SR) * 0.4 + np.sin(2 * np.pi * np.cumsum(165 * wob) / SR) * 0.2
+            + tick_click(d, 0.5, 1400) * 0.6)
+    fade = np.minimum(1, np.minimum(t_axis(d), d - t_axis(d)) / 0.05)
+    add("time_field_loop", slow * fade, "Time crawls")
+    d = 1.6
+    add("time_field_open", sweep(d, 300, 80, 0.5) * env(d, 0.05, 1.4) * 0.6 + fit(tick_click(1.2, 0.09, 2000), d) * env(d, 0.01, 1.2)
+        + boom(d, 60, 35) * 0.5, "Temporal field forms")
+    d = 1.0
+    add("time_accelerate", sweep(d, 200, 2400, 1.4) * env(d, 0.05, 0.3) * 0.4 + fit(tick_click(1.0, 0.04, 2600), d) * 0.6
+        + bandpass(noise(d), 1500, 9000) * env(d, 0.6, 0.3, 1) * 0.3, "Time accelerates")
+    d = 2.2
+    rev = (bandpass(noise(d), 200, 5000) * env(d, 0.2, 1.9, 1) * 0.6 + sweep(d, 1200, 120, 0.6) * env(d, 0.1, 1.8) * 0.4
+           + tick_click(d, 0.07, 1800) * 0.4)[::-1]
+    add("time_rewind", rev, "Time rewinds")
+    d = 1.5
+    add("time_echo", sweep(d, 700, 350, 1.0) * env(d, 0.02, 1.3) * 0.3 + sweep(d, 1050, 525, 1.0) * env(d, 0.15, 1.2) * 0.2
+        + fit(tick_click(0.6, 0.15, 1600), d) * 0.4, "Temporal echo")
+    d = 1.2
+    add("time_loop", sweep(d, 900, 300, 0.5) * env(d, 0.01, 0.5) * 0.4 + sweep(d, 300, 900, 2.0) * env(d, 0.5, 0.6) * 0.4
+        + fit(tick_click(1.2, 0.1, 2200), d) * 0.4, "Time loops")
+    d = 1.8
+    add("time_barrier", sweep(d, 180, 260, 1.0) * env(d, 0.1, 1.2) * 0.5 + fit(tick_click(1.8, 0.12, 1700), d) * 0.5
+        + bandpass(noise(d), 800, 6000) * env(d, 0.05, 0.6, 2) * 0.3, "Chronological barrier rises")
+    d = 0.5
+    add("time_suspend", sweep(d, 1800, 400, 0.4) * env(d, 0.005, 0.45) * 0.5 + crackle(d, 60, seed=21) * 0.3, "Projectile suspended")
+    d = 3.0
+    glass = crackle(d, 140, 0.0015, seed=22) * env(d, 0.01, 2.6, 1.5)
+    add("time_fracture", glass * 1.2 + sweep(d, 50, 30) * env(d, 0.3, 2.5) * 0.6 + bandpass(noise(d), 2000, 10000) * env(d, 0.01, 1.0, 3) * 0.5,
+        "Time fractures")
+    d = 1.6
+    add("time_shatter", boom(d, 90, 25) * 1.2 + crackle(d, 400, 0.001, seed=23) * env(d, 0.001, 0.7, 2) * 1.2, "Time shatters")
 
     # Gauntlet ---------------------------------------------------------------
     d = 2.2

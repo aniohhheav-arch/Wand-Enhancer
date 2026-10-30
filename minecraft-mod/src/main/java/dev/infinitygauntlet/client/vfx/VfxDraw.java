@@ -108,6 +108,37 @@ public final class VfxDraw {
                 .setUv(u, v).setColor(r, g, b, a);
     }
 
+    /** Open vertical cylinder wall from y=0 to {@code height}, alpha fading from {@code aBottom} to {@code aTop}; U wraps, V runs up. */
+    public static void cylinder(PoseStack.Pose pose, VertexConsumer vc, float radius, float height, int segments, float uOffset,
+                                float r, float g, float b, float aBottom, float aTop) {
+        Matrix4f m = pose.pose();
+        for (int i = 0; i < segments; i++) {
+            float t0 = (float) (i * Math.PI * 2 / segments), t1 = (float) ((i + 1) * Math.PI * 2 / segments);
+            float x0 = Mth.cos(t0) * radius, z0 = Mth.sin(t0) * radius, x1 = Mth.cos(t1) * radius, z1 = Mth.sin(t1) * radius;
+            float u0 = (float) i / segments * 4 + uOffset, u1 = (float) (i + 1) / segments * 4 + uOffset;
+            vc.addVertex(m, x0, 0, z0).setUv(u0, 0).setColor(r, g, b, aBottom);
+            vc.addVertex(m, x0, height, z0).setUv(u0, 1).setColor(r, g, b, aTop);
+            vc.addVertex(m, x1, height, z1).setUv(u1, 1).setColor(r, g, b, aTop);
+            vc.addVertex(m, x1, 0, z1).setUv(u1, 0).setColor(r, g, b, aBottom);
+        }
+    }
+
+    /** Partial annulus from angle 0 to {@code fraction}·2π (progress arcs). */
+    public static void arc(PoseStack.Pose pose, VertexConsumer vc, Vec3 ax, Vec3 ay, float inner, float outer, int segments, float fraction,
+                           float r, float g, float b, float a) {
+        int n = Math.max(1, (int) Math.ceil(segments * fraction));
+        Matrix4f m = pose.pose();
+        for (int i = 0; i < n; i++) {
+            float t0 = (float) (Math.PI * 2 * fraction * i / n - Math.PI / 2);
+            float t1 = (float) (Math.PI * 2 * fraction * (i + 1) / n - Math.PI / 2);
+            float c0 = Mth.cos(t0), s0 = Mth.sin(t0), c1 = Mth.cos(t1), s1 = Mth.sin(t1);
+            vertex(vc, m, ax, ay, c0 * inner, s0 * inner, 0, 0, r, g, b, a);
+            vertex(vc, m, ax, ay, c0 * outer, s0 * outer, 0, 1, r, g, b, a);
+            vertex(vc, m, ax, ay, c1 * outer, s1 * outer, 1, 1, r, g, b, a);
+            vertex(vc, m, ax, ay, c1 * inner, s1 * inner, 1, 0, r, g, b, a);
+        }
+    }
+
     /** Textured square in the plane of {@code ax}/{@code ay} (ground glyphs, decals). */
     public static void plane(PoseStack.Pose pose, VertexConsumer vc, Vec3 ax, Vec3 ay, float size, float r, float g, float b, float a) {
         Matrix4f m = pose.pose();
