@@ -150,7 +150,7 @@ public final class ArcaneSpells {
 
     /** Ultimate: telegraphed pillars of arcane energy crash down across a wide area. */
     public static boolean cataclysm(SpellContext c) {
-        Vec3 center = Magic.aimPoint(c, 26);
+        Vec3 center = Magic.aimFar(c, 28, 17);
         double r = 11 * c.radius;
         Magic.snd(c.level, center, SoundEvents.EVOKER_PREPARE_SUMMON, 1.5f, 0.6f);
         Magic.fx3d(c.level, dev.arcana.entity.FxKind.SIGIL, center.add(0, 0.05, 0), 14.7f * c.radius, 160, dev.arcana.entity.SpellFxEntity.EASE);

@@ -123,7 +123,7 @@ public final class StormSpells {
 
     /** Ultimate: a roaring thunderstorm that rains bolts over a wide area. */
     public static boolean tempest(SpellContext c) {
-        Vec3 center = Magic.aimPoint(c, 26);
+        Vec3 center = Magic.aimFar(c, 28, 17);
         double r = 12 * c.radius;
         Magic.snd(c.level, center, SoundEvents.LIGHTNING_BOLT_THUNDER, 2f, 0.7f);
         Magic.fx3d(c.level, dev.arcana.entity.FxKind.STORM_CLOUD, center.add(0, 14, 0), 13.7f * c.radius, 170, dev.arcana.entity.SpellFxEntity.EASE);

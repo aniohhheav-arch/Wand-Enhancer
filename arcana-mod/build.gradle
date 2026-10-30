@@ -26,6 +26,7 @@ neoForge {
             if (project.hasProperty('quickPlay')) {
                 programArguments = ['--quickPlaySingleplayer', project.property('quickPlay')]
                 systemProperty 'arcana.shots', 'true'
+                if (project.hasProperty('shotMode')) systemProperty 'arcana.shots.mode', project.property('shotMode')
             }
         }
         gameTestServer {

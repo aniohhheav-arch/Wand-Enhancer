@@ -452,7 +452,7 @@ def fx_sigil(pal):
     rnd = random.Random(8)
     m = Model('geometry.arcana.fx_sigil', pal, bounds=(6, 2))
     m.bone('root'); m.bone('glow_outer', 'root'); m.bone('glow_mid', 'root'); m.bone('glow_star', 'root'); m.bone('glow_runes', 'root')
-    for (x, y, z, ang) in ring_pts(0, 0, 0, 12.0, 80): m.box('glow_outer', (x, 0, z), (1.2, 0.5, 1.2), (224, 86, 253))
+    for (x, y, z, ang) in ring_pts(0, 0, 0, 12.0, 120): m.box('glow_outer', (x, 0, z), (0.8, 0.3, 0.8), (224, 86, 253))
     for (x, y, z, ang) in ring_pts(0, 0, 0, 9.5, 56): m.box('glow_mid', (x, 0.1, z), (1.0, 0.5, 1.0), (180, 120, 255))
     pts = ring_pts(0, 0, 0, 9.5, 8)
     for i in range(8):

@@ -113,7 +113,7 @@ public final class Hud implements LayeredDraw.Layer {
         float prog = ClientState.cinematicProgress(pt);
         int rgb = ClientState.cinematicRgb;
         if (ClientState.cinematicKind == 1) {
-            g.fill(0, 0, w, h, Draw.argb(0x8890A0, (int) (95 * s)));
+            g.fill(0, 0, w, h, Draw.argb(0x8890A0, (int) (55 * s)));
         } else {
             int edge = (int) (170 * s);
             g.fillGradient(0, 0, w, edge, Draw.argb(rgb, (int) (170 * s)), 0x00000000);

@@ -108,11 +108,11 @@ public final class SolarSpells {
 
     /** Ultimate: a sun gathers above the target and detonates across a huge radius. */
     public static boolean supernova(SpellContext c) {
-        Vec3 ground = Magic.aimPoint(c, 30);
+        Vec3 ground = Magic.aimFar(c, 32, 19);
         Vec3 core = ground.add(0, 7, 0);
         double r = 14 * c.radius;
         Magic.snd(c.level, core, SoundEvents.BEACON_ACTIVATE, 2f, 0.5f);
-        Magic.fx3d(c.level, dev.arcana.entity.FxKind.SUN, core, 8.5f, 80, dev.arcana.entity.SpellFxEntity.GATHER);
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.SUN, core, 11f, 80, dev.arcana.entity.SpellFxEntity.GATHER);
         EffectManager.run(c.level, 70, age -> {
             double size = 0.4 + age * 0.04;
             for (int i = 0; i < Magic.count(22); i++) {

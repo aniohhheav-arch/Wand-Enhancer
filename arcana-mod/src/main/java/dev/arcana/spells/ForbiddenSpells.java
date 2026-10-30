@@ -130,7 +130,7 @@ public final class ForbiddenSpells {
 
     /** Ultimate: tears open a collapsing rift that unleashes every school's power before it implodes. */
     public static boolean riftCollapse(SpellContext c) {
-        Vec3 center = Magic.aimPoint(c, 28).add(0, 3, 0);
+        Vec3 center = Magic.aimFar(c, 30, 17).add(0, 3, 0);
         double r = 14 * c.radius;
         VoidSpells.well(c, center, r, 120, 0.7, 2f, 28f, true);
         Magic.fx3d(c.level, dev.arcana.entity.FxKind.RIFT, center.subtract(0, 3, 0), 6.5f, 130, dev.arcana.entity.SpellFxEntity.EASE);

@@ -58,6 +58,14 @@ public final class Magic {
         return c.level.clip(new ClipContext(a, b, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, c.player));
     }
 
+    /** Set-piece aim: the aimed point if it is at least {@code min} blocks away horizontally, else a ground point {@code min} blocks ahead. */
+    public static Vec3 aimFar(SpellContext c, double max, double min) {
+        Vec3 p = aimPoint(c, max);
+        if (p.subtract(c.player.position()).multiply(1, 0, 1).length() >= min) return p;
+        Vec3 f = c.player.position().add(flatLook(c.player).scale(min));
+        return new Vec3(f.x, groundY(c.level, f.x, c.player.getY(), f.z), f.z);
+    }
+
     public static Vec3 aimPoint(SpellContext c, double range) {
         return rayBlocks(c, range).getLocation();
     }

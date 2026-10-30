@@ -118,7 +118,7 @@ public final class GlacierSpells {
 
     /** Ultimate: a raging blizzard that grinds enemies down and flings them around its eye. */
     public static boolean blizzard(SpellContext c) {
-        Vec3 center = Magic.aimPoint(c, 24);
+        Vec3 center = Magic.aimFar(c, 26, 17);
         double r = 10 * c.radius;
         Magic.snd(c.level, center, SoundEvents.WIND_CHARGE_BURST.value(), 1.2f, 0.5f);
         Magic.fx3d(c.level, dev.arcana.entity.FxKind.ICE_SPIRE, center, 5.5f * c.radius, 200, dev.arcana.entity.SpellFxEntity.EASE);

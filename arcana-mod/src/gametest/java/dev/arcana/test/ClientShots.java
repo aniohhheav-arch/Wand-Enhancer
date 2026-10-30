@@ -87,7 +87,48 @@ public final class ClientShots {
         STEPS.add(new Step(tick, r));
     }
 
+    private static void bossDebug() {
+        Minecraft mc = Minecraft.getInstance();
+        int n = 0;
+        for (var e : mc.level.entitiesForRendering()) {
+            if (e instanceof ArchmageEntity b) {
+                n++;
+                ArcanaMod.LOGGER.info("[arcana-shots] boss#{} pos={} dist={} invisible={} alive={} health={}", n, b.position(), b.distanceTo(mc.player), b.isInvisible(), b.isAlive(), b.getHealth());
+            }
+        }
+        ArcanaMod.LOGGER.info("[arcana-shots] bosses seen by client: {}", n);
+    }
+
     static {
+        if ("boss".equals(System.getProperty("arcana.shots.mode"))) {
+            at(40, () -> server(sp -> {
+                sp.setGameMode(GameType.SURVIVAL);
+                ServerLevel l = sp.serverLevel();
+                l.setDayTime(6000);
+                for (var old : l.getEntitiesOfClass(ArchmageEntity.class, sp.getBoundingBox().inflate(200))) old.discard();
+                int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0);
+                sp.teleportTo(l, 0.5, y, 0.5, 0f, 4f);
+                sp.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20000, 5, false, false));
+                ArchmageEntity boss = ModEntities.ARCHMAGE.get().create(l);
+                boss.moveTo(0.5, l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 7), 7.5, 180f, 0f);
+                boss.setNoAi(true);
+                l.addFreshEntity(boss);
+            }));
+            at(70, ClientShots::bossDebug);
+            at(80, () -> shot("40_boss_close_idle"));
+            at(84, () -> Minecraft.getInstance().options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+            at(96, () -> shot("41_boss_from_front"));
+            at(100, () -> Minecraft.getInstance().options.setCameraType(CameraType.FIRST_PERSON));
+            at(110, () -> server(sp -> sp.serverLevel().getEntitiesOfClass(ArchmageEntity.class, sp.getBoundingBox().inflate(60)).forEach(b -> { b.setNoAi(false); b.hurt(sp.damageSources().genericKill(), 1000f); })));
+            at(150, () -> shot("42_boss_death_a"));
+            at(200, () -> shot("43_boss_death_b"));
+            at(235, () -> shot("44_boss_death_c"));
+            at(250, () -> {
+                ArcanaMod.LOGGER.info("[arcana-shots] done");
+                Minecraft.getInstance().stop();
+            });
+            return;
+        }
         at(40, () -> server(sp -> {
             sp.setGameMode(GameType.SURVIVAL);
             ServerLevel l = sp.serverLevel();

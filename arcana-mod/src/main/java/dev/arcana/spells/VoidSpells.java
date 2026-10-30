@@ -150,9 +150,9 @@ public final class VoidSpells {
 
     /** Ultimate: a black hole with an accretion disc that devours everything nearby and collapses in a blast. */
     public static boolean eventHorizon(SpellContext c) {
-        Vec3 center = Magic.aimPoint(c, 26).add(0, 2.5, 0);
+        Vec3 center = Magic.aimFar(c, 28, 17).add(0, 4.5, 0);
         well(c, center, 12 * c.radius, 140, 0.55, 2.5f, 16f, true);
-        Magic.fx3d(c.level, dev.arcana.entity.FxKind.BLACK_HOLE, center, 12f * c.radius, 160, dev.arcana.entity.SpellFxEntity.EASE);
+        Magic.fx3d(c.level, dev.arcana.entity.FxKind.BLACK_HOLE, center, 7.5f * c.radius, 160, dev.arcana.entity.SpellFxEntity.EASE);
         return true;
     }
 
