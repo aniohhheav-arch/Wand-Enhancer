@@ -494,6 +494,37 @@ def make_gauntlet_animations():
         "animation_length": 0.6,
         "bones": {"hand": {"position": {"0.0": [0, 0, 0], "0.1": [0.4, 0, 0], "0.2": [-0.4, 0.2, 0], "0.3": [0.3, -0.2, 0], "0.6": [0, 0, 0]}}},
     }
+    def kf(frames):
+        return {str(k): v for k, v in frames}
+    fingers4 = ("index", "middle", "ring", "pinky")
+    anims["animation.infinity_gauntlet.power_charge"] = {"loop": True, "animation_length": 0.6, "bones": {
+        **{f: {"rotation": [f"-95 + math.sin(query.anim_time * 3000 + {i * 60}) * 3", 0, 0]} for i, f in enumerate(fingers4)},
+        "thumb": {"rotation": [-40, 0, 50]},
+        "hand": {"position": ["math.sin(query.anim_time * 4000) * 0.35", "math.cos(query.anim_time * 3600) * 0.35", 0],
+                 "rotation": [-12, 0, 0]},
+        "stone_power": {"scale": ["1.8 + math.sin(query.anim_time * 1800) * 0.6"] * 3}}}
+    anims["animation.infinity_gauntlet.power_fire"] = {"animation_length": 0.8, "bones": {
+        "hand": {"rotation": kf([(0.0, [-12, 0, 0]), (0.05, [18, 0, 0]), (0.25, [-6, 0, 0]), (0.8, [0, 0, 0])]),
+                 "position": kf([(0.0, [0, 0, 0]), (0.05, [0, 0.6, 1.6]), (0.3, [0, 0, 0.3]), (0.8, [0, 0, 0])])},
+        **{f: {"rotation": kf([(0.0, [-95, 0, 0]), (0.06, [25, 0, 0]), (0.8, [0, 0, 0])])} for f in fingers4},
+        "stone_power": {"scale": kf([(0.0, [2.6, 2.6, 2.6]), (0.3, [1.2, 1.2, 1.2]), (0.8, [1, 1, 1])])}}}
+    anims["animation.infinity_gauntlet.power_punch"] = {"animation_length": 0.9, "bones": {
+        "hand": {"position": kf([(0.0, [0, 0, 0]), (0.2, [0, -1.2, -3.5]), (0.32, [0, 0.4, 3.2]), (0.5, [0, 0, 2.2]), (0.9, [0, 0, 0])]),
+                 "rotation": kf([(0.0, [0, 0, 0]), (0.2, [-25, 15, 0]), (0.32, [10, -5, 0]), (0.9, [0, 0, 0])])},
+        **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.15, [-100, 0, 0]), (0.7, [-100, 0, 0]), (0.9, [0, 0, 0])])} for f in fingers4},
+        "thumb": {"rotation": kf([(0.0, [0, 0, 0]), (0.15, [-50, 0, 60]), (0.7, [-50, 0, 60]), (0.9, [0, 0, 0])])}}}
+    anims["animation.infinity_gauntlet.power_slam"] = {"animation_length": 1.0, "bones": {
+        "hand": {"rotation": kf([(0.0, [0, 0, 0]), (0.3, [-60, 0, 0]), (0.45, [50, 0, 0]), (0.6, [35, 0, 0]), (1.0, [0, 0, 0])]),
+                 "position": kf([(0.0, [0, 0, 0]), (0.3, [0, 2, -1]), (0.45, [0, -2.5, 1.5]), (1.0, [0, 0, 0])])},
+        **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.2, [-100, 0, 0]), (0.8, [-100, 0, 0]), (1.0, [0, 0, 0])])} for f in fingers4}}}
+    anims["animation.infinity_gauntlet.power_spread"] = {"animation_length": 1.6, "bones": {
+        "hand": {"rotation": kf([(0.0, [0, 0, 0]), (0.4, [-30, 0, 25]), (1.3, [-35, 0, 30]), (1.4, [30, 0, -20]), (1.6, [0, 0, 0])])},
+        **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.4, [25, 0, 0]), (1.3, [30, 0, 0]), (1.4, [-90, 0, 0]), (1.6, [0, 0, 0])])} for f in fingers4},
+        "stone_power": {"scale": kf([(0.0, [1, 1, 1]), (1.3, [3, 3, 3]), (1.45, [1, 1, 1])])}}}
+    anims["animation.infinity_gauntlet.power_raise"] = {"animation_length": 1.0, "bones": {
+        "hand": {"rotation": kf([(0.0, [0, 0, 0]), (0.25, [-55, 0, 0]), (0.75, [-60, 0, 0]), (1.0, [0, 0, 0])]),
+                 "position": kf([(0.0, [0, 0, 0]), (0.25, [0, 2.5, 0]), (1.0, [0, 0, 0])])},
+        **{f: {"rotation": kf([(0.0, [0, 0, 0]), (0.2, [15, 0, 0]), (0.8, [15, 0, 0]), (1.0, [0, 0, 0])])} for f in fingers4}}}
     for stone in STONES:
         anims[f"animation.infinity_gauntlet.activate_{stone}"] = {
             "animation_length": 0.9,
@@ -815,6 +846,119 @@ def make_breach():
     save(Image.fromarray((f * 255).astype(np.uint8), "RGBA"), "textures", "block", "chamber_floor.png")
 
 
+def make_power():
+    """Power Stone: orb, gravity singularity and planetary core models; impact particle sprites."""
+    PURPLE = (170, 60, 255)
+    VIOLET = (110, 30, 200)
+    PINK = (240, 140, 255)
+    DARK = (24, 10, 40)
+    WHITE = (250, 240, 255)
+
+    # power orb: hot core, three counter-rotating shells, six spikes
+    p = BoxUvPainter(128, 64)
+    bones = [bone("root", [0, 0, 0]), bone("core", [0, 0, 0], [p.cube([-2.5, -2.5, -2.5], [5, 5, 5], WHITE, glow=True, seed=500)], parent="root")]
+    for j, (rad, col) in enumerate(((4.5, PURPLE), (5.5, PINK), (6.5, VIOLET))):
+        segs = []
+        for k in range(12):
+            a = 2 * math.pi * k / 12
+            cx, cy = math.cos(a) * rad, math.sin(a) * rad
+            c = p.cube([cx - 0.4, cy - 1.0, -0.4], [0.8, 2.0, 0.8], col, glow=True, seed=510 + j * 20 + k)
+            c["pivot"] = [cx, cy, 0]
+            c["rotation"] = [0, 0, math.degrees(a)]
+            segs.append(c)
+        bones.append(bone(f"shell_{j}", [0, 0, 0], segs, parent="root", rotation=[j * 60, j * 35, 0]))
+    spikes = []
+    for k, (dx, dy, dz) in enumerate(((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1))):
+        size = [0.8 + abs(dx) * 3, 0.8 + abs(dy) * 3, 0.8 + abs(dz) * 3]
+        spikes.append(p.cube([dx * 3.5 - size[0] / 2, dy * 3.5 - size[1] / 2, dz * 3.5 - size[2] / 2], size, PINK, glow=True, seed=580 + k))
+    bones.append(bone("spikes", [0, 0, 0], spikes, parent="root"))
+    write_geo("power_orb", "entity", p, bones, (1.5, 1.5))
+    write_anims("power_orb", "entity", {
+        "animation.power_orb.idle": {"loop": True, "animation_length": 2.0, "bones": {
+            "shell_0": {"rotation": [0, "query.anim_time * 360", "query.anim_time * 180"]},
+            "shell_1": {"rotation": ["query.anim_time * -270", 0, "query.anim_time * 200"]},
+            "shell_2": {"rotation": ["query.anim_time * 150", "query.anim_time * -300", 0]},
+            "spikes": {"rotation": ["query.anim_time * 90", "query.anim_time * 140", 0],
+                       "scale": ["1 + math.sin(query.anim_time * 720) * 0.25"] * 3},
+            "core": {"scale": ["1 + math.sin(query.anim_time * 1080) * 0.15"] * 3}}},
+        "animation.power_orb.dive": {"loop": True, "animation_length": 0.5, "bones": {
+            "shell_0": {"rotation": [0, "query.anim_time * 1440", 0], "scale": [0.6, 0.6, 1.8]},
+            "shell_1": {"rotation": [0, 0, "query.anim_time * -1440"], "scale": [0.6, 0.6, 1.8]},
+            "spikes": {"scale": [0.5, 0.5, 2.5]}}},
+    })
+
+    # gravity singularity: black core, glowing accretion disk, orbiting rubble
+    p = BoxUvPainter(256, 128)
+    bones = [bone("root", [0, 0, 0]), bone("core", [0, 0, 0], [p.cube([-6, -6, -6], [12, 12, 12], DARK, seed=600),
+                                                              p.cube([-6.6, -6.6, -6.6], [13.2, 13.2, 13.2], PURPLE, glow=True, seed=601)],
+                                      parent="root")]
+    disk = []
+    for k in range(40):
+        a = 2 * math.pi * k / 40
+        for r, col in ((11, PINK), (15, PURPLE), (19, VIOLET)):
+            cx, cz = math.cos(a) * r, math.sin(a) * r
+            c = p.cube([cx - 1.4, -0.4, cz - 0.6], [2.8, 0.8, 1.2], col, glow=True, seed=610 + k * 3 + r)
+            c["pivot"] = [cx, 0, cz]
+            c["rotation"] = [0, -math.degrees(a), 0]
+            disk.append(c)
+    bones.append(bone("disk", [0, 0, 0], disk, parent="root", rotation=[18, 0, 8]))
+    rubble = []
+    for k in range(10):
+        a = 2 * math.pi * k / 10
+        cx, cy, cz = math.cos(a) * 24, (RNG.random() - 0.5) * 12, math.sin(a) * 24
+        rubble.append(p.cube([cx - 1.5, cy - 1.5, cz - 1.5], [3, 3, 3], (80, 70, 90), seed=700 + k))
+    bones.append(bone("rubble", [0, 0, 0], rubble, parent="root"))
+    write_geo("gravity_core", "entity", p, bones, (5, 5))
+    write_anims("gravity_core", "entity", {
+        "animation.gravity_core.idle": {"loop": True, "animation_length": 4.0, "bones": {
+            "disk": {"rotation": [18, "query.anim_time * 180", 8]},
+            "rubble": {"rotation": [0, "query.anim_time * -90", "math.sin(query.anim_time * 90) * 15"]},
+            "core": {"scale": ["1 + math.sin(query.anim_time * 540) * 0.06"] * 3, "rotation": ["query.anim_time * 45", "query.anim_time * 70", 0]}}},
+    })
+
+    # planetary core: blazing sphere-ish block cluster wrapped in three great rings
+    p = BoxUvPainter(256, 128)
+    core = [p.cube([-8, -8, -8], [16, 16, 16], WHITE, glow=True, seed=800),
+            p.cube([-10, -5, -5], [20, 10, 10], PINK, glow=True, seed=801),
+            p.cube([-5, -10, -5], [10, 20, 10], PINK, glow=True, seed=802),
+            p.cube([-5, -5, -10], [10, 10, 20], PINK, glow=True, seed=803)]
+    bones = [bone("root", [0, 0, 0]), bone("core", [0, 0, 0], core, parent="root")]
+    for j, rad in enumerate((16, 21, 26)):
+        segs = []
+        for k in range(28):
+            a = 2 * math.pi * k / 28
+            cx, cy = math.cos(a) * rad, math.sin(a) * rad
+            c = p.cube([cx - 0.7, cy - 2.4, -0.7], [1.4, 4.8, 1.4], PURPLE if j != 1 else WHITE, glow=True, seed=820 + j * 40 + k)
+            c["pivot"] = [cx, cy, 0]
+            c["rotation"] = [0, 0, math.degrees(a)]
+            segs.append(c)
+        bones.append(bone(f"ring_{j}", [0, 0, 0], segs, parent="root", rotation=[j * 55, j * 30, 0]))
+    write_geo("planetary_core", "entity", p, bones, (6, 6))
+    write_anims("planetary_core", "entity", {
+        "animation.planetary_core.idle": {"loop": True, "animation_length": 2.0, "bones": {
+            "ring_0": {"rotation": [0, 0, "query.anim_time * 360"]},
+            "ring_1": {"rotation": [55, "query.anim_time * -540", 0]},
+            "ring_2": {"rotation": ["query.anim_time * 270", 30, 0]},
+            "core": {"rotation": ["query.anim_time * 200", "query.anim_time * 260", 0],
+                     "scale": ["1 + math.sin(query.anim_time * 1440) * 0.08"] * 3}}},
+    })
+
+    # impact sprites
+    r, ang = radial(16)
+    drop = np.clip(1 - (r * 1.3 + np.maximum(0, np.linspace(-1, 1, 16)[:, None]) * 0.4), 0, 1) ** 0.6
+    save(gray_alpha(drop), "textures", "particle", "droplet.png")
+    n = fbm(16, 900, 3, 2)
+    splat = np.clip((0.75 + 0.3 * (n - 0.5) * 2 - r) / 0.25, 0, 1)
+    save(gray_alpha(splat, 0.8 + 0.2 * n), "textures", "particle", "splat.png")
+    lin = np.linspace(-1, 1, 16)
+    x, y = np.meshgrid(lin, lin)
+    chunk = ((np.abs(x) < 0.6) & (np.abs(y) < 0.6)).astype(float)
+    save(gray_alpha(chunk, 0.85 + 0.15 * fbm(16, 901, 2, 2)), "textures", "particle", "chunk.png")
+    for name, sprites in {"impact_droplet": ["droplet"], "impact_splat": ["splat"], "impact_chunk": ["chunk"]}.items():
+        with open(path("particles", f"{name}.json"), "w") as f:
+            json.dump({"textures": [f"infinitygauntlet:{s}" for s in sprites]}, f, indent=2)
+
+
 # --------------------------------------------------------------------------- sounds
 
 SR = 44100
@@ -1058,6 +1202,66 @@ def make_sounds():
     add("specimen_lost", sweep(d, 900, 90, 0.5) * env(d, 0.01, 1.1) * 0.4 + crackle(d, 160, 0.002, seed=57) * env(d, 0.01, 0.8, 2) * 0.6,
         "Specimen signal lost")
 
+    # Power Stone -----------------------------------------------------------
+    def rumble(sec, lo=40, hi=220, seed=0):
+        return lowpass(noise(sec), hi) * 4
+
+    d = 1.0
+    add("power_charge", sum(sweep(d, f, f * 4, 2.2) * (0.3 / (i + 1)) for i, f in enumerate((55, 110, 165))) * env(d, 0.9, 0.1, 1)
+        + crackle(d, 120, 0.002, seed=61) * env(d, 0.8, 0.1, 1) * 0.6 + rumble(d) * env(d, 0.9, 0.1, 1) * 0.5, "Power gathers")
+    d = 1.6
+    add("power_beam", (sweep(d, 70, 60) * 0.5 + np.sign(np.sin(2 * np.pi * np.cumsum(140 + 30 * np.sin(2 * np.pi * 9 * t_axis(d))) / SR)) * 0.15
+                       + bandpass(noise(d), 300, 5000) * 0.5 + crackle(d, 300, 0.0015, seed=62) * 0.7) * env(d, 0.01, 0.6, 1.2), "Power beam roars")
+    d = 1.4
+    add("power_explosion", boom(d, 70, 22) * 1.6 + crackle(d, 500, 0.001, seed=63) * env(d, 0.001, 0.5, 2) + bandpass(noise(d), 200, 3000) * env(d, 0.005, 1.0, 2) * 0.8,
+        "Power explosion")
+    d = 0.7
+    add("power_punch_impact", boom(d, 110, 30) * 1.8 + bandpass(noise(d), 100, 2500) * env(d, 0.001, 0.25, 3) * 1.2 + crackle(d, 600, 0.0008, seed=64) * env(d, 0.001, 0.2, 2),
+        "Cosmic punch lands")
+    d = 0.5
+    add("power_whoosh", bandpass(noise(d), 400, 5000) * env(d, 0.25, 0.2, 1) * 0.8 + sweep(d, 200, 900, 1.5) * env(d, 0.3, 0.2) * 0.2, "Rushing air")
+    d = 2.2
+    add("power_ground_crack", (crackle(d, 160, 0.004, seed=65) * 1.2 + rumble(d, hi=160) * 0.8) * env(d, 0.01, 1.8, 1.3) + boom(d, 55, 25), "Ground cracks apart")
+    d = 3.0
+    add("power_nova_charge", sum(sweep(d, f, f * 5, 2.5) * (0.25 / (i + 1)) for i, f in enumerate((40, 80, 120, 160))) * env(d, 2.8, 0.1, 1)
+        + rumble(d) * env(d, 2.8, 0.1, 1) * 0.7 + crackle(d, 80, seed=66) * env(d, 2.5, 0.2, 1) * 0.6, "Energy builds to breaking point")
+    d = 3.0
+    add("power_nova_release", boom(d, 60, 18) * 2.0 + bandpass(noise(d), 100, 8000) * env(d, 0.001, 2.0, 2) * 1.2 + crackle(d, 300, 0.002, seed=67) * env(d, 0.01, 1.5, 2),
+        "Energy nova detonates")
+    d = 1.2
+    add("power_launch", sweep(d, 300, 1400, 0.6) * env(d, 0.01, 1.0) * 0.4 + bandpass(noise(d), 1000, 7000) * env(d, 0.02, 0.9) * 0.4, "Energy launches")
+    d = 2.0
+    whistle = sweep(d, 2400, 500, 1.0) * env(d, 0.2, 0.3) * 0.35 + bandpass(noise(d), 800, 4000) * env(d, 1.0, 0.2, 1) * 0.4
+    add("power_meteor", whistle, "Meteor screams down")
+    d = 1.0
+    add("power_overload", sweep(d, 80, 300, 1.5) * env(d, 0.05, 0.8) * 0.5 + crackle(d, 250, 0.0015, seed=68) * 0.8 + boom(d, 90, 50) * 0.4, "Power overloads")
+    d = 0.4
+    add("power_hit", boom(d, 140, 60) * 1.2 + crackle(d, 400, 0.001, seed=69) * env(d, 0.001, 0.2, 2), "Overloaded hit")
+    d = 4.0
+    tt = t_axis(d)
+    add("power_gravity", (np.sin(2 * np.pi * np.cumsum(32 + 14 * tt / d) / SR) * 0.6 + rumble(d, hi=120) * 0.8 + crackle(d, 30, 0.004, seed=70) * 0.4) * env(d, 1.0, 0.4, 1),
+        "A singularity descends")
+    d = 0.8
+    add("power_orb", sweep(d, 600, 1800, 1.0) * env(d, 0.02, 0.6) * 0.3 + crackle(d, 100, seed=71) * 0.5 + np.sin(2 * np.pi * 220 * t_axis(d)) * env(d, 0.01, 0.7) * 0.3,
+        "Power orb forms")
+    d = 5.0
+    add("power_planetary_charge", sum(sweep(d, f, f * 6, 3.0) * (0.22 / (i + 1)) for i, f in enumerate((30, 45, 60, 90, 120))) * env(d, 4.8, 0.15, 1)
+        + rumble(d, hi=140) * env(d, 4.5, 0.2, 1) + crackle(d, 150, 0.002, seed=72) * env(d, 4.0, 0.3, 1) * 0.7, "A planet's worth of force gathers")
+    d = 5.0
+    add("power_planetary_impact", boom(d, 45, 14) * 2.4 + bandpass(noise(d), 60, 6000) * env(d, 0.002, 4.0, 2) * 1.4
+        + fit(np.concatenate([np.zeros(int(SR * 0.7)), boom(2.0, 60, 25) * 1.5]), d) + fit(np.concatenate([np.zeros(int(SR * 1.5)), boom(2.0, 50, 22) * 1.3]), d),
+        "Planetary impact")
+    d = 0.35
+    add("impact_flesh", lowpass(noise(d), 900) * env(d, 0.001, 0.25, 3) * 2 + boom(d, 160, 70) * 0.6, "Visceral impact")
+    d = 0.3
+    add("impact_bone", crackle(d, 900, 0.0006, seed=73) * env(d, 0.001, 0.2, 3) * 1.5 + bandpass(noise(d), 2000, 7000) * env(d, 0.001, 0.08, 3), "Bones crack")
+    d = 0.6
+    add("head_pop", np.sin(2 * np.pi * np.cumsum(np.linspace(300, 120, int(SR * d))) / SR) * env(d, 0.001, 0.5) * 0.5 + lowpass(noise(d), 1500) * env(d, 0.001, 0.15, 3) * 1.5,
+        "Head pops off")
+    d = 2.0
+    add("power_finisher", sum(sweep(d, f, f * 0.25, 0.4) * (0.3 / (i + 1)) for i, f in enumerate((400, 600, 900))) * env(d, 0.01, 1.9)
+        + fit(np.concatenate([np.zeros(int(SR * 0.05)), boom(1.9, 60, 18) * 2]), d), "Finishing blow")
+
     # Gauntlet ---------------------------------------------------------------
     d = 2.2
     charge = sum(sweep(d, f, f * 3, 2.0) * (0.35 / (i + 1)) for i, f in enumerate((70, 140, 210, 280)))
@@ -1091,6 +1295,7 @@ def main():
     make_gauntlet_animations()
     make_nexus()
     make_breach()
+    make_power()
     make_sounds()
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "generated_subtitles.json"), "w") as f:
         json.dump(SUBTITLES, f, indent=2, sort_keys=True)

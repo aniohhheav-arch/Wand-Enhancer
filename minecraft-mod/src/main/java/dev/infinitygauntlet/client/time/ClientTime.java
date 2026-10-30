@@ -21,16 +21,19 @@ public final class ClientTime {
     private static final class State {
         float scale;
         float acc;
+        boolean visible = true;
     }
 
     private static final Map<Integer, State> STATES = new HashMap<>();
 
-    public static void set(int entityId, float scale) {
+    public static void set(int entityId, float scale, boolean visible) {
         if (scale >= 1f) {
             STATES.remove(entityId);
             return;
         }
-        STATES.computeIfAbsent(entityId, id -> new State()).scale = scale;
+        State state = STATES.computeIfAbsent(entityId, id -> new State());
+        state.scale = scale;
+        state.visible = visible;
         ClientHistory.keepAlive(60);
     }
 
@@ -39,8 +42,13 @@ public final class ClientTime {
         return s == null ? 1f : s.scale;
     }
 
+    /** Entities whose time is slowed by a visible (Time Stone) source, for the overlay. */
     public static void forEach(BiConsumer<Integer, Float> action) {
-        STATES.forEach((id, s) -> action.accept(id, s.scale));
+        STATES.forEach((id, s) -> {
+            if (s.visible) {
+                action.accept(id, s.scale);
+            }
+        });
     }
 
     public static boolean isEmpty() {

@@ -44,6 +44,7 @@ public final class TimeManager {
         final List<float[]> sources = new ArrayList<>(2);
         float effective = 1f;
         float sent = 1f;
+        boolean sentVisible = true;
         float acc;
 
         Entry(Entity entity) {
@@ -56,6 +57,14 @@ public final class TimeManager {
 
     /** Applies a time scale to {@code entity} for {@code ticks} ticks (merged with other sources: the slowest wins). */
     public static void apply(Entity entity, float scale, int ticks) {
+        apply(entity, scale, ticks, false);
+    }
+
+    /**
+     * As above; a {@code quiet} source slows time without the Time Stone's clock-ring overlay (Power Stone hit-stop and
+     * slow motion). The overlay shows while any non-quiet source is live.
+     */
+    public static void apply(Entity entity, float scale, int ticks, boolean quiet) {
         if (entity.level().isClientSide || ticks <= 0) {
             return;
         }
@@ -67,13 +76,13 @@ public final class TimeManager {
         float s = Math.max(0f, Math.min(1f, scale));
         long expires = now + ticks;
         for (float[] src : entry.sources) {
-            if (src[0] == s) {
+            if (src[0] == s && src[2] == (quiet ? 1 : 0)) {
                 src[1] = Math.max(src[1], expires);
                 refresh(entry);
                 return;
             }
         }
-        entry.sources.add(new float[]{s, expires});
+        entry.sources.add(new float[]{s, expires, quiet ? 1 : 0});
         refresh(entry);
     }
 
@@ -160,10 +169,12 @@ public final class TimeManager {
             }
             entry.sources.removeIf(src -> src[1] <= now);
             refresh(entry);
-            if (entry.effective != entry.sent || resync && entry.effective < 1f) {
+            boolean visible = entry.sources.stream().anyMatch(src -> src[2] == 0);
+            if (entry.effective != entry.sent || visible != entry.sentVisible || resync && entry.effective < 1f) {
                 entry.sent = entry.effective;
+                entry.sentVisible = visible;
                 if (entity.level() instanceof ServerLevel level) {
-                    ModNetwork.sendNear(level, entity.position(), 160, new TimeScalePayload(entity.getId(), entry.effective));
+                    ModNetwork.sendNear(level, entity.position(), 160, new TimeScalePayload(entity.getId(), entry.effective, visible));
                 }
             }
             if (entry.sources.isEmpty()) {

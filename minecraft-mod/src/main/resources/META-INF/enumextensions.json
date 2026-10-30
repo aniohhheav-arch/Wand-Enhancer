@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "INFINITYGAUNTLET_POWER",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "dev/infinitygauntlet/client/power/PowerArmPose",
+        "field": "PROXY"
+      }
+    }
+  ]
+}

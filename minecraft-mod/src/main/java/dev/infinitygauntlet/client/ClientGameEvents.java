@@ -30,6 +30,7 @@ public final class ClientGameEvents {
         }
         if (!mc.isPaused()) {
             ClientVfxManager.tick();
+            dev.infinitygauntlet.client.vfx.PowerVfx.tick();
             CameraEffects.tick();
             ClientCooldowns.tick();
             dev.infinitygauntlet.client.time.ClientHistory.tick();
@@ -88,6 +89,7 @@ public final class ClientGameEvents {
         Minecraft mc = Minecraft.getInstance();
         float pt = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         ClientVfxManager.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
+        dev.infinitygauntlet.client.vfx.PowerVfx.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
         dev.infinitygauntlet.client.time.TimeOverlay.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
         dev.infinitygauntlet.client.nexus.NexusLinkRenderer.render(event.getPoseStack(), mc.renderBuffers().bufferSource(), event.getCamera(), pt);
     }
@@ -116,6 +118,10 @@ public final class ClientGameEvents {
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientVfxManager.clear();
+        dev.infinitygauntlet.client.vfx.PowerVfx.clear();
+        dev.infinitygauntlet.client.power.CombatClient.clear();
+        dev.infinitygauntlet.client.power.CinematicCamera.clear();
+        dev.infinitygauntlet.client.power.PowerPoses.clear();
         CameraEffects.reset();
         ClientCooldowns.clear();
         ClientEffects.clear();

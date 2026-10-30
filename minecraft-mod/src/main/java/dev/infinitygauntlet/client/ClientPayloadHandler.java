@@ -24,7 +24,7 @@ public final class ClientPayloadHandler {
     }
 
     public static void timeScale(TimeScalePayload payload) {
-        ClientTime.set(payload.entityId(), payload.scale());
+        ClientTime.set(payload.entityId(), payload.scale(), payload.visible());
     }
 
     public static void possession(dev.infinitygauntlet.network.PossessionStatePayload payload) {
@@ -41,6 +41,18 @@ public final class ClientPayloadHandler {
 
     public static void glitch(dev.infinitygauntlet.network.GlitchPayload payload) {
         dev.infinitygauntlet.client.breach.RealityDistortion.glitch(payload);
+    }
+
+    public static void combat(dev.infinitygauntlet.network.CombatPayload payload) {
+        dev.infinitygauntlet.client.power.CombatClient.handle(payload);
+    }
+
+    public static void cinematic(dev.infinitygauntlet.network.CinematicPayload payload) {
+        dev.infinitygauntlet.client.power.CinematicCamera.start(payload);
+    }
+
+    public static void powerPose(dev.infinitygauntlet.network.PowerPosePayload payload) {
+        dev.infinitygauntlet.client.power.PowerPoses.set(payload);
     }
 
     public static void cooldowns(CooldownSyncPayload payload) {

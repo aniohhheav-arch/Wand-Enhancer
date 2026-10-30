@@ -57,6 +57,11 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue POSSESSION_CREEPER_DETONATION;
     public static final ModConfigSpec.IntValue NEURAL_OVERRIDE_SECONDS;
 
+    public static final ModConfigSpec.DoubleValue POWER_DAMAGE_MULTIPLIER;
+    public static final ModConfigSpec.BooleanValue POWER_TERRAIN_DAMAGE;
+    public static final ModConfigSpec.BooleanValue POWER_DISMEMBERMENT;
+    public static final ModConfigSpec.BooleanValue POWER_SLOW_MOTION;
+
     private static final Map<String, ModConfigSpec.IntValue> COOLDOWNS = new HashMap<>();
 
     static {
@@ -124,6 +129,16 @@ public final class ServerConfig {
         POSSESSION_CREEPER_DETONATION = b.comment("Whether a possessed creeper can be detonated (explosions follow the mobGriefing rule).")
                 .define("creeperDetonation", true);
         NEURAL_OVERRIDE_SECONDS = b.defineInRange("neuralOverrideSeconds", 10, 1, 120);
+        b.pop();
+
+        b.push("power_stone");
+        POWER_DAMAGE_MULTIPLIER = b.comment("Multiplier for all Power Stone damage.").defineInRange("damageMultiplier", 1.0, 0.0, 20.0);
+        POWER_TERRAIN_DAMAGE = b.comment("Whether Power Stone impacts blast craters into the terrain (also requires the mobGriefing rule).")
+                .define("terrainDamage", false);
+        POWER_DISMEMBERMENT = b.comment("Whether finishing blows can knock the heads off zombies, skeletons, creepers and piglins.")
+                .define("dismemberment", true);
+        POWER_SLOW_MOTION = b.comment("Whether big impacts briefly slow time around them (hit-stop and slow motion).")
+                .define("slowMotion", true);
         b.pop();
 
         b.comment("Ability cooldowns in ticks (20 ticks = 1 second).").push("cooldowns");

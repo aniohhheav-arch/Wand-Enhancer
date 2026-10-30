@@ -163,7 +163,9 @@ public class InfinityGauntletItem extends Item implements GeoItem {
             return;
         }
         long id = GeoItem.getOrAssignId(stack, player.serverLevel());
-        triggerAnim(player, id, MAIN_CONTROLLER, "cast");
+        if (stone != InfinityStone.POWER) {
+            triggerAnim(player, id, MAIN_CONTROLLER, "cast"); // Power Stone abilities trigger their own hand animation
+        }
         triggerAnim(player, id, STONE_CONTROLLER, "activate_" + stone.getSerializedName());
     }
 
@@ -182,6 +184,11 @@ public class InfinityGauntletItem extends Item implements GeoItem {
                 .triggerableAnim("charge", CHARGE)
                 .triggerableAnim("snap", SNAP)
                 .triggerableAnim("overload", OVERLOAD);
+        for (String power : new String[]{"power_charge", "power_fire", "power_punch", "power_slam", "power_spread", "power_raise"}) {
+            main.triggerableAnim(power, power.equals("power_charge")
+                    ? RawAnimation.begin().thenPlayXTimes("animation.infinity_gauntlet." + power, 5)
+                    : RawAnimation.begin().thenPlay("animation.infinity_gauntlet." + power));
+        }
         AnimationController<InfinityGauntletItem> stones = new AnimationController<>(this, STONE_CONTROLLER, 0, state -> PlayState.STOP);
         for (InfinityStone stone : InfinityStone.values()) {
             stones.triggerableAnim("activate_" + stone.getSerializedName(),

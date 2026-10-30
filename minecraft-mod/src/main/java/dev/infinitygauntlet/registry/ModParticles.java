@@ -23,6 +23,10 @@ public final class ModParticles {
     public static final DeferredHolder<ParticleType<?>, ParticleType<EnergyParticleOptions>> DIMENSIONAL_SMOKE = register("dimensional_smoke");
     public static final DeferredHolder<ParticleType<?>, ParticleType<EnergyParticleOptions>> ENERGY_SHARD = register("energy_shard");
 
+    public static final DeferredHolder<ParticleType<?>, ParticleType<EnergyParticleOptions>> IMPACT_DROPLET = register("impact_droplet");
+    public static final DeferredHolder<ParticleType<?>, ParticleType<EnergyParticleOptions>> IMPACT_SPLAT = register("impact_splat");
+    public static final DeferredHolder<ParticleType<?>, ParticleType<EnergyParticleOptions>> IMPACT_CHUNK = register("impact_chunk");
+
     private static DeferredHolder<ParticleType<?>, ParticleType<EnergyParticleOptions>> register(String name) {
         return REGISTER.register(name, () -> new ParticleType<EnergyParticleOptions>(false) {
             @Override

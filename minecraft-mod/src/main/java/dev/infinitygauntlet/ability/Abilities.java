@@ -56,6 +56,16 @@ public final class Abilities {
         register(new ChronologicalBarrierAbility());
         register(new TimeFractureAbility());
 
+        register(new dev.infinitygauntlet.ability.power.PowerBeamAbility());
+        register(new dev.infinitygauntlet.ability.power.CosmicPunchAbility());
+        register(new dev.infinitygauntlet.ability.power.GroundbreakerAbility());
+        register(new dev.infinitygauntlet.ability.power.EnergyNovaAbility());
+        register(new dev.infinitygauntlet.ability.power.CosmicArtilleryAbility());
+        register(new dev.infinitygauntlet.ability.power.PowerOverloadAbility());
+        register(new dev.infinitygauntlet.ability.power.GravityImpactAbility());
+        register(new dev.infinitygauntlet.ability.power.CosmicBarrageAbility());
+        register(new dev.infinitygauntlet.ability.power.PlanetaryForceAbility());
+
         register(new dev.infinitygauntlet.ability.combo.RemoteConsciousnessAbility());
         register(new dev.infinitygauntlet.ability.combo.RealityBreachAbility());
     }

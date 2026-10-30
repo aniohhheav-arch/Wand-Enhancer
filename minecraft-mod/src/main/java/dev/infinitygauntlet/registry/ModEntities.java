@@ -63,6 +63,15 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.breach.SpecimenEntity>> SPECIMEN =
             register("specimen", dev.infinitygauntlet.breach.SpecimenEntity::new, 1.5f, 2.0f, 8, 1);
 
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.entity.power.PowerOrbEntity>> POWER_ORB =
+            register("power_orb", dev.infinitygauntlet.entity.power.PowerOrbEntity::new, 0.8f, 0.8f, 10, 1);
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.entity.power.GravityCoreEntity>> GRAVITY_CORE =
+            register("gravity_core", dev.infinitygauntlet.entity.power.GravityCoreEntity::new, 2.0f, 2.0f, 12, 1);
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.entity.power.PlanetaryCoreEntity>> PLANETARY_CORE =
+            register("planetary_core", dev.infinitygauntlet.entity.power.PlanetaryCoreEntity::new, 2.0f, 2.0f, 16, 1);
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.entity.power.SeveredHeadEntity>> SEVERED_HEAD =
+            register("severed_head", dev.infinitygauntlet.entity.power.SeveredHeadEntity::new, 0.4f, 0.4f, 8, 1);
+
     @SubscribeEvent
     static void onAttributes(EntityAttributeCreationEvent event) {
         event.put(TEMPORAL_ECHO.get(), TemporalEchoEntity.attributes().build());

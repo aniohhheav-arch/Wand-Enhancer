@@ -35,7 +35,27 @@ public enum VfxType {
     /** Emerald motes hanging motionless in the air. a = centre, scale = radius. */
     SUSPENDED_FIELD,
     /** Vertical stack of counter-rotating clock rings. a = centre, scale = radius. */
-    CLOCK_RINGS;
+    CLOCK_RINGS,
+    /** Glowing fissures splitting radially through the ground. a = centre, scale = radius. */
+    GROUND_CRACKS,
+    /** Power beam: a core with two energy strands coiling around it. a = start, b = end, scale = width. */
+    HELIX_BEAM,
+    /** Purple fireball with a churning shell, smoke and a ground ring. a = centre, scale = radius. */
+    POWER_EXPLOSION,
+    /** Energy streaming into a point while a core swells. a = centre, scale = gathering radius. */
+    CHARGE,
+    /** Glowing ribbon trailing behind an entity. seed = entity id, scale = width. */
+    ENTITY_TRAIL,
+    /** Lock-on reticle that closes in on an entity. seed = entity id, a = fallback position, scale = size. */
+    LOCK_RETICLE,
+    /** Real block chunks blown out of the ground. a = centre, color = block state id, color2 = count, scale = launch power. */
+    DEBRIS,
+    /** Crystal shards bursting outward. a = centre, scale = radius. */
+    SHARD_NOVA,
+    /** Impact frame of a punch: white star, speed lines and an inverted flash. a = centre, b = blow direction, scale = size. */
+    IMPACT_STAR,
+    /** Rising, mushrooming smoke column. a = base, scale = height. */
+    SMOKE_COLUMN;
 
     public static final StreamCodec<ByteBuf, VfxType> STREAM_CODEC = ByteBufCodecs.idMapper(i -> values()[i], VfxType::ordinal);
 }

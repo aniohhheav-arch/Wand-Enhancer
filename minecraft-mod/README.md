@@ -38,11 +38,12 @@ chamber (milestone 4).
 | Camera system: shake, FOV push, flashes, full-screen dimensional transition (all configurable) | done |
 | **Space Stone: all 9 abilities** | done |
 | **Time Stone: all 9 abilities**, built on real tick-level time dilation | done |
-| Progression: crafting, loot discovery, advancements, testing commands, GameTests | done for the Space and Time Stones |
+| Progression: crafting, loot discovery, advancements, testing commands, GameTests | done for the Space, Time and Power Stones |
 | Combination system (combos appear under each of their stones once all are installed) | done |
 | **Mind + Space: Consciousness Nexus** remote possession with a real-time camera feed | done |
 | **Mind + Space: Reality Breach**: walk through a rift into a white observation chamber and manipulate the real target | done |
-| Mind, Reality, Power and Soul solo abilities | not started; the stones install and render, but have no solo abilities yet |
+| **Power Stone: all 9 abilities**, with cinematic finishers, hit reactions, death styles and a cinematic camera | done |
+| Mind, Reality and Soul solo abilities | not started; the stones install and render, but have no solo abilities yet |
 | Other stone combinations, full-gauntlet ability set, the Snap sequence | not started |
 
 The `snap` and `overload` gauntlet animations and the per-stone palettes are already in place for the later milestones.
@@ -82,6 +83,42 @@ Only position, rotation and velocity are ever restored, never health, inventorie
 | Temporal Loop | A time anomaly on the ground. Creatures that enter it get snapped back to the moment they arrived every 2.5 seconds until they escape or the loop ends. |
 | Chronological Barrier | A disc of clockwork rings in front of you. Incoming projectiles decelerate and hang suspended in front of it; cast again to send them all back. |
 | Time Fracture | Charges, then shatters the air over the battlefield into a turning pane of cracked time. It pulses nearby creatures into near-stillness, shows afterimages of where they were, and implodes in a green flash. |
+
+## Power Stone abilities
+
+Every Power Stone ability has its own body pose, gauntlet animation (GeckoLib), sounds and effect vocabulary. Nothing is shared between two of them except the purple.
+
+| Ability | What happens |
+| --- | --- |
+| **Power Beam** | The gauntlet trembles for a second as energy streams into it, then a coiling **helix beam** (white-hot core and two spiralling strands) erupts and can be swept across the field for 1.6 s, scorching cracks where it lands. **Finisher, Disintegration:** the first kill cuts to a slow-motion close-up as the victim burns away into ash and crystal shards, then detonates. |
+| **Cosmic Punch** | Dash at the target and land one blow: **hit-stop** (the world freezes for 5 ticks), an inverted **impact frame** with a star of spikes and speed lines, a camera punch-in, then a vertical shockwave and the target is launched, tumbling, with a glowing trail. **Finisher, Execution** (target under 35 % health): a low side angle with a dutch tilt, time slows to a crawl as it flies, the head may come off, and it explodes where it falls. |
+| **Groundbreaker** | Leap, hang at the apex, hammer down. **Three rings** roll out 6 ticks apart: the inner ring pops enemies helplessly into the air, the middle one tumbles them, the outer one bowls them over. Glowing **fissures** race across the ground and **real block chunks** of the ground you stand on are thrown up. |
+| **Energy Nova** | You rise three blocks, arms spread, while energy gathers and every creature nearby drifts up in **slow motion**. The camera orbits you. Then a sphere of force releases with a **chromatic-aberration** spike and a white flash, hurling everything away. |
+| **Cosmic Artillery** | Six GeckoLib orbs spiral up and hang overhead while **lock-on reticles** spin in on the nearest enemies in front of you, seen from a low upward camera. One by one they fall as screaming **meteors**, cratering the ground (or bursting mid-air if they catch a target airborne). |
+| **Power Overload** | Ten seconds: every bare-handed or weapon hit lands with a shockwave, a recoil and a cleave; sprinting tears the ground with a wake of shockwaves; sparks crackle off your fist; when it ends it vents in a final burst. |
+| **Gravity Impact** | A black singularity with an accretion disk sinks out of the sky over 2.5 s. Everything beneath it is lifted and held **suspended**, slowly turning, while lightning crawls between them and the core, until it touches down and **crushes** them flat. **Finisher, Crushing Singularity:** on a kill the camera pulls back as the core implodes and detonates under a smoke column. |
+| **Cosmic Barrage** | Five orbs orbit you, each with its own detonation: **Cluster** (splits into five bomblets), **Chain** (lightning leaps between up to six victims), **Gravity** (becomes a collapsing well), **Lance** (pierces everything in a line) and **Shatter** (a nova of crystal shards). Cast to fire the next one, sneak-cast to fire them all. The cooldown starts once the last one is gone. |
+| **Planetary Force** | Hold a swelling, ring-wrapped core for three seconds while the ground splits and lifts around you and the camera **pulls back** to a wide shot, then hurl it. Its impact unfolds in four stages: a blinding implosion, the main blast, a ring of secondary detonations and a towering mushroom of smoke. |
+
+![Cosmic Punch execution](docs/power-punch-execution.jpg)
+![Groundbreaker](docs/power-groundbreaker.jpg)
+![Cosmic Artillery lock-on](docs/power-artillery-lock.jpg)
+![Gravity Impact](docs/power-gravity-impact.jpg)
+![Energy Nova](docs/power-energy-nova.jpg)
+![Planetary Force charge](docs/power-planetary-charge.jpg)
+![Planetary Force impact](docs/power-planetary-impact.jpg)
+![Cosmic Barrage](docs/power-barrage.jpg)
+
+### Combat presentation
+
+* **Per-creature impacts** (stylized, not photoreal): flesh sheds red droplets that splat on the ground, zombies dark blood and rotten chunks, skeletons bone shards and dust, wither skeletons black bone, slimes green goo, magma cubes molten droplets and embers, blazes/breezes/vexes embers, iron golems and shulkers metal sparks, endermen purple motes, spiders/silverfish/bees ichor, creepers gunpowder chunks and smoke. Set `impactStyle = ENERGY` in the client config for purple energy on everything.
+* **Reactions** play on top of the creature's own animation: stagger, recoil, suspension, tumbling and crushing.
+* **Death styles**: ragdoll tumble, crushed flat, disintegrated into ash, and the execution snap.
+* **Dismemberment** (non-graphic): finishers can knock the head off zombies, husks, drowned, skeletons, strays, wither skeletons, creepers, piglins and players. The head pops off whole as a tumbling skull and bounces away; the body is drawn headless. Turn it off with the server option `dismemberment`.
+* **Hit-stop and slow motion** use the Time Stone's tick dilation without its clock-ring overlay (server option `slowMotion`).
+* **Cinematic camera**: finishers take the camera for a moment, easing in from your view and back, avoiding terrain, with letterbox bars and the HUD hidden. Clients can turn it off (`cinematicCamera`).
+* **Player poses**: a custom `HumanoidModel.ArmPose` (added through NeoForge's enum extension) drives each ability's body animation in third person, and the first-person gauntlet hand follows the same motion.
+* **Terrain damage** from impacts is off by default (server option `terrainDamage`, which also requires `mobGriefing`). Debris is otherwise purely visual.
 
 ## Mind + Space: the Consciousness Nexus
 
@@ -211,9 +248,10 @@ Players cannot be breached unless the server allows offensive abilities against 
 ## Configuration
 
 * **Server** (`serverconfig/infinitygauntlet-server.toml`, per world): portal size and duration, pair limit, cross-dimension linking, what portals may transport, all damage values, gateway height/size, group-teleport radius/range, every Time Stone strength, radius and duration (freeze, slow and bubble time scales, rewind history length, loop period...), possession range, link duration, feed count, creeper detonation and Neural Override length, PvP (`offensiveAbilitiesAffectPlayers`, off by default), a global cooldown multiplier and every ability's cooldown.
-* **Client** (`config/infinitygauntlet-client.toml`): VFX quality (`LOW`…`ULTRA`, scales particle and smoke density), effect draw distance, camera effects on/off, shake intensity, screen flashes, portal transition overlay and the HUD.
+* **Server, Power Stone**: `damageMultiplier`, `terrainDamage` (off), `dismemberment` (on), `slowMotion` (on).
+* **Client** (`config/infinitygauntlet-client.toml`): Power Stone `impactStyle` (`VISCERAL` or `ENERGY`) and `cinematicCamera`; VFX quality (`LOW`…`ULTRA`, scales particle and smoke density), effect draw distance, camera effects on/off, shake intensity, screen flashes, portal transition overlay and the HUD.
 
-No ability in either stone edits terrain.
+No ability edits terrain, unless you enable the Power Stone's `terrainDamage` server option.
 
 ## Architecture
 
@@ -221,6 +259,9 @@ No ability in either stone edits terrain.
 ability/        Ability base, CastResult, AbilityCaster (the single cast path), per-player data, target rules
 ability/space/  the nine Space Stone abilities
 ability/time/   the nine Time Stone abilities
+ability/power/  the nine Power Stone abilities
+power/          CombatFx (strike, hit-stop, slow motion, reactions, death styles, decapitation), PowerFx, PowerOverload
+entity/power/   GeckoLib orb, gravity singularity and planetary core entities; severed heads
 time/           TimeManager (tick dilation), EntityHistory (movement recording), RewindController
 breach/         Reality Breach: chamber dimension and cells, rift/panel/specimen entities, PanelLayout (shared hit test), BreachManager
 nexus/          Consciousness Nexus block + block entity, PossessionManager (sessions), RemoteMoveControl, ControlProfiles
@@ -235,6 +276,7 @@ client/time/    ClientTime (client tick dilation), ClientHistory, Afterimages (g
 client/vfx/     render types, geometry builders (VfxDraw), RuptureDraw, ClientVfxManager, CameraEffects
 client/render/  entity renderers and the GeckoLib item renderers
 client/gui/     ability HUD, screen effects layer, ability wheel
+client/power/   CombatClient (materials, reactions, deaths), CinematicCamera, PowerPoses + PowerArmPose, entity renderers
 gametest/       server GameTests (arena structure generated by tools/generate_test_structures.py)
 ```
 

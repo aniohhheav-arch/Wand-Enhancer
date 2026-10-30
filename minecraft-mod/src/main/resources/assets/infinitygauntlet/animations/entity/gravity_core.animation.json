@@ -1,0 +1,37 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.gravity_core.idle": {
+   "loop": true,
+   "animation_length": 4.0,
+   "bones": {
+    "disk": {
+     "rotation": [
+      18,
+      "query.anim_time * 180",
+      8
+     ]
+    },
+    "rubble": {
+     "rotation": [
+      0,
+      "query.anim_time * -90",
+      "math.sin(query.anim_time * 90) * 15"
+     ]
+    },
+    "core": {
+     "scale": [
+      "1 + math.sin(query.anim_time * 540) * 0.06",
+      "1 + math.sin(query.anim_time * 540) * 0.06",
+      "1 + math.sin(query.anim_time * 540) * 0.06"
+     ],
+     "rotation": [
+      "query.anim_time * 45",
+      "query.anim_time * 70",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

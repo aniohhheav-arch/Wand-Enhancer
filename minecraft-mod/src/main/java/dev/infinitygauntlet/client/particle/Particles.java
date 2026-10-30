@@ -44,6 +44,21 @@ public final class Particles {
         add(new EnergyParticleOptions(ModParticles.ENERGY_SHARD.get(), color, size, life, EnergyParticleOptions.BEHAVIOR_DRIFT), pos, vel);
     }
 
+    /** A liquid droplet that arcs under gravity and splats where it lands. */
+    public static void droplet(Vec3 pos, Vec3 vel, int color, float size) {
+        add(new EnergyParticleOptions(ModParticles.IMPACT_DROPLET.get(), color, size, 0, EnergyParticleOptions.BEHAVIOR_DRIFT), pos, vel);
+    }
+
+    /** A flat splash decal lying on the ground. */
+    public static void splat(Vec3 pos, int color, float size, int life) {
+        add(new EnergyParticleOptions(ModParticles.IMPACT_SPLAT.get(), color, size, life, EnergyParticleOptions.BEHAVIOR_DRIFT), pos, Vec3.ZERO);
+    }
+
+    /** A solid fragment (bone, metal, rock) that tumbles, bounces and settles. */
+    public static void chunk(Vec3 pos, Vec3 vel, int color, float size) {
+        add(new EnergyParticleOptions(ModParticles.IMPACT_CHUNK.get(), color, size, 0, EnergyParticleOptions.BEHAVIOR_DRIFT), pos, vel);
+    }
+
     private static void add(EnergyParticleOptions options, Vec3 pos, Vec3 vel) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {

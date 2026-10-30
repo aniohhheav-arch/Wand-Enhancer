@@ -39,6 +39,10 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.DIMENSIONAL_RIFT.get(), dev.infinitygauntlet.client.breach.RiftRenderer::new);
         event.registerEntityRenderer(ModEntities.OBSERVATION_PANEL.get(), dev.infinitygauntlet.client.breach.PanelRenderer::new);
         event.registerEntityRenderer(ModEntities.SPECIMEN.get(), dev.infinitygauntlet.client.breach.SpecimenRenderer::new);
+        event.registerEntityRenderer(ModEntities.POWER_ORB.get(), dev.infinitygauntlet.client.power.PowerRenderers.Orb::new);
+        event.registerEntityRenderer(ModEntities.GRAVITY_CORE.get(), dev.infinitygauntlet.client.power.PowerRenderers.Gravity::new);
+        event.registerEntityRenderer(ModEntities.PLANETARY_CORE.get(), dev.infinitygauntlet.client.power.PowerRenderers.Planetary::new);
+        event.registerEntityRenderer(ModEntities.SEVERED_HEAD.get(), dev.infinitygauntlet.client.power.PowerRenderers.Head::new);
         event.registerBlockEntityRenderer(dev.infinitygauntlet.registry.ModBlockEntities.CONSCIOUSNESS_NEXUS.get(),
                 dev.infinitygauntlet.client.nexus.NexusRenderer::new);
     }
@@ -55,6 +59,12 @@ public final class ClientModEvents {
         event.registerSpriteSet(ModParticles.ENERGY_MOTE.get(), sprites -> new EnergyParticle.Provider(sprites, false, 20));
         event.registerSpriteSet(ModParticles.DIMENSIONAL_SMOKE.get(), sprites -> new EnergyParticle.Provider(sprites, true, 30));
         event.registerSpriteSet(ModParticles.ENERGY_SHARD.get(), sprites -> new EnergyParticle.Provider(sprites, false, 16));
+        event.registerSpriteSet(ModParticles.IMPACT_DROPLET.get(),
+                sprites -> new dev.infinitygauntlet.client.particle.ImpactParticle.Provider(sprites, dev.infinitygauntlet.client.particle.ImpactParticle.Kind.DROPLET));
+        event.registerSpriteSet(ModParticles.IMPACT_SPLAT.get(),
+                sprites -> new dev.infinitygauntlet.client.particle.ImpactParticle.Provider(sprites, dev.infinitygauntlet.client.particle.ImpactParticle.Kind.SPLAT));
+        event.registerSpriteSet(ModParticles.IMPACT_CHUNK.get(),
+                sprites -> new dev.infinitygauntlet.client.particle.ImpactParticle.Provider(sprites, dev.infinitygauntlet.client.particle.ImpactParticle.Kind.CHUNK));
     }
 
     @SubscribeEvent
@@ -74,6 +84,7 @@ public final class ClientModEvents {
     static void onGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, InfinityGauntlet.id("ability_hud"), AbilityHud::render);
         event.registerAboveAll(InfinityGauntlet.id("screen_effects"), ScreenEffectsLayer::render);
+        event.registerBelow(VanillaGuiLayers.CROSSHAIR, InfinityGauntlet.id("cinematic_bars"), dev.infinitygauntlet.client.power.CinematicCamera::renderBars);
         event.registerBelow(VanillaGuiLayers.CROSSHAIR, InfinityGauntlet.id("reality_distortion"),
                 dev.infinitygauntlet.client.breach.DistortionOverlay::render);
         event.registerAbove(VanillaGuiLayers.HOTBAR, InfinityGauntlet.id("remote_control"), dev.infinitygauntlet.client.nexus.RemoteControlHud::render);

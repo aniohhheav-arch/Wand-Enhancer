@@ -1,0 +1,44 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.planetary_core.idle": {
+   "loop": true,
+   "animation_length": 2.0,
+   "bones": {
+    "ring_0": {
+     "rotation": [
+      0,
+      0,
+      "query.anim_time * 360"
+     ]
+    },
+    "ring_1": {
+     "rotation": [
+      55,
+      "query.anim_time * -540",
+      0
+     ]
+    },
+    "ring_2": {
+     "rotation": [
+      "query.anim_time * 270",
+      30,
+      0
+     ]
+    },
+    "core": {
+     "rotation": [
+      "query.anim_time * 200",
+      "query.anim_time * 260",
+      0
+     ],
+     "scale": [
+      "1 + math.sin(query.anim_time * 1440) * 0.08",
+      "1 + math.sin(query.anim_time * 1440) * 0.08",
+      "1 + math.sin(query.anim_time * 1440) * 0.08"
+     ]
+    }
+   }
+  }
+ }
+}

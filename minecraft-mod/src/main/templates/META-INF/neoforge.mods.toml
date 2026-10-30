@@ -8,6 +8,8 @@ version="${mod_version}"
 displayName="${mod_name}"
 authors="${mod_authors}"
 description='''${mod_description}'''
+# Adds the Power Stone arm pose to HumanoidModel.ArmPose (client only; the enum never loads on servers).
+enumExtensions="META-INF/enumextensions.json"
 
 [[dependencies.${mod_id}]]
     modId="neoforge"

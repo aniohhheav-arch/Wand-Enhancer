@@ -295,6 +295,166 @@
       }
     ]
   },
+  "power_charge": {
+    "subtitle": "subtitles.infinitygauntlet.power_charge",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_charge"
+      }
+    ]
+  },
+  "power_beam": {
+    "subtitle": "subtitles.infinitygauntlet.power_beam",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_beam"
+      }
+    ]
+  },
+  "power_explosion": {
+    "subtitle": "subtitles.infinitygauntlet.power_explosion",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_explosion"
+      }
+    ]
+  },
+  "power_punch_impact": {
+    "subtitle": "subtitles.infinitygauntlet.power_punch_impact",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_punch_impact"
+      }
+    ]
+  },
+  "power_whoosh": {
+    "subtitle": "subtitles.infinitygauntlet.power_whoosh",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_whoosh"
+      }
+    ]
+  },
+  "power_ground_crack": {
+    "subtitle": "subtitles.infinitygauntlet.power_ground_crack",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_ground_crack"
+      }
+    ]
+  },
+  "power_nova_charge": {
+    "subtitle": "subtitles.infinitygauntlet.power_nova_charge",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_nova_charge"
+      }
+    ]
+  },
+  "power_nova_release": {
+    "subtitle": "subtitles.infinitygauntlet.power_nova_release",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_nova_release"
+      }
+    ]
+  },
+  "power_launch": {
+    "subtitle": "subtitles.infinitygauntlet.power_launch",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_launch"
+      }
+    ]
+  },
+  "power_meteor": {
+    "subtitle": "subtitles.infinitygauntlet.power_meteor",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_meteor"
+      }
+    ]
+  },
+  "power_overload": {
+    "subtitle": "subtitles.infinitygauntlet.power_overload",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_overload"
+      }
+    ]
+  },
+  "power_hit": {
+    "subtitle": "subtitles.infinitygauntlet.power_hit",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_hit"
+      }
+    ]
+  },
+  "power_gravity": {
+    "subtitle": "subtitles.infinitygauntlet.power_gravity",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_gravity"
+      }
+    ]
+  },
+  "power_orb": {
+    "subtitle": "subtitles.infinitygauntlet.power_orb",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_orb"
+      }
+    ]
+  },
+  "power_planetary_charge": {
+    "subtitle": "subtitles.infinitygauntlet.power_planetary_charge",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_planetary_charge"
+      }
+    ]
+  },
+  "power_planetary_impact": {
+    "subtitle": "subtitles.infinitygauntlet.power_planetary_impact",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_planetary_impact"
+      }
+    ]
+  },
+  "impact_flesh": {
+    "subtitle": "subtitles.infinitygauntlet.impact_flesh",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:impact_flesh"
+      }
+    ]
+  },
+  "impact_bone": {
+    "subtitle": "subtitles.infinitygauntlet.impact_bone",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:impact_bone"
+      }
+    ]
+  },
+  "head_pop": {
+    "subtitle": "subtitles.infinitygauntlet.head_pop",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:head_pop"
+      }
+    ]
+  },
+  "power_finisher": {
+    "subtitle": "subtitles.infinitygauntlet.power_finisher",
+    "sounds": [
+      {
+        "name": "infinitygauntlet:power_finisher"
+      }
+    ]
+  },
   "gauntlet_charge": {
     "subtitle": "subtitles.infinitygauntlet.gauntlet_charge",
     "sounds": [
