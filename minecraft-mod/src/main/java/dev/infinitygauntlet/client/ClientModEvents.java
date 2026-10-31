@@ -43,6 +43,9 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.GRAVITY_CORE.get(), dev.infinitygauntlet.client.power.PowerRenderers.Gravity::new);
         event.registerEntityRenderer(ModEntities.PLANETARY_CORE.get(), dev.infinitygauntlet.client.power.PowerRenderers.Planetary::new);
         event.registerEntityRenderer(ModEntities.SEVERED_HEAD.get(), dev.infinitygauntlet.client.power.PowerRenderers.Head::new);
+        event.registerEntityRenderer(ModEntities.ASTRAL_BODY.get(), dev.infinitygauntlet.client.mind.MindRenderers.Body::new);
+        event.registerEntityRenderer(ModEntities.LEVITATION_FIELD.get(), dev.infinitygauntlet.client.mind.MindRenderers.Field::new);
+        event.registerEntityRenderer(ModEntities.MENTAL_SHIELD.get(), dev.infinitygauntlet.client.mind.MindRenderers.Shield::new);
         event.registerBlockEntityRenderer(dev.infinitygauntlet.registry.ModBlockEntities.CONSCIOUSNESS_NEXUS.get(),
                 dev.infinitygauntlet.client.nexus.NexusRenderer::new);
     }
@@ -95,6 +98,7 @@ public final class ClientModEvents {
         event.registerAboveAll(InfinityGauntlet.id("screen_effects"), ScreenEffectsLayer::render);
         event.registerBelow(VanillaGuiLayers.CROSSHAIR, InfinityGauntlet.id("finisher_grade"), dev.infinitygauntlet.client.finisher.FinisherScreen::grade);
         event.registerBelow(VanillaGuiLayers.CROSSHAIR, InfinityGauntlet.id("cinematic_bars"), dev.infinitygauntlet.client.power.CinematicCamera::renderBars);
+        event.registerBelow(VanillaGuiLayers.CROSSHAIR, InfinityGauntlet.id("mind_hud"), dev.infinitygauntlet.client.mind.MindClient::renderHud);
         event.registerAboveAll(InfinityGauntlet.id("finisher_impact"), dev.infinitygauntlet.client.finisher.FinisherScreen::impact);
         event.registerBelow(VanillaGuiLayers.CROSSHAIR, InfinityGauntlet.id("reality_distortion"),
                 dev.infinitygauntlet.client.breach.DistortionOverlay::render);

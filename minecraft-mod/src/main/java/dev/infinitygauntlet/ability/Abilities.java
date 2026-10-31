@@ -58,6 +58,15 @@ public final class Abilities {
 
         register(new dev.infinitygauntlet.finisher.FinisherAbility("dimensional_erasure", dev.infinitygauntlet.finisher.FinisherType.DIMENSIONAL_ERASURE, 400));
         register(new dev.infinitygauntlet.finisher.FinisherAbility("temporal_collapse", dev.infinitygauntlet.finisher.FinisherType.TEMPORAL_COLLAPSE, 400));
+        register(new dev.infinitygauntlet.ability.mind.TelekinesisAbility());
+        register(new dev.infinitygauntlet.ability.mind.MindControlAbility());
+        register(new dev.infinitygauntlet.ability.mind.NeuralBlastAbility());
+        register(new dev.infinitygauntlet.ability.mind.PsychicPulseAbility());
+        register(new dev.infinitygauntlet.ability.mind.MentalOverloadAbility());
+        register(new dev.infinitygauntlet.ability.mind.LevitationFieldAbility());
+        register(new dev.infinitygauntlet.ability.mind.AstralProjectionAbility());
+        register(new dev.infinitygauntlet.ability.mind.MentalShieldAbility());
+        register(new dev.infinitygauntlet.ability.mind.MindsEyeAbility());
         register(new dev.infinitygauntlet.finisher.FinisherAbility("psychic_overload", dev.infinitygauntlet.finisher.FinisherType.PSYCHIC_OVERLOAD, 400));
         register(new dev.infinitygauntlet.finisher.FinisherAbility("reality_rewrite", dev.infinitygauntlet.finisher.FinisherType.REALITY_REWRITE, 400));
         register(new dev.infinitygauntlet.finisher.FinisherAbility("soul_extraction", dev.infinitygauntlet.finisher.FinisherType.SOUL_EXTRACTION, 400));

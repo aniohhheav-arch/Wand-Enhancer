@@ -62,6 +62,12 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue POWER_DISMEMBERMENT;
     public static final ModConfigSpec.BooleanValue POWER_SLOW_MOTION;
 
+    public static final ModConfigSpec.IntValue MIND_CONTROL_SECONDS;
+    public static final ModConfigSpec.IntValue MIND_CONTROL_MAX;
+    public static final ModConfigSpec.IntValue ASTRAL_SECONDS;
+    public static final ModConfigSpec.IntValue ASTRAL_RANGE;
+    public static final ModConfigSpec.DoubleValue MIND_DAMAGE_MULTIPLIER;
+
     public static final ModConfigSpec.BooleanValue FINISHERS_ENABLED;
     public static final ModConfigSpec.DoubleValue FINISHER_HEALTH_THRESHOLD;
     public static final ModConfigSpec.BooleanValue FINISHERS_ON_PLAYERS;
@@ -133,6 +139,14 @@ public final class ServerConfig {
         POSSESSION_CREEPER_DETONATION = b.comment("Whether a possessed creeper can be detonated (explosions follow the mobGriefing rule).")
                 .define("creeperDetonation", true);
         NEURAL_OVERRIDE_SECONDS = b.defineInRange("neuralOverrideSeconds", 10, 1, 120);
+        b.pop();
+
+        b.push("mind_stone");
+        MIND_CONTROL_SECONDS = b.comment("How long Mind Control holds a creature.").defineInRange("mindControlSeconds", 30, 3, 600);
+        MIND_CONTROL_MAX = b.comment("How many creatures one player can control at once.").defineInRange("mindControlMax", 3, 1, 16);
+        ASTRAL_SECONDS = b.comment("How long an Astral Projection lasts.").defineInRange("astralProjectionSeconds", 30, 5, 600);
+        ASTRAL_RANGE = b.comment("How far the projection can roam from the body.").defineInRange("astralProjectionRange", 64, 8, 256);
+        MIND_DAMAGE_MULTIPLIER = b.comment("Multiplier for all Mind Stone damage.").defineInRange("damageMultiplier", 1.0, 0.0, 20.0);
         b.pop();
 
         b.push("finishers");

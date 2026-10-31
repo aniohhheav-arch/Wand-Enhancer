@@ -96,6 +96,22 @@ public final class PowerArmPose {
                 float strain = tremble * (1 + 2 * t);
                 set(part, Mth.lerp(grow, 0f, -Mth.HALF_PI + model.head.xRot * 0.5f - 0.1f) + strain, -out * 0.4f * grow + strain, 0);
             }
+            case TEMPLE -> {
+                float in = smooth(age / 4f);
+                if (gauntlet) {
+                    set(part, Mth.lerp(in, 0, -2.55f) + tremble * 0.4f, -out * 0.62f * in, out * 0.1f * in); // fingers to the temple
+                } else {
+                    set(part, Mth.lerp(in, 0, aimX), aimY * in, 0);
+                }
+            }
+            case PUSH -> {
+                float shove = smooth(age / 2.5f);
+                if (gauntlet) {
+                    set(part, Mth.lerp(shove, 0.4f, aimX - 0.1f), aimY, 0);
+                } else {
+                    set(part, 0.3f * shove, 0, -out * 0.2f * shove);
+                }
+            }
             case OVERLOAD -> {
                 if (gauntlet) {
                     set(part, part.xRot * 0.5f - 0.3f + tremble, part.yRot, out * 0.22f);

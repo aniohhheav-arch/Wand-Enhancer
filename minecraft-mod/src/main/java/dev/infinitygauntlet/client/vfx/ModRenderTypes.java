@@ -32,6 +32,7 @@ public final class ModRenderTypes {
     public static final ResourceLocation VIGNETTE = tex("vignette");
     public static final ResourceLocation GLYPH_MIND = tex("glyph_mind");
     public static final ResourceLocation WHITE = tex("white");
+    public static final ResourceLocation HEXGRID = tex("hexgrid");
 
     private static final RenderStateShard.ShaderStateShard POSITION_TEX_COLOR = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexColorShader);
 

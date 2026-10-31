@@ -137,7 +137,8 @@ public final class RemoteControlClient {
             return;
         }
         while (Keybinds.EMERGENCY_DISCONNECT.consumeClick()) {
-            if (controlling) {
+            if (controlling || dev.infinitygauntlet.client.mind.MindClient.astral()) {
+                // also the way back from an astral projection
                 PacketDistributor.sendToServer(new PossessionActionPayload(PossessionActionPayload.DISCONNECT));
             }
         }

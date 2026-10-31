@@ -59,6 +59,10 @@ public final class ClientPayloadHandler {
         dev.infinitygauntlet.client.finisher.ClientFinishers.handle(payload);
     }
 
+    public static void mindState(dev.infinitygauntlet.network.MindStatePayload payload) {
+        dev.infinitygauntlet.client.mind.MindClient.state(payload);
+    }
+
     public static void cooldowns(CooldownSyncPayload payload) {
         ClientCooldowns.sync(payload.remaining());
     }

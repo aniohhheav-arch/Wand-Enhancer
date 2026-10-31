@@ -23,8 +23,10 @@ public final class PlayerPowerData {
             UUIDUtil.CODEC.optionalFieldOf("swap_entity").forGetter(d -> Optional.ofNullable(d.swapEntity)),
             GlobalPos.CODEC.optionalFieldOf("waypoint").forGetter(d -> Optional.ofNullable(d.waypoint)),
             GlobalPos.CODEC.optionalFieldOf("nexus").forGetter(d -> Optional.ofNullable(d.nexus)),
-            GlobalPos.CODEC.optionalFieldOf("chamber_return").forGetter(d -> Optional.ofNullable(d.chamberReturn))
-    ).apply(i, (cd, portal, marker, entity, waypoint, nexus, chamberReturn) -> {
+            GlobalPos.CODEC.optionalFieldOf("chamber_return").forGetter(d -> Optional.ofNullable(d.chamberReturn)),
+            GlobalPos.CODEC.optionalFieldOf("astral_body").forGetter(d -> Optional.ofNullable(d.astralBody)),
+            Codec.STRING.optionalFieldOf("astral_mode").forGetter(d -> Optional.ofNullable(d.astralMode))
+    ).apply(i, (cd, portal, marker, entity, waypoint, nexus, chamberReturn, astralBody, astralMode) -> {
         PlayerPowerData d = new PlayerPowerData();
         d.cooldowns.putAll(cd);
         d.pendingPortal = portal.orElse(null);
@@ -33,6 +35,8 @@ public final class PlayerPowerData {
         d.waypoint = waypoint.orElse(null);
         d.nexus = nexus.orElse(null);
         d.chamberReturn = chamberReturn.orElse(null);
+        d.astralBody = astralBody.orElse(null);
+        d.astralMode = astralMode.orElse(null);
         return d;
     }));
 
@@ -45,6 +49,10 @@ public final class PlayerPowerData {
     public GlobalPos nexus;
     /** Where to put the player back if they are found in the observation chamber without a live breach (relog, restart). */
     public GlobalPos chamberReturn;
+    /** Where an astral projection left its body, so a relog or crash mid-projection can restore the player. */
+    public GlobalPos astralBody;
+    /** The game mode to restore when the projection ends. */
+    public String astralMode;
 
     public long cooldownEnd(ResourceLocation ability) {
         return cooldowns.getOrDefault(ability.toString(), 0L);

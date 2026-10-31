@@ -18,7 +18,14 @@ public final class ModNetwork {
         registrar.playToServer(ControlInputPayload.TYPE, ControlInputPayload.CODEC,
                 (payload, ctx) -> dev.infinitygauntlet.nexus.PossessionManager.input((ServerPlayer) ctx.player(), payload));
         registrar.playToServer(PossessionActionPayload.TYPE, PossessionActionPayload.CODEC,
-                (payload, ctx) -> dev.infinitygauntlet.nexus.PossessionManager.action((ServerPlayer) ctx.player(), payload.action()));
+                (payload, ctx) -> {
+                    ServerPlayer player = (ServerPlayer) ctx.player();
+                    if (payload.action() == PossessionActionPayload.DISCONNECT && dev.infinitygauntlet.mind.MindManager.projecting(player)) {
+                        dev.infinitygauntlet.mind.MindManager.returnToBody(player);
+                    } else {
+                        dev.infinitygauntlet.nexus.PossessionManager.action(player, payload.action());
+                    }
+                });
         registrar.playToClient(PossessionStatePayload.TYPE, PossessionStatePayload.CODEC,
                 (payload, ctx) -> ClientPayloadHandler.possession(payload));
         registrar.playToServer(PanelPressPayload.TYPE, PanelPressPayload.CODEC,
@@ -35,6 +42,7 @@ public final class ModNetwork {
         registrar.playToClient(CinematicPayload.TYPE, CinematicPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.cinematic(payload));
         registrar.playToClient(PowerPosePayload.TYPE, PowerPosePayload.CODEC, (payload, ctx) -> ClientPayloadHandler.powerPose(payload));
         registrar.playToClient(FinisherPayload.TYPE, FinisherPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.finisher(payload));
+        registrar.playToClient(MindStatePayload.TYPE, MindStatePayload.CODEC, (payload, ctx) -> ClientPayloadHandler.mindState(payload));
         registrar.playToClient(CooldownSyncPayload.TYPE, CooldownSyncPayload.CODEC, (payload, ctx) -> ClientPayloadHandler.cooldowns(payload));
     }
 

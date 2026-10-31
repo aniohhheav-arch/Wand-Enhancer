@@ -42,9 +42,12 @@ public final class WornGauntlet {
         float centre = (right ? -1 : 1) * (slim ? 0.5f : 1f);
         pose.pushPose();
         // wrist cuff starts just above the hand; the glove's fingers run on down the arm
-        pose.translate(centre / 16f, 3.0f / 16f, 0);
+        // glove model: cuff 6 px, hand 8 px, fingers ~7 px long; 8-9 px wide, 5-7 px deep. Scaled so it sits about
+        // one pixel proud of the 4x4 (slim 3x4) arm: cuff on the wrist, hand over the arm's last pixels, fingertips
+        // just past the end of the arm
+        pose.translate(centre / 16f, 4.6f / 16f, 0);
         pose.mulPose(Axis.YP.rotationDegrees(right ? 90 : -90)); // palm toward the body
-        pose.scale(0.6f, 0.47f, slim ? 0.66f : 0.8f);             // width x length x depth, wrapping a 4x4 (or 3x4) arm
+        pose.scale(0.54f, 0.37f, slim ? 0.7f : 0.86f);            // glove width (arm depth) x length x glove depth (arm width)
         pose.translate(-0.5f, -0.51f, -0.5f);                    // undo the item renderer's block-centre offset
         IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, pose, buffers, light, OverlayTexture.NO_OVERLAY);
         pose.popPose();

@@ -55,7 +55,23 @@ public enum VfxType {
     /** Impact frame of a punch: white star, speed lines and an inverted flash. a = centre, b = blow direction, scale = size. */
     IMPACT_STAR,
     /** Rising, mushrooming smoke column. a = base, scale = height. */
-    SMOKE_COLUMN;
+    SMOKE_COLUMN,
+    /** Golden beam threaded with branching neural filaments. a = start, b = end, scale = width. */
+    NEURAL_BEAM,
+    /** Telekinetic link from a caster's hand to an entity. seed = target entity id, b.x = caster entity id. */
+    NEURAL_LINK,
+    /** Mind control: a rotating halo of runes and glowing yellow eyes. seed = entity id. */
+    MIND_AURA,
+    /** Mental Overload mark: an eye sigil over the target with energy spiralling in. seed = entity id. */
+    MIND_MARK,
+    /** Golden geometric shapes bursting outward. a = centre, scale = radius. */
+    GEOMETRY_BURST,
+    /** A ripple across a shield dome where something struck it. a = impact point, b = dome centre, scale = dome radius. */
+    SHIELD_RIPPLE,
+    /** Golden stars circling a dazed creature's head. seed = entity id. */
+    DAZE,
+    /** A golden ghost of a projecting player, seen by others. seed = player id. */
+    ASTRAL_GHOST;
 
     public static final StreamCodec<ByteBuf, VfxType> STREAM_CODEC = ByteBufCodecs.idMapper(i -> values()[i], VfxType::ordinal);
 }

@@ -17,5 +17,9 @@ public enum PowerPose {
     /** Gauntlet held low at the hip, crackling. */
     OVERLOAD,
     /** Both hands cupped forward around a growing mass. */
-    HOLD
+    HOLD,
+    /** Two fingers to the temple, the other hand reaching out. */
+    TEMPLE,
+    /** An open palm shoved forward. */
+    PUSH
 }

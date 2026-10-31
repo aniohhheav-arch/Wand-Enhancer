@@ -225,6 +225,15 @@ public final class PowerPoses {
                 pose.mulPose(Axis.ZP.rotationDegrees(side * 12 * grow));
             }
             case OVERLOAD -> pose.translate(jitter * 0.5f, jitter * 0.5f, 0);
+            case TEMPLE -> {
+                float in = PowerArmPose.smooth(age / 4f) * (1 - PowerArmPose.smooth((t - 0.8f) / 0.2f));
+                pose.translate(-side * 0.25f * in, 0.3f * in, 0.15f * in);
+                pose.mulPose(Axis.ZP.rotationDegrees(side * 25 * in));
+            }
+            case PUSH -> {
+                float shove = (float) Math.exp(-age * 0.25f);
+                pose.translate(-side * 0.1f, 0.05f, -0.3f * (1 - shove * 0.3f) * PowerArmPose.smooth(age / 2f));
+            }
         }
     }
 

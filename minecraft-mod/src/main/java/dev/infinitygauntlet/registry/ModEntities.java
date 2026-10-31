@@ -72,6 +72,13 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.entity.power.SeveredHeadEntity>> SEVERED_HEAD =
             register("severed_head", dev.infinitygauntlet.entity.power.SeveredHeadEntity::new, 0.4f, 0.4f, 8, 1);
 
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.mind.AstralBodyEntity>> ASTRAL_BODY =
+            register("astral_body", dev.infinitygauntlet.mind.AstralBodyEntity::new, 0.6f, 1.8f, 10, 1);
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.mind.LevitationFieldEntity>> LEVITATION_FIELD =
+            register("levitation_field", dev.infinitygauntlet.mind.LevitationFieldEntity::new, 1.0f, 1.0f, 10, 1);
+    public static final DeferredHolder<EntityType<?>, EntityType<dev.infinitygauntlet.mind.MentalShieldEntity>> MENTAL_SHIELD =
+            register("mental_shield", dev.infinitygauntlet.mind.MentalShieldEntity::new, 1.0f, 1.0f, 10, 1);
+
     @SubscribeEvent
     static void onAttributes(EntityAttributeCreationEvent event) {
         event.put(TEMPORAL_ECHO.get(), TemporalEchoEntity.attributes().build());

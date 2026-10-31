@@ -35,6 +35,10 @@ public final class ClientVfxManager {
         if (mc.gameRenderer.getMainCamera().getPosition().distanceToSqr(payload.a()) > max * max) {
             return;
         }
+        if (MindVfx.handles(payload)) {
+            MindVfx.spawn(payload);
+            return;
+        }
         if (PowerVfx.handles(payload)) {
             PowerVfx.spawn(payload);
             return;

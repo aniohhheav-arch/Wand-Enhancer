@@ -162,7 +162,7 @@ public final class BreachManager {
         s.rift = DimensionalRiftEntity.breach(level, target, player);
         SESSIONS.put(player.getUUID(), s);
         anchor(s);
-        TimeManager.apply(target, 0f, 3);
+        TimeManager.apply(target, 0f, 3, true); // held still, without the Time Stone's clock rings
 
         Vec3 c = target.getBoundingBox().getCenter();
         Vfx.sound(level, c, ModSounds.BREACH_OPEN, 3f, 1f);
@@ -547,7 +547,7 @@ public final class BreachManager {
             anchor(s);
         }
         if (!s.entered) {
-            TimeManager.apply(t, 0f, 3); // held at the tear until the caster passes through
+            TimeManager.apply(t, 0f, 3, true); // held at the tear until the caster passes through
         } else if (t.level() instanceof ServerLevel level) {
             // Vanilla stops ticking every entity in a level that has had no players for 15 seconds. With the caster in
             // the chamber the target's world is usually empty, so keep it awake: the target must stay live, not frozen.
