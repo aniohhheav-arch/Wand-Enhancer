@@ -13,6 +13,7 @@ import dev.infinitygauntlet.stone.InfinityStone;
 import dev.infinitygauntlet.util.TeleportUtil;
 import dev.infinitygauntlet.vfx.Vfx;
 import dev.infinitygauntlet.vfx.VfxType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -23,10 +24,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -71,12 +75,51 @@ public final class MindManager {
     private record Thrown(ServerPlayer by, Entity entity, int[] age) {
     }
 
+    /** A thrown block: tracked separately because a falling block places itself the tick it lands. */
+    private static final class ThrownBlock {
+        final ServerPlayer by;
+        final FallingBlockEntity block;
+        Vec3 last;
+        int age;
+
+        ThrownBlock(ServerPlayer by, FallingBlockEntity block) {
+            this.by = by;
+            this.block = block;
+            this.last = block.position();
+        }
+    }
+
+    private static final List<ThrownBlock> THROWN_BLOCKS = new ArrayList<>();
+
     private static final Map<UUID, Grip> GRIPS = new HashMap<>();
     private static final List<Thrown> THROWN = new ArrayList<>();
     public static final int GRIP_MAX_TICKS = 300;
 
     public static boolean holding(ServerPlayer player) {
         return GRIPS.containsKey(player.getUUID());
+    }
+
+    /**
+     * Tears a block out of the world into a floating block that can be held and thrown. Refused for unbreakable
+     * blocks, blocks with contents (chests, furnaces...) and where the player may not build.
+     */
+    @Nullable
+    public static FallingBlockEntity liftBlock(ServerPlayer player, BlockPos pos) {
+        ServerLevel level = player.serverLevel();
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity() || state.getDestroySpeed(level, pos) < 0
+                || !level.mayInteract(player, pos) || !player.mayBuild()) {
+            return null;
+        }
+        FallingBlockEntity block = FallingBlockEntity.fall(level, pos, state);
+        block.setNoGravity(true);
+        block.time = 1;
+        block.dropItem = false;
+        block.setDeltaMovement(0, 0.3, 0); // off the ground at once, or it would settle straight back into place
+        block.hurtMarked = true;
+        Vfx.send(level, VfxType.GEOMETRY_BURST, Vec3.atCenterOf(pos), Vec3.ZERO, GOLD, PALE, 1.2f, 12);
+        level.levelEvent(2001, pos, Block.getId(state)); // the crumble of it tearing loose
+        return block;
     }
 
     public static void grab(ServerPlayer player, Entity target) {
@@ -96,6 +139,27 @@ public final class MindManager {
             return;
         }
         ServerLevel level = player.serverLevel();
+        // thrown at whatever is under the crosshair, from wherever the held thing actually is
+        Vec3 eye = player.getEyePosition();
+        var hit = level.clip(new net.minecraft.world.level.ClipContext(eye, eye.add(player.getLookAngle().scale(64)),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+        Vec3 aim = hit.getLocation();
+        Vec3 throwDir = aim.subtract(g.target.getBoundingBox().getCenter());
+        throwDir = throwDir.lengthSqr() < 1.0E-4 ? player.getLookAngle() : throwDir.normalize();
+        if (g.target instanceof FallingBlockEntity block) {
+            block.setNoGravity(!gentle); // thrown blocks fly true for a moment before dropping
+            if (!gentle) {
+                block.setDeltaMovement(throwDir.scale(2.2));
+                block.hurtMarked = true;
+                THROWN_BLOCKS.add(new ThrownBlock(player, block));
+                Vfx.sound(level, block.position(), ModSounds.MIND_THROW, 2f, 0.8f);
+                Vfx.send(level, VfxType.ENTITY_TRAIL, block.position(), Vec3.ZERO, GOLD, PALE, 0.9f, 30, block.getId());
+                return;
+            }
+            block.setDeltaMovement(Vec3.ZERO); // set down: it settles back into the world as a block
+            block.hurtMarked = true;
+            return;
+        }
         if (gentle) {
             g.target.setDeltaMovement(player.getLookAngle().scale(0.1).add(0, -0.05, 0));
             if (g.target instanceof LivingEntity living) {
@@ -103,7 +167,7 @@ public final class MindManager {
             }
             Vfx.sound(level, g.target.position(), ModSounds.MIND_SHIELD_HIT, 1f, 0.8f);
         } else {
-            g.target.setDeltaMovement(player.getLookAngle().scale(2.4).add(0, 0.15, 0));
+            g.target.setDeltaMovement(throwDir.scale(2.4).add(0, 0.1, 0));
             THROWN.add(new Thrown(player, g.target, new int[]{0}));
             Vfx.sound(level, g.target.position(), ModSounds.MIND_THROW, 2f, 1f);
             Vfx.send(level, VfxType.ENTITY_TRAIL, g.target.position(), Vec3.ZERO, GOLD, PALE, 0.8f, 20, g.target.getId());
@@ -121,6 +185,7 @@ public final class MindManager {
                 it.remove();
                 if (g.target.isAlive()) {
                     g.target.setDeltaMovement(Vec3.ZERO);
+                    g.target.setNoGravity(false);
                     g.target.hurtMarked = true;
                 }
                 continue;
@@ -138,9 +203,43 @@ public final class MindManager {
                 mob.setTarget(null);
                 mob.getNavigation().stop();
             }
+            if (g.target instanceof FallingBlockEntity block) {
+                block.time = 1; // a held block never times out
+            }
             if (g.age % 4 == 1) {
                 Vfx.send(p.serverLevel(), VfxType.NEURAL_LINK, centre, new Vec3(p.getId(), 0, 0), GOLD, PALE, 1f, 6, g.target.getId());
             }
+        }
+        Iterator<ThrownBlock> tb = THROWN_BLOCKS.iterator();
+        while (tb.hasNext()) {
+            ThrownBlock t = tb.next();
+            FallingBlockEntity b = t.block;
+            t.age++;
+            if (t.age == 12) {
+                b.setNoGravity(false);
+            }
+            if (!(b.level() instanceof ServerLevel level)) {
+                tb.remove();
+                continue;
+            }
+            boolean landed = b.isRemoved(); // it already placed itself where it struck
+            boolean struck = !landed && (b.horizontalCollision || b.onGround() || !level.getEntitiesOfClass(LivingEntity.class,
+                    b.getBoundingBox().inflate(0.3), o -> o != t.by && TargetRules.canTarget(t.by, o)).isEmpty());
+            if (landed || struck || t.age > 100) {
+                tb.remove();
+                Vec3 at = landed ? t.last : b.position();
+                if (landed) {
+                    BlockPos placed = BlockPos.containing(at);
+                    if (level.getBlockState(placed).is(b.getBlockState().getBlock())) {
+                        level.removeBlock(placed, false);
+                    }
+                } else {
+                    b.discard();
+                }
+                blockImpact(t.by, level, at.add(0, 0.5, 0), b.getBlockState());
+                continue;
+            }
+            t.last = b.position();
         }
         Iterator<Thrown> th = THROWN.iterator();
         while (th.hasNext()) {
@@ -174,6 +273,21 @@ public final class MindManager {
                 Vfx.shake(level, c, 16, 0.4f);
             }
         }
+    }
+
+    /** A thrown block bursts on impact: a real explosion (terrain only if the server allows it) and golden geometry. */
+    private static void blockImpact(ServerPlayer by, ServerLevel level, Vec3 at, BlockState state) {
+        boolean terrain = ServerConfig.POWER_TERRAIN_DAMAGE.get();
+        level.explode(by, level.damageSources().explosion(by, by), null, at.x, at.y, at.z, 2.6f, false,
+                terrain ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE);
+        level.levelEvent(2001, BlockPos.containing(at), Block.getId(state));
+        Vfx.send(level, VfxType.POWER_EXPLOSION, at, Vec3.ZERO, 0xFFB01E, 0xFFF4C0, 2.6f, 24);
+        Vfx.send(level, VfxType.SPHERE_PULSE, at, Vec3.ZERO, GOLD, 0xFFFFFF, 4f, 10);
+        Vfx.send(level, VfxType.GEOMETRY_BURST, at, Vec3.ZERO, GOLD, PALE, 3.5f, 20);
+        Vfx.send(level, VfxType.SHOCKWAVE, at, new Vec3(0, 1, 0), GOLD, PALE, 6f, 14);
+        Vfx.send(level, VfxType.DEBRIS, at, Vec3.ZERO, Block.getId(state), 10, 0.9f, 60);
+        Vfx.sound(level, at, ModSounds.MIND_BURST, 2f, 0.9f);
+        Vfx.camera(level, at, 24, 0.6f, 0, 0, 0xFFF0C0, 0.15f, 4);
     }
 
     public static float damage(float base) {
@@ -441,6 +555,11 @@ public final class MindManager {
         player.setGameMode(mode);
         data.astralBody = null;
         data.astralMode = null;
+        var ability = dev.infinitygauntlet.ability.Abilities.byId(InfinityGauntlet.id("astral_projection"));
+        if (ability != null && mode != GameType.CREATIVE) {
+            data.setCooldownEnd(ability.id(), player.serverLevel().getGameTime() + ServerConfig.cooldown(ability));
+            dev.infinitygauntlet.ability.AbilityCaster.syncCooldowns(player);
+        }
         ModNetwork.sendTo(player, new MindStatePayload(MindStatePayload.ASTRAL, 0));
         Vfx.sound(player.serverLevel(), player.position(), ModSounds.MIND_ASTRAL_IN, 2f, 1f);
         Vfx.send(player.serverLevel(), VfxType.GEOMETRY_BURST, player.getEyePosition(), Vec3.ZERO, GOLD, PALE, 1.6f, 16);
@@ -521,6 +640,7 @@ public final class MindManager {
     static void onStopped(ServerStoppedEvent event) {
         GRIPS.clear();
         THROWN.clear();
+        THROWN_BLOCKS.clear();
         CONTROLLED.clear();
         DAZED.clear();
         ASTRAL.clear();

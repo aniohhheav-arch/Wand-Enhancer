@@ -26,7 +26,8 @@ public final class AstralProjectionAbility extends Ability {
         }
         PowerFx.pose(ctx.player(), PowerPose.TEMPLE, 10);
         MindManager.project(ctx.player());
-        return CastResult.success(Component.translatable("message.infinitygauntlet.astral.out",
+        // the cooldown starts when the consciousness returns, not now: otherwise it would run out during the trip
+        return CastResult.utility(Component.translatable("message.infinitygauntlet.astral.out",
                 dev.infinitygauntlet.config.ServerConfig.ASTRAL_SECONDS.get()));
     }
 }

@@ -178,13 +178,13 @@ Golden geometry, neural filaments and glowing eyes.
 
 | Ability | What happens |
 | --- | --- |
-| **Telekinesis** | Seize a creature or item; it floats where you look, bound to your hand by a rippling neural link. Cast again to hurl it (it crashes into whatever it hits, hurting both), sneak-cast to set it down gently. |
+| **Telekinesis** | Seize a creature or item, or aim at a block to tear it out of the ground. It floats where you look, bound to your hand by a rippling neural link. Cast again to hurl it at the crosshair: creatures crash into whatever they hit, blocks explode on impact in a golden blast (breaking terrain only with the `terrainDamage` server option). Sneak-cast to set it down gently. Blocks with contents (chests, furnaces...) and unbreakable blocks can't be lifted, and protected areas are respected. |
 | **Mind Control** | A hostile creature gets a rune halo and burning gold eyes and fights for you. It hunts other monsters, follows you when idle, and never targets you or your allies. While you control any (up to 3), casting at a target sends them all at it. |
 | **Neural Blast** | A golden charge gathers at the gauntlet, then a beam threaded with branching neural filaments hits the crosshair and blooms into a circular golden explosion. |
 | **Psychic Pulse** | A sphere of mental force with golden polygons hanging in the air. Everything nearby is thrown back and dazed: creatures wander aimlessly with stars circling their heads, players reel. |
 | **Mental Overload** | An eye sigil appears over the target and energy spirals into it for two seconds, then its mind bursts. |
 | **Levitation Field** | A GeckoLib sigil hangs over a wide circle. Everything inside slowly rises and orbits, along with chunks of the ground. Cast again to drop it all at once. |
-| **Astral Projection** | Leave your body as an intangible golden projection that flies through walls but touches nothing. Your body stays behind, joined to you by a golden cord, and others see your golden ghost. Fly back into it, press the disconnect key (X) or wait it out. Striking the body snaps you back. A crash or relog mid-projection puts you back in your body. |
+| **Astral Projection** | Leave your body as an intangible golden projection that flies through walls but touches nothing. Your body stays behind, joined to you by a golden cord, and others see your golden ghost. Fly back into it, press the disconnect key (X) or wait it out. The cooldown starts when you return. Striking the body snaps you back. A crash or relog mid-projection puts you back in your body. |
 | **Mental Shield** | A dome of golden hexagons travels with you: arrows are turned back at their shooter, other projectiles are burnt away, hostile creatures are pushed out, and every strike ripples across it. |
 | **Mind's Eye** | Every living creature within 48 blocks shows as a gold silhouette through walls, labelled with its distance, with markers around the crosshair pointing at each. Only you see it. |
 

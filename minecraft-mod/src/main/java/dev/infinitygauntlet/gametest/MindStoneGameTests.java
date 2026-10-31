@@ -67,6 +67,30 @@ public final class MindStoneGameTests {
         });
     }
 
+    @GameTest(template = "arena", timeoutTicks = 120, batch = "mind_telekinesis_block")
+    public static void telekinesisTearsUpABlockAndItExplodes(GameTestHelper helper) {
+        ServerPlayer player = caster(helper, 0f);
+        BlockPos wallPos = new BlockPos(8, 3, 7);
+        helper.setBlock(wallPos, net.minecraft.world.level.block.Blocks.STONE_BRICKS);
+        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.HUSK, new BlockPos(8, 2, 16));
+        // aim at the block
+        Vec3 eye = player.getEyePosition();
+        Vec3 to = helper.absoluteVec(new Vec3(8.5, 3.5, 7.5)).subtract(eye);
+        player.setXRot((float) -Math.toDegrees(Math.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z))));
+        helper.assertTrue(cast(player, "telekinesis"), "telekinesis takes hold of the block");
+        helper.assertTrue(MindManager.holding(player), "the block is held");
+        helper.runAfterDelay(5, () -> helper.assertBlockNotPresent(net.minecraft.world.level.block.Blocks.STONE_BRICKS, wallPos));
+        helper.runAfterDelay(20, () -> {
+            player.setXRot(0f);
+            helper.assertTrue(cast(player, "telekinesis"), "a second cast throws the block");
+        });
+        helper.runAfterDelay(60, () -> {
+            helper.assertTrue(!zombie.isAlive() || zombie.getHealth() < zombie.getMaxHealth(), "the block exploded on impact near the zombie");
+            helper.assertBlockNotPresent(net.minecraft.world.level.block.Blocks.STONE_BRICKS, wallPos);
+            helper.succeed();
+        });
+    }
+
     @GameTest(template = "arena", timeoutTicks = 200, batch = "mind_control")
     public static void mindControlTurnsAMonsterOnItsKind(GameTestHelper helper) {
         ServerPlayer player = caster(helper, 0f);
@@ -162,6 +186,9 @@ public final class MindStoneGameTests {
         helper.assertTrue(player.gameMode.getGameModeForPlayer() == GameType.SURVIVAL, "the original game mode is restored");
         helper.assertTrue(player.position().distanceTo(home) < 1.5, "the player is back in the body");
         helper.assertTrue(player.getData(ModAttachments.POWER_DATA).astralBody == null, "the recovery record is cleared");
+        long now = helper.getLevel().getGameTime();
+        helper.assertTrue(player.getData(ModAttachments.POWER_DATA).cooldownEnd(InfinityGauntlet.id("astral_projection")) > now + 100,
+                "the cooldown starts on return, not on departure");
         helper.succeed();
     }
 

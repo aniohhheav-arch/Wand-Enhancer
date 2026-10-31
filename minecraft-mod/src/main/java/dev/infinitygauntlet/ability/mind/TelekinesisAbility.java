@@ -14,8 +14,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 
 /**
- * Telekinesis: seize a creature or item and hold it in the air wherever you look; it follows your gaze. Cast again to
- * hurl it (it crashes into whatever it hits), or sneak-cast to set it down gently.
+ * Telekinesis: seize a creature, an item or a block torn out of the ground, and hold it in the air wherever you look;
+ * it follows your gaze. Cast again to hurl it: creatures crash into whatever they hit, blocks explode on impact.
+ * Sneak-cast to set it down gently.
  */
 public final class TelekinesisAbility extends Ability {
     public TelekinesisAbility() {
@@ -37,6 +38,13 @@ public final class TelekinesisAbility extends Ability {
         }
         Entity target = ctx.pickEntity(24, e -> e instanceof ItemEntity
                 || e instanceof LivingEntity living && living.isAlive() && TargetRules.canTarget(ctx.player(), living) && living.getBbHeight() < 4);
+        if (target == null) {
+            // no creature in the way: tear the aimed block out of the ground instead
+            var hit = ctx.pickBlock(24);
+            if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+                target = MindManager.liftBlock(ctx.player(), hit.getBlockPos());
+            }
+        }
         if (target == null) {
             return CastResult.fail(Component.translatable("message.infinitygauntlet.no_target"));
         }
