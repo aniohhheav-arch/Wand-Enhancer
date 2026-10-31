@@ -48,6 +48,15 @@ public final class ClientModEvents {
     }
 
     @SubscribeEvent
+    static void onLayers(EntityRenderersEvent.AddLayers event) {
+        for (net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
+            if (event.getSkin(skin) instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer renderer) {
+                renderer.addLayer(new dev.infinitygauntlet.client.render.WornGauntlet.Layer(renderer));
+            }
+        }
+    }
+
+    @SubscribeEvent
     static void onDimensionEffects(net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent event) {
         event.register(InfinityGauntlet.id("observation_chamber"), new dev.infinitygauntlet.client.breach.ChamberSpecialEffects());
     }

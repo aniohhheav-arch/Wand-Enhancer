@@ -49,6 +49,14 @@ chamber (milestone 4).
 
 The `snap` and `overload` gauntlet animations and the per-stone palettes are already in place for the later milestones.
 
+## Wearing the gauntlet
+
+The gauntlet is worn, not held. In third person it is fitted over the player model's own hand and wrist and follows
+every arm pose, punch and finisher; in first person your own arm (with your skin) reaches into view wearing it.
+
+![Worn in third person](docs/gauntlet-third-person.jpg)
+![Worn in first person](docs/gauntlet-first-person.jpg)
+
 ## Space Stone abilities
 
 Select with **V / C** (next/previous), switch stones with **G**, or hold **R** for the radial ability wheel. Cast by using the gauntlet.

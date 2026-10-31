@@ -3,37 +3,17 @@
   "gui_light": "front",
   "display": {
     "thirdperson_righthand": {
-      "rotation": [
-        75,
-        180,
-        0
-      ],
-      "translation": [
-        0,
-        2.5,
-        1.5
-      ],
       "scale": [
-        0.55,
-        0.55,
-        0.55
+        0,
+        0,
+        0
       ]
     },
     "thirdperson_lefthand": {
-      "rotation": [
-        75,
-        180,
-        0
-      ],
-      "translation": [
-        0,
-        2.5,
-        1.5
-      ],
       "scale": [
-        0.55,
-        0.55,
-        0.55
+        0,
+        0,
+        0
       ]
     },
     "firstperson_righthand": {
